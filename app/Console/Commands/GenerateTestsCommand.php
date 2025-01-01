@@ -97,7 +97,7 @@ class GenerateTestsCommand extends Command
      */
     private function getPhpFiles(string $directory): array
     {
-        return File::allFiles($directory)
+        return collect(File::allFiles($directory))
             ->filter(fn($file) => strtolower($file->getExtension()) === 'php')
             ->map(fn($file) => $file->getRealPath())
             ->toArray();
