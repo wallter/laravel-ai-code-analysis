@@ -4,8 +4,8 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use PhpParser\Error;
+use App\Services\Parsing\ParserService;
 use PhpParser\NodeTraverser;
-use PhpParser\ParserFactory;
 use App\Services\Parsing\ClassVisitor;
 use Illuminate\Support\Facades\File;
 
@@ -17,6 +17,22 @@ class GenerateTestsCommand extends Command
     protected $signature = 'generate:tests {--filter=}';
     protected $description = 'Generates PHPUnit test skeletons for discovered classes and methods';
 
+    /**
+     * @var ParserService
+     */
+    protected ParserService $parserService;
+
+    /**
+     * GenerateTestsCommand constructor.
+     *
+     * @param ParserService $parserService
+     */
+    public function __construct(ParserService $parserService)
+    {
+        parent::__construct();
+        $this->parserService = $parserService;
+    }
+
     public function handle()
     {
         // 1) Grab default paths from Laravel config
@@ -24,10 +40,9 @@ class GenerateTestsCommand extends Command
 
         $filter = $this->option('filter');
 
-        // 2) Setup parser & visitor
-        $parser = (new ParserFactory())->createForNewestSupportedVersion();
-        
-        $traverser = new NodeTraverser();
+        // 2) Setup parser & visitor using ParserService
+        $parser = $this->parserService->createParser();
+        $traverser = $this->parserService->createTraverser();
         $visitor = new ClassVisitor();
         $traverser->addVisitor($visitor);
 

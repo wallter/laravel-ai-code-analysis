@@ -4,8 +4,8 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use PhpParser\Error;
+use App\Services\Parsing\ParserService;
 use PhpParser\NodeTraverser;
-use PhpParser\ParserFactory;
 use App\Services\Parsing\FunctionAndClassVisitor;
 use Illuminate\Support\Facades\File;
 
@@ -16,6 +16,22 @@ class ParseFilesCommand extends Command
 {
     protected $signature = 'parse:files {paths?*} {--filter=} {--output-file=}';
     protected $description = 'Parses configured or specified files/directories and lists discovered functions and classes';
+
+    /**
+     * @var ParserService
+     */
+    protected ParserService $parserService;
+
+    /**
+     * ParseFilesCommand constructor.
+     *
+     * @param ParserService $parserService
+     */
+    public function __construct(ParserService $parserService)
+    {
+        parent::__construct();
+        $this->parserService = $parserService;
+    }
 
     public function handle()
     {
@@ -30,9 +46,9 @@ class ParseFilesCommand extends Command
         $filter     = $this->option('filter');
         $outputFile = $this->option('output-file');
 
-        // 2) Create parser
-        $parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
-        $traverser = new NodeTraverser();
+        // 2) Setup parser & traverser using ParserService
+        $parser = $this->parserService->createParser();
+        $traverser = $this->parserService->createTraverser();
         $visitor = new FunctionAndClassVisitor();
         $traverser->addVisitor($visitor);
 
@@ -173,9 +189,30 @@ class ParseFilesCommand extends Command
      */
     private function normalizePath(string $path): string
     {
-        if (File::isAbsolutePath($path)) {
+        if ($this->isAbsolutePath($path)) {
             return $path;
         }
         return base_path($path);
+    }
+
+    /**
+     * Determines if a given path is absolute.
+     *
+     * @param string $path
+     * @return bool
+     */
+    private function isAbsolutePath(string $path): bool
+    {
+        // Check for Unix-like absolute path
+        if (strpos($path, '/') === 0) {
+            return true;
+        }
+
+        // Check for Windows absolute path (e.g., C:\)
+        if (preg_match('/^[A-Z]:\\\\/', $path)) {
+            return true;
+        }
+
+        return false;
     }
 }
