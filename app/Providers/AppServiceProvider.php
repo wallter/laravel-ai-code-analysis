@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Services\Parsing\ParserService;
+use App\Services\AI\DocEnhancer;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,6 +15,16 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ParserService::class, function ($app) {
             return new ParserService();
+        });
+    }
+
+    /**
+     * Register the DocEnhancer service.
+     */
+    public function register(): void
+    {
+        $this->app->singleton(DocEnhancer::class, function ($app) {
+            return new DocEnhancer();
         });
     }
 
