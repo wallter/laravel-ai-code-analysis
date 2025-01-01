@@ -25,7 +25,8 @@ class GenerateTestsCommand extends Command
         $filter = $this->option('filter');
 
         // 2) Setup parser & visitor
-        $parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
+        $parser = (new ParserFactory())->createForNewestSupportedVersion();
+        
         $traverser = new NodeTraverser();
         $visitor = new ClassVisitor();
         $traverser->addVisitor($visitor);
