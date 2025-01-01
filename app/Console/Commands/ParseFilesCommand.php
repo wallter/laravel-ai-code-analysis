@@ -8,6 +8,7 @@ use App\Services\Parsing\ParserService;
 use PhpParser\NodeTraverser;
 use App\Services\Parsing\FunctionAndClassVisitor;
 use Illuminate\Support\Facades\File;
+use App\Models\ParsedItem;
 
 /**
  * Parses PHP files and outputs discovered classes & functions.
@@ -79,6 +80,23 @@ class ParseFilesCommand extends Command
             $items = array_filter($items, function($item) use ($filter) {
                 return stripos($item['name'], $filter) !== false;
             });
+        }
+
+        // 6) Store parsed items in the database
+        foreach ($items as $item) {
+            ParsedItem::updateOrCreate(
+                [
+                    'type' => $item['type'],
+                    'name' => $item['name'],
+                    'file_path' => $item['file'],
+                ],
+                [
+                    'line_number' => $item['line'],
+                    'annotations' => $item['annotations'] ?: [],
+                    'attributes' => $item['attributes'] ?: [],
+                    'details' => $item['details'] ?: [],
+                ]
+            );
         }
 
         // 5) Output
