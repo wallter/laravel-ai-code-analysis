@@ -18,6 +18,7 @@ class EnhanceDocsCommandTest extends TestCase
         $parsedItem = ParsedItem::create([
             'type' => 'Class',
             'name' => 'TestClass',
+            'file_path' => 'test/path/TestClass.php',
             'details' => [
                 'description' => null,
             ],
