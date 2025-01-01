@@ -16,13 +16,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ParserService::class, function ($app) {
             return new ParserService();
         });
-    }
-
-    /**
-     * Register the DocEnhancer service.
-     */
-    public function register(): void
-    {
+        
         $this->app->singleton(DocEnhancer::class, function ($app) {
             return new DocEnhancer();
         });

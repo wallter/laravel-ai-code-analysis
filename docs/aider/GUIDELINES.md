@@ -22,9 +22,10 @@ It outlines best practices, constraints, and usage patterns to maintain a consis
     ```
   - This scaffolds a proper command class in `app/Console/Commands/`.  
   - If the command already exists, make sure changes go into the existing class file.
+  - `app/Console/Kernel` does not need to be updated as commands are auto-discovered
 
 ---
-
+ 
 ## 2. Code Style & Organization
 
 - **Follow PSR-12**: Ensure you adhere to standard PHP coding guidelines (PSR-12) for indentation, braces, namespaces, etc.  
