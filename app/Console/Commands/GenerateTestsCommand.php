@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use PhpParser\Error;
 use PhpParser\NodeTraverser;
 use PhpParser\ParserFactory;
 use App\Services\Parsing\ClassVisitor;
@@ -24,9 +25,9 @@ class GenerateTestsCommand extends Command
         $filter = $this->option('filter');
 
         // 2) Setup parser & visitor
-        $parser = (new ParserFactory)->create(\PhpParser\ParserFactory::PREFER_PHP7);
+        $parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
         $traverser = new NodeTraverser();
-        $visitor = new ClassVisitor(); // Your refactored class visitor
+        $visitor = new ClassVisitor();
         $traverser->addVisitor($visitor);
 
         // 3) Parse files
@@ -83,7 +84,7 @@ class GenerateTestsCommand extends Command
             }
             $visitor->setCurrentFile($filePath);
             $traverser->traverse($ast);
-        } catch (\PhpParser\Error $e) {
+        } catch (Error $e) {
             $this->error("Parse error in {$filePath}: {$e->getMessage()}");
         } catch (\Exception $e) {
             $this->error("Error processing {$filePath}: {$e->getMessage()}");
@@ -114,13 +115,12 @@ class GenerateTestsCommand extends Command
      */
     private function generateTestClass(array $class)
     {
-        // Example logic (simplified):
         $testNamespace = 'Tests\\' . $class['namespace'];
         $testClassName = $class['name'] . 'Test';
         $targetDir     = base_path('tests/' . str_replace('\\', '/', $class['namespace']));
         $targetFile    = "{$targetDir}/{$testClassName}.php";
 
-        // Make sure directory exists
+        // Ensure the directory exists
         if (!File::isDirectory($targetDir)) {
             File::makeDirectory($targetDir, 0777, true);
         }
@@ -130,21 +130,22 @@ class GenerateTestsCommand extends Command
             $this->createNewTestFile($targetFile, $testNamespace, $testClassName, $class);
             $this->info("Created new test class at {$targetFile}");
         } else {
-            // For brevity, you could append test methods if they don’t exist
-            // or handle advanced logic. 
+            // Append missing test methods if necessary
             $this->appendMissingMethods($targetFile, $class);
         }
     }
 
+    /**
+     * Creates a new PHPUnit test file with a basic template.
+     */
     private function createNewTestFile(string $path, string $namespace, string $testClassName, array $classInfo)
     {
-        // Basic template (simplified). Real logic would gather methods, docs, mocks, etc.
         $contents = <<<PHP
 <?php
 
 namespace {$namespace};
 
-use PHPUnit\\Framework\\TestCase;
+use PHPUnit\Framework\TestCase;
 use {$classInfo['fullyQualifiedName']};
 
 /**
@@ -164,10 +165,13 @@ PHP;
         File::put($path, $contents);
     }
 
+    /**
+     * Appends missing test methods to an existing test file.
+     */
     private function appendMissingMethods(string $path, array $classInfo)
     {
-        // Example: read file content, parse, add missing test methods
-        // Omitted for brevity
+        // Example: Read file content, parse, add missing test methods
+        // This is a placeholder for actual implementation.
         $this->info("Updated existing test file: {$path} with new methods (Not Implemented).");
     }
 }

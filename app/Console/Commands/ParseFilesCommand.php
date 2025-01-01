@@ -10,20 +10,18 @@ use App\Services\Parsing\FunctionAndClassVisitor;
 use Illuminate\Support\Facades\File;
 
 /**
- * Class ParseFilesCommand
- *
  * Parses PHP files and outputs discovered classes & functions.
  */
 class ParseFilesCommand extends Command
 {
-    protected $signature   = 'parse:files {--filter=} {--output-file=}';
+    protected $signature = 'parse:files {paths?*} {--filter=} {--output-file=}';
     protected $description = 'Parses configured or specified files/directories and lists discovered functions and classes';
 
     public function handle()
     {
         // 1) Collect paths from config or direct input
-        $paths = config('parsing.files', []); // from config/parsing.php
-        $inputPaths = $this->argument('paths'); // if you define ->addArgument('paths') in $signature, optional
+        $paths = config('parsing.files', []);
+        $inputPaths = $this->argument('paths');
 
         if (!empty($inputPaths)) {
             $paths = $inputPaths;
@@ -33,7 +31,7 @@ class ParseFilesCommand extends Command
         $outputFile = $this->option('output-file');
 
         // 2) Create parser
-        $parser = (new ParserFactory)->create(ParserFactory::PREFER_PHP7);
+        $parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
         $traverser = new NodeTraverser();
         $visitor = new FunctionAndClassVisitor();
         $traverser->addVisitor($visitor);
