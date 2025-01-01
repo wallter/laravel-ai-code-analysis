@@ -108,7 +108,28 @@ class GenerateTestsCommand extends Command
      */
     private function normalizePath(string $path): string
     {
-        return File::isAbsolutePath($path) ? $path : base_path($path);
+        return $this->isAbsolutePath($path) ? $path : base_path($path);
+    }
+
+    /**
+     * Determines if a given path is absolute.
+     *
+     * @param string $path
+     * @return bool
+     */
+    private function isAbsolutePath(string $path): bool
+    {
+        // Check for Unix-like absolute path
+        if (strpos($path, '/') === 0) {
+            return true;
+        }
+
+        // Check for Windows absolute path (e.g., C:\)
+        if (preg_match('/^[A-Z]:\\\\/', $path)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
