@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Config;
 use Tests\TestCase;
 use App\Models\ParsedItem;
 
@@ -16,10 +17,9 @@ class ParseFilesCommandTest extends TestCase
         // Given: a known file with at least one class/function
         $testFilePath = base_path('app/Services/Parsing/ParserService.php');
 
-        // When: we run the parse:files command pointing to the test file
-        Artisan::call('parse:files', [
-            '--path' => $testFilePath,
-        ]);
+        // When: we mock the config and run the parse:files command
+        Config::set('parsing.files', [$testFilePath]);
+        Artisan::call('parse:files');
 
         // Then: the parsed_items table should have at least one row
         $this->assertDatabaseCount('parsed_items', 1);

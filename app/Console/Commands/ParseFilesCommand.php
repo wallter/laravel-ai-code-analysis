@@ -15,7 +15,7 @@ use App\Models\ParsedItem;
  */
 class ParseFilesCommand extends Command
 {
-    protected $signature = 'parse:files {paths?*} {--filter=} {--output-file=}';
+    protected $signature = 'parse:files {--filter=} {--output-file=}';
     protected $description = 'Parses configured or specified files/directories and lists discovered functions and classes';
 
     /**
@@ -38,11 +38,6 @@ class ParseFilesCommand extends Command
     {
         // 1) Collect paths from config or direct input
         $paths = config('parsing.files', []);
-        $inputPaths = $this->argument('paths');
-
-        if (!empty($inputPaths)) {
-            $paths = $inputPaths;
-        }
 
         $filter     = $this->option('filter');
         $outputFile = $this->option('output-file');
