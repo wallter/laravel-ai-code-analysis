@@ -202,8 +202,12 @@ class ParseFilesCommand extends Command
                         $methodAnnotations = '';
                         if (!empty($m['annotations'])) {
                             foreach ($m['annotations'] as $tag => $values) {
-                                foreach ($values as $value) {
-                                    $methodAnnotations .= "@{$tag} {$value}\n";
+                                if (is_array($values)) {
+                                    foreach ($values as $value) {
+                                        $methodAnnotations .= "@{$tag} {$value}\n";
+                                    }
+                                } else {
+                                    $methodAnnotations .= "@{$tag} {$values}\n";
                                 }
                             }
                         }
