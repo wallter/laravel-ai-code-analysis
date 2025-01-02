@@ -6,6 +6,7 @@ use PhpParser\Node;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassLike;
 use PhpParser\NodeVisitorAbstract;
+use PhpParser\Node\Stmt\Namespace_;
 
 /**
  * Collects both free-floating functions and classes with methods/attributes.
