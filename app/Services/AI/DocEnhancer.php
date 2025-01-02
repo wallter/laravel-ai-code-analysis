@@ -5,7 +5,9 @@ namespace App\Services\AI;
 use App\Models\ParsedItem;
 use Illuminate\Support\Facades\Http;
 
-class DocEnhancer
+use App\Services\AI\AbstractAIService;
+
+class DocEnhancer extends AbstractAIService
 {
     /**
      * Enhance the description of a ParsedItem using an AI service.
@@ -15,43 +17,10 @@ class DocEnhancer
      */
     public function enhanceDescription(ParsedItem $item): ?string
     {
-        // Placeholder for AI API integration
-        // Example using OpenAI's API
-
-        $apiKey = config('ai.openai_api_key');
-        $model = config('ai.openai_model', 'text-davinci-003');
-
-        if (!$apiKey) {
-            // Log or handle missing API key
-            return null;
-        }
 
         $prompt = $this->generatePrompt($item);
 
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => "Bearer {$apiKey}",
-                'Content-Type' => 'application/json',
-            ])->post('https://api.openai.com/v1/completions', [
-                'model' => $model,
-                'prompt' => $prompt,
-                'max_tokens' => 150,
-                'temperature' => 0.7,
-            ]);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                return trim($data['choices'][0]['text']);
-            }
-
-            // Handle unsuccessful response
-            \Log::error("OpenAI API error: " . $response->body());
-            return null;
-        } catch (\Exception $e) {
-            // Log exceptions
-            \Log::error("Exception in DocEnhancer: " . $e->getMessage());
-            return null;
-        }
+        return $this->sendRequest($prompt, $overrideParams);
     }
 
     /**
