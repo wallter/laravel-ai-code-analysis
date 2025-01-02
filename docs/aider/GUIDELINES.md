@@ -8,12 +8,10 @@ It outlines best practices, constraints, and usage patterns to maintain a consis
 ## 1. Laravel Ecosystem First
 
 - **Migrations**  
-  - Always create or modify migrations using Laravel’s built-in commands:
-    ```bash
-    php artisan make:migration create_parsed_items_table --create=parsed_items
-    ```
-  - Avoid manually writing raw migration files unless absolutely necessary.  
-  - This helps keep the code consistent with Laravel conventions.
+  - Updates to the `parsed_items` table should be made directly in the existing migration file:  
+    `database/migrations/2025_01_01_225018_create_parsed_items_table.php`.  
+  - Avoid creating new migration files for modifications to this table.  
+  - This ensures a single, consolidated source of truth for the `parsed_items` table schema.
 
 - **Commands**  
   - If you need to create or modify Artisan commands, use:
@@ -22,10 +20,10 @@ It outlines best practices, constraints, and usage patterns to maintain a consis
     ```
   - This scaffolds a proper command class in `app/Console/Commands/`.  
   - If the command already exists, make sure changes go into the existing class file.
-  - `app/Console/Kernel` does not need to be updated as commands are auto-discovered
+  - `app/Console/Kernel` does not need to be updated as commands are auto-discovered.
 
 ---
- 
+
 ## 2. Code Style & Organization
 
 - **Follow PSR-12**: Ensure you adhere to standard PHP coding guidelines (PSR-12) for indentation, braces, namespaces, etc.  
@@ -62,8 +60,8 @@ It outlines best practices, constraints, and usage patterns to maintain a consis
   - Reference these guidelines by name if needed, e.g., “Please follow the rules in `docs/aider/GUIDELINES.md`.”
 
 - **Propose Diffs**  
-  - For new migrations, request `php artisan make:migration...` commands, or ask Aider to show the resulting migration.  
-  - For existing code, request small diffs or well-explained patches so changes can be validated easily.
+  - For updates to the `parsed_items` table, request edits to `2025_01_01_225018_create_parsed_items_table.php`.  
+  - For other code, request small diffs or well-explained patches so changes can be validated easily.
 
 ---
 
