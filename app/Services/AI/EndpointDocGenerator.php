@@ -10,6 +10,16 @@ use App\Services\AI\AbstractAIService;
 class EndpointDocGenerator extends AbstractAIService
 {
     /**
+     * Get the operation key for EndpointDocGenerator.
+     *
+     * @return string
+     */
+    protected function getOperationKey(): string
+    {
+        return 'endpoint_doc_generator';
+    }
+
+    /**
      * Generate a detailed summary for the given ParsedItem using AI.
      *
      * @param ParsedItem $item

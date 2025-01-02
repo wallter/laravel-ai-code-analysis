@@ -10,6 +10,16 @@ use App\Services\AI\AbstractAIService;
 class DocEnhancer extends AbstractAIService
 {
     /**
+     * Get the operation key for DocEnhancer.
+     *
+     * @return string
+     */
+    protected function getOperationKey(): string
+    {
+        return 'doc_enhancer';
+    }
+
+    /**
      * Enhance the description of a ParsedItem using an AI service.
      *
      * @param ParsedItem $item

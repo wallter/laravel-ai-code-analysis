@@ -7,6 +7,13 @@ use Illuminate\Support\Facades\Http;
 abstract class AbstractAIService
 {
     /**
+     * Get the operation key for configuration.
+     *
+     * @return string
+     */
+    abstract protected function getOperationKey(): string;
+
+    /**
      * Send a request to the AI API with the given prompt and parameters.
      *
      * @param string $prompt
@@ -15,6 +22,7 @@ abstract class AbstractAIService
      */
     protected function sendRequest(string $prompt, array $params = []): ?string
     {
+        $operationKey = $this->getOperationKey();
         $apiKey = config('ai.openai_api_key');
 
         if (!$apiKey) {
@@ -22,14 +30,18 @@ abstract class AbstractAIService
             return null;
         }
 
-        // Merge default and overridden parameters
+        // Retrieve operation-specific default parameters
+        $operationConfig = config("ai.operations.{$operationKey}");
+
+        if (!$operationConfig) {
+            \Log::error("AI operation configuration for '{$operationKey}' not found.");
+            return null;
+        }
+
+        // Merge default parameters, operation-specific parameters, and any overridden params
         $payload = array_merge([
-            'model'        => config('ai.openai_model', 'text-davinci-003'),
-            'prompt'       => $prompt,
-            'max_tokens'   => config('ai.max_tokens', 150),
-            'temperature'  => config('ai.temperature', 0.7),
-            // Add other default parameters here
-        ], $params);
+            'prompt' => $prompt,
+        ], $operationConfig, $params);
 
         try {
             $response = Http::withHeaders([

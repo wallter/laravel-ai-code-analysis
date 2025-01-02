@@ -25,4 +25,16 @@ return [
         'endpoint_doc_generator' => env('ENDPOINT_DOC_GENERATOR_PROMPT', 'Your default prompt here...'),
         'doc_enhancer' => env('DOC_ENHANCER_PROMPT', 'Your default prompt here...'),
     ],
+    'operations' => [
+        'doc_enhancer' => [
+            'model' => env('DOC_ENHANCER_MODEL', 'text-davinci-003'),
+            'max_tokens' => env('DOC_ENHANCER_MAX_TOKENS', 500),
+            'temperature' => env('DOC_ENHANCER_TEMPERATURE', 0.5),
+        ],
+        'endpoint_doc_generator' => [
+            'model' => env('ENDPOINT_DOC_GENERATOR_MODEL', 'text-davinci-003'),
+            'max_tokens' => env('ENDPOINT_DOC_GENERATOR_MAX_TOKENS', 500),
+            'temperature' => env('ENDPOINT_DOC_GENERATOR_TEMPERATURE', 0.5),
+        ],
+    ],
 ];
