@@ -42,6 +42,9 @@ class ParseFilesCommand extends Command
 
         $filter     = $this->option('filter');
         $outputFile = $this->option('output-file');
+        if ($outputFile && substr($outputFile, -5) !== '.json') {
+            $outputFile .= '.json';
+        }
         $limitClass = $this->option('limit-class');
 
         // 2) Setup parser & traverser using ParserService
