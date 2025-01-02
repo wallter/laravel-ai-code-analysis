@@ -229,16 +229,7 @@ class ParseFilesCommand extends Command
      */
     private function isAbsolutePath(string $path): bool
     {
-        // Check for Unix-like absolute path
-        if (strpos($path, '/') === 0) {
-            return true;
-        }
-
-        // Check for Windows absolute path (e.g., C:\)
-        if (preg_match('/^[A-Z]:\\\\/', $path)) {
-            return true;
-        }
-
-        return false;
+        // Check for Unix-like or Windows absolute path
+        return preg_match('/^(\/|[A-Za-z]:[\/\\\\])/', $path) === 1;
     }
 }
