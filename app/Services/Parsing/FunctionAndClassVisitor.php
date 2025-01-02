@@ -94,7 +94,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $description = '';
         $annotations = [];
         $restlerTags = [];
-        $restlerTags = [];
 
         if ($docComment) {
             $docText     = $docComment->getText();
@@ -130,6 +129,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     {
         $description = '';
         $annotations = [];
+        $restlerTags = [];
         $docComment  = $node->getDocComment();
         if ($docComment) {
             $docText     = $docComment->getText();
