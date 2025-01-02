@@ -7,6 +7,10 @@ use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassLike;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node\Stmt\Namespace_;
+use PhpParser\Node\Identifier;
+use PhpParser\Node\NullableType;
+use PhpParser\Node\UnionType;
+use PhpParser\Node\Name;
 
 /**
  * Collects both free-floating functions and classes with methods/attributes.
@@ -41,6 +45,24 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         } elseif ($node instanceof ClassLike && $node->name !== null) {
             $this->items[] = $this->collectClassData($node);
         }
+
+        /**
+         * Helper method to convert type nodes to strings.
+         */
+        private function typeToString($typeNode): string
+        {
+            if ($typeNode instanceof Identifier) {
+                return $typeNode->name;
+            } elseif ($typeNode instanceof NullableType) {
+                return '?' . $this->typeToString($typeNode->type);
+            } elseif ($typeNode instanceof UnionType) {
+                return implode('|', array_map([$this, 'typeToString'], $typeNode->types));
+            } elseif ($typeNode instanceof Name) {
+                return $typeNode->toString();
+            } else {
+                return 'mixed';
+            }
+        }
     }
 
     /**
@@ -64,7 +86,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $params      = [];
         foreach ($node->params as $param) {
             $paramName = '$' . $param->var->name;
-            $paramType = $param->type ? $param->type->toString() : 'mixed';
+            $paramType = $param->type ? $this->typeToString($param->type) : 'mixed';
             $params[]  = ['name' => $paramName, 'type' => $paramType];
         }
 
@@ -174,7 +196,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $methodParams     = [];
         foreach ($method->params as $param) {
             $paramName  = '$' . $param->var->name;
-            $paramType  = $param->type ? $param->type->toString() : 'mixed';
+            $paramType  = $param->type ? $this->typeToString($param->type) : 'mixed';
             $methodParams[] = ['name' => $paramName, 'type' => $paramType];
         }
 
