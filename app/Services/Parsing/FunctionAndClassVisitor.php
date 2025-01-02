@@ -26,6 +26,8 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
      * @var string
      */
     private $currentFile = '';
+    private $currentClassName = '';
+    private $currentNamespace = '';
 
     /**
      * Sets the current file being processed.
@@ -33,6 +35,14 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     public function setCurrentFile(string $file)
     {
         $this->currentFile = $file;
+    }
+
+    public function leaveNode(Node $node)
+    {
+        if ($node instanceof ClassLike && $node->name !== null) {
+            $this->currentClassName = '';
+            $this->currentNamespace = '';
+        }
     }
 
     private function parseAnnotationValue(string $value)
@@ -69,6 +79,8 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         if ($node instanceof Node\Stmt\Function_) {
             $this->items[] = $this->collectFunctionData($node);
         } elseif ($node instanceof ClassLike && $node->name !== null) {
+            $this->currentClassName = $node->name->name;
+            $this->currentNamespace = $this->getNamespace($node);
             $this->items[] = $this->collectClassData($node);
         }
     }
@@ -130,7 +142,19 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
 
         $attributes = $this->collectAttributes($node->attrGroups);
 
+        $visibility = $method->isPublic() ? 'public' : ($method->isProtected() ? 'protected' : 'private');
+        $isStatic = $method->isStatic();
+
         return [
+            'name' => $methodName,
+            'params' => $methodParams,
+            'description' => $methodDescription,
+            'annotations' => $methodAnnotations,
+            'attributes' => $methodAttributes,
+            'visibility' => $visibility,
+            'isStatic' => $isStatic,
+            'class' => $this->currentClassName,
+            'namespace' => $this->currentNamespace,
             'type'       => 'Function',
             'name'       => $node->name->name,
             'details'    => [
