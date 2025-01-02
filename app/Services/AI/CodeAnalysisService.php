@@ -2,8 +2,7 @@
 
 namespace App\Services\AI;
 
-use App\Services\OpenAIService;
-use Illuminate\Support\Facades\Log;
+use App\Services\AI\OpenAIService;
 use Illuminate\Support\Facades\Log;
 
 class CodeAnalysisService

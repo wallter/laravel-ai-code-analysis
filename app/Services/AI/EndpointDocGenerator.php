@@ -5,7 +5,7 @@ namespace App\Services\AI;
 use App\Models\ParsedItem;
 use Illuminate\Support\Facades\Http;
 
-use App\Services\OpenAIService;
+use App\Services\AI\OpenAIService;
 use Illuminate\Support\Facades\Log;
 
 class EndpointDocGenerator
