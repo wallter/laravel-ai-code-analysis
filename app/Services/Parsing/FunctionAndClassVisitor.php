@@ -45,24 +45,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         } elseif ($node instanceof ClassLike && $node->name !== null) {
             $this->items[] = $this->collectClassData($node);
         }
-
-        /**
-         * Helper method to convert type nodes to strings.
-         */
-        private function typeToString($typeNode): string
-        {
-            if ($typeNode instanceof Identifier) {
-                return $typeNode->name;
-            } elseif ($typeNode instanceof NullableType) {
-                return '?' . $this->typeToString($typeNode->type);
-            } elseif ($typeNode instanceof UnionType) {
-                return implode('|', array_map([$this, 'typeToString'], $typeNode->types));
-            } elseif ($typeNode instanceof Name) {
-                return $typeNode->toString();
-            } else {
-                return 'mixed';
-            }
-        }
     }
 
     /**
