@@ -183,7 +183,12 @@ class ParseFilesCommand extends Command
                     if (!empty($item['details']['description'])) {
                         $details .= ' - ' . $item['details']['description'];
                     }
-                    $annotations = implode("\n", $item['annotations']);
+                    $annotations = '';
+                    foreach ($item['annotations'] as $tag => $values) {
+                        foreach ($values as $value) {
+                            $annotations .= "@{$tag} {$value}\n";
+                        }
+                    }
                     $attributes  = implode("\n", $item['attributes']);
                     $location    = $item['file'] . ':' . $item['line'];
                     return [$item['type'], $item['name'], $details, $annotations, $attributes, $location];
@@ -191,7 +196,15 @@ class ParseFilesCommand extends Command
                     $methods = collect($item['details']['methods'])->map(function($m) {
                         $params = collect($m['params'])->map(fn($p) => "{$p['type']} {$p['name']}")->implode(', ');
                         $desc   = $m['description'] ? ' - ' . $m['description'] : '';
-                        return "{$m['name']}($params)$desc";
+                        $methodAnnotations = '';
+                        if (!empty($m['annotations'])) {
+                            foreach ($m['annotations'] as $tag => $values) {
+                                foreach ($values as $value) {
+                                    $methodAnnotations .= "@{$tag} {$value}\n";
+                                }
+                            }
+                        }
+                        return "{$m['name']}($params)$desc\n$methodAnnotations";
                     })->implode(', ');
                     if (!empty($item['details']['description'])) {
                         $methods .= ' - ' . $item['details']['description'];
