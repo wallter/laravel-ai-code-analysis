@@ -99,7 +99,6 @@ class GenerateDocsCommand extends Command
                 $this->line($markdownContent);
             }
         }
-        }
 
         $this->info('Documentation generated successfully.');
     }
