@@ -11,13 +11,21 @@ use Illuminate\Support\Facades\File;
  */
 class GenerateDocsCommand extends Command
 {
-    protected $signature = 'doc:generate';
+    protected $signature = 'doc:generate {--limit=}';
 
     protected $description = 'Generates Markdown documentation for each endpoint';
 
     public function handle()
     {
-        $parsedItems = ParsedItem::where('type', 'Method')->get();
+        $limit = $this->option('limit');
+
+        $parsedItems = ParsedItem::where('type', 'Method');
+
+        if ($limit) {
+            $parsedItems = $parsedItems->limit($limit);
+        }
+
+        $parsedItems = $parsedItems->get();
 
         $groupedItems = $parsedItems->groupBy(function ($item) {
             return $item->details['namespace'] ?? 'global';
