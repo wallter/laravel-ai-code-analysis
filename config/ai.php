@@ -37,5 +37,10 @@ return [
             'max_tokens' => env('ENDPOINT_DOC_GENERATOR_MAX_TOKENS', 500),
             'temperature' => env('ENDPOINT_DOC_GENERATOR_TEMPERATURE', 0.5),
         ],
+        'code_analysis' => [
+            'model' => env('CODE_ANALYSIS_MODEL', 'text-davinci-003'),
+            'max_tokens' => env('CODE_ANALYSIS_MAX_TOKENS', 500),
+            'temperature' => env('CODE_ANALYSIS_TEMPERATURE', 0.5),
+        ],
     ],
 ];
