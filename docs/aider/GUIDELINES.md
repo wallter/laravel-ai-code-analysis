@@ -67,8 +67,8 @@ It outlines best practices, constraints, and usage patterns to maintain a consis
 
 ## 6. Testing & Coverage
 
-- **Keep Tests Updated**  
-  - If you add or refactor core functionality, ensure existing tests still pass.  
-  - Create new tests for any new features (`php artisan make:test SomeFeatureTest`).  
-- **Code Coverage**  
+- **Keep Tests Updated**
+  - If you add or refactor core functionality, ensure existing tests still pass.
+  - Create new tests for any new features (`php artisan make:test SomeFeatureTest`).
+- **Code Coverage**
   - Focus on critical parsing and storage logic. Use `XDEBUG_MODE=coverage php artisan test --coverage` or equivalent.
