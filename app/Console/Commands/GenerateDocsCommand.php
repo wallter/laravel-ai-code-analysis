@@ -103,5 +103,4 @@ class GenerateDocsCommand extends Command
 
         $this->info('Documentation generated successfully.');
     }
-    }
 }
