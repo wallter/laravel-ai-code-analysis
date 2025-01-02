@@ -61,45 +61,12 @@ return [
 
     /*
     |----------------------------------------------------------------------
-    | Default Prompts
-    |----------------------------------------------------------------------
-    |
-    | Contains default prompt templates for various AI operations. These
-    | prompts can be overridden or extended as needed for specific use cases.
-    |
-    */
-    'default_prompts' => [
-        /*
-        |------------------------------------------------------------------
-        | Endpoint Documentation Generator Prompt
-        |------------------------------------------------------------------
-        |
-        | The default prompt used to generate documentation for API endpoints.
-        | Customize this prompt to guide the AI in producing the desired output.
-        |
-        */
-        'endpoint_doc_generator' => env('ENDPOINT_DOC_GENERATOR_PROMPT', 'Your default prompt here...'),
-
-        /*
-        |------------------------------------------------------------------
-        | Documentation Enhancer Prompt
-        |------------------------------------------------------------------
-        |
-        | The default prompt used to enhance existing documentation. This helps
-        | in refining and improving the clarity and comprehensiveness of docs.
-        |
-        */
-        'doc_enhancer' => env('DOC_ENHANCER_PROMPT', 'Your default prompt here...'),
-    ],
-    
-    /*
-    |----------------------------------------------------------------------
     | AI Operations Configuration
     |----------------------------------------------------------------------
     |
     | Defines specific configurations for each AI operation. Each operation
-    | can have its own model, token limit, and temperature settings to tailor
-    | the AI responses according to the task requirements.
+    | can have its own model, token limit, temperature settings, and prompt
+    | templates to tailor the AI responses according to the task requirements.
     |
     */
     'operations' => [
@@ -109,7 +76,7 @@ return [
         |------------------------------------------------------------------
         |
         | Configuration for the documentation enhancement operation.
-        | Adjust the model, max tokens, and temperature as needed to optimize
+        | Adjust the model, max tokens, temperature, and prompt as needed to optimize
         | the quality and length of the enhanced documentation.
         |
         */
@@ -117,6 +84,7 @@ return [
             'model' => env('DOC_ENHANCER_MODEL', 'text-davinci-003'),
             'max_tokens' => env('DOC_ENHANCER_MAX_TOKENS', 500),
             'temperature' => env('DOC_ENHANCER_TEMPERATURE', 0.5),
+            'prompt' => env('DOC_ENHANCER_PROMPT', 'Your default prompt here...'),
         ],
 
         /*
@@ -125,14 +93,15 @@ return [
         |------------------------------------------------------------------
         |
         | Configuration for generating documentation for API endpoints.
-        | Customize the model and token limits to ensure detailed and
-        | accurate documentation is produced.
+        | Customize the model, token limits, temperature, and prompt to ensure 
+        | detailed and accurate documentation is produced.
         |
         */
         'endpoint_doc_generator' => [
             'model' => env('ENDPOINT_DOC_GENERATOR_MODEL', 'text-davinci-003'),
             'max_tokens' => env('ENDPOINT_DOC_GENERATOR_MAX_TOKENS', 500),
             'temperature' => env('ENDPOINT_DOC_GENERATOR_TEMPERATURE', 0.5),
+            'prompt' => env('ENDPOINT_DOC_GENERATOR_PROMPT', 'Your default prompt here...'),
         ],
 
         /*
@@ -149,6 +118,7 @@ return [
             'model' => env('CODE_ANALYSIS_MODEL', 'text-davinci-003'),
             'max_tokens' => env('CODE_ANALYSIS_MAX_TOKENS', 500),
             'temperature' => env('CODE_ANALYSIS_TEMPERATURE', 0.5),
+            'prompt' => env('CODE_ANALYSIS_PROMPT', 'Your default prompt here...'),
         ],
     ],
 ];
