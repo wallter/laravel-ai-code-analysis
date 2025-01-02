@@ -36,7 +36,7 @@ class ClassVisitor extends NodeVisitorAbstract
     public function enterNode(Node $node)
     {
         if ($node instanceof Class_) {
-            $className = $node->name->name;
+            $className = $node->name ? $node->name->name : 'anonymous class';
             $namespace = $this->getNamespace($node);
             $fullyQualifiedName = $namespace ? "{$namespace}\\{$className}" : $className;
 

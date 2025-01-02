@@ -4,6 +4,7 @@ namespace App\Services\Parsing;
 
 use PhpParser\Node;
 use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\ClassLike;
 use PhpParser\NodeVisitorAbstract;
 
 /**
@@ -38,7 +39,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             $this->items[] = $this->collectFunctionData($node);
         }
 
-        if ($node instanceof Class_) {
+        if ($node instanceof ClassLike && $node->name !== null) {
             $this->items[] = $this->collectClassData($node);
         }
     }
@@ -119,17 +120,22 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             $methods[] = $this->collectMethodData($method);
         }
 
+        $namespace = $this->getNamespace($node);
+        $fullyQualifiedName = $namespace ? "{$namespace}\\{$className}" : $className;
+
         return [
-            'type'       => 'Class',
-            'name'       => $node->name->name,
-            'details'    => [
+            'type'                => 'Class',
+            'name'                => $className,
+            'namespace'           => $namespace,
+            'fullyQualifiedName'  => $fullyQualifiedName,
+            'details'             => [
                 'methods'     => $methods,
                 'description' => $description
             ],
-            'annotations' => $annotations,
-            'attributes'  => $attributes,
-            'file'        => $this->currentFile,
-            'line'        => $node->getStartLine(),
+            'annotations'         => $annotations,
+            'attributes'          => $attributes,
+            'file'                => $this->currentFile,
+            'line'                => $node->getStartLine(),
         ];
     }
 
@@ -262,3 +268,22 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         return '[' . implode(', ', $elements) . ']';
     }
 }
+    /**
+     * Extracts the namespace from the given node.
+     *
+     * @param Node $node
+     * @return string
+     */
+    private function getNamespace(Node $node): string
+    {
+        $namespace = '';
+        $current = $node;
+        while ($current->getAttribute('parent')) {
+            $current = $current->getAttribute('parent');
+            if ($current instanceof Node\Stmt\Namespace_) {
+                $namespace = $current->name ? $current->name->toString() : '';
+                break;
+            }
+        }
+        return $namespace;
+    }
