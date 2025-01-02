@@ -70,39 +70,6 @@ return [
     |
     */
     'operations' => [
-        /*
-        |------------------------------------------------------------------
-        | Documentation Enhancer Operation
-        |------------------------------------------------------------------
-        |
-        | Configuration for the documentation enhancement operation.
-        | Adjust the model, max tokens, temperature, and prompt as needed to optimize
-        | the quality and length of the enhanced documentation.
-        |
-        */
-        'doc_enhancer' => [
-            'model' => env('DOC_ENHANCER_MODEL', 'text-davinci-003'),
-            'max_tokens' => env('DOC_ENHANCER_MAX_TOKENS', 500),
-            'temperature' => env('DOC_ENHANCER_TEMPERATURE', 0.5),
-            'prompt' => env('DOC_ENHANCER_PROMPT', 'Your default prompt here...'),
-        ],
-
-        /*
-        |------------------------------------------------------------------
-        | Endpoint Documentation Generator Operation
-        |------------------------------------------------------------------
-        |
-        | Configuration for generating documentation for API endpoints.
-        | Customize the model, token limits, temperature, and prompt to ensure 
-        | detailed and accurate documentation is produced.
-        |
-        */
-        'endpoint_doc_generator' => [
-            'model' => env('ENDPOINT_DOC_GENERATOR_MODEL', 'text-davinci-003'),
-            'max_tokens' => env('ENDPOINT_DOC_GENERATOR_MAX_TOKENS', 500),
-            'temperature' => env('ENDPOINT_DOC_GENERATOR_TEMPERATURE', 0.5),
-            'prompt' => env('ENDPOINT_DOC_GENERATOR_PROMPT', 'Your default prompt here...'),
-        ],
 
         /*
         |------------------------------------------------------------------
