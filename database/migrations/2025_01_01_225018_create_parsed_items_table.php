@@ -13,15 +13,32 @@ return new class extends Migration
     {
         Schema::create('parsed_items', function (Blueprint $table) {
             $table->id();
-            $table->string('type'); // 'Class' or 'Function'
+            // Core identifiers
+            $table->string('type'); // 'Class', 'Function', or 'Method'
             $table->string('name');
             $table->string('file_path');
             $table->unsignedInteger('line_number');
+
+            // Additional attributes from other migrations
+            $table->string('class_name')->nullable();
+            $table->string('namespace')->nullable();
+            $table->string('visibility')->nullable();
+            $table->boolean('is_static')->default(false);
+            $table->string('fully_qualified_name')->nullable();
+
+            $table->text('operation_summary')->nullable();
+            $table->json('called_methods')->nullable();
+
+            $table->longText('ast')->nullable();
+
+            // JSON fields for extra details
             $table->json('annotations')->nullable();
             $table->json('attributes')->nullable();
             $table->json('details')->nullable();
+
             $table->timestamps();
 
+            // Ensure uniqueness
             $table->unique(['type', 'name', 'file_path'], 'parsed_items_unique');
         });
     }
