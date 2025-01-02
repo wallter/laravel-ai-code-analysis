@@ -97,12 +97,7 @@ class ParseFilesCommand extends Command
         }
 
         // 6) Store parsed items in the database
-        $bar = $this->output->createProgressBar($items->count());
-        $bar->start();
-
-        $items->chunk(10)->each(function ($chunk) use ($bar) {
-            foreach ($chunk as $item) {
-                $bar->advance();
+        foreach ($items as $item) {
             ParsedItem::updateOrCreate(
                 [
                     'type' => $item['type'],
@@ -144,6 +139,7 @@ class ParseFilesCommand extends Command
             if ($ast === null) {
                 throw new \Exception("Unable to parse AST for {$filePath}.");
             }
+
             // Set the "current file" context
             $visitor->setCurrentFile($filePath);
             $traverser->traverse($ast);
