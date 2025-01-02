@@ -88,4 +88,11 @@ return [
             'prompt' => env('CODE_ANALYSIS_PROMPT', 'Your default prompt here...'),
         ],
     ],
+
+    'ast_insights' => [
+        'model' => env('AST_INSIGHTS_MODEL', 'gpt-3.5-turbo'),
+        'max_tokens' => env('AST_INSIGHTS_MAX_TOKENS', 300),
+        'temperature' => env('AST_INSIGHTS_TEMPERATURE', 0.5),
+        'prompt' => env('AST_INSIGHTS_PROMPT', 'Provide insights based on the given AST.'),
+    ],
 ];

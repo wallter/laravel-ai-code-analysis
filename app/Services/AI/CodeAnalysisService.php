@@ -37,4 +37,58 @@ class CodeAnalysisService
             return [];
         }
     }
-}
+    }
+
+    /**
+     * Analyze the given AST and return analysis results.
+     *
+     * @param array $ast
+     * @return array
+     */
+    public function analyzeAst(array $ast): array
+    {
+        // Implement your AST analysis logic here.
+        // For example, count classes, methods, functions, etc.
+
+        $classCount = 0;
+        $methodCount = 0;
+        $functionCount = 0;
+
+        $nodeQueue = $ast;
+
+        while (!empty($nodeQueue)) {
+            $node = array_shift($nodeQueue);
+
+            if ($node instanceof \PhpParser\Node\Stmt\ClassLike) {
+                $classCount++;
+                foreach ($node->getMethods() as $method) {
+                    $methodCount++;
+                }
+            }
+
+            if ($node instanceof \PhpParser\Node\Stmt\Function_) {
+                $functionCount++;
+            }
+
+            // Add child nodes to the queue for further traversal
+            foreach ($node->getSubNodeNames() as $subNodeName) {
+                $subNode = $node->$subNodeName;
+                if (is_array($subNode)) {
+                    foreach ($subNode as $childNode) {
+                        if ($childNode instanceof \PhpParser\Node) {
+                            $nodeQueue[] = $childNode;
+                        }
+                    }
+                } elseif ($subNode instanceof \PhpParser\Node) {
+                    $nodeQueue[] = $subNode;
+                }
+            }
+        }
+
+        return [
+            'class_count' => $classCount,
+            'method_count' => $methodCount,
+            'function_count' => $functionCount,
+            // Add more analysis metrics as needed
+        ];
+    }

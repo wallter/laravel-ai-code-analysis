@@ -30,4 +30,44 @@ class ParserService
         $traverser->addVisitor(new \PhpParser\NodeVisitor\ParentConnectingVisitor());
         return $traverser;
     }
+    }
+
+    /**
+     * Parse a single PHP file and return its AST.
+     *
+     * @param string $filePath
+     * @return array
+     *
+     * @throws \PhpParser\Error
+     */
+    public function parseFile(string $filePath): array
+    {
+        $parser = $this->createParser();
+        $traverser = $this->createTraverser();
+        $visitor = new \App\Services\Parsing\ClassVisitor();
+
+        $traverser->addVisitor($visitor);
+
+        $code = file_get_contents($filePath);
+        $ast = $parser->parse($code);
+
+        if ($ast === null) {
+            throw new \Exception("Failed to parse AST for file: {$filePath}");
+        }
+
+        $traverser->traverse($ast);
+
+        return $ast;
+    }
+
+    /**
+     * Normalize a file path.
+     *
+     * @param string $path
+     * @return string
+     */
+    public function normalizePath(string $path): string
+    {
+        return realpath($path) ?: $path;
+    }
 }
