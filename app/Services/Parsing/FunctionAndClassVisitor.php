@@ -253,6 +253,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'description' => $methodDescription,
             'annotations' => $methodAnnotations,
             'attributes'  => $methodAttributes,
+            'line'        => $method->getStartLine(),
         ];
     }
 
