@@ -320,6 +320,7 @@ class ParseFilesCommand extends Command
      */
     private function persistJsonOutput(array $items, string $outputFile)
     {
+        $items = $this->decodeAstProperties($items);
         $jsonData = json_encode($items, JSON_PRETTY_PRINT);
         if ($jsonData === false) {
             $this->error("Failed to encode data to JSON.");
@@ -358,3 +359,22 @@ class ParseFilesCommand extends Command
         return preg_match('/^(\/|[A-Za-z]:[\/\\\\])/', $path) === 1;
     }
 }
+    /**
+     * Decode the 'ast' property in items to avoid escaping in output JSON.
+     */
+    private function decodeAstProperties(array $items): array
+    {
+        foreach ($items as &$item) {
+            if (isset($item['ast']) && is_string($item['ast'])) {
+                $item['ast'] = json_decode($item['ast'], true);
+            }
+            if (isset($item['details']['methods']) && is_array($item['details']['methods'])) {
+                foreach ($item['details']['methods'] as &$method) {
+                    if (isset($method['ast']) && is_string($method['ast'])) {
+                        $method['ast'] = json_decode($method['ast'], true);
+                    }
+                }
+            }
+        }
+        return $items;
+    }
