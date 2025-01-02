@@ -24,6 +24,8 @@ class ParserService
      */
     public function createTraverser()
     {
-        return new NodeTraverser();
+        $traverser = new NodeTraverser();
+        $traverser->addVisitor(new \PhpParser\NodeVisitor\ParentConnectingVisitor());
+        return $traverser;
     }
 }
