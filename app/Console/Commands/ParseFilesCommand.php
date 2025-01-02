@@ -36,36 +36,49 @@ class ParseFilesCommand extends Command
 
     public function handle()
     {
-        // 1) Collect paths from config or direct input
-        $paths = config('parsing.files', []);
+        // 1) Collect files and folders from config
+        $filePaths   = config('parsing.files', []);
+        $folderPaths = config('parsing.folders', []);
 
         $filter     = $this->option('filter');
         $outputFile = $this->option('output-file');
 
         // 2) Setup parser & traverser using ParserService
-        $parser = $this->parserService->createParser();
-        $traverser = $this->parserService->createTraverser();
-        $visitor = new FunctionAndClassVisitor();
+        $parser     = $this->parserService->createParser();
+        $traverser  = $this->parserService->createTraverser();
+        $visitor    = new FunctionAndClassVisitor();
         $traverser->addVisitor($visitor);
 
-        $items = [];
+        $items      = [];
+        $phpFiles   = [];
 
-        // 3) Iterate over all configured paths
-        foreach ($paths as $path) {
-            $realPath = $this->normalizePath($path);
-            if (!File::exists($realPath)) {
-                $this->warn("Path not found: {$realPath}");
+        // 3) Collect all PHP files from the folders
+        foreach ($folderPaths as $folderPath) {
+            $realPath = $this->normalizePath($folderPath);
+            if (!File::isDirectory($realPath)) {
+                $this->warn("Folder not found: {$realPath}");
                 continue;
             }
+            $folderPhpFiles = $this->getPhpFiles($realPath);
+            $phpFiles = array_merge($phpFiles, $folderPhpFiles);
+        }
 
-            if (File::isDirectory($realPath)) {
-                $phpFiles = $this->getPhpFiles($realPath);
-                foreach ($phpFiles as $phpFile) {
-                    $this->parseOneFile($phpFile, $parser, $traverser, $visitor);
-                }
-            } else {
-                $this->parseOneFile($realPath, $parser, $traverser, $visitor);
+        // Add individual files to the list
+        foreach ($filePaths as $filePath) {
+            $realPath = $this->normalizePath($filePath);
+            if (!File::exists($realPath)) {
+                $this->warn("File not found: {$realPath}");
+                continue;
             }
+            $phpFiles[] = $realPath;
+        }
+
+        // Remove duplicates
+        $phpFiles = array_unique($phpFiles);
+
+        // 4) Parse each PHP file
+        foreach ($phpFiles as $phpFile) {
+            $this->parseOneFile($phpFile, $parser, $traverser, $visitor);
         }
 
         $items = $visitor->getItems();
