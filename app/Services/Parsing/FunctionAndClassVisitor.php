@@ -281,6 +281,62 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         ];
     }
 
+    private function collectMethodData(Node\Stmt\ClassMethod $method): array
+    {
+        $params = [];
+        foreach ($method->params as $param) {
+            $paramName = '$' . $param->var->name;
+            $paramType = $param->type ? $this->typeToString($param->type) : 'mixed';
+            $params[] = ['name' => $paramName, 'type' => $paramType];
+        }
+
+        $docComment = $method->getDocComment();
+        $description = '';
+        $annotations = [];
+        $restlerTags = [];
+
+        if ($docComment) {
+            $docText = $docComment->getText();
+            $description = $this->extractShortDescription($docText);
+            $annotations = $this->extractAnnotations($docText);
+            $restlerTags = $annotations;
+        }
+
+        $attributes = $this->collectAttributes($method->attrGroups);
+
+        // Serialize the AST
+        $astSerialized = $this->serializeAst($method);
+        $astSize = strlen($astSerialized);
+
+        // Check if AST exceeds the size limit
+        if ($astSize > $this->astSizeLimit) {
+            $this->warnings[] = "AST size for method '{$method->name->name}' exceeds limit ({$astSize} bytes).";
+            $astSerialized = null; // Optionally set to null or leave AST out
+        }
+
+        // Collect called methods
+        $calledMethods = $this->collectCalledMethods($method);
+
+        // Summarize method body
+        $operationSummary = $this->summarizeMethodBody($method);
+
+        return [
+            'name'              => $method->name->name,
+            'params'            => $params,
+            'description'       => $description,
+            'annotations'       => $annotations,
+            'attributes'        => $attributes,
+            'class'             => $this->currentClassName,
+            'namespace'         => $this->currentNamespace,
+            'visibility'        => implode(' ', \PhpParser\Node\Stmt\Class_::getModifierNames($method->flags)),
+            'isStatic'          => $method->isStatic(),
+            'line'              => $method->getStartLine(),
+            'operation_summary' => $operationSummary,
+            'called_methods'    => $calledMethods,
+            'ast'               => $astSerialized,
+        ];
+    }
+
     /**
      * Extracts attributes (e.g. PHP 8+) from the given attribute groups.
      *
