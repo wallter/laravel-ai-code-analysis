@@ -45,9 +45,11 @@ class DocEnhancer
             }
 
             // Handle unsuccessful response
+            \Log::error("OpenAI API error: " . $response->body());
             return null;
         } catch (\Exception $e) {
-            // Handle exceptions (e.g., log the error)
+            // Log exceptions
+            \Log::error("Exception in DocEnhancer: " . $e->getMessage());
             return null;
         }
     }

@@ -55,22 +55,27 @@ class EnhanceDocsCommand extends Command
             return 0;
         }
 
-        foreach ($items as $item) {
-            $this->info("Enhancing documentation for: {$item->type} {$item->name}");
+        $items->chunk(10)->each(function ($chunk) {
+            foreach ($chunk as $item) {
+                $this->info("Enhancing documentation for: {$item->type} {$item->name}");
 
-            $enhancedDescription = $this->docEnhancer->enhanceDescription($item);
+                $enhancedDescription = $this->docEnhancer->enhanceDescription($item);
 
-            if ($enhancedDescription) {
-                $item->details = array_merge($item->details ?? [], [
-                    'description' => $enhancedDescription
-                ]);
-                $item->save();
+                if ($enhancedDescription) {
+                    $item->details = array_merge($item->details ?? [], [
+                        'description' => $enhancedDescription
+                    ]);
+                    $item->save();
 
-                $this->info("Updated description for {$item->name}.");
-            } else {
-                $this->warn("Failed to enhance description for {$item->name}.");
+                    $this->info("Updated description for {$item->name}.");
+                } else {
+                    $this->warn("Failed to enhance description for {$item->name}.");
+                }
             }
-        }
+        });
+
+        $bar->finish();
+        });
 
         $this->info('Documentation enhancement process completed.');
         return 0;
