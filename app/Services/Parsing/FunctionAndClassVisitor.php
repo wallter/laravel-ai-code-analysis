@@ -334,6 +334,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'file'        => $this->currentFile,
             'line'        => $node->getStartLine(),
             'ast'         => $astSerialized,
+        ];
     }
 
     /**
@@ -414,44 +415,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
      * @param Node\Stmt\ClassMethod $method
      * @return array
      */
-    private function collectMethodData(Node\Stmt\ClassMethod $method): array
-    {
-        $methodName = $method->name->name;
-        $methodParams = [];
-        foreach ($method->params as $param) {
-            $paramName = '$' . $param->var->name;
-            $paramType = $param->type ? $this->typeToString($param->type) : 'mixed';
-            $methodParams[] = ['name' => $paramName, 'type' => $paramType];
-        }
-
-        $methodDescription = '';
-        $methodAnnotations = [];
-        $methodDocComment = $method->getDocComment();
-        if ($methodDocComment) {
-            $docText = $methodDocComment->getText();
-            $methodDescription = $this->extractShortDescription($docText);
-            $methodAnnotations = $this->extractAnnotations($docText);
-        }
-
-        $methodAttributes = $this->collectAttributes($method->attrGroups);
-
-        // Analyze method body to create an operation summary
-        $operationSummary = $this->summarizeMethodBody($method);
-
-        // Identify called methods
-        $calledMethods = $this->collectCalledMethods($method);
-
-        return [
-            'name' => $methodName,
-            'params' => $methodParams,
-            'description' => $methodDescription,
-            'annotations' => $methodAnnotations,
-            'attributes' => $methodAttributes,
-            'operation_summary' => $operationSummary,
-            'called_methods' => $calledMethods,
-            'line' => $method->getStartLine(),
-        ];
-    }
 
     /**
      * Convert docblock lines to short description.
