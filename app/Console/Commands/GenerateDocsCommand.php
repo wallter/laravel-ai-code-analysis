@@ -23,7 +23,8 @@ class GenerateDocsCommand extends Command
         parent::__construct();
         $this->docGenerator = $docGenerator;
     }
-    {
+
+    public function handle()
         $limit = $this->option('limit');
 
         $parsedItems = ParsedItem::where('type', 'Method');
