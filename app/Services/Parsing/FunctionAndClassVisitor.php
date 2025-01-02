@@ -144,6 +144,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'file'        => $this->currentFile,
             'line'        => $node->getStartLine(),
             'restler_tags'  => $methodRestlerTags,
+            'line'        => $method->getStartLine(),
         ];
     }
 

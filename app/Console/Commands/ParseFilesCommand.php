@@ -100,6 +100,49 @@ class ParseFilesCommand extends Command
 
         // 6) Store parsed items in the database
         foreach ($items as $item) {
+            // Store the class or function
+            ParsedItem::updateOrCreate(
+                [
+                    'type' => $item['type'],
+                    'name' => $item['name'],
+                    'file_path' => $item['file'],
+                ],
+                [
+                    'line_number' => $item['line'],
+                    'annotations' => $item['annotations'] ?: [],
+                    'attributes' => $item['attributes'] ?: [],
+                    'details' => array_merge($item['details'] ?: [], [
+                        'restler_tags' => $item['restler_tags'] ?? [],
+                    ]),
+                ]
+            );
+
+            // If item is a class and has methods, store each method as a separate ParsedItem
+            if ($item['type'] === 'Class' && !empty($item['details']['methods'])) {
+                foreach ($item['details']['methods'] as $method) {
+                    ParsedItem::updateOrCreate(
+                        [
+                            'type' => 'Method',
+                            'name' => $method['name'],
+                            'file_path' => $item['file'],
+                        ],
+                        [
+                            'line_number' => $method['line'] ?? null,
+                            'annotations' => $method['annotations'] ?: [],
+                            'attributes' => $method['attributes'] ?: [],
+                            'details' => [
+                                'params' => $method['params'] ?? [],
+                                'description' => $method['description'] ?? '',
+                                'class_name' => $item['name'],
+                                'namespace' => $item['namespace'] ?? '',
+                                'fully_qualified_name' => $item['fullyQualifiedName'] . '::' . $method['name'],
+                            ],
+                        ]
+                    );
+                }
+            }
+        }
+        foreach ($items as $item) {
             ParsedItem::updateOrCreate(
                 [
                     'type' => $item['type'],
