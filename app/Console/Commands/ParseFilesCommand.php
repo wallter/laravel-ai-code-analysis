@@ -97,7 +97,12 @@ class ParseFilesCommand extends Command
         }
 
         // 6) Store parsed items in the database
-        foreach ($items as $item) {
+        $bar = $this->output->createProgressBar($items->count());
+        $bar->start();
+
+        $items->chunk(10)->each(function ($chunk) use ($bar) {
+            foreach ($chunk as $item) {
+                $bar->advance();
             ParsedItem::updateOrCreate(
                 [
                     'type' => $item['type'],
