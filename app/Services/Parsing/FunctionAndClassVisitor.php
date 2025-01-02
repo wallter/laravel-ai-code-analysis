@@ -38,8 +38,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     {
         if ($node instanceof Node\Stmt\Function_) {
             $this->items[] = $this->collectFunctionData($node);
-        }
-
         } elseif ($node instanceof ClassLike && $node->name !== null) {
             $this->items[] = $this->collectClassData($node);
         }
