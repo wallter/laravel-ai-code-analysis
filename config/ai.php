@@ -17,9 +17,9 @@ return [
 
     'openai_model' => env('OPENAI_MODEL', 'text-davinci-003'),
 
-    'max_tokens' => env('OPENAI_MAX_TOKENS', 150),
+    'max_tokens' => env('OPENAI_MAX_TOKENS', 500), // Increase token limit if necessary
 
-    'temperature' => env('OPENAI_TEMPERATURE', 0.7),
+    'temperature' => env('OPENAI_TEMPERATURE', 0.5), // Adjust for desired creativity
 
     'default_prompts' => [
         'endpoint_doc_generator' => env('ENDPOINT_DOC_GENERATOR_PROMPT', 'Your default prompt here...'),
