@@ -148,10 +148,16 @@ class ParseFilesCommand extends Command
      */
     private function getPhpFiles(string $directory): array
     {
-        return collect(File::allFiles($directory))
-            ->filter(fn($file) => strtolower($file->getExtension()) === 'php')
-            ->map(fn($file) => $file->getRealPath())
-            ->toArray();
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($directory)
+        );
+        $phpFiles = [];
+        foreach ($iterator as $file) {
+            if ($file->isFile() && strtolower($file->getExtension()) === 'php') {
+                $phpFiles[] = $file->getRealPath();
+            }
+        }
+        return $phpFiles;
     }
 
     /**
