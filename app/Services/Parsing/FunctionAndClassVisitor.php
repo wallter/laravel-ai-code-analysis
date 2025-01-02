@@ -99,10 +99,10 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     /**
      * Collects data for a class node, including methods and attributes.
      *
-     * @param Class_ $node
+     * @param ClassLike $node
      * @return array
      */
-    private function collectClassData(Class_ $node): array
+    private function collectClassData(ClassLike $node): array
     {
         $description = '';
         $annotations = [];
