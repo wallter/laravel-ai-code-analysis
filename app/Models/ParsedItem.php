@@ -21,7 +21,16 @@ class ParsedItem extends Model
         'fully_qualified_name',
         'operation_summary',
         'called_methods',
+        'ast',
         'called_methods' => 'array',
+    ];
+
+    protected $casts = [
+        'annotations' => 'array',
+        'attributes'  => 'array',
+        'details'     => 'array',
+        'is_static'   => 'boolean',
+        'ast'         => 'array',
     ];
 
     protected $casts = [

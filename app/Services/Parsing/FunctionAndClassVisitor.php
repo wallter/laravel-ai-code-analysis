@@ -22,6 +22,8 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
      */
     private $items = [];
     private $maxDepth = 2; // Adjust this value to limit the depth
+    private $warnings = [];
+    private $astSizeLimit = 50000; // Set the AST size limit in bytes (adjust as needed)
 
     /**
      * @var string
@@ -36,6 +38,17 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     public function setCurrentFile(string $file)
     {
         $this->currentFile = $file;
+    }
+
+    private function serializeAst(Node $node)
+    {
+        $serializer = new \PhpParser\Serializer\XML(); // You can also use 'JSON' serializer
+        return $serializer->serialize($node);
+    }
+
+    public function getWarnings(): array
+    {
+        return $this->warnings;
     }
 
     private function collectCalledMethods(Node $node, $currentDepth = 0)
@@ -230,7 +243,67 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'line'        => $method->getStartLine(),
             'operation_summary' => $operationSummary,
             'called_methods' => $calledMethods,
+            'type'       => 'Function',
+            'name'       => $node->name->name,
+            'details'    => [
+                'params'       => $params,
+                'description'  => $description,
+                'restler_tags' => $restlerTags
+            ],
+            'annotations' => $annotations,
+            'attributes'  => $attributes,
+            'restler_tags' => $restlerTags,
+            'file'        => $this->currentFile,
+            'line'        => $node->getStartLine(),
+            'ast'         => $astSerialized,
+            'name' => $methodName,
+            'params' => $methodParams,
+            'description' => $methodDescription,
+            'annotations' => $methodAnnotations,
+            'attributes' => $methodAttributes,
+            'operation_summary' => $operationSummary,
+            'called_methods' => $calledMethods,
+            'line' => $method->getStartLine(),
+            'ast' => $astSerialized,
         ];
+    }
+
+    private function collectMethodData(Node\Stmt\ClassMethod $method): array
+    {
+        // ... existing code ...
+
+        // Serialize the AST
+        $astSerialized = $this->serializeAst($method);
+        $astSize = strlen($astSerialized);
+
+        // Check if AST exceeds the size limit
+        if ($astSize > $this->astSizeLimit) {
+            $this->warnings[] = "AST size for method '{$method->name->name}' in class '{$this->currentClassName}' exceeds limit ({$astSize} bytes).";
+            $astSerialized = null; // Optionally set to null or leave AST out
+        }
+
+        return [
+            // ... existing data ...
+            'ast' => $astSerialized,
+    }
+
+    private function collectFunctionData(Node\Stmt\Function_ $node): array
+    {
+        // ... existing code ...
+
+        // Serialize the AST
+        $astSerialized = $this->serializeAst($node);
+        $astSize = strlen($astSerialized);
+
+        // Check if AST exceeds the size limit
+        if ($astSize > $this->astSizeLimit) {
+            $this->warnings[] = "AST size for function '{$node->name->name}' exceeds limit ({$astSize} bytes).";
+            $astSerialized = null; // Optionally set to null or leave AST out
+        }
+
+        return [
+            // ... existing data ...
+            'ast' => $astSerialized,
     }
 
     /**
