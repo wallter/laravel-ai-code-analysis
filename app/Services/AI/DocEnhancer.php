@@ -5,11 +5,19 @@ namespace App\Services\AI;
 use App\Models\ParsedItem;
 use Illuminate\Support\Facades\Http;
 
-use App\Services\AI\AbstractAIService;
+use App\Services\OpenAIService;
+use Illuminate\Support\Facades\Log;
 
-class DocEnhancer extends AbstractAIService
+class DocEnhancer
 {
-    /**
+    protected OpenAIService $openAIService;
+
+    public function __construct(OpenAIService $openAIService)
+    {
+        $this->openAIService = $openAIService;
+    }
+
+    /** 
      * Get the operation key for DocEnhancer.
      *
      * @return string
@@ -30,7 +38,10 @@ class DocEnhancer extends AbstractAIService
 
         $prompt = $this->generatePrompt($item);
 
-        return $this->sendRequest($prompt, $overrideParams);
+        return $this->openAIService->performOperation('doc_enhancer', [
+            'prompt' => $prompt,
+            // Add other parameters from $overrideParams if needed
+        ]);
     }
 
     /**

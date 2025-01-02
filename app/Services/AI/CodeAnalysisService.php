@@ -2,26 +2,17 @@
 
 namespace App\Services\AI;
 
-use OpenAI\Client;
+use App\Services\OpenAIService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Log;
 
 class CodeAnalysisService
 {
-    protected Client $client;
-    protected $apiKey;
-    protected $model;
-    protected $temperature;
-    protected $maxTokens;
+    protected OpenAIService $openAIService;
 
-    public function __construct()
+    public function __construct(OpenAIService $openAIService)
     {
-        $this->apiKey = config('services.openai.api_key');
-        $this->model = config('services.openai.model');
-        $this->temperature = config('services.openai.temperature');
-        $this->maxTokens = config('services.openai.max_tokens');
-        $this->client = new Client([
-            'api_key' => $this->apiKey,
-        ]);
+        $this->openAIService = $openAIService;
     }
 
     /**
@@ -32,21 +23,21 @@ class CodeAnalysisService
      */
     public function sendAnalysisRequest(string $input): array
     {
-        try {
-            $response = $this->client->completions()->create([
-                'model'       => $this->model,
-                'prompt'      => $input,
-                'temperature' => $this->temperature,
-                'max_tokens'  => $this->maxTokens,
-            ]);
+        $response = $this->openAIService->performOperation('code_analysis', [
+            'prompt' => $input,
+            'model' => config('ai.operations.code_analysis.model'),
+            'max_tokens' => config('ai.operations.code_analysis.max_tokens'),
+            'temperature' => config('ai.operations.code_analysis.temperature'),
+        ]);
 
+        if ($response && isset($response['choices'][0]['text'])) {
             return [
-                'summary' => trim($response['choices'][0]['text'] ?? ''),
+                'summary' => trim($response['choices'][0]['text']),
                 'tokens'  => $response['usage']['total_tokens'] ?? 0,
             ];
-        } catch (\Exception $e) {
-            Log::error('Exception in CodeAnalysisService: ' . $e->getMessage());
-            return [];
         }
+
+        Log::error('Failed to get a valid response from OpenAI.');
+        return [];
     }
 }

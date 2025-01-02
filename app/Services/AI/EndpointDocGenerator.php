@@ -5,11 +5,19 @@ namespace App\Services\AI;
 use App\Models\ParsedItem;
 use Illuminate\Support\Facades\Http;
 
-use App\Services\AI\AbstractAIService;
+use App\Services\OpenAIService;
+use Illuminate\Support\Facades\Log;
 
-class EndpointDocGenerator extends AbstractAIService
+class EndpointDocGenerator
 {
-    /**
+    protected OpenAIService $openAIService;
+
+    public function __construct(OpenAIService $openAIService)
+    {
+        $this->openAIService = $openAIService;
+    }
+
+    /** 
      * Get the operation key for EndpointDocGenerator.
      *
      * @return string
@@ -30,7 +38,10 @@ class EndpointDocGenerator extends AbstractAIService
 
         $prompt = $this->createPrompt($item);
 
-        return $this->sendRequest($prompt, $overrideParams);
+        return $this->openAIService->performOperation('endpoint_doc_generator', [
+            'prompt' => $prompt,
+            // Add other parameters from $overrideParams if needed
+        ]);
     }
 
     /**
