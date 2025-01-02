@@ -25,6 +25,7 @@ return [
         'endpoint_doc_generator' => env('ENDPOINT_DOC_GENERATOR_PROMPT', 'Your default prompt here...'),
         'doc_enhancer' => env('DOC_ENHANCER_PROMPT', 'Your default prompt here...'),
     ],
+    
     'operations' => [
         'doc_enhancer' => [
             'model' => env('DOC_ENHANCER_MODEL', 'text-davinci-003'),
