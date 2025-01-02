@@ -269,12 +269,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         return '[' . implode(', ', $elements) . ']';
     }
 }
-    /**
-     * Extracts the namespace from the given node.
-     *
-     * @param Node $node
-     * @return string
-     */
     private function getNamespace(Node $node): string
     {
         $namespace = '';
