@@ -358,7 +358,7 @@ class ParseFilesCommand extends Command
         // Check for Unix-like or Windows absolute path
         return preg_match('/^(\/|[A-Za-z]:[\/\\\\])/', $path) === 1;
     }
-}
+    
     /**
      * Decode the 'ast' property in items to avoid escaping in output JSON.
      */
@@ -378,3 +378,4 @@ class ParseFilesCommand extends Command
         }
         return $items;
     }
+}
