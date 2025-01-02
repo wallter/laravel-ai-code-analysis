@@ -55,7 +55,10 @@ class EnhanceDocsCommand extends Command
             return 0;
         }
 
-        $items->chunk(10)->each(function ($chunk) {
+        $bar = $this->output->createProgressBar($items->count());
+        $bar->start();
+
+        $items->chunk(10)->each(function ($chunk) use ($bar) {
             foreach ($chunk as $item) {
                 $this->info("Enhancing documentation for: {$item->type} {$item->name}");
 
@@ -71,8 +74,11 @@ class EnhanceDocsCommand extends Command
                 } else {
                     $this->warn("Failed to enhance description for {$item->name}.");
                 }
+                $bar->advance();
             }
         });
+
+        $bar->finish();
 
         $bar->finish();
 
