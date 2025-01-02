@@ -3,6 +3,8 @@
 namespace App\Services\AI;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Exception;
 
 abstract class AbstractAIService
 {
@@ -26,7 +28,7 @@ abstract class AbstractAIService
         $apiKey = config('ai.openai_api_key');
 
         if (!$apiKey) {
-            \Log::error('OpenAI API key is missing.');
+            Log::error('OpenAI API key is missing.');
             return null;
         }
 
@@ -34,16 +36,22 @@ abstract class AbstractAIService
         $operationConfig = config("ai.operations.{$operationKey}");
 
         if (!$operationConfig) {
-            \Log::error("AI operation configuration for '{$operationKey}' not found.");
+            Log::error("AI operation configuration for '{$operationKey}' not found.");
             return null;
         }
 
         // Merge default parameters, operation-specific parameters, and any overridden params
         $payload = array_merge([
             'prompt' => $prompt,
-        ], $operationConfig, $params);
+            'model' => $operationConfig['model'],
+            'max_tokens' => $operationConfig['max_tokens'],
+            'temperature' => $operationConfig['temperature'],
+            // Add other default parameters here if needed
+        ], $params);
 
         try {
+            Log::info("Sending request to OpenAI for operation '{$operationKey}'", ['payload' => $payload]);
+
             $response = Http::withHeaders([
                 'Authorization' => "Bearer {$apiKey}",
                 'Content-Type'  => 'application/json',
@@ -51,13 +59,17 @@ abstract class AbstractAIService
 
             if ($response->successful()) {
                 $data = $response->json();
-                return trim($data['choices'][0]['text'] ?? '');
+                if (isset($data['choices'][0]['text'])) {
+                    return trim($data['choices'][0]['text']);
+                }
+                Log::error("Unexpected response structure from OpenAI for operation '{$operationKey}'", ['response' => $data]);
+                return null;
             }
 
-            \Log::error("OpenAI API error: " . $response->body());
+            Log::error("OpenAI API error: " . $response->body());
             return null;
-        } catch (\Exception $e) {
-            \Log::error("Exception in AbstractAIService: " . $e->getMessage());
+        } catch (Exception $e) {
+            Log::error("Exception in AbstractAIService: " . $e->getMessage(), ['exception' => $e]);
             return null;
         }
     }

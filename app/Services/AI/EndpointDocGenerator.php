@@ -3,10 +3,9 @@
 namespace App\Services\AI;
 
 use App\Models\ParsedItem;
-use Illuminate\Support\Facades\Http;
-
 use App\Services\AI\OpenAIService;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 class EndpointDocGenerator
 {
@@ -35,13 +34,16 @@ class EndpointDocGenerator
      */
     public function generateSummary(ParsedItem $item): ?string
     {
-
         $prompt = $this->createPrompt($item);
 
-        return $this->openAIService->performOperation('endpoint_doc_generator', [
-            'prompt' => $prompt,
-            // Add other parameters from $overrideParams if needed
-        ]);
+        try {
+            return $this->openAIService->performOperation('endpoint_doc_generator', [
+                'prompt' => $prompt,
+            ]);
+        } catch (Exception $e) {
+            Log::error('Failed to generate summary from OpenAI.', ['exception' => $e]);
+            return null;
+        }
     }
 
     /**

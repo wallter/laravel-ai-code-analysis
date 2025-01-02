@@ -4,8 +4,6 @@ namespace App\Services\AI;
 
 use App\Models\ParsedItem;
 use Illuminate\Support\Facades\Http;
-
-use App\Services\AI\OpenAIService;
 use Illuminate\Support\Facades\Log;
 
 class DocEnhancer
@@ -31,17 +29,24 @@ class DocEnhancer
      * Enhance the description of a ParsedItem using an AI service.
      *
      * @param ParsedItem $item
+     * @param array $overrideParams Optional parameters to override defaults.
      * @return string|null
      */
     public function enhanceDescription(ParsedItem $item, array $overrideParams = []): ?string
     {
-
         $prompt = $this->generatePrompt($item);
 
-        return $this->openAIService->performOperation('doc_enhancer', [
+        // Merge override parameters if any
+        $params = array_merge([
             'prompt' => $prompt,
-            // Add other parameters from $overrideParams if needed
-        ]);
+        ], $overrideParams);
+
+        try {
+            return $this->openAIService->performOperation('doc_enhancer', $params);
+        } catch (Exception $e) {
+            Log::error('Failed to enhance description using OpenAI.', ['exception' => $e]);
+            return null;
+        }
     }
 
     /**

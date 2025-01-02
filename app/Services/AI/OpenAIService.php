@@ -6,6 +6,7 @@ use OpenAI\Laravel\Facades\OpenAI as OpenAIFacade;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
+use Exception;
 
 class OpenAIService
 {
@@ -20,7 +21,7 @@ class OpenAIService
      * @return string The AI-generated response text.
      *
      * @throws InvalidArgumentException If the operation identifier is not found in the configuration.
-     * @throws \Exception If the AI API request fails or returns an unexpected response.
+     * @throws Exception If the AI API request fails or returns an unexpected response.
      */
     public function performOperation(string $operationIdentifier, array $params = []): string
     {
@@ -64,8 +65,8 @@ class OpenAIService
 
             // Log unexpected response structure
             Log::error("Unexpected response structure from OpenAI for operation '{$operationIdentifier}'", ['response' => $response]);
-            throw new \Exception("Unexpected response from OpenAI API.");
-        } catch (\Exception $e) {
+            throw new Exception("Unexpected response from OpenAI API.");
+        } catch (Exception $e) {
             // Log the exception and rethrow it for further handling
             Log::error("Exception occurred during OpenAI operation '{$operationIdentifier}': " . $e->getMessage(), ['exception' => $e]);
             throw $e;

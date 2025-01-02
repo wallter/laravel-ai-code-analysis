@@ -4,6 +4,7 @@ namespace App\Services\AI;
 
 use App\Services\AI\OpenAIService;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 class CodeAnalysisService
 {
@@ -22,21 +23,18 @@ class CodeAnalysisService
      */
     public function sendAnalysisRequest(string $input): array
     {
-        $response = $this->openAIService->performOperation('code_analysis', [
-            'prompt' => $input,
-            'model' => config('ai.operations.code_analysis.model'),
-            'max_tokens' => config('ai.operations.code_analysis.max_tokens'),
-            'temperature' => config('ai.operations.code_analysis.temperature'),
-        ]);
+        try {
+            $responseText = $this->openAIService->performOperation('code_analysis', [
+                'prompt' => $input,
+            ]);
 
-        if ($response && isset($response['choices'][0]['text'])) {
             return [
-                'summary' => trim($response['choices'][0]['text']),
-                'tokens'  => $response['usage']['total_tokens'] ?? 0,
+                'summary' => $responseText,
+                'tokens'  => 0, // Tokens usage not tracked in OpenAIService
             ];
+        } catch (Exception $e) {
+            Log::error('Failed to get a valid response from OpenAI.', ['exception' => $e]);
+            return [];
         }
-
-        Log::error('Failed to get a valid response from OpenAI.');
-        return [];
     }
 }
