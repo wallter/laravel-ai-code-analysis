@@ -21,6 +21,7 @@ use PhpParser\Node\Identifier;
 class FunctionAndClassVisitor extends NodeVisitorAbstract
 {
     private $items = [];
+    private $businessRuleCalls = [];
     private $warnings = [];
     private $maxDepth = 2;
     private $astSizeLimit = 100000;
@@ -35,6 +36,40 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     public function setCurrentFile(string $file)
     {
         $this->currentFile = $file;
+    } elseif ($node instanceof Node\Expr\StaticCall) {
+        if ($node->class->toString() === 'v5\\Service\\BusinessRule') {
+            $methodName = $node->name->name;
+
+            // Initialize variables
+            $ruleKey = null;
+            $additionalMethods = [];
+
+            // Handle 'about' method to get the rule key
+            if ($methodName === 'about' && isset($node->args[0])) {
+                $firstArg = $node->args[0]->value;
+                if ($firstArg instanceof Node\Scalar\String_) {
+                    $ruleKey = $firstArg->value;
+                }
+            }
+
+            // Check for chained method calls like 'matches' or 'items'
+            $parentNode = $node->getAttribute('parent');
+            while ($parentNode instanceof Node\Expr\MethodCall) {
+                $chainMethodName = $parentNode->name->name;
+                if (in_array($chainMethodName, ['matches', 'items'])) {
+                    $additionalMethods[] = $chainMethodName;
+                }
+                $parentNode = $parentNode->getAttribute('parent');
+            }
+
+            // Store the collected information
+            $this->businessRuleCalls[] = [
+                'line'            => $node->getStartLine(),
+                'method'          => $methodName,
+                'ruleKey'         => $ruleKey,
+                'chainedMethods'  => $additionalMethods,
+            ];
+        }
     }
 
     /**
@@ -522,5 +557,13 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         } else {
             return '';
         }
+    }
+
+    /**
+     * Retrieve the collected BusinessRule calls.
+     */
+    public function getBusinessRuleCalls(): array
+    {
+        return $this->businessRuleCalls;
     }
 }
