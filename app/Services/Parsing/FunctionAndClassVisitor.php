@@ -35,6 +35,32 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $this->currentFile = $file;
     }
 
+    private function parseAnnotationValue(string $value)
+    {
+        $result = [];
+        $pattern = '/\{(@\w+)\s+([^}]+)\}/';
+        
+        if (preg_match_all($pattern, $value, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $nestedTag = ltrim($match[1], '@');
+                $nestedValue = trim($match[2]);
+                $result[$nestedTag] = $nestedValue;
+            }
+            $value = preg_replace($pattern, '', $value);
+            $value = trim($value);
+        }
+
+        if (!empty($value)) {
+            $result['value'] = $value;
+        }
+
+        if (count($result) === 1 && isset($result['value'])) {
+            return $result['value'];
+        }
+
+        return $result;
+    }
+
     /**
      * Called on each node to detect functions and classes.
      */
@@ -114,8 +140,10 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             ],
             'annotations' => $annotations,
             'attributes'  => $attributes,
+            'restler_tags' => $restlerTags,
             'file'        => $this->currentFile,
             'line'        => $node->getStartLine(),
+            'restler_tags'  => $methodRestlerTags,
         ];
     }
 
@@ -162,6 +190,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             ],
             'annotations'         => $annotations,
             'attributes'          => $attributes,
+            'restler_tags'        => $restlerTags,
             'file'                => $this->currentFile,
             'line'                => $node->getStartLine(),
         ];
@@ -258,13 +287,11 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $annotations = [];
         $lines       = preg_split('/\R/', $docblock);
         foreach ($lines as $line) {
+            $line = trim($line, " \t\n\r\0\x0B*");
             if (preg_match('/@(\w+)\s*(.*)/', $line, $matches)) {
                 $tag = $matches[1];
-                $value = trim($matches[2]);
-                if (!isset($annotations[$tag])) {
-                    $annotations[$tag] = [];
-                }
-                $annotations[$tag][] = $value;
+                $value = $matches[2];
+                $annotations[$tag] = $this->parseAnnotationValue($value);
             }
         }
         return $annotations;

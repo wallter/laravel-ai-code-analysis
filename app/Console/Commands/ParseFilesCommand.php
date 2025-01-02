@@ -110,7 +110,9 @@ class ParseFilesCommand extends Command
                     'line_number' => $item['line'],
                     'annotations' => $item['annotations'] ?: [],
                     'attributes' => $item['attributes'] ?: [],
-                    'details' => $item['details'] ?: [],
+                    'details' => array_merge($item['details'] ?: [], [
+                        'restler_tags' => $item['restler_tags'] ?? [],
+                    ]),
                 ]
             );
         }
@@ -183,8 +185,9 @@ class ParseFilesCommand extends Command
                     if (!empty($item['details']['description'])) {
                         $details .= ' - ' . $item['details']['description'];
                     }
+                    $allAnnotations = array_merge_recursive($item['annotations'], $item['restler_tags'] ?? []);
                     $annotations = '';
-                    foreach ($item['annotations'] as $tag => $values) {
+                    foreach ($allAnnotations as $tag => $values) {
                         foreach ($values as $value) {
                             $annotations .= "@{$tag} {$value}\n";
                         }
