@@ -19,6 +19,7 @@ class EnhanceDocsCommandTest extends TestCase
             'type' => 'Class',
             'name' => 'TestClass',
             'file_path' => 'test/path/TestClass.php',
+            'line_number' => 10, // or another integer
             'details' => [
                 'description' => null,
             ],
