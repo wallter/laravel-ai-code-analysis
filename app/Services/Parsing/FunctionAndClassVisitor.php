@@ -226,7 +226,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             ],
             'annotations' => $annotations,
             'attributes'  => $attributes,
-            'restler_tags' => $restlerTags,
             'file'        => $this->currentFile,
             'line'        => $node->getStartLine(),
             'ast'         => $astSerialized,
