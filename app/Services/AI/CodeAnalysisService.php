@@ -2,11 +2,12 @@
 
 namespace App\Services\AI;
 
-use Illuminate\Support\Facades\Http;
+use OpenAI\Client;
 use Illuminate\Support\Facades\Log;
 
 class CodeAnalysisService
 {
+    protected Client $client;
     protected $apiKey;
     protected $model;
     protected $temperature;
@@ -18,6 +19,9 @@ class CodeAnalysisService
         $this->model = config('services.openai.model');
         $this->temperature = config('services.openai.temperature');
         $this->maxTokens = config('services.openai.max_tokens');
+        $this->client = new Client([
+            'api_key' => $this->apiKey,
+        ]);
     }
 
     /**
@@ -29,26 +33,17 @@ class CodeAnalysisService
     public function sendAnalysisRequest(string $input): array
     {
         try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Content-Type'  => 'application/json',
-            ])->post('https://api.openai.com/v1/completions', [
+            $response = $this->client->completions()->create([
                 'model'       => $this->model,
                 'prompt'      => $input,
                 'temperature' => $this->temperature,
                 'max_tokens'  => $this->maxTokens,
             ]);
 
-            if ($response->successful()) {
-                $data = $response->json();
-                return [
-                    'summary' => trim($data['choices'][0]['text'] ?? ''),
-                    'tokens'  => $data['usage']['total_tokens'] ?? 0,
-                ];
-            }
-
-            Log::error('OpenAI API error: ' . $response->body());
-            return [];
+            return [
+                'summary' => trim($response['choices'][0]['text'] ?? ''),
+                'tokens'  => $response['usage']['total_tokens'] ?? 0,
+            ];
         } catch (\Exception $e) {
             Log::error('Exception in CodeAnalysisService: ' . $e->getMessage());
             return [];
