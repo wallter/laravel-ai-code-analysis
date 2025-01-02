@@ -14,9 +14,14 @@ return [
     | ],
     |
     */
-    'files' => [
-        // Example path
+    'folders' => [
+        // Directories to parse recursively
         base_path('app/Services'),
+    ],
+
+    'files' => [
+        // Individual files to parse
+        // base_path('app/Helpers.php'),
     ],
 
     /*
