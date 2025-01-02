@@ -485,4 +485,21 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         }
         return $namespace;
     }
+
+    private function typeToString($typeNode): string
+    {
+        if ($typeNode instanceof Node\Identifier) {
+            return $typeNode->name;
+        } elseif ($typeNode instanceof Node\NullableType) {
+            return '?' . $this->typeToString($typeNode->type);
+        } elseif ($typeNode instanceof Node\UnionType) {
+            return implode('|', array_map([$this, 'typeToString'], $typeNode->types));
+        } elseif ($typeNode instanceof Node\IntersectionType) {
+            return implode('&', array_map([$this, 'typeToString'], $typeNode->types));
+        } elseif ($typeNode instanceof Node\Name) {
+            return $typeNode->toString();
+        } else {
+            return 'mixed';
+        }
+    }
 }
