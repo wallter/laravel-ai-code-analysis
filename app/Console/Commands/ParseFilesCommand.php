@@ -55,6 +55,7 @@ class ParseFilesCommand extends Command
         // 3) Collect all PHP files from the folders
         foreach ($folderPaths as $folderPath) {
             $realPath = $this->normalizePath($folderPath);
+            $this->info("Scanning folder: $realPath");
             if (!File::isDirectory($realPath)) {
                 $this->warn("Folder not found: {$realPath}");
                 continue;
@@ -76,12 +77,17 @@ class ParseFilesCommand extends Command
         // Remove duplicates
         $phpFiles = array_unique($phpFiles);
 
+        $this->info("Found " . count($phpFiles) . " PHP files to parse.");
+
         // 4) Parse each PHP file
         foreach ($phpFiles as $phpFile) {
+            $this->info("Parsing file: $phpFile");
             $this->parseOneFile($phpFile, $parser, $traverser, $visitor);
         }
 
         $items = $visitor->getItems();
+
+        $this->info("Collected " . count($items) . " items from parsing.");
 
         // 4) Apply filter if given
         if ($filter) {
