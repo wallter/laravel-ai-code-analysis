@@ -93,11 +93,14 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $docComment  = $node->getDocComment();
         $description = '';
         $annotations = [];
+        $restlerTags = [];
+        $restlerTags = [];
 
         if ($docComment) {
             $docText     = $docComment->getText();
             $description = $this->extractShortDescription($docText);
             $annotations = $this->extractAnnotations($docText);
+            $restlerTags = $annotations;
         }
 
         $attributes = $this->collectAttributes($node->attrGroups);
@@ -131,6 +134,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             $docText     = $docComment->getText();
             $description = $this->extractShortDescription($docText);
             $annotations = $this->extractAnnotations($docText);
+            $restlerTags = $annotations;
         }
 
         $attributes = $this->collectAttributes($node->attrGroups);
