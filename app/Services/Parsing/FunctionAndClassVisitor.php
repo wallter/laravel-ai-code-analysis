@@ -3,31 +3,29 @@
 namespace App\Services\Parsing;
 
 use PhpParser\Node;
-use PhpParser\Node\Stmt\Class_;
-use PhpParser\Node\Stmt\ClassLike;
-use PhpParser\NodeVisitorAbstract;
-use PhpParser\Node\Stmt\Namespace_;
-use PhpParser\Node\Identifier;
-use PhpParser\Node\NullableType;
-use PhpParser\Node\UnionType;
 use PhpParser\Node\Name;
+use PhpParser\Node\NullableType;
+use PhpParser\Node\Stmt\ClassLike;
+use PhpParser\Node\Stmt\ClassMethod;
+use PhpParser\Node\Stmt\Namespace_;
+use PhpParser\Node\UnionType;
+use PhpParser\NodeVisitorAbstract;
+use PhpParser\Node\Identifier;
+// If your version of nikic/php-parser has Serializer\XML spelled as 'Xml':
+// use PhpParser\Serializer\Xml; 
+// Otherwise, for older versions, it might be spelled as 'XML' (all caps):
+use PhpParser\Serializer\XML;
 
 /**
  * Collects both free-floating functions and classes with methods/attributes.
  */
 class FunctionAndClassVisitor extends NodeVisitorAbstract
 {
-    /**
-     * @var array
-     */
     private $items = [];
-    private $maxDepth = 2; // Adjust this value to limit the depth
     private $warnings = [];
-    private $astSizeLimit = 50000; // Set the AST size limit in bytes (adjust as needed)
+    private $maxDepth = 2;
+    private $astSizeLimit = 50000;
 
-    /**
-     * @var string
-     */
     private $currentFile = '';
     private $currentClassName = '';
     private $currentNamespace = '';
@@ -40,9 +38,20 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $this->currentFile = $file;
     }
 
+    /**
+     * Serialize the AST node to XML (or JSON if desired).
+     * Adjust the class name if your parser uses `Xml` or `XML`.
+     *
+     * @param Node $node
+     * @return string|null
+     */
     private function serializeAst(Node $node)
     {
-        $serializer = new \PhpParser\Serializer\XML(); // You can also use 'JSON' serializer
+        // If your environment has `Xml` spelled with uppercase X and lowercase ml, you might do:
+        // $serializer = new Xml();
+
+        // For older versions spelled `XML`:
+        $serializer = new XML();
         return $serializer->serialize($node);
     }
 
@@ -51,92 +60,50 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         return $this->warnings;
     }
 
-    private function collectCalledMethods(Node $node, $currentDepth = 0)
+    /**
+     * Helper to interpret method flags for visibility/static if `Class_::getModifierNames` is not available.
+     */
+    private function resolveModifierNames(int $flags): array
     {
-        if ($currentDepth >= $this->maxDepth) {
-            return [];
+        $names = [];
+
+        // These constants exist in \PhpParser\Node\Stmt\Class_ for visibility:
+        //   MODIFIER_PUBLIC = 1
+        //   MODIFIER_PROTECTED = 2
+        //   MODIFIER_PRIVATE = 4
+        //   MODIFIER_STATIC = 8
+        //   MODIFIER_ABSTRACT = 16
+        //   MODIFIER_FINAL = 32
+
+        // Visibility
+        if ($flags & \PhpParser\Node\Stmt\Class_::MODIFIER_PUBLIC) {
+            $names[] = 'public';
+        } elseif ($flags & \PhpParser\Node\Stmt\Class_::MODIFIER_PROTECTED) {
+            $names[] = 'protected';
+        } elseif ($flags & \PhpParser\Node\Stmt\Class_::MODIFIER_PRIVATE) {
+            $names[] = 'private';
         }
 
-        $calledMethods = [];
-
-        if (isset($node->stmts) && is_array($node->stmts)) {
-            foreach ($node->stmts as $stmt) {
-                if ($stmt instanceof Node\Stmt\Expression) {
-                    $expr = $stmt->expr;
-                    if ($expr instanceof Node\Expr\MethodCall) {
-                        $methodName = $expr->name instanceof Node\Identifier ? $expr->name->name : '';
-                        if ($methodName) {
-                            $calledMethods[] = $methodName;
-                        }
-                    }
-                }
-                // Recursively explore nested statements
-                $calledMethods = array_merge(
-                    $calledMethods,
-                    $this->collectCalledMethods($stmt, $currentDepth + 1)
-                );
-            }
+        // Static?
+        if ($flags & \PhpParser\Node\Stmt\Class_::MODIFIER_STATIC) {
+            $names[] = 'static';
         }
 
-        return $calledMethods;
-    }
-
-    private function summarizeMethodBody(Node\Stmt\ClassMethod $method): string
-    {
-        // Simple summary based on method statements
-        $statementTypes = [];
-        if ($method->stmts) {
-            foreach ($method->stmts as $stmt) {
-                $type = $stmt->getType();
-                if (!isset($statementTypes[$type])) {
-                    $statementTypes[$type] = 0;
-                }
-                $statementTypes[$type]++;
-            }
-        }
-        $summaryParts = [];
-        foreach ($statementTypes as $type => $count) {
-            $summaryParts[] = "{$count} {$type}(s)";
-        }
-        return 'Contains ' . implode(', ', $summaryParts) . '.';
-    }
-
-    public function leaveNode(Node $node)
-    {
-        if ($node instanceof ClassLike && $node->name !== null) {
-            $this->currentClassName = '';
-            $this->currentNamespace = '';
-        }
-    }
-
-    private function parseAnnotationValue(string $value)
-    {
-        $result = [];
-        $pattern = '/\{(@\w+)\s+([^}]+)\}/';
-        
-        if (preg_match_all($pattern, $value, $matches, PREG_SET_ORDER)) {
-            foreach ($matches as $match) {
-                $nestedTag = ltrim($match[1], '@');
-                $nestedValue = trim($match[2]);
-                $result[$nestedTag] = $nestedValue;
-            }
-            $value = preg_replace($pattern, '', $value);
-            $value = trim($value);
+        // Abstract?
+        if ($flags & \PhpParser\Node\Stmt\Class_::MODIFIER_ABSTRACT) {
+            $names[] = 'abstract';
         }
 
-        if (!empty($value)) {
-            $result['value'] = $value;
+        // Final?
+        if ($flags & \PhpParser\Node\Stmt\Class_::MODIFIER_FINAL) {
+            $names[] = 'final';
         }
 
-        if (count($result) === 1 && isset($result['value'])) {
-            return $result['value'];
-        }
-
-        return $result;
+        return $names;
     }
 
     /**
-     * Called on each node to detect functions and classes.
+     * Called on each node to detect free-floating functions and classes.
      */
     public function enterNode(Node $node)
     {
@@ -150,27 +117,18 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     }
 
     /**
-     * Helper method to convert type nodes to strings.
+     * Resets current class/namespace after leaving a class node.
      */
-    private function typeToString($typeNode): string
+    public function leaveNode(Node $node)
     {
-        if ($typeNode instanceof Identifier) {
-            return $typeNode->name;
-        } elseif ($typeNode instanceof NullableType) {
-            return '?' . $this->typeToString($typeNode->type);
-        } elseif ($typeNode instanceof UnionType) {
-            return implode('|', array_map([$this, 'typeToString'], $typeNode->types));
-        } elseif ($typeNode instanceof Name) {
-            return $typeNode->toString();
-        } else {
-            return 'mixed';
+        if ($node instanceof ClassLike && $node->name !== null) {
+            $this->currentClassName = '';
+            $this->currentNamespace = '';
         }
     }
 
     /**
      * Returns all discovered items (functions, classes, etc.).
-     *
-     * @return array
      */
     public function getItems(): array
     {
@@ -179,13 +137,10 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
 
     /**
      * Collects data for a standalone function.
-     *
-     * @param Node\Stmt\Function_ $node
-     * @return array
      */
     private function collectFunctionData(Node\Stmt\Function_ $node): array
     {
-        $params      = [];
+        $params = [];
         foreach ($node->params as $param) {
             $paramName = '$' . $param->var->name;
             $paramType = $param->type ? $this->typeToString($param->type) : 'mixed';
@@ -213,16 +168,16 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         // Check if AST exceeds the size limit
         if ($astSize > $this->astSizeLimit) {
             $this->warnings[] = "AST size for function '{$node->name->name}' exceeds limit ({$astSize} bytes).";
-            $astSerialized = null; // Optionally set to null or leave AST out
+            $astSerialized = null;
         }
 
         return [
-            'type'       => 'Function',
-            'name'       => $node->name->name,
-            'details'    => [
+            'type' => 'Function',
+            'name' => $node->name->name,
+            'details' => [
                 'params'       => $params,
                 'description'  => $description,
-                'restler_tags' => $restlerTags
+                'restler_tags' => $restlerTags,
             ],
             'annotations' => $annotations,
             'attributes'  => $attributes,
@@ -233,10 +188,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     }
 
     /**
-     * Collects data for a class node, including methods and attributes.
-     *
-     * @param ClassLike $node
-     * @return array
+     * Collects data for a class node.
      */
     private function collectClassData(ClassLike $node): array
     {
@@ -264,30 +216,33 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $fullyQualifiedName = $namespace ? "{$namespace}\\{$className}" : $className;
 
         return [
-            'type'                => 'Class',
-            'name'                => $className,
-            'namespace'           => $namespace,
-            'fullyQualifiedName'  => $fullyQualifiedName,
-            'details'             => [
+            'type'               => 'Class',
+            'name'               => $className,
+            'namespace'          => $namespace,
+            'fullyQualifiedName' => $fullyQualifiedName,
+            'details' => [
                 'methods'      => $methods,
                 'description'  => $description,
-                'restler_tags' => $restlerTags
+                'restler_tags' => $restlerTags,
             ],
-            'annotations'         => $annotations,
-            'attributes'          => $attributes,
-            'restler_tags'        => $restlerTags,
-            'file'                => $this->currentFile,
-            'line'                => $node->getStartLine(),
+            'annotations'  => $annotations,
+            'attributes'   => $attributes,
+            'restler_tags' => $restlerTags,
+            'file'         => $this->currentFile,
+            'line'         => $node->getStartLine(),
         ];
     }
 
-    private function collectMethodData(Node\Stmt\ClassMethod $method): array
+    /**
+     * Collect data for one class method.
+     */
+    private function collectMethodData(ClassMethod $method): array
     {
         $params = [];
         foreach ($method->params as $param) {
             $paramName = '$' . $param->var->name;
             $paramType = $param->type ? $this->typeToString($param->type) : 'mixed';
-            $params[] = ['name' => $paramName, 'type' => $paramType];
+            $params[]  = ['name' => $paramName, 'type' => $paramType];
         }
 
         $docComment = $method->getDocComment();
@@ -296,10 +251,10 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $restlerTags = [];
 
         if ($docComment) {
-            $docText = $docComment->getText();
-            $description = $this->extractShortDescription($docText);
-            $annotations = $this->extractAnnotations($docText);
-            $restlerTags = $annotations;
+            $docText      = $docComment->getText();
+            $description  = $this->extractShortDescription($docText);
+            $annotations  = $this->extractAnnotations($docText);
+            $restlerTags  = $annotations;
         }
 
         $attributes = $this->collectAttributes($method->attrGroups);
@@ -308,17 +263,19 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $astSerialized = $this->serializeAst($method);
         $astSize = strlen($astSerialized);
 
-        // Check if AST exceeds the size limit
         if ($astSize > $this->astSizeLimit) {
             $this->warnings[] = "AST size for method '{$method->name->name}' exceeds limit ({$astSize} bytes).";
-            $astSerialized = null; // Optionally set to null or leave AST out
+            $astSerialized = null;
         }
+
+        // Summarize method body
+        $operationSummary = $this->summarizeMethodBody($method);
 
         // Collect called methods
         $calledMethods = $this->collectCalledMethods($method);
 
-        // Summarize method body
-        $operationSummary = $this->summarizeMethodBody($method);
+        $visibilityFlags = $this->resolveModifierNames($method->flags);
+        $visibility = implode(' ', $visibilityFlags);
 
         return [
             'name'              => $method->name->name,
@@ -328,7 +285,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'attributes'        => $attributes,
             'class'             => $this->currentClassName,
             'namespace'         => $this->currentNamespace,
-            'visibility'        => implode(' ', \PhpParser\Node\Stmt\Class_::getModifierNames($method->flags)),
+            'visibility'        => $visibility,
             'isStatic'          => $method->isStatic(),
             'line'              => $method->getStartLine(),
             'operation_summary' => $operationSummary,
@@ -336,36 +293,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'ast'               => $astSerialized,
         ];
     }
-
-    /**
-     * Extracts attributes (e.g. PHP 8+) from the given attribute groups.
-     *
-     * @param array $attrGroups
-     * @return array
-     */
-    private function collectAttributes(array $attrGroups): array
-    {
-        $attributes = [];
-        foreach ($attrGroups as $attrGroup) {
-            foreach ($attrGroup->attrs as $attr) {
-                $attrName = $attr->name->toString();
-                $args     = [];
-                foreach ($attr->args as $arg) {
-                    // Some basic logic for attribute arguments
-                    $args[] = $this->argToString($arg->value);
-                }
-                $attributes[] = $attrName . '(' . implode(', ', $args) . ')';
-            }
-        }
-        return $attributes;
-    }
-
-    /**
-     * Collects data for a class method node.
-     *
-     * @param Node\Stmt\ClassMethod $method
-     * @return array
-     */
 
     /**
      * Convert docblock lines to short description.
@@ -392,12 +319,13 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     }
 
     /**
-     * Find lines with @annotation in docblock.
+     * Extract lines with @annotation in docblock.
      */
     private function extractAnnotations(string $docblock): array
     {
         $annotations = [];
-        $lines       = preg_split('/\R/', $docblock);
+        $lines = preg_split('/\R/', $docblock);
+
         foreach ($lines as $line) {
             $line = trim($line, " \t\n\r\0\x0B*");
             if (preg_match('/@(\w+)\s*(.*)/', $line, $matches)) {
@@ -406,11 +334,119 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
                 $annotations[$tag] = $this->parseAnnotationValue($value);
             }
         }
+
         return $annotations;
     }
 
     /**
-     * Convert attribute argument node to a string representation.
+     * Parse an annotation line that may have nested braces like {@requires guest}.
+     */
+    private function parseAnnotationValue(string $value)
+    {
+        $result = [];
+        $pattern = '/\{(@\w+)\s+([^}]+)\}/';
+
+        if (preg_match_all($pattern, $value, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $nestedTag = ltrim($match[1], '@');
+                $nestedValue = trim($match[2]);
+                $result[$nestedTag] = $nestedValue;
+            }
+            $value = preg_replace($pattern, '', $value);
+            $value = trim($value);
+        }
+
+        if (!empty($value)) {
+            $result['value'] = $value;
+        }
+
+        if (count($result) === 1 && isset($result['value'])) {
+            return $result['value'];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Summarize a method's statement types.
+     */
+    private function summarizeMethodBody(Node\Stmt\ClassMethod $method): string
+    {
+        $statementTypes = [];
+        if ($method->stmts) {
+            foreach ($method->stmts as $stmt) {
+                $type = $stmt->getType();
+                if (!isset($statementTypes[$type])) {
+                    $statementTypes[$type] = 0;
+                }
+                $statementTypes[$type]++;
+            }
+        }
+
+        $summaryParts = [];
+        foreach ($statementTypes as $type => $count) {
+            $summaryParts[] = "{$count} {$type}(s)";
+        }
+
+        return 'Contains ' . implode(', ', $summaryParts) . '.';
+    }
+
+    /**
+     * Recursively gather method calls within a method's body up to maxDepth.
+     */
+    private function collectCalledMethods(Node $node, int $currentDepth = 0): array
+    {
+        if ($currentDepth >= $this->maxDepth) {
+            return [];
+        }
+
+        $calledMethods = [];
+
+        if (isset($node->stmts) && is_array($node->stmts)) {
+            foreach ($node->stmts as $stmt) {
+                if ($stmt instanceof Node\Stmt\Expression) {
+                    $expr = $stmt->expr;
+                    if ($expr instanceof Node\Expr\MethodCall) {
+                        $methodName = $expr->name instanceof Node\Identifier
+                            ? $expr->name->name
+                            : '';
+                        if ($methodName) {
+                            $calledMethods[] = $methodName;
+                        }
+                    }
+                }
+                // Recursively explore nested statements
+                $calledMethods = array_merge(
+                    $calledMethods,
+                    $this->collectCalledMethods($stmt, $currentDepth + 1)
+                );
+            }
+        }
+
+        return $calledMethods;
+    }
+
+    /**
+     * Collect attributes (PHP 8+).
+     */
+    private function collectAttributes(array $attrGroups): array
+    {
+        $attributes = [];
+        foreach ($attrGroups as $attrGroup) {
+            foreach ($attrGroup->attrs as $attr) {
+                $attrName = $attr->name->toString();
+                $args = [];
+                foreach ($attr->args as $arg) {
+                    $args[] = $this->argToString($arg->value);
+                }
+                $attributes[] = $attrName . '(' . implode(', ', $args) . ')';
+            }
+        }
+        return $attributes;
+    }
+
+    /**
+     * Convert an attribute argument node to string.
      */
     private function argToString(Node $node): string
     {
@@ -427,26 +463,29 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     }
 
     /**
-     * Turn a PhpParser array node into a string.
+     * Parse an array node into a string representation.
      */
     private function parseArray(Node\Expr\Array_ $array): string
     {
         $elements = [];
         foreach ($array->items as $item) {
-            $key   = $item->key ? $this->argToString($item->key) . ' => ' : '';
+            $key = $item->key ? $this->argToString($item->key) . ' => ' : '';
             $value = $this->argToString($item->value);
             $elements[] = $key . $value;
         }
         return '[' . implode(', ', $elements) . ']';
     }
 
+    /**
+     * Resolve the namespace of a class node.
+     */
     private function getNamespace(Node $node): string
     {
         $namespace = '';
         $current = $node;
         while ($current->getAttribute('parent')) {
             $current = $current->getAttribute('parent');
-            if ($current instanceof Node\Stmt\Namespace_) {
+            if ($current instanceof Namespace_) {
                 $namespace = $current->name ? $current->name->toString() : '';
                 break;
             }
