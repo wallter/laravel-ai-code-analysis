@@ -109,8 +109,9 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'type'       => 'Function',
             'name'       => $node->name->name,
             'details'    => [
-                'params'      => $params,
-                'description' => $description
+                'params'       => $params,
+                'description'  => $description,
+                'restler_tags' => $restlerTags
             ],
             'annotations' => $annotations,
             'attributes'  => $attributes,
@@ -155,8 +156,9 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'namespace'           => $namespace,
             'fullyQualifiedName'  => $fullyQualifiedName,
             'details'             => [
-                'methods'     => $methods,
-                'description' => $description
+                'methods'      => $methods,
+                'description'  => $description,
+                'restler_tags' => $restlerTags
             ],
             'annotations'         => $annotations,
             'attributes'          => $attributes,
@@ -257,7 +259,12 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $lines       = preg_split('/\R/', $docblock);
         foreach ($lines as $line) {
             if (preg_match('/@(\w+)\s*(.*)/', $line, $matches)) {
-                $annotations[] = $matches[0];
+                $tag = $matches[1];
+                $value = trim($matches[2]);
+                if (!isset($annotations[$tag])) {
+                    $annotations[$tag] = [];
+                }
+                $annotations[$tag][] = $value;
             }
         }
         return $annotations;
