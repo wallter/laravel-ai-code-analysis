@@ -20,33 +20,37 @@ class OpenAIService
      *
      * @return string The AI-generated response text.
      *
-     * @throws InvalidArgumentException If the operation identifier is not found in the configuration.
+     * @throws InvalidArgumentException If the 'prompt' parameter is not provided.
      * @throws Exception If the AI API request fails or returns an unexpected response.
      */
     public function performOperation(string $operationIdentifier, array $params = []): string
     {
         // Retrieve the configuration for the specified operation
-        $operationConfig = Config::get("ai.operations.{$operationIdentifier}");
+        $operationConfig = Config::get("ai.operations.{$operationIdentifier}", []);
 
-        if (!$operationConfig) {
-            $message = "Operation identifier '{$operationIdentifier}' not found in config.ai.operations.";
-            Log::error($message);
-            throw new InvalidArgumentException($message);
-        }
+        // Use default configuration values if specific ones are not set in operationConfig
+        $model = $operationConfig['model'] ?? Config::get('ai.openai_model', 'text-davinci-003');
+        $maxTokens = $operationConfig['max_tokens'] ?? Config::get('ai.max_tokens', 500);
+        $temperature = $operationConfig['temperature'] ?? Config::get('ai.temperature', 0.5);
+        $promptTemplate = $operationConfig['prompt'] ?? '';
 
         // Ensure that a prompt is provided
         if (empty($params['prompt'])) {
-            $message = "The 'prompt' parameter is required for the '{$operationIdentifier}' operation.";
-            Log::error($message);
-            throw new InvalidArgumentException($message);
+            if (empty($promptTemplate)) {
+                $message = "The 'prompt' parameter is required for the '{$operationIdentifier}' operation and no default prompt is set.";
+                Log::error($message);
+                throw new InvalidArgumentException($message);
+            }
+            $params['prompt'] = $promptTemplate;
+            Log::info("Using default prompt for operation '{$operationIdentifier}'.");
         }
 
         // Merge default operation parameters with any overrides provided in $params
         $payload = array_merge([
-            'model' => $operationConfig['model'],
+            'model' => $model,
             'prompt' => $params['prompt'],
-            'max_tokens' => $operationConfig['max_tokens'],
-            'temperature' => $operationConfig['temperature'],
+            'max_tokens' => $maxTokens,
+            'temperature' => $temperature,
             // Add other default parameters here if needed
         ], $params);
 

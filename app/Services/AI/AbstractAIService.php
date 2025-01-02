@@ -33,19 +33,30 @@ abstract class AbstractAIService
         }
 
         // Retrieve operation-specific default parameters
-        $operationConfig = config("ai.operations.{$operationKey}");
+        $operationConfig = config("ai.operations.{$operationKey}", []);
 
-        if (!$operationConfig) {
-            Log::error("AI operation configuration for '{$operationKey}' not found.");
-            return null;
+        // Use default configuration values if specific ones are not set in operationConfig
+        $model = $operationConfig['model'] ?? config('ai.openai_model', 'text-davinci-003');
+        $maxTokens = $operationConfig['max_tokens'] ?? config('ai.max_tokens', 500);
+        $temperature = $operationConfig['temperature'] ?? config('ai.temperature', 0.5);
+        $promptTemplate = $operationConfig['prompt'] ?? '';
+
+        // Ensure that a prompt is provided
+        if (empty($prompt)) {
+            if (empty($promptTemplate)) {
+                Log::error("The 'prompt' parameter is required for the '{$operationKey}' operation and no default prompt is set.");
+                return null;
+            }
+            $prompt = $promptTemplate;
+            Log::info("Using default prompt for operation '{$operationKey}'.");
         }
 
         // Merge default parameters, operation-specific parameters, and any overridden params
         $payload = array_merge([
             'prompt' => $prompt,
-            'model' => $operationConfig['model'],
-            'max_tokens' => $operationConfig['max_tokens'],
-            'temperature' => $operationConfig['temperature'],
+            'model' => $model,
+            'max_tokens' => $maxTokens,
+            'temperature' => $temperature,
             // Add other default parameters here if needed
         ], $params);
 
