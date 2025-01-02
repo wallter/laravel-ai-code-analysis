@@ -268,6 +268,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         }
         return '[' . implode(', ', $elements) . ']';
     }
+
     private function getNamespace(Node $node): string
     {
         $namespace = '';
@@ -281,3 +282,4 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         }
         return $namespace;
     }
+}
