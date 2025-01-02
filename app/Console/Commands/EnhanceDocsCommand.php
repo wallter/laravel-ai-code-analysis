@@ -60,7 +60,9 @@ class EnhanceDocsCommand extends Command
 
         $items->chunk(10)->each(function ($chunk) use ($bar) {
             foreach ($chunk as $item) {
-                $this->info("Enhancing documentation for: {$item->type} {$item->name}");
+                if ($this->output->isVerbose()) {
+                    $this->info("Enhancing documentation for: {$item->type} {$item->name}");
+                }
 
                 $enhancedDescription = $this->docEnhancer->enhanceDescription($item);
 

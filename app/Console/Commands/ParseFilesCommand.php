@@ -154,6 +154,8 @@ class ParseFilesCommand extends Command
                             'visibility' => $method['visibility'] ?? '',
                             'is_static' => $method['isStatic'] ?? false,
                             'fully_qualified_name' => ($item['fullyQualifiedName'] ?? '') . '::' . $method['name'],
+                            'operation_summary' => $method['operation_summary'] ?? '',
+                            'called_methods' => $method['called_methods'] ?? [],
                         ]
                     );
                 }

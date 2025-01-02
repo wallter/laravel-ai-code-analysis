@@ -19,6 +19,9 @@ class ParsedItem extends Model
         'visibility',
         'is_static',
         'fully_qualified_name',
+        'operation_summary',
+        'called_methods',
+        'called_methods' => 'array',
     ];
 
     protected $casts = [

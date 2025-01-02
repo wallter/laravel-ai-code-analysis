@@ -15,7 +15,7 @@ class DocEnhancer extends AbstractAIService
      * @param ParsedItem $item
      * @return string|null
      */
-    public function enhanceDescription(ParsedItem $item): ?string
+    public function enhanceDescription(ParsedItem $item, array $overrideParams = []): ?string
     {
 
         $prompt = $this->generatePrompt($item);
@@ -36,8 +36,8 @@ class DocEnhancer extends AbstractAIService
         $className = $item->class_name ?? '';
         $namespace = $item->namespace ?? '';
         $params = $item->details['params'] ?? [];
-        $operationSummary = $item->details['operation_summary'] ?? '';
-        $calledMethods = $item->details['called_methods'] ?? [];
+        $operationSummary = $item->operation_summary ?? '';
+        $calledMethods = $item->called_methods ?? [];
 
         $paramList = '';
         foreach ($params as $param) {

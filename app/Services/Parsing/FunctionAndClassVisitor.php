@@ -21,6 +21,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
      * @var array
      */
     private $items = [];
+    private $maxDepth = 2; // Adjust this value to limit the depth
 
     /**
      * @var string
@@ -35,6 +36,56 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     public function setCurrentFile(string $file)
     {
         $this->currentFile = $file;
+    }
+
+    private function collectCalledMethods(Node $node, $currentDepth = 0)
+    {
+        if ($currentDepth >= $this->maxDepth) {
+            return [];
+        }
+
+        $calledMethods = [];
+
+        if (isset($node->stmts) && is_array($node->stmts)) {
+            foreach ($node->stmts as $stmt) {
+                if ($stmt instanceof Node\Stmt\Expression) {
+                    $expr = $stmt->expr;
+                    if ($expr instanceof Node\Expr\MethodCall) {
+                        $methodName = $expr->name instanceof Node\Identifier ? $expr->name->name : '';
+                        if ($methodName) {
+                            $calledMethods[] = $methodName;
+                        }
+                    }
+                }
+                // Recursively explore nested statements
+                $calledMethods = array_merge(
+                    $calledMethods,
+                    $this->collectCalledMethods($stmt, $currentDepth + 1)
+                );
+            }
+        }
+
+        return $calledMethods;
+    }
+
+    private function summarizeMethodBody(Node\Stmt\ClassMethod $method): string
+    {
+        // Simple summary based on method statements
+        $statementTypes = [];
+        if ($method->stmts) {
+            foreach ($method->stmts as $stmt) {
+                $type = $stmt->getType();
+                if (!isset($statementTypes[$type])) {
+                    $statementTypes[$type] = 0;
+                }
+                $statementTypes[$type]++;
+            }
+        }
+        $summaryParts = [];
+        foreach ($statementTypes as $type => $count) {
+            $summaryParts[] = "{$count} {$type}(s)";
+        }
+        return 'Contains ' . implode(', ', $summaryParts) . '.';
     }
 
     public function leaveNode(Node $node)
@@ -177,6 +228,8 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'class'       => $this->currentClassName,
             'namespace'   => $this->currentNamespace,
             'line'        => $method->getStartLine(),
+            'operation_summary' => $operationSummary,
+            'called_methods' => $calledMethods,
         ];
     }
 
