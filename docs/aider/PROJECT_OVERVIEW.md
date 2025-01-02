@@ -35,7 +35,7 @@ We are building an **automated documentation and code-analysis system** for a **
 
 ## 3. Roadmap
 
-1. **Database Integration**
+1. **Database Integration**  
    - Write a migration (using `php artisan make:migration`) for `parsed_items`.
    - Use an Eloquent model (e.g., `ParsedItem`) for storing/updating parse results.
 
@@ -58,7 +58,7 @@ We are building an **automated documentation and code-analysis system** for a **
 
 ## 4. Usage Patterns
 
-- **Development**
+- **Development**  
   - Devs can run `php artisan parse:files` to update or view code parse data.
   - Use `--filter`, `--output-file`, or `--limit-class=N` options for specialized output.
   - Handle large ASTs with warnings displayed when the AST size exceeds the limit.
