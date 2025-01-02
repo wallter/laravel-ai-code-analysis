@@ -6,7 +6,6 @@ use Illuminate\Console\Command;
 use App\Services\AI\EndpointDocGenerator;
 use App\Models\ParsedItem;
 use Illuminate\Support\Facades\File;
-use App\Services\AI\EndpointDocGenerator;
 
 /**
  * Generates Markdown documentation for each endpoint.
