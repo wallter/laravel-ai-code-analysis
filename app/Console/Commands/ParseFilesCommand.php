@@ -81,7 +81,9 @@ class ParseFilesCommand extends Command
 
         // 4) Parse each PHP file
         foreach ($phpFiles as $phpFile) {
-            $this->info("Parsing file: $phpFile");
+            if ($this->output->isVerbose()) {
+                $this->info("Parsing file: $phpFile");
+            }
             $this->parseOneFile($phpFile, $parser, $traverser, $visitor);
         }
 
