@@ -17,7 +17,8 @@ return [
     'folders' => [
         // Directories to parse recursively
         // base_path('app/Services'),
-        '/Users/tylerwall/Documents/programing/unicity/Octopus/components/services/access-app/src/classes/v5/Controller/LoginTokens'
+        base_path('resources/access-app')
+        // '/Users/tylerwall/Documents/programing/unicity/Octopus/components/services/access-app/src/classes/v5/Controller/LoginTokens'
     ],
 
     'files' => [
