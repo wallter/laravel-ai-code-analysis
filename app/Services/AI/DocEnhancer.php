@@ -33,15 +33,36 @@ class DocEnhancer extends AbstractAIService
     {
         $type = $item->type;
         $name = $item->name;
-        $details = $item->details;
+        $className = $item->class_name ?? '';
+        $namespace = $item->namespace ?? '';
+        $params = $item->details['params'] ?? [];
+        $operationSummary = $item->details['operation_summary'] ?? '';
+        $calledMethods = $item->details['called_methods'] ?? [];
 
-        // Customize the prompt based on item type
-        if ($type === 'Class') {
-            return "Provide a detailed description for the class '{$name}' including its purpose and main functionalities.";
-        } elseif ($type === 'Function') {
-            return "Provide a detailed description for the function '{$name}' including its purpose, parameters, and return value.";
+        $paramList = '';
+        foreach ($params as $param) {
+            $paramList .= "{$param['type']} {$param['name']}, ";
         }
+        $paramList = rtrim($paramList, ', ');
 
-        return "Provide a detailed description for '{$name}'.";
+        $calledMethodsList = implode(', ', $calledMethods);
+
+        $prompt = <<<PROMPT
+You are an expert software documentation writer.
+
+Please provide a detailed description for the {$type} '{$name}'.
+
+- Type: {$type}
+- Name: {$name}
+- Class: {$className}
+- Namespace: {$namespace}
+- Parameters: {$paramList}
+- Operation Summary: {$operationSummary}
+- Called Methods: {$calledMethodsList}
+
+Your description should explain the purpose of the {$type}, how it works, and any important details. Use the provided information to craft a clear and informative documentation entry.
+PROMPT;
+
+        return $prompt;
     }
 }

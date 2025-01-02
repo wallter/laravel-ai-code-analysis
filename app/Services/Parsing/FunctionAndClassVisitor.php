@@ -260,32 +260,40 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
      */
     private function collectMethodData(Node\Stmt\ClassMethod $method): array
     {
-        $methodName       = $method->name->name;
-        $methodParams     = [];
+        $methodName = $method->name->name;
+        $methodParams = [];
         foreach ($method->params as $param) {
-            $paramName  = '$' . $param->var->name;
-            $paramType  = $param->type ? $this->typeToString($param->type) : 'mixed';
+            $paramName = '$' . $param->var->name;
+            $paramType = $param->type ? $this->typeToString($param->type) : 'mixed';
             $methodParams[] = ['name' => $paramName, 'type' => $paramType];
         }
 
         $methodDescription = '';
         $methodAnnotations = [];
-        $methodDocComment  = $method->getDocComment();
+        $methodDocComment = $method->getDocComment();
         if ($methodDocComment) {
-            $docText          = $methodDocComment->getText();
+            $docText = $methodDocComment->getText();
             $methodDescription = $this->extractShortDescription($docText);
             $methodAnnotations = $this->extractAnnotations($docText);
         }
 
         $methodAttributes = $this->collectAttributes($method->attrGroups);
 
+        // Analyze method body to create an operation summary
+        $operationSummary = $this->summarizeMethodBody($method);
+
+        // Identify called methods
+        $calledMethods = $this->collectCalledMethods($method);
+
         return [
-            'name'        => $methodName,
-            'params'      => $methodParams,
+            'name' => $methodName,
+            'params' => $methodParams,
             'description' => $methodDescription,
             'annotations' => $methodAnnotations,
-            'attributes'  => $methodAttributes,
-            'line'        => $method->getStartLine(),
+            'attributes' => $methodAttributes,
+            'operation_summary' => $operationSummary,
+            'called_methods' => $calledMethods,
+            'line' => $method->getStartLine(),
         ];
     }
 
