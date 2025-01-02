@@ -78,7 +78,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
      * @param Node $node
      * @return string|null
      */
-    private function serializeAst(Node $node)
+    private function serializeAst(Node $node): ?string
     {
         return json_encode($node);
     }
@@ -133,7 +133,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     /**
      * Called on each node to detect free-floating functions and classes.
      */
-    public function enterNode(Node $node)
+    public function enterNode(Node $node): void
     {
         if ($node instanceof Node\Stmt\Function_) {
             $this->items[] = $this->collectFunctionData($node);
@@ -147,7 +147,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     /**
      * Resets current class/namespace after leaving a class node.
      */
-    public function leaveNode(Node $node)
+    public function leaveNode(Node $node): void
     {
         if ($node instanceof ClassLike && $node->name !== null) {
             $this->currentClassName = '';
@@ -369,7 +369,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     /**
      * Parse an annotation line that may have nested braces like {@requires guest}.
      */
-    private function parseAnnotationValue(string $value)
+    private function parseAnnotationValue(string $value): mixed
     {
         $result = [];
         $pattern = '/\{(@\w+)\s+([^}]+)\}/';
