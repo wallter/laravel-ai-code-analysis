@@ -14,7 +14,6 @@ use PhpParser\Node\Identifier;
 // If your version of nikic/php-parser has Serializer\XML spelled as 'Xml':
 // use PhpParser\Serializer\Xml; 
 // Otherwise, for older versions, it might be spelled as 'XML' (all caps):
-use PhpParser\Serializer\XML;
 
 /**
  * Collects both free-floating functions and classes with methods/attributes.
@@ -39,20 +38,14 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     }
 
     /**
-     * Serialize the AST node to XML (or JSON if desired).
-     * Adjust the class name if your parser uses `Xml` or `XML`.
+     * Serialize the AST node to JSON.
      *
      * @param Node $node
      * @return string|null
      */
     private function serializeAst(Node $node)
     {
-        // If your environment has `Xml` spelled with uppercase X and lowercase ml, you might do:
-        // $serializer = new Xml();
-
-        // For older versions spelled `XML`:
-        $serializer = new XML();
-        return $serializer->serialize($node);
+        return json_encode($node);
     }
 
     public function getWarnings(): array
