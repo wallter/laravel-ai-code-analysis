@@ -15,7 +15,7 @@ use App\Models\ParsedItem;
  */
 class ParseFilesCommand extends Command
 {
-    protected $signature = 'parse:files {--filter=} {--output-file=}';
+    protected $signature = 'parse:files {--filter=} {--output-file=} {--limit-class=}';
     protected $description = 'Parses configured or specified files/directories and lists discovered functions and classes';
 
     /**
@@ -42,6 +42,7 @@ class ParseFilesCommand extends Command
 
         $filter     = $this->option('filter');
         $outputFile = $this->option('output-file');
+        $limitClass = $this->option('limit-class');
 
         // 2) Setup parser & traverser using ParserService
         $parser     = $this->parserService->createParser();
@@ -88,6 +89,17 @@ class ParseFilesCommand extends Command
         }
 
         $items = $visitor->getItems();
+
+        if ($limitClass) {
+            $classItems = array_filter($items, function ($item) {
+                return $item['type'] === 'Class';
+            });
+            $nonClassItems = array_filter($items, function ($item) {
+                return $item['type'] !== 'Class';
+            });
+            $classItems = array_slice($classItems, 0, $limitClass);
+            $items = array_merge($classItems, $nonClassItems);
+        }
 
         $this->info("Collected " . count($items) . " items from parsing.");
 
