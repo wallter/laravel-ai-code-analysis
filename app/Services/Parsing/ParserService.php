@@ -3,6 +3,8 @@
 namespace App\Services\Parsing;
 
 use PhpParser\ParserFactory;
+use App\Services\Parsing\FunctionVisitor;
+use App\Services\Parsing\ClassVisitor;
 use PhpParser\NodeTraverser;
 
 class ParserService
