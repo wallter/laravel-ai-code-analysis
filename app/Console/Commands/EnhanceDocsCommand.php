@@ -75,7 +75,6 @@ class EnhanceDocsCommand extends Command
         });
 
         $bar->finish();
-        });
 
         $this->info('Documentation enhancement process completed.');
         return 0;
