@@ -25,6 +25,7 @@ class GenerateDocsCommand extends Command
     }
 
     public function handle()
+    {
         $limit = $this->option('limit');
 
         $parsedItems = ParsedItem::where('type', 'Method');
@@ -98,46 +99,9 @@ class GenerateDocsCommand extends Command
                 $this->line($markdownContent);
             }
         }
-            $markdownContent = "# {$groupName} Endpoints\n\n";
-            
-            foreach ($items as $item) {
-                $className = $item->details['class_name'];
-                $restlerTags = $item->annotations;
-                $parameters = $item->details['params'];
-
-                $markdownContent .= "## {$className}\n\n";
-                $markdownContent .= "### Endpoint Details\n\n";
-                foreach ($restlerTags as $tag => $value) {
-                    if (is_array($value)) {
-                        $value = json_encode($value);
-                    }
-                    $markdownContent .= "- **{$tag}**: {$value}\n";
-                }
-                $markdownContent .= "\n";
-
-                $markdownContent .= "### Parameters\n\n";
-                foreach ($parameters as $param) {
-                    $paramName = $param['name'];
-                    $paramType = $param['type'];
-                    $markdownContent .= "- `{$paramName}` ({$paramType})\n";
-                }
-                $markdownContent .= "\n";
-            }
-
-            $url = $restlerTags['url'] ?? 'unknown';
-            $httpMethod = strtolower(strtok($url, ' '));
-            $name = $item->name;
-
-            $filePath = "docs/endpoints/{$url}/{$httpMethod}_{$name}.md";
-
-            $directory = dirname($filePath);
-            if (!File::exists($directory)) {
-                File::makeDirectory($directory, 0755, true);
-            }
-
-            File::put($filePath, $markdownContent);
         }
 
         $this->info('Documentation generated successfully.');
+    }
     }
 }
