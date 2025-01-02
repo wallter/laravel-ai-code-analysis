@@ -206,43 +206,17 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
 
         $attributes = $this->collectAttributes($node->attrGroups);
 
-        $visibility = $method->isPublic() ? 'public' : ($method->isProtected() ? 'protected' : 'private');
-        $isStatic = $method->isStatic();
+        // Serialize the AST
+        $astSerialized = $this->serializeAst($node);
+        $astSize = strlen($astSerialized);
+
+        // Check if AST exceeds the size limit
+        if ($astSize > $this->astSizeLimit) {
+            $this->warnings[] = "AST size for function '{$node->name->name}' exceeds limit ({$astSize} bytes).";
+            $astSerialized = null; // Optionally set to null or leave AST out
+        }
 
         return [
-            'name' => $methodName,
-            'params' => $methodParams,
-            'description' => $methodDescription,
-            'annotations' => $methodAnnotations,
-            'attributes' => $methodAttributes,
-            'visibility' => $visibility,
-            'isStatic' => $isStatic,
-            'class' => $this->currentClassName,
-            'namespace' => $this->currentNamespace,
-            'type'       => 'Function',
-            'name'       => $node->name->name,
-            'details'    => [
-                'params'       => $params,
-                'description'  => $description,
-                'restler_tags' => $restlerTags
-            ],
-            'annotations' => $annotations,
-            'attributes'  => $attributes,
-            'restler_tags' => $restlerTags,
-            'file'        => $this->currentFile,
-            'line'        => $node->getStartLine(),
-            'name'        => $methodName,
-            'params'      => $methodParams,
-            'description' => $methodDescription,
-            'annotations' => $methodAnnotations,
-            'attributes'  => $methodAttributes,
-            'visibility'  => $visibility,
-            'isStatic'    => $isStatic,
-            'class'       => $this->currentClassName,
-            'namespace'   => $this->currentNamespace,
-            'line'        => $method->getStartLine(),
-            'operation_summary' => $operationSummary,
-            'called_methods' => $calledMethods,
             'type'       => 'Function',
             'name'       => $node->name->name,
             'details'    => [
@@ -256,15 +230,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'file'        => $this->currentFile,
             'line'        => $node->getStartLine(),
             'ast'         => $astSerialized,
-            'name' => $methodName,
-            'params' => $methodParams,
-            'description' => $methodDescription,
-            'annotations' => $methodAnnotations,
-            'attributes' => $methodAttributes,
-            'operation_summary' => $operationSummary,
-            'called_methods' => $calledMethods,
-            'line' => $method->getStartLine(),
-            'ast' => $astSerialized,
         ];
     }
 
@@ -282,9 +247,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             $astSerialized = null; // Optionally set to null or leave AST out
         }
 
-        return [
-            // ... existing data ...
-            'ast' => $astSerialized,
         ];
 
     private function collectFunctionData(Node\Stmt\Function_ $node): array
