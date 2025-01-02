@@ -22,7 +22,6 @@ class ParsedItem extends Model
         'operation_summary',
         'called_methods',
         'ast',
-        'called_methods' => 'array',
     ];
 
     protected $casts = [
@@ -31,5 +30,6 @@ class ParsedItem extends Model
         'details'     => 'array',
         'is_static'   => 'boolean',
         'ast'         => 'array',
+        'called_methods' => 'array',
     ];
 }
