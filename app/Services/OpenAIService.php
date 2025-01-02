@@ -6,6 +6,7 @@ use OpenAI\Laravel\Facades\OpenAI as OpenAIFacade;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
+use Exception;
 
 class OpenAIService
 {
@@ -19,8 +20,8 @@ class OpenAIService
      *
      * @return string The AI-generated response text.
      *
-     * @throws InvalidArgumentException If the operation identifier is not found in the configuration.
-     * @throws \Exception If the AI API request fails or returns an unexpected response.
+     * @throws InvalidArgumentException If the 'prompt' parameter is not provided.
+     * @throws Exception If the AI API request fails or returns an unexpected response.
      */
     public function performOperation(string $operationIdentifier, array $params = []): string
     {
@@ -28,9 +29,15 @@ class OpenAIService
         $operationConfig = Config::get("ai.operations.{$operationIdentifier}");
 
         if (!$operationConfig) {
-            $message = "Operation identifier '{$operationIdentifier}' not found in config.ai.operations.";
-            Log::error($message);
-            throw new InvalidArgumentException($message);
+            Log::warning("Operation identifier '{$operationIdentifier}' not found in config.ai.operations. Using default configuration.");
+
+            // Use default configuration from config/ai.php
+            $operationConfig = [
+                'model' => Config::get('ai.openai_model', 'text-davinci-003'),
+                'max_tokens' => Config::get('ai.max_tokens', 500),
+                'temperature' => Config::get('ai.temperature', 0.5),
+                // Add other default parameters here if needed
+            ];
         }
 
         // Ensure that a prompt is provided
@@ -64,8 +71,8 @@ class OpenAIService
 
             // Log unexpected response structure
             Log::error("Unexpected response structure from OpenAI for operation '{$operationIdentifier}'", ['response' => $response]);
-            throw new \Exception("Unexpected response from OpenAI API.");
-        } catch (\Exception $e) {
+            throw new Exception("Unexpected response from OpenAI API.");
+        } catch (Exception $e) {
             // Log the exception and rethrow it for further handling
             Log::error("Exception occurred during OpenAI operation '{$operationIdentifier}': " . $e->getMessage(), ['exception' => $e]);
             throw $e;
