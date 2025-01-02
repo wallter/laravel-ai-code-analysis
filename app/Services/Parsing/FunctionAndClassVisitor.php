@@ -285,11 +285,30 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         return [
             // ... existing data ...
             'ast' => $astSerialized,
-    }
+        ];
 
     private function collectFunctionData(Node\Stmt\Function_ $node): array
     {
-        // ... existing code ...
+        $params      = [];
+        foreach ($node->params as $param) {
+            $paramName = '$' . $param->var->name;
+            $paramType = $param->type ? $this->typeToString($param->type) : 'mixed';
+            $params[]  = ['name' => $paramName, 'type' => $paramType];
+        }
+
+        $docComment  = $node->getDocComment();
+        $description = '';
+        $annotations = [];
+        $restlerTags = [];
+
+        if ($docComment) {
+            $docText     = $docComment->getText();
+            $description = $this->extractShortDescription($docText);
+            $annotations = $this->extractAnnotations($docText);
+            $restlerTags = $annotations;
+        }
+
+        $attributes = $this->collectAttributes($node->attrGroups);
 
         // Serialize the AST
         $astSerialized = $this->serializeAst($node);
@@ -302,8 +321,19 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         }
 
         return [
-            // ... existing data ...
-            'ast' => $astSerialized,
+            'type'       => 'Function',
+            'name'       => $node->name->name,
+            'details'    => [
+                'params'       => $params,
+                'description'  => $description,
+                'restler_tags' => $restlerTags
+            ],
+            'annotations' => $annotations,
+            'attributes'  => $attributes,
+            'restler_tags' => $restlerTags,
+            'file'        => $this->currentFile,
+            'line'        => $node->getStartLine(),
+            'ast'         => $astSerialized,
     }
 
     /**
