@@ -23,7 +23,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     private $items = [];
     private $warnings = [];
     private $maxDepth = 2;
-    private $astSizeLimit = 50000;
+    private $astSizeLimit = 100000;
 
     private $currentFile = '';
     private $currentClassName = '';
