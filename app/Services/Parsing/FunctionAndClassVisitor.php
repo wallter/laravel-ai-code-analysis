@@ -400,11 +400,12 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
                 if ($stmt instanceof Node\Stmt\Expression) {
                     $expr = $stmt->expr;
                     if ($expr instanceof Node\Expr\MethodCall) {
+                        $caller = $this->getCallerName($expr->var);
                         $methodName = $expr->name instanceof Node\Identifier
                             ? $expr->name->name
                             : '';
                         if ($methodName) {
-                            $calledMethods[] = $methodName;
+                            $calledMethods[] = $caller . '->' . $methodName;
                         }
                     }
                 }
@@ -500,6 +501,26 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             return $typeNode->toString();
         } else {
             return 'mixed';
+        }
+    }
+
+    /**
+     * Get the name of the caller in a method call.
+     */
+    private function getCallerName($var): string
+    {
+        if ($var instanceof Node\Expr\Variable) {
+            return '$' . $var->name;
+        } elseif ($var instanceof Node\Expr\PropertyFetch) {
+            return $this->getCallerName($var->var) . '->' . $var->name->name;
+        } elseif ($var instanceof Node\Expr\StaticPropertyFetch) {
+            return $var->class->toString() . '::$' . $var->name->name;
+        } elseif ($var instanceof Node\Expr\StaticCall) {
+            return $var->class->toString();
+        } elseif ($var instanceof Node\Expr\ArrayDimFetch) {
+            return $this->getCallerName($var->var) . '[' . $this->getCallerName($var->dim) . ']';
+        } else {
+            return '';
         }
     }
 }
