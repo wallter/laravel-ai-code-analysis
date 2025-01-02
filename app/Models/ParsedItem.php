@@ -27,10 +27,4 @@ class ParsedItem extends Model
         'details'     => 'array',
         'is_static'   => 'boolean',
     ];
-
-    protected $casts = [
-        'annotations' => 'array',
-        'attributes'  => 'array',
-        'details'     => 'array',
-    ];
 }
