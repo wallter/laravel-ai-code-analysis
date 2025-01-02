@@ -14,6 +14,18 @@ class ParsedItem extends Model
         'annotations',
         'attributes',
         'details',
+        'class_name',
+        'namespace',
+        'visibility',
+        'is_static',
+        'fully_qualified_name',
+    ];
+
+    protected $casts = [
+        'annotations' => 'array',
+        'attributes'  => 'array',
+        'details'     => 'array',
+        'is_static'   => 'boolean',
     ];
 
     protected $casts = [

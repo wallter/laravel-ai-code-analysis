@@ -167,6 +167,16 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'restler_tags' => $restlerTags,
             'file'        => $this->currentFile,
             'line'        => $node->getStartLine(),
+            'name'        => $methodName,
+            'params'      => $methodParams,
+            'description' => $methodDescription,
+            'annotations' => $methodAnnotations,
+            'attributes'  => $methodAttributes,
+            'visibility'  => $visibility,
+            'isStatic'    => $isStatic,
+            'class'       => $this->currentClassName,
+            'namespace'   => $this->currentNamespace,
+            'line'        => $method->getStartLine(),
         ];
     }
 

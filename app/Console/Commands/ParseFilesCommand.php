@@ -145,10 +145,12 @@ class ParseFilesCommand extends Command
                             'details' => [
                                 'params' => $method['params'] ?? [],
                                 'description' => $method['description'] ?? '',
-                                'class_name' => $item['name'],
-                                'namespace' => $item['namespace'] ?? '',
-                                'fully_qualified_name' => $item['fullyQualifiedName'] . '::' . $method['name'],
                             ],
+                            'class_name' => $method['class'] ?? '',
+                            'namespace' => $method['namespace'] ?? '',
+                            'visibility' => $method['visibility'] ?? '',
+                            'is_static' => $method['isStatic'] ?? false,
+                            'fully_qualified_name' => ($item['fullyQualifiedName'] ?? '') . '::' . $method['name'],
                         ]
                     );
                 }
