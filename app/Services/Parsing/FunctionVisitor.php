@@ -16,6 +16,35 @@ class FunctionVisitor extends NodeVisitorAbstract
     {
         $this->functions = collect();
     }
+
+    /**
+     * Recursively converts a PhpParser Node into an associative array.
+     *
+     * @param Node $node
+     * @return array
+     */
+    private function astToArray(Node $node): array
+    {
+        $result = [
+            'nodeType' => $node->getType(),
+            'attributes' => $node->getAttributes(),
+        ];
+
+        foreach ($node->getSubNodeNames() as $subNodeName) {
+            $subNode = $node->$subNodeName;
+            if ($subNode instanceof Node) {
+                $result[$subNodeName] = $this->astToArray($subNode);
+            } elseif (is_array($subNode)) {
+                $result[$subNodeName] = array_map(function ($item) {
+                    return ($item instanceof Node) ? $this->astToArray($item) : $item;
+                }, $subNode);
+            } else {
+                $result[$subNodeName] = $subNode;
+            }
+        }
+
+        return $result;
+    }
     private string $currentFile = '';
 
     public function setCurrentFile(string $file): void
@@ -70,6 +99,7 @@ class FunctionVisitor extends NodeVisitorAbstract
             'attributes'  => $attributes,
             'file'        => $this->currentFile,
             'line'        => $node->getStartLine(),
+            'ast'         => $this->astToArray($node),
         ];
     }
 

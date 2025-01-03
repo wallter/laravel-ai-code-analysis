@@ -29,6 +29,37 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     }
 
     /**
+     * Recursively converts a PhpParser Node into an associative array.
+     *
+     * @param Node $node
+     * @return array
+     */
+    private function astToArray(Node $node): array
+    {
+        $result = [
+            'nodeType' => $node->getType(),
+            'attributes' => $node->getAttributes(),
+            'ast' => $this->astToArray($node),
+            'ast' => $this->astToArray($node),
+        ];
+
+        foreach ($node->getSubNodeNames() as $subNodeName) {
+            $subNode = $node->$subNodeName;
+            if ($subNode instanceof Node) {
+                $result[$subNodeName] = $this->astToArray($subNode);
+            } elseif (is_array($subNode)) {
+                $result[$subNodeName] = array_map(function ($item) {
+                    return ($item instanceof Node) ? $this->astToArray($item) : $item;
+                }, $subNode);
+            } else {
+                $result[$subNodeName] = $subNode;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Sets the current file being parsed.
      *
      * @param string $file
@@ -145,6 +176,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
                 'isStatic' => $method->isStatic(),
                 'line' => $method->getStartLine(),
                 'fully_qualified_name' => "{$node->name->name}::{$method->name->name}",
+                'ast' => $this->astToArray($method),
             ];
         }
 

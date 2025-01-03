@@ -120,7 +120,7 @@ class ParseFilesCommand extends Command
                     'details' => array_merge($item['details'] ?: [], [
                         'restler_tags' => $item['restler_tags'] ?? [],
                     ]),
-                    'ast' => $item['ast'] ?? null,
+                    'ast' => $item['ast'],
                 ]
             );
 
@@ -148,7 +148,7 @@ class ParseFilesCommand extends Command
                             'fully_qualified_name' => ($item['fullyQualifiedName'] ?? '') . '::' . $method['name'],
                             'operation_summary' => $method['operation_summary'] ?? '',
                             'called_methods' => $method['called_methods'] ?? [],
-                            'ast' => $method['ast'] ?? null,
+                            'ast' => $method['ast'],
                         ]
                     );
                 });
@@ -248,13 +248,11 @@ class ParseFilesCommand extends Command
     private function decodeAstProperties(array $items): array
     {
         return collect($items)->map(function ($item) {
-            if (isset($item['ast']) && is_string($item['ast'])) {
-                $item['ast'] = json_decode($item['ast'], true);
+            if (isset($item['ast']) && is_array($item['ast'])) {
             }
             if (isset($item['details']['methods']) && is_array($item['details']['methods'])) {
                 $item['details']['methods'] = collect($item['details']['methods'])->map(function ($method) {
-                    if (isset($method['ast']) && is_string($method['ast'])) {
-                        $method['ast'] = json_decode($method['ast'], true);
+                    if (isset($method['ast']) && is_array($method['ast'])) {
                     }
                     return $method;
                 })->toArray();
