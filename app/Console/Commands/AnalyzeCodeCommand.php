@@ -8,7 +8,6 @@ use App\Services\AI\CodeAnalysisService;
 use App\Models\CodeAnalysis; // Assuming a model for persistence
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Collection;
 
 class AnalyzeCodeCommand extends Command
@@ -53,11 +52,12 @@ class AnalyzeCodeCommand extends Command
      */
     public function handle()
     {
-        // Retrieve the default directory from configuration
-        $directory = Config::get('code_analysis.default_directory');
+        // Collect PHP files using ParserService's collectPhpFiles method
+        $phpFiles = $this->parserService->collectPhpFiles()->unique();
 
-        if (!is_dir($directory)) {
-            $this->error("The directory '{$directory}' does not exist.");
+        // Check if any PHP files were found
+        if ($phpFiles->isEmpty()) {
+            $this->error("No PHP files found to analyze.");
             return 1;
         }
 
@@ -68,8 +68,6 @@ class AnalyzeCodeCommand extends Command
 
         $this->info("Starting analysis for directory: {$directory}");
 
-        // Retrieve PHP files using ParserService
-        $phpFiles = collect($this->parserService->getPhpFiles($directory));
 
         // Apply limits if set
         if ($limitClass > 0) {
