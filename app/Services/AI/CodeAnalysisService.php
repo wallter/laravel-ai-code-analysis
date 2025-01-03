@@ -99,7 +99,7 @@ class CodeAnalysisService
 
                 $codeAnalysis->save();
 
-                info("Pass [{$nextPass}] completed for [{$codeAnalysis->file_path}].");
+                Log::info("Pass [{$nextPass}] completed for [{$codeAnalysis->file_path}].");
                 
                 // Remove context after successful operation
                 Context::forget('pass_name');
