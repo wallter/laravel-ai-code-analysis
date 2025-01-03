@@ -152,32 +152,6 @@ class CodeAnalysisService
             Log::warning("Could not read raw code from [{$filePath}]: " . $ex->getMessage());
             return '';
         }
-
-        // Now use your single visitor
-        $visitor = new UnifiedAstVisitor();
-        $visitor->setCurrentFile($filePath);
-
-        $traverser = new \PhpParser\NodeTraverser();
-        $traverser->addVisitor(new NameResolver()); // optional
-        $traverser->addVisitor($visitor);
-        $traverser->traverse($ast);
-
-        // The "items" contain both classes + methods + free-floating functions
-        $items = $visitor->getItems();
-
-        // Summarize AST quickly:
-        $astData = $this->buildSummary($items, $limitMethod);
-
-        // Raw code for AI passes
-        $rawCode = $this->retrieveRawCode($filePath);
-
-        // Perform multi-pass
-        $multiPassResults = $this->performMultiPassAnalysis($astData, $rawCode);
-
-        return [
-            'ast_data'   => $astData,
-            'ai_results' => $multiPassResults,
-        ];
     }
 
     /**
