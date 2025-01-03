@@ -10,11 +10,8 @@ use PhpParser\NodeTraverser;
 
 class ParserService
 {
-    protected CodeAnalysis $codeAnalysis;
-
-    public function __construct(CodeAnalysis $codeAnalysis)
+    public function __construct()
     {
-        $this->codeAnalysis = $codeAnalysis;
     }
 
     /**

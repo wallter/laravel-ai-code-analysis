@@ -83,8 +83,7 @@ class AnalyzeCodeCommand extends Command
 
         foreach ($phpFiles as $filePath) {
             try {
-                $ast = $this->parserService->parseFile($filePath);
-                $analysis = $this->codeAnalysisService->analyzeAst($ast, $limitMethod);
+                $analysis = $this->codeAnalysisService->analyzeAst($filePath, $limitMethod);
 
                 // Persist the analysis using updateOrCreate
                 CodeAnalysis::updateOrCreate(

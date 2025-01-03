@@ -55,49 +55,49 @@ class CodeAnalysisService
      * @param int $limitMethod
      * @return array
      */
-    public function analyzeAst(array $ast, int $limitMethod = 0): array
+    public function analyzeAst(string $filePath, int $limitMethod = 0): array
     {
-        // Implement your AST analysis logic here.
-        // For example, count classes, methods, functions, etc.
+        // Use ParserService to parse the file
+        $ast = $this->parserService->parseFile($filePath);
 
+        // Initialize visitors
+        $classVisitor = new \App\Services\Parsing\ClassVisitor();
+        $functionVisitor = new \App\Services\Parsing\FunctionVisitor();
+
+        // Traverse AST with visitors
         $nodeTraverser = new NodeTraverser();
         $nodeTraverser->addVisitor(new NameResolver());
-        $ast = $nodeTraverser->traverse($ast);
+        $nodeTraverser->addVisitor($classVisitor);
+        $nodeTraverser->addVisitor($functionVisitor);
 
+        $nodeTraverser->traverse($ast);
+
+        // Collect data from visitors
+        $classes = $classVisitor->getClasses();
+        $functions = $functionVisitor->getFunctions();
+
+        // Process collected data
         $analysisResults = [
-            'class_count' => 0,
+            'class_count' => count($classes),
             'method_count' => 0,
-            'function_count' => 0,
+            'function_count' => count($functions),
             'classes' => [],
+            'functions' => $functions,
         ];
 
-        foreach ($ast as $node) {
-            if ($node instanceof \PhpParser\Node\Stmt\ClassLike) {
-                $analysisResults['class_count']++;
-
-                $className = $node->name ? $node->name->toString() : 'Anonymous Class';
-                $methodCount = 0;
-                $methods = [];
-
-                foreach ($node->getMethods() as $method) {
-                    if ($limitMethod > 0 && $methodCount >= $limitMethod) {
-                        break;
-                    }
-                    $methodCount++;
-                    $methods[] = $method->name->toString();
-                }
-
-                $analysisResults['method_count'] += $methodCount;
-
-                $analysisResults['classes'][] = [
-                    'name' => $className,
-                    'methods' => $methods,
-                ];
+        foreach ($classes as $class) {
+            // Apply method limit
+            $methods = $class['details']['methods'];
+            if ($limitMethod > 0) {
+                $methods = array_slice($methods, 0, $limitMethod);
             }
+            $methodCount = count($methods);
+            $analysisResults['method_count'] += $methodCount;
 
-            if ($node instanceof \PhpParser\Node\Stmt\Function_) {
-                $analysisResults['function_count']++;
-            }
+            $analysisResults['classes'][] = [
+                'name' => $class['name'],
+                'methods' => $methods,
+            ];
         }
 
         return $analysisResults;
