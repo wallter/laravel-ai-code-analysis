@@ -32,7 +32,7 @@ class ProcessPassesCommand extends Command
         // Fetch all analyses that have pending passes by filtering in PHP
         $pendingAnalyses = CodeAnalysis::all()
             ->filter(function ($analysis) use ($passOrderCount) {
-                return count($analysis->completed_passes ?? []) < $passOrderCount;
+                return count((array) ($analysis->completed_passes ?? [])) < $passOrderCount;
             });
 
         if ($pendingAnalyses->isEmpty()) {
