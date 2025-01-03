@@ -132,39 +132,40 @@ return [
         |
         */
         'multi_pass_analysis' => [
-            'multi_pass_analysis' => [
 
-                /*
-                |--------------------------------------------------------------------------
-                | 1) Comprehensive Documentation Generation
-                |--------------------------------------------------------------------------
-                |
-                | Purpose:
-                |   - Provide an all-encompassing, highly detailed class documentation.
-                |   - Include sections for "Class Overview," "Properties," "Methods," 
-                |     "Usage Context," etc.
-                | Format:
-                |   - Use Markdown or a structured format with headings for each section.
-                | Focus:
-                |   - Emulate the style you observed: thoroughly describe properties, 
-                |     methods, parameters, usage, potential return values, and exceptions.
-                */
-                'doc_generation' => [
-                    'operation'   => 'code_analysis',
-                    'type'        => 'both',
-                    'max_tokens'  => 1000,
-                    'temperature' => 0.3,
-                    'prompt'      => implode("\n", [
-                        "You are a concise documentation generator for a PHP codebase.",
-                        "Create a short but clear doc from the AST data + raw code:",
-                        "- Summarize only essential info: class or trait's purpose, key methods, parameters, usage context.",
-                        "- Mention custom annotations (@url, etc.), but keep it under ~200 words.",
-                        "Be succinct and well-structured."
-                    ]),
-                ],
+            'doc_generation' => [
+                'operation'    => 'code_analysis',
+                'type'         => 'both',
+                'max_tokens'   => 1000,
+                'temperature'  => 0.3,
+                'prompt'       => implode("\n", [
+                    "You are a concise documentation generator for a PHP codebase.",
+                    "Create a short but clear doc from the AST data + raw code:",
+                    "- Summarize only essential info: class or trait's purpose, key methods, parameters, usage context.",
+                    "- Mention custom annotations (@url, etc.), but keep it under ~200 words.",
+                    "Be succinct and well-structured."
+                ]),
+            ],
 
-            ]
-        ]
+            'refactor_suggestions' => [
+                'operation'    => 'code_improvements',
+                'type'         => 'raw',
+                'max_tokens'   => 1800,
+                'temperature'  => 0.6,
+                'prompt'       => implode("\n", [
+                    "You are a senior PHP engineer analyzing the raw code. Provide actionable refactoring suggestions:",
+                    "- Focus on structural changes (class splitting, design patterns)",
+                    "- Emphasize SOLID principles, especially SRP",
+                    "- Discuss how to reduce duplication, enhance naming clarity, and improve maintainability",
+                    "Write your suggestions in a concise list or short paragraphs."
+                ]),
+            ],
+
+            'pass_order' => [
+                'doc_generation',
+                'refactor_suggestions',
+            ],
+        ],
     ],
 ];
 
