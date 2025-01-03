@@ -76,7 +76,6 @@ class CodeAnalysisService
         $classes = $classVisitor->getClasses();
         $functions = $functionVisitor->getFunctions();
 
-        // Process collected data
         $analysisResults = [
             'class_count' => count($classes),
             'method_count' => 0,

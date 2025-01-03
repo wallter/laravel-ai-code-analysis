@@ -48,6 +48,11 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         return json_encode($node);
     }
 
+    public function getItems(): array
+    {
+        return $this->items->all();
+    }
+
     public function getWarnings(): array
     {
         return $this->warnings;
