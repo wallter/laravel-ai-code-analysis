@@ -7,6 +7,7 @@ use App\Services\Parsing\ParserService;
 use App\Services\Parsing\FunctionAndClassVisitor;
 use App\Models\ParsedItem;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Collection;
 
 /**
  * Parses PHP files and outputs discovered classes & functions.
@@ -35,7 +36,7 @@ class ParseFilesCommand extends Command
     public function handle()
     {
         // 1) Collect files and folders from config
-        $phpFiles = $this->parserService->collectPhpFiles();
+        $phpFiles = collect($this->parserService->collectPhpFiles())->unique();
 
         $filter     = $this->option('filter');
         $outputFile = $this->option('output-file');
@@ -52,65 +53,58 @@ class ParseFilesCommand extends Command
         $visitor = new FunctionAndClassVisitor();
         $traverser->addVisitor($visitor);
 
-        // Remove duplicates
-        $phpFiles = array_unique($phpFiles);
-
-        $this->info("Found " . count($phpFiles) . " PHP files to parse.");
+        $this->info("Found " . $phpFiles->count() . " PHP files to parse.");
 
         // Initialize progress bar
-        $bar = $this->output->createProgressBar(count($phpFiles));
+        $bar = $this->output->createProgressBar($phpFiles->count());
         $bar->start();
 
         // 3) Parse each PHP file
-        foreach ($phpFiles as $phpFile) {
+        $phpFiles->each(function ($phpFile) use ($parser, $traverser, $visitor, $bar) {
             if ($this->output->isVerbose()) {
                 $this->info("Parsing file: $phpFile");
             }
             $this->parseOneFile($phpFile, $parser, $traverser, $visitor);
             $bar->advance();
-        }
+        });
 
         $bar->finish();
         $this->newLine();
 
-        $items = $visitor->getItems();
+        $items = collect($visitor->getItems());
 
         // Display warnings
-        $warnings = $visitor->getWarnings();
-        foreach ($warnings as $warning) {
+        collect($visitor->getWarnings())->each(function ($warning) {
             $this->warn($warning);
-        }
+        });
 
         if ($limitClass) {
-            $classItems = array_filter($items, function ($item) {
-                return $item['type'] === 'Class';
-            });
-            $nonClassItems = array_filter($items, function ($item) {
-                return $item['type'] !== 'Class';
-            });
-            $classItems = array_slice($classItems, 0, $limitClass);
-            $items = array_merge($classItems, $nonClassItems);
+            $items = $items->filter(fn($item) => $item['type'] !== 'Class')
+                ->merge(
+                    $items->where('type', 'Class')->take($limitClass)
+                );
         }
 
         if ($limitMethod) {
-            foreach ($items as &$item) {
+            $items = $items->map(function (&$item) use ($limitMethod) {
                 if ($item['type'] === 'Class' && !empty($item['details']['methods'])) {
                     $item['details']['methods'] = array_slice($item['details']['methods'], 0, $limitMethod);
                 }
-            }
+                return $item;
+            });
         }
 
-        $this->info("Collected " . count($items) . " items from parsing.");
+        $this->info("Collected " . $items->count() . " items from parsing.");
 
         // 4) Apply filter if given
         if ($filter) {
-            $items = array_filter($items, function($item) use ($filter) {
+            $items = $items->filter(function($item) use ($filter) {
                 return stripos($item['name'], $filter) !== false;
             });
         }
 
         // 5) Store parsed items in the database
-        foreach ($items as $item) {
+        $items->each(function ($item) {
             // Store the class or function
             ParsedItem::updateOrCreate(
                 [
@@ -131,7 +125,7 @@ class ParseFilesCommand extends Command
 
             // If item is a class and has methods, store each method as a separate ParsedItem
             if ($item['type'] === 'Class' && !empty($item['details']['methods'])) {
-                foreach ($item['details']['methods'] as $method) {
+                collect($item['details']['methods'])->each(function ($method) use ($item) {
                     ParsedItem::updateOrCreate(
                         [
                             'type' => 'Method',
@@ -156,20 +150,20 @@ class ParseFilesCommand extends Command
                             'ast' => $method['ast'] ?? null,
                         ]
                     );
-                }
+                });
             }
-        }
+        });
 
         // 6) Output
-        if (empty($items)) {
+        if ($items->isEmpty()) {
             $this->info('No functions or classes found.');
             return 0;
         }
 
         if ($outputFile) {
-            $this->persistJsonOutput($items, $outputFile);
+            $this->persistJsonOutput($items->all(), $outputFile);
         } else {
-            $this->displayTable($items);
+            $this->displayTable($items->all());
         }
 
         return 0;
