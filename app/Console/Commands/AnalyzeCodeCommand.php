@@ -61,17 +61,17 @@ class AnalyzeCodeCommand extends Command
 
         // Retrieve options
         $outputFile = $this->option('output-file');
-        $limitClass = intval($this->option('limit-class')) ?: Config::get('ai.analysis_limits.limit_class', 0);
-        $limitMethod = intval($this->option('limit-method')) ?: Config::get('ai.analysis_limits.limit_method', 0);
+        $limitClass = intval($this->option('limit-class')) ?: Config::get('ai.operations.analysis_limits.limit_class', 0);
+        $limitMethod = intval($this->option('limit-method')) ?: Config::get('ai.operations.analysis_limits.limit_method', 0);
+
+        $this->info("Starting analysis for directory: {$directory}");
+
+        $phpFiles = $this->parserService->getPhpFiles($directory);
 
         // Apply limits if set
         if ($limitClass > 0) {
             $phpFiles = array_slice($phpFiles, 0, $limitClass);
         }
-
-        $this->info("Starting analysis for directory: {$directory}");
-
-        $phpFiles = $this->parserService->getPhpFiles($directory);
 
         $fileCount = count($phpFiles);
         $bar = $this->output->createProgressBar($fileCount);
@@ -104,12 +104,19 @@ class AnalyzeCodeCommand extends Command
                 Log::error("Analysis failed for {$filePath}: " . $e->getMessage());
                 $this->error("Failed to analyze: {$filePath}");
             }
+
+            $bar->advance();
         }
+
+        $bar->finish();
+        $this->newLine();
 
         if ($outputFile) {
             $this->exportResults($outputFile, $analysisResults);
             $this->info("Analysis results exported to {$outputFile}");
         }
+
+        DB::commit();
 
         $this->info("Code analysis completed.");
 

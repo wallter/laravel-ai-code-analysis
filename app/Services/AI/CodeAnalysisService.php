@@ -5,6 +5,7 @@ namespace App\Services\AI;
 use App\Services\AI\OpenAIService;
 use Illuminate\Support\Facades\Log;
 use Exception;
+use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
 
 class CodeAnalysisService
