@@ -8,71 +8,100 @@ use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Exception;
 
+/**
+ * OpenAIService - revised to use chat() calls rather than completions.
+ */
 class OpenAIService
 {
     /**
-     * Perform an operation based on the given operation identifier.
+     * Perform an operation based on the given operation identifier (from config/ai.php).
      *
-     * @param string $operationIdentifier The identifier for the AI operation to perform.
-     * @param array $params Optional parameters to customize the AI request.
-     *                      - 'prompt' (string): The prompt to send to the AI model.
-     *                      - Additional parameters as required by the AI model.
+     * @param  string  $operationIdentifier
+     * @param  array   $params  Additional parameters: 'prompt' (required), etc.
+     * @return string  AI-generated response (trimmed).
      *
-     * @return string The AI-generated response text.
-     *
-     * @throws InvalidArgumentException If the 'prompt' parameter is not provided.
-     * @throws Exception If the AI API request fails or returns an unexpected response.
+     * @throws InvalidArgumentException if no prompt is provided and no default is set.
+     * @throws Exception for unexpected response or other errors.
      */
     public function performOperation(string $operationIdentifier, array $params = []): string
     {
-        // Retrieve the configuration for the specified operation
-        $operationConfig = config("ai.operations.{$operationIdentifier}", []);
+        // 1) Retrieve config for this operation
+        $operationConfig = Config::get("ai.operations.{$operationIdentifier}", []);
 
-        // Use default configuration values if specific ones are not set in operationConfig
-        $model = $operationConfig['model'] ?? config('ai.openai_model', 'text-davinci-003');
-        $maxTokens = $operationConfig['max_tokens'] ?? config('ai.max_tokens', 500);
-        $temperature = $operationConfig['temperature'] ?? config('ai.temperature', 0.5);
+        // 2) Determine model, system message, tokens, temperature, etc.
+        $model       = $operationConfig['model']       ?? Config::get('ai.openai_model', 'gpt-4o-mini');
+        $maxTokens   = $operationConfig['max_tokens']  ?? Config::get('ai.max_tokens', 500);
+        $temperature = $operationConfig['temperature'] ?? Config::get('ai.temperature', 0.5);
+
+        // 3) If a specialized system message is in config, use it; else fallback.
+        //    We'll store it under 'system_message' or similar in config.
+        $systemMessage = $operationConfig['system_message']
+            ?? 'You are a helpful AI assistant.';
+
+        // 4) The user-facing prompt
         $promptTemplate = $operationConfig['prompt'] ?? '';
+        if (empty($params['prompt']) && empty($promptTemplate)) {
+            $msg = "No 'prompt' found for [{$operationIdentifier}] and no default prompt in config.";
+            Log::error($msg);
+            throw new InvalidArgumentException($msg);
+        }
+        $userPrompt = $params['prompt'] ?? $promptTemplate;
 
-        // Ensure that a prompt is provided
-        if (empty($params['prompt'])) {
-            if (empty($promptTemplate)) {
-                $message = "The 'prompt' parameter is required for the '{$operationIdentifier}' operation and no default prompt is set.";
-                Log::error($message);
-                throw new InvalidArgumentException($message);
+        // 5) Construct the chat payload (system + user messages)
+        $payload = [
+            'model'       => $model,
+            'messages'    => [
+                [
+                    'role'    => 'system',
+                    'content' => $systemMessage,
+                ],
+                [
+                    'role'    => 'user',
+                    'content' => $userPrompt,
+                ],
+            ],
+            'max_tokens'  => $maxTokens,
+            'temperature' => $temperature,
+        ];
+
+        // Merge any additional parameters (like custom temperature or messages array)
+        // but ensure we don't overwrite our messages.
+        // For instance, if 'messages' is passed, you can unify or replace them.
+        // We'll do a simple merge for any other top-level keys.
+        foreach ($params as $key => $value) {
+            if (! in_array($key, ['prompt'])) {
+                $payload[$key] = $value; 
             }
-            $params['prompt'] = $promptTemplate;
-            Log::info("Using default prompt for operation '{$operationIdentifier}'.");
         }
 
-        // Merge default operation parameters with any overrides provided in $params
-        $payload = array_merge([
-            'model' => $model,
-            'prompt' => $params['prompt'],
-            'max_tokens' => $maxTokens,
-            'temperature' => $temperature,
-            // Add other default parameters here if needed
-        ], $params);
-
         try {
-            Log::info("Sending request to OpenAI for operation '{$operationIdentifier}'", ['payload' => $payload]);
+            Log::info("Sending chat request to OpenAI [{$operationIdentifier}]", [
+                'payload' => array_merge($payload, ['messages' => '<<omitted for brevity>>']),
+            ]);
 
-            // Send the request to the OpenAI API
-            $response = OpenAIFacade::completion()->create($payload);
+            // 6) Execute the chat() call
+            $response = OpenAIFacade::chat()->create($payload);
 
-            Log::info("Received response from OpenAI for operation '{$operationIdentifier}'", ['response' => $response]);
+            Log::info("Received chat response from OpenAI [{$operationIdentifier}]", [
+                'response' => $response,
+            ]);
 
-            // Check if the response contains the expected data
-            if (isset($response['choices'][0]['text'])) {
-                return trim($response['choices'][0]['text']);
+            // 7) Check the response structure:
+            //    chat API typically returns ->choices[0]->message->content
+            $content = $response['choices'][0]['message']['content'] ?? null;
+            if (! $content) {
+                Log::error("Unexpected response structure from OpenAI [{$operationIdentifier}]", [
+                    'response' => $response,
+                ]);
+                throw new Exception("No content in OpenAI chat response.");
             }
 
-            // Log unexpected response structure
-            Log::error("Unexpected response structure from OpenAI for operation '{$operationIdentifier}'", ['response' => $response]);
-            throw new Exception("Unexpected response from OpenAI API.");
+            return trim($content);
         } catch (Exception $e) {
-            // Log the exception and rethrow it for further handling
-            Log::error("Exception occurred during OpenAI operation '{$operationIdentifier}': " . $e->getMessage(), ['exception' => $e]);
+            // Log & rethrow
+            Log::error("OpenAI chat request failed [{$operationIdentifier}]: " . $e->getMessage(), [
+                'exception' => $e,
+            ]);
             throw $e;
         }
     }

@@ -7,117 +7,144 @@ return [
     | AI Service Configuration
     |--------------------------------------------------------------------------
     |
-    | This file is for storing the credentials and settings for the AI service
-    | used to enhance documentation and perform other AI-driven operations.
-    | Ensure that you set the necessary environment variables in your .env file.
+    | This file stores credentials and settings for the AI service used
+    | to enhance documentation, code analysis, etc. Ensure that you set
+    | the necessary env variables in your .env file.
     |
     */
 
-    /*
-    |----------------------------------------------------------------------
-    | OpenAI API Key
-    |----------------------------------------------------------------------
-    |
-    | The API key used to authenticate requests to the OpenAI service.
-    | Make sure to keep this key secure and do not expose it publicly.
-    |
-    */
     'openai_api_key' => env('OPENAI_API_KEY'),
 
     /*
-    |----------------------------------------------------------------------
-    | Default OpenAI Model
-    |----------------------------------------------------------------------
-    |
-    | Specifies the default AI model to use for operations if not overridden
-    | by specific operation configurations. Common models include
-    | 'text-davinci-003', 'gpt-3.5-turbo', etc.
-    |
+    |--------------------------------------------------------------------------
+    | Default Model, Tokens, Temperature
+    |--------------------------------------------------------------------------
     */
-    'openai_model' => env('OPENAI_MODEL', 'text-davinci-003'),
+    'openai_model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+    'max_tokens'   => env('OPENAI_MAX_TOKENS', 500),
+    'temperature'  => env('OPENAI_TEMPERATURE', 0.5),
 
     /*
-    |----------------------------------------------------------------------
-    | Default Maximum Tokens
-    |----------------------------------------------------------------------
+    |--------------------------------------------------------------------------
+    | AI Operations
+    |--------------------------------------------------------------------------
     |
-    | Sets the default maximum number of tokens to generate in the AI response.
-    | You can increase this limit if more extensive responses are required.
-    |
-    */
-    'max_tokens' => env('OPENAI_MAX_TOKENS', 500),
-
-    /*
-    |----------------------------------------------------------------------
-    | Default Temperature
-    |----------------------------------------------------------------------
-    |
-    | Controls the creativity of the AI responses. Lower values make the
-    | responses more deterministic, while higher values increase randomness.
-    | Typical values range from 0.0 to 1.0.
-    |
-    */
-    'temperature' => env('OPENAI_TEMPERATURE', 0.5),
-
-    /*
-    |----------------------------------------------------------------------
-    | AI Operations Configuration
-    |----------------------------------------------------------------------
-    |
-    | Defines specific configurations for each AI operation. Each operation
-    | can have its own model, token limit, temperature settings, and prompt
-    | templates to tailor the AI responses according to the task requirements.
+    | Each key is an "operationIdentifier". Each defines its own:
+    |  - model
+    |  - max_tokens
+    |  - temperature
+    |  - system_message (optional)
+    |  - prompt (fallback text if user doesn't supply one)
     |
     */
     'operations' => [
 
-        /*
-        |------------------------------------------------------------------
-        | Code Analysis Operation
-        |------------------------------------------------------------------
-        |
-        | Configuration for the code analysis operation. This setup is used
-        | to analyze code snippets, provide summaries, or offer insights
-        | based on the provided code.
-        |
-        */
         'code_analysis' => [
-            'model' => env('CODE_ANALYSIS_MODEL', 'text-davinci-003'),
-            'max_tokens' => env('CODE_ANALYSIS_MAX_TOKENS', 500),
-            'temperature' => env('CODE_ANALYSIS_TEMPERATURE', 0.5),
-            'prompt' => env('CODE_ANALYSIS_PROMPT', 'Your default prompt here...'),
+            'model'         => env('CODE_ANALYSIS_MODEL', 'gpt-4o-mini'),
+            'max_tokens'    => env('CODE_ANALYSIS_MAX_TOKENS', 1500),
+            'temperature'   => env('CODE_ANALYSIS_TEMPERATURE', 0.4),
+            'system_message'=> 'You are an assistant that generates comprehensive documentation from AST data. Focus on describing classes, methods, parameters, and the usage context.',
+            'prompt'        => '',
+        ],
+
+        'code_improvements' => [
+            'model'         => 'gpt-4o-mini',
+            'max_tokens'    => 2000,
+            'temperature'   => 0.7,
+            'system_message'=> 'You are an assistant that suggests code improvements, best practices, and refactoring steps.',
+            'prompt'        => '',
+        ],
+
+        'ast_insights' => [
+            'model'         => 'gpt-4o-mini',
+            'max_tokens'    => 300,
+            'temperature'   => 0.5,
+            'system_message'=> 'You provide AST-based insights, focusing on structure and relationships in code.',
+            'prompt'        => 'Provide insights based on the given AST.',
+        ],
+
+        // Possibly more specialized operations, each with a different system or prompt text:
+        'some_other_op' => [
+            'model'         => 'gpt-4o-mini',
+            'max_tokens'    => 1000,
+            'temperature'   => 0.6,
+            'system_message'=> 'You are an expert in code security analysis, focusing on vulnerabilities.',
+            'prompt'        => '',
         ],
 
         /*
-        |------------------------------------------------------------------
-        | Analysis Limits
-        |------------------------------------------------------------------
-        |
-        | Define default limits for classes and methods during code analysis.
-        | These can be overridden via command-line options.
-        |
+        |----------------------------------------------------------------------
+        | Analysis Limits (not used directly by the service, but by commands)
+        |----------------------------------------------------------------------
         */
         'analysis_limits' => [
-            'limit_class' => env('ANALYSIS_LIMIT_CLASS', 0), // 0 means no limit
-            'limit_method' => env('ANALYSIS_LIMIT_METHOD', 0), // 0 means no limit
+            'limit_class'  => env('ANALYSIS_LIMIT_CLASS', 0),
+            'limit_method' => env('ANALYSIS_LIMIT_METHOD', 0),
         ],
 
         /*
-        |------------------------------------------------------------------
-        | AST Insights Operation
-        |------------------------------------------------------------------
+        |--------------------------------------------------------------------------
+        | Multi-Pass Analysis
+        |--------------------------------------------------------------------------
         |
-        | Configuration for the AST insights operation. This setup is used
-        | to provide insights based on the provided Abstract Syntax Tree.
+        | Each pass references an existing operation (like "code_analysis" or
+        | "code_improvements"), plus a "type" (e.g. 'ast', 'raw', 'both') and
+        | optionally a custom prompt or system_message override.
         |
         */
-        'ast_insights' => [
-            'model' => env('AST_INSIGHTS_MODEL', 'gpt-3.5-turbo'),
-            'max_tokens' => env('AST_INSIGHTS_MAX_TOKENS', 300),
-            'temperature' => env('AST_INSIGHTS_TEMPERATURE', 0.5),
-            'prompt' => env('AST_INSIGHTS_PROMPT', 'Provide insights based on the given AST.'),
+        'multi_pass_analysis' => [
+
+            'doc_generation' => [
+                'operation'   => 'code_analysis',
+                'type'        => 'ast',
+                'prompt'      => "Generate comprehensive documentation from the following AST data. Focus on describing classes, methods, parameters, and the usage context.\n",
+                'max_tokens'  => 1200,
+                'temperature' => 0.3,
+            ],
+
+            // 'refactor_suggestions' => [
+            //     'operation'   => 'code_improvements',
+            //     'type'        => 'raw',
+            //     'prompt'      => "Review the raw PHP code and suggest meaningful refactors, best practices, or design improvements.\n",
+            //     'max_tokens'  => 1500,
+            //     'temperature' => 0.6,
+            // ],
+
+            // 'complexity_analysis' => [
+            //     'operation'   => 'code_analysis',
+            //     'type'        => 'both',
+            //     'prompt'      => "Perform a complexity analysis on the code structure (classes, methods) and the raw code.\n",
+            //     'max_tokens'  => 800,
+            //     'temperature' => 0.4,
+            // ],
+
+            // 'security_assessment' => [
+            //     'operation'   => 'code_improvements',
+            //     'type'        => 'raw',
+            //     'prompt'      => "Analyze this PHP code for potential security vulnerabilities or insecure practices.\n",
+            //     'max_tokens'  => 1000,
+            //     'temperature' => 0.5,
+            // ],
+
+            // 'performance_tips' => [
+            //     'operation'   => 'code_improvements',
+            //     'type'        => 'both',
+            //     'prompt'      => "Review the structural AST data and raw code to identify performance bottlenecks.\n",
+            //     'max_tokens'  => 1200,
+            //     'temperature' => 0.5,
+            // ],
+
+            // 'doc_summary' => [
+            //     'operation' => 'code_analysis',
+            //     'type'      => 'ast',
+            //     'prompt'    => "Generate a doc summary from the AST structure.\n",
+            // ],
+
+            // 'improvements' => [
+            //     'operation' => 'code_improvements',
+            //     'type'      => 'raw',
+            //     'prompt'    => "Evaluate the raw code for potential improvements.\n",
+            // ],
         ],
-
     ],
-
 ];
