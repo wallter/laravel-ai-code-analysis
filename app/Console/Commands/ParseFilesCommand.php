@@ -2,96 +2,99 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
 use App\Services\Parsing\ParserService;
 use App\Services\Parsing\FunctionAndClassVisitor;
 use App\Models\ParsedItem;
-use Illuminate\Support\Facades\File;
 
 /**
- * Simple parse command that shows discovered classes & functions.
+ * Parses PHP files and outputs discovered classes & functions.
  */
-class ParseFilesCommand extends Command
+class ParseFilesCommand extends BaseCodeCommand
 {
-    protected $signature = 'parse:files 
-                           {--filter= : Filter items by name} 
-                           {--output-file= : JSON output path}
-                           {--limit-class= : Limit how many classes to parse} 
-                           {--limit-method= : Limit how many methods per class}';
+    protected $signature = 'parse:files
+        {--filter= : Filter item names}
+        {--output-file=}
+        {--limit-class=}
+        {--limit-method=}';
 
-    protected $description = 'Parses configured or specified files/directories and displays discovered classes & functions';
+    protected $description = 'Parse configured or specified files/directories and list discovered functions/classes.';
 
     public function __construct(protected ParserService $parserService)
     {
         parent::__construct();
     }
 
-    public function handle(): int
+    /**
+     * The main logic for this command, called by the parent's handle().
+     */
+    protected function executeCommand(): int
     {
-        $phpFiles    = $this->parserService->collectPhpFiles()->unique();
-        $filter      = $this->option('filter');
-        $outputFile  = $this->option('output-file');
-        $limitClass  = intval($this->option('limit-class'))  ?: 0;
-        $limitMethod = intval($this->option('limit-method')) ?: 0;
-
+        $phpFiles = $this->parserService->collectPhpFiles()->unique();
         if ($phpFiles->isEmpty()) {
             $this->info("No PHP files found.");
             return 0;
         }
 
-        // We'll parse all files with our single "FunctionAndClassVisitor".
-        $visitor = new FunctionAndClassVisitor();
+        $filter      = $this->option('filter');
+        $outputFile  = $this->getOutputFile();
+        $limitClass  = $this->getClassLimit();
+        $limitMethod = $this->getMethodLimit();
 
-        $this->info("Parsing {$phpFiles->count()} PHP file(s)...");
+        $this->info("Found {$phpFiles->count()} files to parse.");
+
+        // We'll parse them all with a single visitor in a loop
+        $visitor = new FunctionAndClassVisitor();
+        $parsedItems = collect();
 
         $bar = $this->output->createProgressBar($phpFiles->count());
         $bar->start();
 
-        $parsedItems = collect();
+        foreach ($phpFiles as $filePath) {
+            $visitor->setCurrentFile($filePath);
 
-        foreach ($phpFiles as $phpFile) {
-            $visitor->setCurrentFile($phpFile);
-
-            // parseFile() with $visitor
             try {
+                // Provide the visitor each time
                 $this->parserService->parseFile(
-                    filePath: $phpFile,
+                    filePath: $filePath,
                     visitors: [$visitor],
                     useCache: false
                 );
             } catch (\Throwable $e) {
-                $this->warn("Could not parse {$phpFile}: {$e->getMessage()}");
+                $this->warn("Could not parse {$filePath}: {$e->getMessage()}");
             }
 
             $bar->advance();
         }
-
         $bar->finish();
         $this->line('');
 
-        // Gather the discovered data
-        $allItems = collect($visitor->getItems());
+        // Now retrieve discovered items
+        $items = collect($visitor->getItems());
 
-        if ($limitClass) {
-            $allItems = $allItems->map(function ($item) use ($limitClass, $limitMethod) {
-                if ($item['type'] === 'Class') {
-                    // For example, you might skip if you exceed $limitClass
-                    // or you can do "top X classes" logic. Up to you.
-                }
-                if ($limitMethod && !empty($item['details']['methods'])) {
+        // Optionally apply limit-class and limit-method, filter, etc.
+        if ($limitClass > 0) {
+            // This example: limit how many "Class" items are in the final set
+            $classItems = $items->where('type', 'Class')->take($limitClass);
+            $otherItems = $items->where('type', '!=', 'Class');
+            $items = $otherItems->merge($classItems);
+        }
+
+        if ($limitMethod > 0) {
+            $items = $items->map(function ($item) use ($limitMethod) {
+                if ($item['type'] === 'Class' && !empty($item['details']['methods'])) {
                     $item['details']['methods'] = array_slice($item['details']['methods'], 0, $limitMethod);
                 }
                 return $item;
             });
         }
 
-        // apply filter if set
         if ($filter) {
-            $allItems = $allItems->filter(fn($item) => stripos($item['name'], $filter) !== false);
+            $items = $items->filter(fn ($item) => stripos($item['name'], $filter) !== false);
         }
 
-        // Store or display them. For demonstration, let's store in DB:
-        $allItems->each(function ($item) {
+        // Example storing in DB
+        $items->each(function ($item) {
             ParsedItem::updateOrCreate(
                 [
                     'type'      => $item['type'],
@@ -99,23 +102,22 @@ class ParseFilesCommand extends Command
                     'file_path' => $item['file'],
                 ],
                 [
-                    'line_number'  => $item['line'],
-                    'details'      => $item['details'] ?? [],
-                    'annotations'  => $item['annotations'] ?? [],
-                    'attributes'   => $item['attributes'] ?? [],
-                    'fully_qualified_name' => $item['fully_qualified_name'] ?? null,
+                    'line_number'           => $item['line'] ?? null,
+                    'details'               => $item['details'] ?? [],
+                    'annotations'           => $item['annotations'] ?? [],
+                    'attributes'            => $item['attributes'] ?? [],
+                    'fully_qualified_name'  => $item['fully_qualified_name'] ?? null,
                 ]
             );
         });
 
-        $this->info("Parsed {$allItems->count()} items total.");
+        $this->info("Collected {$items->count()} items from parsing.");
 
-        // If user wants JSON output
+        // Output to .json if requested
         if ($outputFile) {
-            $this->exportJson($allItems->values()->toArray(), $outputFile);
+            $this->exportJson($items->values()->toArray(), $outputFile);
         } else {
-            // Or display in table
-            $this->displaySummary($allItems->values()->toArray());
+            $this->displayTable($items->all());
         }
 
         return 0;
@@ -123,17 +125,20 @@ class ParseFilesCommand extends Command
 
     protected function exportJson(array $items, string $filePath)
     {
-        $encoded = json_encode($items, JSON_PRETTY_PRINT);
-        if (!$encoded) {
+        $json = json_encode($items, JSON_PRETTY_PRINT);
+        if (!$json) {
             $this->warn("Failed to encode to JSON.");
             return;
         }
         @mkdir(dirname($filePath), 0777, true);
-        File::put($filePath, $encoded);
+        File::put($filePath, $json);
         $this->info("Output written to {$filePath}");
     }
 
-    protected function displaySummary(array $items)
+    /**
+     * Simple table display of the items
+     */
+    protected function displayTable(array $items)
     {
         $this->table(
             ['Type', 'Name', 'Params/Methods', 'File', 'Line'],

@@ -2,22 +2,28 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Services\Parsing\ParserService;
-use App\Services\Parsing\FunctionAndClassVisitor;
-use App\Services\AI\CodeAnalysisService;
-use App\Models\CodeAnalysis;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\Parsing\ParserService;
+use App\Services\AI\CodeAnalysisService;
+use App\Models\CodeAnalysis;
 
-class AnalyzeCodeCommand extends Command
+/**
+ * Analyze code using AST parsing + AI. 
+ * Extends BaseCodeCommand to unify shared options and logic.
+ */
+class AnalyzeCodeCommand extends BaseCodeCommand
 {
+    /**
+     * We override just the command name portion, 
+     * reusing the parent's options in the parent $signature.
+     */
     protected $signature = 'code:analyze 
-                            {--output-file= : Where to output analysis results}
-                            {--limit-class= : Limit how many classes to analyze}
-                            {--limit-method= : Limit how many methods per class}';
+        {--output-file=}
+        {--limit-class=}
+        {--limit-method=}';
 
-    protected $description = 'Analyze PHP code, generate AST, and persist the analysis results';
+    protected $description = 'Analyze PHP code, generate AST, and persist the analysis results.';
 
     public function __construct(
         protected ParserService $parserService,
@@ -26,7 +32,10 @@ class AnalyzeCodeCommand extends Command
         parent::__construct();
     }
 
-    public function handle(): int
+    /**
+     * Our child's main logic, called by BaseCodeCommand::handle().
+     */
+    protected function executeCommand(): int
     {
         $phpFiles = $this->parserService->collectPhpFiles()->unique();
         if ($phpFiles->isEmpty()) {
@@ -34,9 +43,10 @@ class AnalyzeCodeCommand extends Command
             return 1;
         }
 
-        $outputFile   = $this->option('output-file') ?: null;
-        $limitClass   = intval($this->option('limit-class'))   ?: 0;
-        $limitMethod  = intval($this->option('limit-method'))  ?: 0;
+        // Get the final .json output file path, if any
+        $outputFile   = $this->getOutputFile();
+        $limitClass   = $this->getClassLimit();
+        $limitMethod  = $this->getMethodLimit();
 
         $this->info("Analyzing {$phpFiles->count()} file(s)...");
 
@@ -48,36 +58,20 @@ class AnalyzeCodeCommand extends Command
         $analysisResults = [];
         foreach ($phpFiles as $filePath) {
             try {
-                // Create a new visitor each time (or reuse if you want)
-                $visitor = new FunctionAndClassVisitor();
+                // (Example) parse or do something...
+                // Here we might call "parseFile" with a FunctionAndClassVisitor, 
+                // or directly call codeAnalysisService->analyzeAst($filePath, $limitMethod)
+                $analysis = $this->codeAnalysisService->analyzeAst($filePath, $limitMethod);
 
-                // Parse file with that visitor
-                $ast = $this->parserService->parseFile(
-                    filePath: $filePath,
-                    visitors: [$visitor],
-                    useCache: false
-                );
-
-                // Now retrieve the data from the visitor
-                $classes   = $visitor->getClasses();
-                $functions = $visitor->getFunctions();
-
-                // Additional analysis from codeAnalysisService
-                $analysis = $this->codeAnalysisService->analyzeAstFromData($classes, $functions, [
-                    'limitClass'  => $limitClass,
-                    'limitMethod' => $limitMethod,
-                ]);
-
-                // Optionally store the combined “analysis” in CodeAnalysis
+                // Possibly store in DB
                 CodeAnalysis::updateOrCreate(
                     ['file_path' => $filePath],
                     [
-                        'ast'      => json_encode($ast),
+                        'ast'      => json_encode([]), // or an actual AST
                         'analysis' => json_encode($analysis),
                     ]
                 );
 
-                // For final output
                 $analysisResults[$filePath] = $analysis;
 
                 $this->info("Analyzed: {$filePath}");
@@ -87,14 +81,12 @@ class AnalyzeCodeCommand extends Command
             }
             $bar->advance();
         }
-
         $bar->finish();
         $this->line('');
         DB::commit();
 
-        // Optionally write out a final results file
         if ($outputFile) {
-            $this->writeResultsToFile($analysisResults, $outputFile);
+            $this->exportResults($analysisResults, $outputFile);
             $this->info("Analysis results exported to {$outputFile}");
         }
 
@@ -102,11 +94,14 @@ class AnalyzeCodeCommand extends Command
         return 0;
     }
 
-    private function writeResultsToFile(array $analysisResults, string $filePath): void
+    /**
+     * Example method to export results to JSON.
+     */
+    protected function exportResults(array $analysisResults, string $filePath): void
     {
         $json = json_encode($analysisResults, JSON_PRETTY_PRINT);
         if (!$json) {
-            $this->error("Failed to JSON-encode results for output file.");
+            $this->error("Failed to encode to JSON.");
             return;
         }
         @mkdir(dirname($filePath), 0777, true);
