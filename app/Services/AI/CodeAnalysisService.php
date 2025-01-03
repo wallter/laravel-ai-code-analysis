@@ -52,7 +52,10 @@ class CodeAnalysisService
         // 3) Multi-pass AI analysis
         $aiResults = $this->performMultiPassAnalysis($astData, $rawCode);
 
-        return array_merge($astData, $aiResults);
+        return [
+            'ast_data'    => $astData,    // Contains AST-related information
+            'ai_results'  => $aiResults,  // Contains AI-generated outputs like doc_generation, etc.
+        ];
     }
 
     /**

@@ -100,9 +100,8 @@ class AnalyzeCodeCommand extends BaseCodeCommand
                     // Persist in code_analyses DB table
                     CodeAnalysis::updateOrCreate(
                         ['file_path' => $this->parserService->normalizePath($filePath)],
-                        [
-                            'ast'      => json_encode($analysisData, JSON_UNESCAPED_SLASHES),
-                            'analysis' => json_encode($analysisData, JSON_UNESCAPED_SLASHES),
+                        ['ast' => json_encode($analysisData['ast_data'] ?? [], JSON_UNESCAPED_SLASHES),
+                         'ai_output' => json_encode($analysisData['ai_results'] ?? [], JSON_UNESCAPED_SLASHES),
                         ]
                     );
 

@@ -13,5 +13,6 @@ class CodeAnalysis extends Model
         'file_path',
         'ast',
         'analysis',
+        'ai_output', // Add this line
     ];
 }
