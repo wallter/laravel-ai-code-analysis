@@ -36,26 +36,27 @@ class ProcessPassesCommand extends Command
         $passOrderCount = count($passOrder);
 
         // Log the retrieved pass order for debugging
-        Log::info('Retrieved pass_order from config:', ['passOrder' => $passOrder, 'passOrderCount' => $passOrderCount]);
+        Context::add('passOrder', $passOrder);
+        Context::add('passOrderCount', $passOrderCount);
+        Log::info('Retrieved pass_order from config.');
 
         // Fetch all analyses that have pending passes by filtering in PHP
         $pendingAnalyses = CodeAnalysis::all()
             ->filter(function ($analysis) use ($passOrderCount) {
-                Log::info("Checking analysis: {$analysis->file_path}", [
-                    'passOrderCount' => $passOrderCount,
-                    'current_pass' => $analysis->current_pass,
-                    'completed_passes' => $analysis->completed_passes ?? [],
-                ]);
+                Context::add('passOrderCount', $passOrderCount);
+                Context::add('current_pass', $analysis->current_pass);
+                Context::add('completed_passes', $analysis->completed_passes ?? []);
+                Log::info("Checking analysis: {$analysis->file_path}");
                 return count((array) ($analysis->completed_passes ?? [])) < $passOrderCount;
             });
 
         if ($pendingAnalyses->isEmpty()) {
             $this->info("No pending passes to process.");
             Log::info("No pending passes to process.");
-            return 0;
             // Remove context after processing
             Context::forget('file_path');
             Context::forget('current_pass');
+            return 0;
         }
 
         // Remove dryRun context
@@ -68,7 +69,9 @@ class ProcessPassesCommand extends Command
             Context::add('file_path', $analysis->file_path);
             Context::add('current_pass', $analysis->current_pass + 1);
 
-            Log::info("Starting pass processing for file: {$analysis->file_path}", ['dryRun' => $dryRun]);
+            Context::add('file_path', $analysis->file_path);
+            Context::add('current_pass', $analysis->current_pass + 1);
+            Log::info("Starting pass processing for file: {$analysis->file_path}");
             $this->info("Processing next pass for [{$analysis->file_path}]...");
             try {
                 $this->codeAnalysisService->processNextPass($analysis, $dryRun);
@@ -90,11 +93,13 @@ class ProcessPassesCommand extends Command
         if ($dryRun) {
             $this->info("Dry-run pass processing completed.");
             Log::info("Dry-run pass processing completed.");
-            Log::info("Pass processing command executed in dry-run mode.", ['dryRun' => $dryRun]);
+            Log::info("Pass processing command executed in dry-run mode.");
         } else {
             $this->info("Pass processing completed.");
-            Log::info("Pass processing command executed successfully.", ['dryRun' => $dryRun]);
+            Log::info("Pass processing command executed successfully.");
         }
+        // Remove dryRun context after all processing
+        Context::forget('dryRun');
         return 0;
     }
 }

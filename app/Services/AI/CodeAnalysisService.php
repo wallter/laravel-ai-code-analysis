@@ -45,7 +45,7 @@ class CodeAnalysisService
 
         $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
         $passOrderCount = count($passOrder);
-        $multiPasses = config('ai.operations.multi_pass_analysis.multi_pass_analysis', []);
+        $multiPasses = config('ai.operations.multi_pass_analysis', []);
 
         // Determine the next pass to execute
         $nextPass = null;
@@ -68,7 +68,6 @@ class CodeAnalysisService
         }
 
         try {
-            // Set context for AI operation
             Context::add('pass_name', $nextPass);
             Context::add('file_path', $codeAnalysis->file_path);
 
