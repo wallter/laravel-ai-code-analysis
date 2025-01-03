@@ -3,11 +3,10 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use PhpParser\Error;
 use App\Services\Parsing\ParserService;
-use PhpParser\NodeTraverser;
 use App\Services\Parsing\FunctionAndClassVisitor;
 use App\Models\ParsedItem;
+use Illuminate\Support\Facades\File;
 
 /**
  * Parses PHP files and outputs discovered classes & functions.
