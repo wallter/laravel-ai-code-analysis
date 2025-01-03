@@ -30,7 +30,6 @@ class ParserService
         $traverser->addVisitor(new \PhpParser\NodeVisitor\ParentConnectingVisitor());
         return $traverser;
     }
-    }
 
     /**
      * Parse a single PHP file and return its AST.

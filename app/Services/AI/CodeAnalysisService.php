@@ -37,7 +37,6 @@ class CodeAnalysisService
             return [];
         }
     }
-    }
 
     /**
      * Analyze the given AST and return analysis results.
@@ -92,3 +91,4 @@ class CodeAnalysisService
             // Add more analysis metrics as needed
         ];
     }
+}

@@ -5,6 +5,11 @@ It outlines best practices, constraints, and usage patterns to maintain a consis
 
 ---
 
+## 0. TLDR;
+- DO NOT CREATE or use an `app/Console/Kernel.php`, commands are auto-discovered by laravel v11
+
+---
+
 ## 1. Laravel Ecosystem First
 
 - **Migrations**  
@@ -20,7 +25,7 @@ It outlines best practices, constraints, and usage patterns to maintain a consis
     ```
   - This scaffolds a proper command class in `app/Console/Commands/`.  
   - If the command already exists, make sure changes go into the existing class file.
-  - `app/Console/Kernel` does not need to be updated as commands are auto-discovered.
+  - `app/Console/Kernel.php` does not need to be updated as commands are auto-discovered.
 
 ---
 
