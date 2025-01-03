@@ -141,12 +141,6 @@ class ParseFilesCommand extends Command
                     'details' => array_merge($item['details'] ?: [], [
                         'restler_tags' => $item['restler_tags'] ?? [],
                     ]),
-                    'line_number' => $item['line'],
-                    'annotations' => $item['annotations'] ?: [],
-                    'attributes' => $item['attributes'] ?: [],
-                    'details' => array_merge($item['details'] ?: [], [
-                        'restler_tags' => $item['restler_tags'] ?? [],
-                    ]),
                     'ast' => $item['ast'] ?? null,
                 ]
             );
@@ -175,42 +169,11 @@ class ParseFilesCommand extends Command
                             'fully_qualified_name' => ($item['fullyQualifiedName'] ?? '') . '::' . $method['name'],
                             'operation_summary' => $method['operation_summary'] ?? '',
                             'called_methods' => $method['called_methods'] ?? [],
-                            'line_number' => $method['line'] ?? null,
-                            'annotations' => $method['annotations'] ?: [],
-                            'attributes' => $method['attributes'] ?: [],
-                            'details' => [
-                                'params' => $method['params'] ?? [],
-                                'description' => $method['description'] ?? '',
-                            ],
-                            'class_name' => $method['class'] ?? '',
-                            'namespace' => $method['namespace'] ?? '',
-                            'visibility' => $method['visibility'] ?? '',
-                            'is_static' => $method['isStatic'] ?? false,
-                            'fully_qualified_name' => ($item['fullyQualifiedName'] ?? '') . '::' . $method['name'],
-                            'operation_summary' => $method['operation_summary'] ?? '',
-                            'called_methods' => $method['called_methods'] ?? [],
                             'ast' => $method['ast'] ?? null,
                         ]
                     );
                 }
             }
-        }
-        foreach ($items as $item) {
-            ParsedItem::updateOrCreate(
-                [
-                    'type' => $item['type'],
-                    'name' => $item['name'],
-                    'file_path' => $item['file'],
-                ],
-                [
-                    'line_number' => $item['line'],
-                    'annotations' => $item['annotations'] ?: [],
-                    'attributes' => $item['attributes'] ?: [],
-                    'details' => array_merge($item['details'] ?: [], [
-                        'restler_tags' => $item['restler_tags'] ?? [],
-                    ]),
-                ]
-            );
         }
 
         // 5) Output
@@ -362,5 +325,24 @@ class ParseFilesCommand extends Command
             }
         }
         return $items;
+    }
+
+    /**
+     * Parse a single PHP file.
+     *
+     * @param string $filePath
+     * @param mixed $parser
+     * @param mixed $traverser
+     * @param FunctionAndClassVisitor $visitor
+     */
+    private function parseOneFile(string $filePath, $parser, $traverser, $visitor)
+    {
+        $code = File::get($filePath);
+        try {
+            $ast = $parser->parse($code);
+            $traverser->traverse($ast);
+        } catch (\Exception $e) {
+            $this->error("Error parsing file {$filePath}: " . $e->getMessage());
+        }
     }
 }
