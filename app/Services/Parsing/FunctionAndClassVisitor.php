@@ -12,6 +12,7 @@ use PhpParser\Node\UnionType;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node\Identifier;
 use PhpParser\Modifier; // Added to use the updated Modifier constants
+use PhpParser\Modifiers;
 
 // If your version of nikic/php-parser has Serializer\XML spelled as 'Xml':
 // use PhpParser\Serializer\Xml; 
@@ -72,11 +73,11 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         //   FINAL = 32
 
         // Visibility
-        if ($flags & Modifier::PUBLIC) {
+        if ($flags & Modifiers::PUBLIC) {
             $names[] = 'public';
-        } elseif ($flags & Modifier::PROTECTED) {
+        } elseif ($flags & Modifiers::PROTECTED) {
             $names[] = 'protected';
-        } elseif ($flags & Modifier::PRIVATE) {
+        } elseif ($flags & Modifiers::PRIVATE) {
             $names[] = 'private';
         } elseif ($node instanceof Node\Expr\StaticCall) {
             if ($node->class->toString() === 'v5\\Service\\BusinessRule') {
@@ -115,17 +116,17 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         }
 
         // Static?
-        if ($flags & Modifier::STATIC) {
+        if ($flags & Modifiers::STATIC) {
             $names[] = 'static';
         }
 
         // Abstract?
-        if ($flags & Modifier::ABSTRACT) {
+        if ($flags & Modifiers::ABSTRACT) {
             $names[] = 'abstract';
         }
 
         // Final?
-        if ($flags & Modifier::FINAL) {
+        if ($flags & Modifiers::FINAL) {
             $names[] = 'final';
         }
 
