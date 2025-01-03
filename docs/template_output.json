@@ -1,0 +1,43 @@
+{
+    "/Users/tylerwall/Documents/programing/ai/aider/laravel_self_improve_ai/resources/access-app/v5/Utilities.php": {
+        "class_count": 1,
+        "function_count": 0,
+        "method_count": 44,
+        "classes": [
+            {
+                "name": "Utilities",
+                "methods": [
+                    {
+                        "name": "initLeapDataSources",
+                        "params": [],
+                        "description": "",
+                        "class": "",
+                        "namespace": "v5",
+                        "line": 17
+                    },
+                    {
+                        "name": "getCountry",
+                        "params": [
+                            {
+                                "name": "$country",
+                                "type": "mixed"
+                            }
+                        ],
+                        "description": "",
+                        "class": "",
+                        "namespace": "v5",
+                        "line": 55
+                    },
+                ]
+            }
+        ],
+        "functions": [],
+        "doc_generation": "...markdown...",
+        "refactor_suggestions": "...markdown...",
+        "complexity_analysis": "...markdown...",
+        "security_assessment": "...markdown...",
+        "performance_tips": "...markdown...",
+        "doc_summary": "...markdown...",
+        "improvements": "...markdown...."
+    }
+}
