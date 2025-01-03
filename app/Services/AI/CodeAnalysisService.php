@@ -135,7 +135,6 @@ class CodeAnalysisService
             return '';
         }
     }
-    {
         // parseFile is your ParserService method that runs the AST parse
         $ast = $this->parserService->parseFile($filePath);
         if (empty($ast)) {
