@@ -32,7 +32,6 @@ class CodeAnalysisService
         // Example usage of ParserService to normalize input if it's a file path
         if (is_string($input) && file_exists($input)) {
             $input = $this->parserService->normalizePath($input);
-        }
             $responseText = $this->openAIService->performOperation('code_analysis', [
                 'prompt' => $input,
             ]);
@@ -101,4 +100,3 @@ class CodeAnalysisService
 
         return $analysisResults;
     }
-}
