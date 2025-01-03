@@ -9,6 +9,7 @@ use App\Models\CodeAnalysis; // Assuming a model for persistence
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Collection;
 
 class AnalyzeCodeCommand extends Command
 {
@@ -68,22 +69,22 @@ class AnalyzeCodeCommand extends Command
         $this->info("Starting analysis for directory: {$directory}");
 
         // Retrieve PHP files using ParserService
-        $phpFiles = $this->parserService->getPhpFiles($directory);
+        $phpFiles = collect($this->parserService->getPhpFiles($directory));
 
         // Apply limits if set
         if ($limitClass > 0) {
-            $phpFiles = array_slice($phpFiles, 0, $limitClass);
+            $phpFiles = $phpFiles->take($limitClass);
         }
 
-        $fileCount = count($phpFiles);
+        $fileCount = $phpFiles->count();
         $bar = $this->output->createProgressBar($fileCount);
         $bar->start();
 
         DB::beginTransaction();
 
-        $analysisResults = [];
+        $analysisResults = collect();
 
-        foreach ($phpFiles as $filePath) {
+        $phpFiles->each(function ($filePath) use (&$analysisResults, $limitMethod, $bar) {
             try {
                 // Analyze the AST using CodeAnalysisService
                 $analysis = $this->codeAnalysisService->analyzeAst($filePath, $limitMethod);
@@ -100,8 +101,8 @@ class AnalyzeCodeCommand extends Command
                     ]
                 );
 
-                if ($outputFile) {
-                    $analysisResults[$filePath] = $analysis;
+                if ($this->option('output-file')) {
+                    $analysisResults->put($filePath, $analysis);
                 }
 
                 $this->info("Successfully analyzed and persisted: {$filePath}");
@@ -111,13 +112,13 @@ class AnalyzeCodeCommand extends Command
             }
 
             $bar->advance();
-        }
+        });
 
         $bar->finish();
         $this->newLine();
 
         if ($outputFile) {
-            $this->exportResults($outputFile, $analysisResults);
+            $this->exportResults($outputFile, $analysisResults->all());
             $this->info("Analysis results exported to {$outputFile}");
         }
 
@@ -127,6 +128,7 @@ class AnalyzeCodeCommand extends Command
 
         return 0;
     }
+
     /**
      * Export analysis results to a specified output file.
      *
@@ -137,9 +139,23 @@ class AnalyzeCodeCommand extends Command
     protected function exportResults(string $filePath, array $data): void
     {
         $jsonData = json_encode($data, JSON_PRETTY_PRINT);
-        if (file_put_contents($filePath, $jsonData) === false) {
+        if ($jsonData === false) {
+            $this->error("Failed to encode analysis results to JSON.");
+            Log::error("Failed to encode analysis results to JSON.");
+            return;
+        }
+
+        $dir = dirname($filePath);
+        if (!File::isDirectory($dir)) {
+            File::makeDirectory($dir, 0777, true, true);
+        }
+
+        if (File::put($filePath, $jsonData) === false) {
             $this->error("Failed to write analysis results to {$filePath}");
             Log::error("Failed to write analysis results to {$filePath}");
+            return;
         }
+
+        $this->info("Analysis results successfully written to {$filePath}");
     }
 }

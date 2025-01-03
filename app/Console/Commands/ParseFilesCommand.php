@@ -36,7 +36,7 @@ class ParseFilesCommand extends Command
     public function handle()
     {
         // 1) Collect files and folders from config
-        $phpFiles = collect($this->parserService->collectPhpFiles())->unique();
+        $phpFiles = $this->parserService->collectPhpFiles()->unique();
 
         $filter     = $this->option('filter');
         $outputFile = $this->option('output-file');
@@ -192,40 +192,28 @@ class ParseFilesCommand extends Command
                     if (!empty($item['details']['description'])) {
                         $details .= ' - ' . $item['details']['description'];
                     }
-                    $allAnnotations = array_merge_recursive($item['annotations'], $item['restler_tags'] ?? []);
-                    $annotations = '';
-                    foreach ($allAnnotations as $tag => $values) {
-                        foreach ($values as $value) {
-                            $annotations .= "@{$tag} {$value}\n";
-                        }
-                    }
-                    $attributes  = implode("\n", $item['attributes']);
-                    $location    = $item['file'] . ':' . $item['line'];
+                    $allAnnotations = collect($item['annotations'])->merge($item['restler_tags'] ?? [])->toArray();
+                    $annotations = collect($allAnnotations)->map(function($values, $tag) {
+                        return collect($values)->map(fn($value) => "@{$tag} {$value}")->implode("\n");
+                    })->implode("\n");
+                    $attributes  = collect($item['attributes'])->implode("\n");
+                    $location    = "{$item['file']}:{$item['line']}";
                     return [$item['type'], $item['name'], $details, $annotations, $attributes, $location];
                 } else { // 'Class'
                     $methods = collect($item['details']['methods'])->map(function($m) {
                         $params = collect($m['params'])->map(fn($p) => "{$p['type']} {$p['name']}")->implode(', ');
                         $desc   = $m['description'] ? ' - ' . $m['description'] : '';
-                        $methodAnnotations = '';
-                        if (!empty($m['annotations'])) {
-                            foreach ($m['annotations'] as $tag => $values) {
-                                if (is_array($values)) {
-                                    foreach ($values as $value) {
-                                        $methodAnnotations .= "@{$tag} {$value}\n";
-                                    }
-                                } else {
-                                    $methodAnnotations .= "@{$tag} {$values}\n";
-                                }
-                            }
-                        }
+                        $methodAnnotations = collect($m['annotations'])->map(function($values, $tag) {
+                            return collect($values)->map(fn($value) => "@{$tag} {$value}")->implode("\n");
+                        })->implode("\n");
                         return "{$m['name']}($params)$desc\n$methodAnnotations";
                     })->implode(', ');
                     if (!empty($item['details']['description'])) {
                         $methods .= ' - ' . $item['details']['description'];
                     }
-                    $annotations = implode("\n", $item['annotations']);
-                    $attributes  = implode("\n", $item['attributes']);
-                    $location    = $item['file'] . ':' . $item['line'];
+                    $annotations = collect($item['annotations'])->implode("\n");
+                    $attributes  = collect($item['attributes'])->implode("\n");
+                    $location    = "{$item['file']}:{$item['line']}";
                     return [$item['type'], $item['name'], $methods, $annotations, $attributes, $location];
                 }
             })->toArray()
@@ -258,19 +246,20 @@ class ParseFilesCommand extends Command
      */
     private function decodeAstProperties(array $items): array
     {
-        foreach ($items as &$item) {
+        return collect($items)->map(function (&$item) {
             if (isset($item['ast']) && is_string($item['ast'])) {
                 $item['ast'] = json_decode($item['ast'], true);
             }
             if (isset($item['details']['methods']) && is_array($item['details']['methods'])) {
-                foreach ($item['details']['methods'] as &$method) {
+                $item['details']['methods'] = collect($item['details']['methods'])->map(function (&$method) {
                     if (isset($method['ast']) && is_string($method['ast'])) {
                         $method['ast'] = json_decode($method['ast'], true);
                     }
-                }
+                    return $method;
+                })->toArray();
             }
-        }
-        return $items;
+            return $item;
+        })->toArray();
     }
 
     /**

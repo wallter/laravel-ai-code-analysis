@@ -10,6 +10,7 @@ use PhpParser\NodeVisitor\ParentConnectingVisitor;
 use PhpParser\Parser;
 use PhpParser\NodeVisitor;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Collection;
 
 class ParserService
 {
@@ -39,35 +40,30 @@ class ParserService
     /**
      * Collect all PHP files from configured folders and individual files.
      *
-     * @return array An array of absolute paths to PHP files.
+     * @return Collection An Illuminate\Support\Collection of absolute paths to PHP files.
      */
-    public function collectPhpFiles(): array
+    public function collectPhpFiles(): Collection
     {
-        $filePaths   = config('parsing.files', []);
-        $folderPaths = config('parsing.folders', []);
-        $phpFiles = [];
+        $filePaths = collect(config('parsing.files', []));
+        $folderPaths = collect(config('parsing.folders', []));
 
-        // Collect PHP files from folders
-        foreach ($folderPaths as $folderPath) {
+        $phpFiles = $folderPaths->map(function ($folderPath) {
             $realPath = $this->normalizePath($folderPath);
             if (!is_dir($realPath)) {
-                continue;
+                return collect([]);
             }
-            $folderPhpFiles = $this->getPhpFiles($realPath);
-            $phpFiles = array_merge($phpFiles, $folderPhpFiles);
-        }
+            return collect($this->getPhpFiles($realPath));
+        })->flatten();
 
-        // Collect individual PHP files
-        foreach ($filePaths as $filePath) {
+        $individualFiles = $filePaths->map(function ($filePath) {
             $realPath = $this->normalizePath($filePath);
             if (!file_exists($realPath)) {
-                continue;
+                return null;
             }
-            $phpFiles[] = $realPath;
-        }
+            return $realPath;
+        })->filter();
 
-        // Remove duplicate file paths
-        return array_unique($phpFiles);
+        return $phpFiles->merge($individualFiles)->unique();
     }
 
     /**
@@ -86,11 +82,13 @@ class ParserService
             new \RecursiveDirectoryIterator($directory, \RecursiveDirectoryIterator::SKIP_DOTS)
         );
         $phpFiles = [];
+
         foreach ($iterator as $file) {
             if ($file->isFile() && strtolower($file->getExtension()) === 'php') {
                 $phpFiles[] = $file->getRealPath();
             }
         }
+
         return $phpFiles;
     }
 
@@ -164,7 +162,7 @@ class ParserService
             return json_decode($existingAnalysis->ast, true);
         }
 
-        $code = file_get_contents($filePath);
+        $code = File::get($filePath);
         $ast = $this->parser->parse($code);
 
         if ($ast === null) {
@@ -181,7 +179,7 @@ class ParserService
      *
      * @return void
      */
-    public function setupParserTraversal()
+    public function setupParserTraversal(): void
     {
         $this->traverser = $this->createTraverser();
         $this->visitor = new FunctionAndClassVisitor();
