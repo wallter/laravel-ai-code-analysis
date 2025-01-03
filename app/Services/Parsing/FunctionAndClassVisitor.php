@@ -46,7 +46,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
                 'nodeType' => $node->getType(),
                 'attributes' => $node->getAttributes(),
                 'note' => 'Max depth reached, recursion stopped.',
-            ]);
+            ]) ?: '{}';
         }
 
         // Detect and prevent processing the same node multiple times
@@ -55,7 +55,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
                 'nodeType' => $node->getType(),
                 'attributes' => $node->getAttributes(),
                 'note' => 'Recursion detected, node already processed.',
-            ]);
+            ]) ?: '{}';
         }
 
         // Mark the current node as processed
@@ -100,11 +100,16 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $json = json_encode($result);
         if ($json === false) {
             // Fallback in case json_encode fails
-            return json_encode([
+            $fallback = json_encode([
                 'nodeType' => $node->getType(),
                 'attributes' => $node->getAttributes(),
                 'note' => 'Failed to encode AST node to JSON.',
             ]);
+            if ($fallback === false) {
+                // As a last resort, return an empty JSON object
+                return '{}';
+            }
+            return $fallback;
         }
 
         return $json;
