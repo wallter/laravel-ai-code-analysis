@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\CodeAnalysis;
 use App\Services\AI\CodeAnalysisService;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Context;
 
 class ProcessPassesCommand extends Command
 {
@@ -26,6 +27,9 @@ class ProcessPassesCommand extends Command
     public function handle(): int
     {
         $dryRun = $this->option('dry-run');
+
+        // Set dryRun context
+        Context::add('dryRun', $dryRun);
 
         // Retrieve pass order from configuration
         $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
@@ -49,11 +53,21 @@ class ProcessPassesCommand extends Command
             $this->info("No pending passes to process.");
             Log::info("No pending passes to process.");
             return 0;
+            // Remove context after processing
+            Context::forget('file_path');
+            Context::forget('current_pass');
         }
+
+        // Remove dryRun context
+        Context::forget('dryRun');
 
         Log::info("Pass processing command started.", ['dryRun' => $dryRun]);
 
         foreach ($pendingAnalyses as $analysis) {
+            // Set context for each analysis
+            Context::add('file_path', $analysis->file_path);
+            Context::add('current_pass', $analysis->current_pass + 1);
+
             Log::info("Starting pass processing for file: {$analysis->file_path}", ['dryRun' => $dryRun]);
             $this->info("Processing next pass for [{$analysis->file_path}]...");
             try {

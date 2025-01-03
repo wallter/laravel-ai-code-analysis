@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use PhpParser\NodeTraverser;
+use Illuminate\Support\Facades\Context;
 use PhpParser\NodeVisitor\NameResolver;
 use Exception;
 
@@ -39,7 +40,13 @@ class CodeAnalysisService
         $completedPasses = $codeAnalysis->completed_passes ?? [];
         if (!is_array($completedPasses)) {
             $completedPasses = json_decode($completedPasses, true) ?? [];
-        }
+        } catch (\Throwable $e) {
+            // Remove context in case of exception
+            Context::forget('pass_name');
+            Context::forget('file_path');
+            
+            Log::error("Failed to perform pass [{$nextPass}] for [{$codeAnalysis->file_path}]: {$e->getMessage()}", ['exception' => $e]);
+            $this->error("Failed to process pass for [{$codeAnalysis->file_path}]: {$e->getMessage()}");
 
         $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
         $passOrderCount = count($passOrder);
@@ -66,6 +73,10 @@ class CodeAnalysisService
         }
 
         try {
+            // Set context for AI operation
+            Context::add('pass_name', $nextPass);
+            Context::add('file_path', $codeAnalysis->file_path);
+
             // Build the prompt based on the pass type
             $prompt = $this->buildPrompt(
                 json_decode($codeAnalysis->ast, true),
@@ -95,7 +106,14 @@ class CodeAnalysisService
                 $codeAnalysis->save();
 
                 info("Pass [{$nextPass}] completed for [{$codeAnalysis->file_path}].");
+                
+                // Remove context after successful operation
+                Context::forget('pass_name');
+                Context::forget('file_path');
             } else {
+                // Remove context in dry-run
+                Context::forget('pass_name');
+                Context::forget('file_path');
                 Log::info("Dry-run: Would append pass [{$nextPass}] to ai_output and completed_passes for [{$codeAnalysis->file_path}].");
             }
         } catch (\Throwable $e) {

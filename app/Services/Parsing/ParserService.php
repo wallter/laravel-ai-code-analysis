@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
 use PhpParser\Node\Stmt\Function_;
 use PhpParser\Node;
+use Illuminate\Support\Facades\Context;
 
 /**
  * Provides helper methods to collect, parse, and optionally store AST data.
@@ -96,6 +97,9 @@ class ParserService
             }
         }
 
+        // Set context for file parsing
+        Context::add('file_path', $filePath);
+
         // Read source code
         $code = File::get($filePath);
         $parser = $this->createParser();
@@ -119,6 +123,9 @@ class ParserService
                 [ 'ast' => json_encode($ast) ]
             );
         }
+
+        // Remove context after parsing
+        Context::forget('file_path');
 
         return $ast;
     }

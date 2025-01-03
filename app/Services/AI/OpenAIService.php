@@ -6,6 +6,7 @@ use OpenAI\Laravel\Facades\OpenAI as OpenAIFacade;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
+use Illuminate\Support\Facades\Context;
 use Exception;
 
 /**
@@ -82,6 +83,9 @@ class OpenAIService
         }
 
         try {
+            // Set context for AI operation
+            Context::add('operation', $operationIdentifier);
+
             info("Sending chat request to OpenAI [{$operationIdentifier}]", [
                 'payload' => array_merge($payload, ['messages' => '<<omitted for brevity>>']),
             ]);
@@ -103,8 +107,14 @@ class OpenAIService
                 throw new Exception("No content in OpenAI chat response.");
             }
 
+            // Remove context after successful response
+            Context::forget('operation');
+
             return trim($content);
         } catch (Exception $e) {
+            // Remove context in case of exception
+            Context::forget('operation');
+
             // Log & rethrow
             Log::error("OpenAI chat request failed [{$operationIdentifier}]: " . $e->getMessage(), [
                 'exception' => $e,
