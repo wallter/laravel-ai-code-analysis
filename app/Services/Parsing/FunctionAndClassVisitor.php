@@ -17,7 +17,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
 
     public function __construct()
     {
-        parent::__construct();
         $this->items = collect();
         $this->warnings = collect();
     }
@@ -85,55 +84,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'attributes'  => $attributes,
             'file'        => $this->currentFile,
             'line'        => $node->getStartLine(),
-        ];
-    }
-
-    /**
-     * Collects data for a class node.
-     *
-     * @param Node\Stmt\ClassLike $node
-     * @return array
-     */
-    private function collectClassData(ClassLike $node): array
-    {
-        $description = '';
-        $annotations = [];
-        $restlerTags = [];
-        $docComment  = $node->getDocComment();
-        if ($docComment) {
-            $docText     = $docComment->getText();
-            $description = $this->extractShortDescription($docText);
-            $annotations = $this->extractAnnotations($docText);
-            $restlerTags = $annotations;
-        }
-
-        $attributes = $this->collectAttributes($node->attrGroups);
-
-        // Gather methods
-        $methods = collect($node->getMethods())
-            ->map(function ($method) {
-                return $this->collectMethodData($method);
-            })
-            ->all();
-
-        $className = $node->name->name;
-        $namespace = $this->getNamespace($node);
-        $fullyQualifiedName = $namespace ? "{$namespace}\\{$className}" : $className;
-
-        return [
-            'type'               => 'Class',
-            'name'               => $className,
-            'namespace'          => $namespace,
-            'fullyQualifiedName' => $fullyQualifiedName,
-            'details' => [
-                'methods'      => $methods,
-                'description'  => $description,
-                'restler_tags' => $restlerTags,
-            ],
-            'annotations'  => $annotations,
-            'attributes'   => $attributes,
-            'file'         => $this->currentFile,
-            'line'         => $node->getStartLine(),
         ];
     }
 
