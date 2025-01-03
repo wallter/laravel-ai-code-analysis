@@ -28,6 +28,17 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $this->warnings = collect();
     }
 
+    /**
+     * Sets the current file being parsed.
+     *
+     * @param string $file
+     * @return void
+     */
+    public function setCurrentFile(string $file): void
+    {
+        $this->currentFile = $file;
+    }
+
     public function enterNode(Node $node)
     {
         if ($node instanceof Class_) {
@@ -65,6 +76,16 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     public function getItems(): array
     {
         return $this->items->all();
+    }
+
+    /**
+     * Returns all collected warnings.
+     *
+     * @return array
+     */
+    public function getWarnings(): array
+    {
+        return $this->warnings->all();
     }
 
     /**
@@ -219,6 +240,43 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     }
 
     /**
+     * Convert an attribute argument node to string.
+     *
+     * @param Node $node
+     * @return string
+     */
+    private function argToString(Node $node): string
+    {
+        if ($node instanceof Node\Scalar\String_) {
+            return '"' . $node->value . '"';
+        } elseif ($node instanceof Node\Scalar\LNumber) {
+            return (string) $node->value;
+        } elseif ($node instanceof Node\Expr\Array_) {
+            return $this->parseArray($node);
+        } elseif ($node instanceof Node\Expr\ConstFetch) {
+            return $node->name->toString();
+        }
+        return '...';
+    }
+
+    /**
+     * Parse an array node into a string representation.
+     *
+     * @param Node\Expr\Array_ $array
+     * @return string
+     */
+    private function parseArray(Node\Expr\Array_ $array): string
+    {
+        $elements = [];
+        foreach ($array->items as $item) {
+            $key = $item->key ? $this->argToString($item->key) . ' => ' : '';
+            $value = $this->argToString($item->value);
+            $elements[] = $key . $value;
+        }
+        return '[' . implode(', ', $elements) . ']';
+    }
+
+    /**
      * Resolve visibility of a method.
      *
      * @param Node\Stmt\ClassMethod $method
@@ -236,5 +294,28 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             return 'private';
         }
         return 'public'; // Default visibility
+    }
+
+    /**
+     * Convert type node to string.
+     *
+     * @param mixed $typeNode
+     * @return string
+     */
+    private function typeToString($typeNode): string
+    {
+        if ($typeNode instanceof Node\Identifier) {
+            return $typeNode->name;
+        } elseif ($typeNode instanceof Node\NullableType) {
+            return '?' . $this->typeToString($typeNode->type);
+        } elseif ($typeNode instanceof Node\UnionType) {
+            return implode('|', array_map([$this, 'typeToString'], $typeNode->types));
+        } elseif ($typeNode instanceof Node\IntersectionType) {
+            return implode('&', array_map([$this, 'typeToString'], $typeNode->types));
+        } elseif ($typeNode instanceof Node\Name) {
+            return $typeNode->toString();
+        } else {
+            return 'mixed';
+        }
     }
 }
