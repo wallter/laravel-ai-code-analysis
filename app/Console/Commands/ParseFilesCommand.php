@@ -225,7 +225,6 @@ class ParseFilesCommand extends Command
      */
     private function persistJsonOutput(array $items, string $outputFile)
     {
-        $items = $this->decodeAstProperties($items);
         $jsonData = json_encode($items, JSON_PRETTY_PRINT);
         if ($jsonData === false) {
             $this->error("Failed to encode data to JSON.");
@@ -239,30 +238,6 @@ class ParseFilesCommand extends Command
 
         File::put($outputFile, $jsonData);
         $this->info("Output written to {$outputFile}");
-    }
-
-    /**
-     * Decode the 'ast' property in items to avoid escaping in output JSON.
-     */
-    private function decodeAstProperties(array $items): array
-    {
-        return collect($items)->map(function ($item) {
-            // Ensure 'ast' is correctly formatted as an array
-            // No additional processing needed since astToArray already returns arrays
-
-            if (isset($item['ast']) && is_array($item['ast'])) {
-                // Example processing can be done here if needed
-            }
-            if (isset($item['details']['methods']) && is_array($item['details']['methods'])) {
-                $item['details']['methods'] = collect($item['details']['methods'])->map(function ($method) {
-                    if (isset($method['ast']) && is_array($method['ast'])) {
-                        // Example processing can be done here if needed
-                    }
-                    return $method;
-                })->toArray();
-            }
-            return $item;
-        })->toArray();
     }
 
     /**
