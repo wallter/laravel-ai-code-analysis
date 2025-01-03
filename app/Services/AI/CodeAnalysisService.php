@@ -3,6 +3,7 @@
 namespace App\Services\AI;
 
 use App\Services\Parsing\ParserService;
+use App\Services\Parsing\UnifiedAstVisitor;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
@@ -24,37 +25,73 @@ class CodeAnalysisService
         protected ParserService  $parserService
     ) {}
 
-    /**
-     * Main analysis entry point for a single file. 
-     * Returns an array of merged results from AST visitors & AI passes.
-     *
-     * @param string $filePath
-     * @param int    $limitMethod
-     * @return array
-     */
     public function analyzeAst(string $filePath, int $limitMethod = 0): array
     {
-        Log::info("CodeAnalysisService.analyzeAst => [{$filePath}], limitMethod={$limitMethod}");
-
-        // 1) Parse & gather AST data
+        // parseFile is your ParserService method that runs the AST parse
         $ast = $this->parserService->parseFile($filePath);
         if (empty($ast)) {
-            Log::warning("No AST generated or file was empty: [{$filePath}]");
             return [];
         }
 
-        // Gather AST-based data
-        $astData = $this->collectAstData($ast, $limitMethod);
+        // Now use your single visitor
+        $visitor = new UnifiedAstVisitor();
+        $visitor->setCurrentFile($filePath);
 
-        // Retrieve the raw code
-        $rawCode = $this->retrieveRawCode($filePath);
+        $traverser = new \PhpParser\NodeTraverser();
+        $traverser->addVisitor(new NameResolver()); // optional
+        $traverser->addVisitor($visitor);
+        $traverser->traverse($ast);
 
-        // Perform multi-pass AI analysis; each pass becomes a separate key
+        // The "items" contain both classes + methods + free-floating functions
+        $items = $visitor->getItems();
+
+        // Summarize AST quickly:
+        $astData = $this->buildSummary($items, $limitMethod);
+
+        // Raw code for AI passes
+        $rawCode = $this->fetchRawCode($filePath);
+
+        // Perform multi-pass
         $multiPassResults = $this->performMultiPassAnalysis($astData, $rawCode);
 
         return [
-            'ast_data'   => $astData,        // structured AST info
-            'ai_results' => $multiPassResults, // e.g. { "doc_generation": "...", "security_assessment": "...", ... }
+            'ast_data'   => $astData,
+            'ai_results' => $multiPassResults,
+        ];
+    }
+
+    /**
+     * A shorter summary—just a count, plus classes & functions with docblock data.
+     */
+    protected function buildSummary(array $items, int $limitMethod): array
+    {
+        $classes   = array_filter($items, fn($it) => $it['type'] === 'Class');
+        $functions = array_filter($items, fn($it) => $it['type'] === 'Function');
+
+        $methodCount = 0;
+        $classData = [];
+        foreach ($classes as $cls) {
+            $allMethods = $cls['details']['methods'] ?? [];
+            if ($limitMethod > 0 && \count($allMethods) > $limitMethod) {
+                $allMethods = \array_slice($allMethods, 0, $limitMethod);
+            }
+            $methodCount += \count($allMethods);
+
+            $classData[] = [
+                'name'        => $cls['name'],
+                'namespace'   => $cls['namespace'] ?? '',
+                'annotations' => $cls['annotations'] ?? [],
+                'description' => $cls['details']['description'] ?? '',
+                'methods'     => $allMethods,
+            ];
+        }
+
+        return [
+            'class_count'    => \count($classData),
+            'function_count' => \count($functions),
+            'method_count'   => $methodCount,
+            'classes'        => array_values($classData),
+            'functions'      => array_values($functions),
         ];
     }
 
