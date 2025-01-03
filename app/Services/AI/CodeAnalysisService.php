@@ -4,6 +4,7 @@ namespace App\Services\AI;
 
 use App\Services\AI\OpenAIService;
 use Illuminate\Support\Facades\Log;
+use App\Services\Parsing\ParserService;
 use Exception;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
@@ -12,10 +13,13 @@ class CodeAnalysisService
 {
     protected OpenAIService $openAIService;
 
-    public function __construct(OpenAIService $openAIService)
+    public function __construct(OpenAIService $openAIService, ParserService $parserService)
     {
         $this->openAIService = $openAIService;
+        $this->parserService = $parserService;
     }
+
+    protected ParserService $parserService;
 
     /**
      * Send an analysis request to OpenAI API.
@@ -25,7 +29,10 @@ class CodeAnalysisService
      */
     public function sendAnalysisRequest(string $input): array
     {
-        try {
+        // Example usage of ParserService to normalize input if it's a file path
+        if (is_string($input) && file_exists($input)) {
+            $input = $this->parserService->normalizePath($input);
+        }
             $responseText = $this->openAIService->performOperation('code_analysis', [
                 'prompt' => $input,
             ]);
