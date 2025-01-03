@@ -39,8 +39,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $result = [
             'nodeType' => $node->getType(),
             'attributes' => $node->getAttributes(),
-            'ast' => $this->astToArray($node),
-            'ast' => $this->astToArray($node),
         ];
 
         foreach ($node->getSubNodeNames() as $subNodeName) {
@@ -146,6 +144,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'fully_qualified_name' => $this->currentClassName 
                                         ? "{$this->currentClassName}::{$node->name->name}" 
                                         : "::{$node->name->name}",
+            'ast' => $this->astToArray($node),
         ];
     }
 
@@ -194,6 +193,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'attributes' => $this->collectAttributes($node->attrGroups),
             'file' => $this->currentFile,
             'line' => $node->getStartLine(),
+            'ast' => $this->astToArray($node),
         ];
     }
 

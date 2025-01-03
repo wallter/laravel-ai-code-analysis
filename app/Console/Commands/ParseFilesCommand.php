@@ -117,10 +117,9 @@ class ParseFilesCommand extends Command
                     'line_number' => $item['line'],
                     'annotations' => $item['annotations'] ?: [],
                     'attributes' => $item['attributes'] ?: [],
-                    'details' => array_merge($item['details'] ?: [], [
-                        'restler_tags' => $item['restler_tags'] ?? [],
-                    ]),
-                    'ast' => $item['ast'],
+                    'details' => $item['details'] ?? [],
+                    'ast' => $item['ast'] ?? null,
+                    'fully_qualified_name' => $item['fully_qualified_name'] ?? null,
                 ]
             );
 
@@ -145,10 +144,10 @@ class ParseFilesCommand extends Command
                             'namespace' => $method['namespace'] ?? '',
                             'visibility' => $method['visibility'] ?? '',
                             'is_static' => $method['isStatic'] ?? false,
-                            'fully_qualified_name' => ($item['fullyQualifiedName'] ?? '') . '::' . $method['name'],
+                            'fully_qualified_name' => ($item['fully_qualified_name'] ?? '') . '::' . $method['name'],
                             'operation_summary' => $method['operation_summary'] ?? '',
                             'called_methods' => $method['called_methods'] ?? [],
-                            'ast' => $method['ast'],
+                            'ast' => $method['ast'] ?? null,
                         ]
                     );
                 });
@@ -193,7 +192,7 @@ class ParseFilesCommand extends Command
                     if (!empty($item['details']['description'])) {
                         $details .= ' - ' . $item['details']['description'];
                     }
-                    $allAnnotations = collect($item['annotations'])->merge($item['restler_tags'] ?? [])->toArray();
+                    $allAnnotations = collect($item['annotations'])->merge($item['details']['restler_tags'] ?? [])->toArray();
                     $annotations = collect($allAnnotations)->map(function($values, $tag) {
                         return collect($values)->map(fn($value) => "@{$tag} {$value}")->implode("\n");
                     })->implode("\n");
@@ -248,11 +247,16 @@ class ParseFilesCommand extends Command
     private function decodeAstProperties(array $items): array
     {
         return collect($items)->map(function ($item) {
+            // Ensure 'ast' is correctly formatted as an array
+            // No additional processing needed since astToArray already returns arrays
+
             if (isset($item['ast']) && is_array($item['ast'])) {
+                // Example processing can be done here if needed
             }
             if (isset($item['details']['methods']) && is_array($item['details']['methods'])) {
                 $item['details']['methods'] = collect($item['details']['methods'])->map(function ($method) {
                     if (isset($method['ast']) && is_array($method['ast'])) {
+                        // Example processing can be done here if needed
                     }
                     return $method;
                 })->toArray();
