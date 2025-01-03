@@ -17,6 +17,7 @@ class CodeAnalysis extends Model
         'current_pass',      // Added
         'completed_passes',  // Added
     ];
+}
 
     protected $casts = [
         'ast' => 'array',
