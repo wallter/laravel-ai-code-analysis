@@ -8,6 +8,7 @@ use App\Services\AI\CodeAnalysisService;
 use App\Models\CodeAnalysis; // Assuming a model for persistence
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Config;
 
 class AnalyzeCodeCommand extends Command
 {
@@ -16,7 +17,10 @@ class AnalyzeCodeCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'code:analyze {directory}';
+    protected $signature = 'code:analyze {directory} 
+                                {--output-file= : Specify the output file for the analysis results}
+                                {--limit-class= : Limit analysis to a specific number of classes}
+                                {--limit-method= : Limit analysis to a specific number of methods per class}';
 
     /**
      * The console command description.
@@ -53,12 +57,17 @@ class AnalyzeCodeCommand extends Command
         if (!is_dir($directory)) {
             $this->error("The directory '{$directory}' does not exist.");
             return 1;
-            $bar->advance();
         }
 
-        DB::commit();
-        $bar->finish();
-        $this->newLine();
+        // Retrieve options
+        $outputFile = $this->option('output-file');
+        $limitClass = intval($this->option('limit-class')) ?: Config::get('ai.analysis_limits.limit_class', 0);
+        $limitMethod = intval($this->option('limit-method')) ?: Config::get('ai.analysis_limits.limit_method', 0);
+
+        // Apply limits if set
+        if ($limitClass > 0) {
+            $phpFiles = array_slice($phpFiles, 0, $limitClass);
+        }
 
         $this->info("Starting analysis for directory: {$directory}");
 
@@ -70,10 +79,12 @@ class AnalyzeCodeCommand extends Command
 
         DB::beginTransaction();
 
+        $analysisResults = [];
+
         foreach ($phpFiles as $filePath) {
             try {
                 $ast = $this->parserService->parseFile($filePath);
-                $analysis = $this->codeAnalysisService->analyzeAst($ast);
+                $analysis = $this->codeAnalysisService->analyzeAst($ast, $limitMethod);
 
                 // Persist the analysis using updateOrCreate
                 CodeAnalysis::updateOrCreate(
@@ -84,6 +95,10 @@ class AnalyzeCodeCommand extends Command
                     ]
                 );
 
+                if ($outputFile) {
+                    $analysisResults[$filePath] = $analysis;
+                }
+
                 $this->info("Successfully analyzed and persisted: {$filePath}");
             } catch (\Exception $e) {
                 Log::error("Analysis failed for {$filePath}: " . $e->getMessage());
@@ -91,8 +106,28 @@ class AnalyzeCodeCommand extends Command
             }
         }
 
+        if ($outputFile) {
+            $this->exportResults($outputFile, $analysisResults);
+            $this->info("Analysis results exported to {$outputFile}");
+        }
+
         $this->info("Code analysis completed.");
 
         return 0;
+    }
+    /**
+     * Export analysis results to a specified output file.
+     *
+     * @param string $filePath
+     * @param array $data
+     * @return void
+     */
+    protected function exportResults(string $filePath, array $data): void
+    {
+        $jsonData = json_encode($data, JSON_PRETTY_PRINT);
+        if (file_put_contents($filePath, $jsonData) === false) {
+            $this->error("Failed to write analysis results to {$filePath}");
+            Log::error("Failed to write analysis results to {$filePath}");
+        }
     }
 }

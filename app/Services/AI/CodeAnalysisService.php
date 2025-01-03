@@ -43,9 +43,10 @@ class CodeAnalysisService
      * Analyze the given AST and return analysis results.
      *
      * @param array $ast
+     * @param int $limitMethod
      * @return array
      */
-    public function analyzeAst(array $ast): array
+    public function analyzeAst(array $ast, int $limitMethod = 0): array
     {
         // Implement your AST analysis logic here.
         // For example, count classes, methods, functions, etc.
@@ -54,46 +55,42 @@ class CodeAnalysisService
         $nodeTraverser->addVisitor(new NameResolver());
         $ast = $nodeTraverser->traverse($ast);
 
-        $classCount = 0;
-        $methodCount = 0;
-        $functionCount = 0;
+        $analysisResults = [
+            'class_count' => 0,
+            'method_count' => 0,
+            'function_count' => 0,
+            'classes' => [],
+        ];
 
-        $nodeQueue = $ast;
-
-        while (!empty($nodeQueue)) {
-            $node = array_shift($nodeQueue);
-
+        foreach ($ast as $node) {
             if ($node instanceof \PhpParser\Node\Stmt\ClassLike) {
-                $classCount++;
+                $analysisResults['class_count']++;
+
+                $className = $node->name ? $node->name->toString() : 'Anonymous Class';
+                $methodCount = 0;
+                $methods = [];
+
                 foreach ($node->getMethods() as $method) {
+                    if ($limitMethod > 0 && $methodCount >= $limitMethod) {
+                        break;
+                    }
                     $methodCount++;
+                    $methods[] = $method->name->toString();
                 }
+
+                $analysisResults['method_count'] += $methodCount;
+
+                $analysisResults['classes'][] = [
+                    'name' => $className,
+                    'methods' => $methods,
+                ];
             }
 
             if ($node instanceof \PhpParser\Node\Stmt\Function_) {
-                $functionCount++;
-            }
-
-            // Add child nodes to the queue for further traversal
-            foreach ($node->getSubNodeNames() as $subNodeName) {
-                $subNode = $node->$subNodeName;
-                if (is_array($subNode)) {
-                    foreach ($subNode as $childNode) {
-                        if ($childNode instanceof \PhpParser\Node) {
-                            $nodeQueue[] = $childNode;
-                        }
-                    }
-                } elseif ($subNode instanceof \PhpParser\Node) {
-                    $nodeQueue[] = $subNode;
-                }
+                $analysisResults['function_count']++;
             }
         }
 
-        return [
-            'class_count' => $classCount,
-            'method_count' => $methodCount,
-            'function_count' => $functionCount,
-            // Add more analysis metrics as needed
-        ];
+        return $analysisResults;
     }
 }

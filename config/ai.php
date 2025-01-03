@@ -89,6 +89,20 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Code Analysis Limits
+    |--------------------------------------------------------------------------
+    |
+    | Define default limits for classes and methods during code analysis.
+    | These can be overridden via command-line options.
+    |
+    */
+    'analysis_limits' => [
+        'limit_class' => env('ANALYSIS_LIMIT_CLASS', 0), // 0 means no limit
+        'limit_method' => env('ANALYSIS_LIMIT_METHOD', 0), // 0 means no limit
+    ],
+
     'ast_insights' => [
         'model' => env('AST_INSIGHTS_MODEL', 'gpt-3.5-turbo'),
         'max_tokens' => env('AST_INSIGHTS_MAX_TOKENS', 300),
