@@ -13,6 +13,7 @@ return [
     |
     */
 
+    // 1. API Credentials
     'openai_api_key' => env('OPENAI_API_KEY'),
 
     /*
@@ -20,9 +21,22 @@ return [
     | Default Model, Tokens, Temperature
     |--------------------------------------------------------------------------
     */
-    'openai_model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
-    'max_tokens'   => env('OPENAI_MAX_TOKENS', 500),
-    'temperature'  => env('OPENAI_TEMPERATURE', 0.5),
+    /*
+    |--------------------------------------------------------------------------
+    | Default AI Model Settings
+    |--------------------------------------------------------------------------
+    |
+    | These settings serve as the default configuration for AI operations,
+    | unless overridden by specific operation configurations.
+    |
+    */
+
+    'default' => [
+        'model'       => env('AI_DEFAULT_MODEL', 'gpt-4o-mini'),
+        'max_tokens'  => env('AI_DEFAULT_MAX_TOKENS', 500),
+        'temperature' => env('AI_DEFAULT_TEMPERATURE', 0.5),
+        'system_message' => 'You are a helpful AI assistant.',
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -37,6 +51,20 @@ return [
     |  - prompt (fallback text if user doesn't supply one)
     |
     */
+    /*
+    |--------------------------------------------------------------------------
+    | AI Operations
+    |--------------------------------------------------------------------------
+    |
+    | Define each AI operation your application will utilize. Each operation
+    | can inherit default settings or override them as needed.
+    |
+    | Available Drivers:
+    | - 'chat': For chat-based models like ChatGPT.
+    | - 'completion': For standard completion models.
+    |
+    */
+
     'operations' => [
 
         'code_analysis' => [
@@ -131,40 +159,19 @@ return [
         | optionally a custom prompt or system_message override.
         |
         */
-        'multi_pass_analysis' => [
+    /*
+    |--------------------------------------------------------------------------
+    | Analysis Limits
+    |--------------------------------------------------------------------------
+    |
+    | Settings to limit the scope of analysis, such as the maximum number of
+    | classes or methods to analyze per file. A value of 0 means no limit.
+    |
+    */
 
-            'pass_order' => [
-                'doc_generation',
-                'refactor_suggestions',
-            ],
-
-            'doc_generation' => [
-                'operation'    => 'code_analysis',
-                'type'         => 'both',
-                'max_tokens'   => 1000,
-                'temperature'  => 0.3,
-                'prompt'       => implode("\n", [
-                    "You are a concise documentation generator for a PHP codebase.",
-                    "Create a short but clear doc from the AST data + raw code:",
-                    "- Summarize only essential info: class or trait's purpose, key methods, parameters, usage context.",
-                    "- Mention custom annotations (@url, etc.), but keep it under ~200 words.",
-                    "Be succinct and well-structured."
-                ]),
-            ],
-
-            'refactor_suggestions' => [
-                'operation'    => 'code_improvements',
-                'type'         => 'raw',
-                'max_tokens'   => 1800,
-                'temperature'  => 0.6,
-                'prompt'       => implode("\n", [
-                    "You are a senior PHP engineer analyzing the raw code. Provide actionable refactoring suggestions:",
-                    "- Focus on structural changes (class splitting, design patterns)",
-                    "- Emphasize SOLID principles, especially SRP",
-                    "- Discuss how to reduce duplication, enhance naming clarity, and improve maintainability",
-                    "Write your suggestions in a concise list or short paragraphs."
-                ]),
-            ],
-        ],
+    'analysis_limits' => [
+        'limit_class'  => env('ANALYSIS_LIMIT_CLASS', 0),  // 0 = no limit
+        'limit_method' => env('ANALYSIS_LIMIT_METHOD', 0), // 0 = no limit
+    ],
     ],
 ];
