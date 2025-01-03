@@ -6,6 +6,7 @@ namespace App\Services\Parsing;
 use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 use Illuminate\Support\Collection;
+use PhpParser\Modifiers;
 
 /**
  * Collects both free-floating functions and classes with methods/attributes.
@@ -401,16 +402,16 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $names = [];
 
         // Visibility
-        if ($flags & Node\Stmt\Class_::MODIFIER_PUBLIC) {
+        if ($flags & Modifiers::PUBLIC) {
             $names[] = 'public';
-        } elseif ($flags & Node\Stmt\Class_::MODIFIER_PROTECTED) {
+        } elseif ($flags & Modifiers::PROTECTED) {
             $names[] = 'protected';
-        } elseif ($flags & Node\Stmt\Class_::MODIFIER_PRIVATE) {
+        } elseif ($flags & Modifiers::PRIVATE) {
             $names[] = 'private';
         }
 
         // Static?
-        if ($flags & Node\Stmt\Class_::MODIFIER_STATIC) {
+        if ($flags & Modifiers::STATIC) {
             $names[] = 'static';
         }
 
