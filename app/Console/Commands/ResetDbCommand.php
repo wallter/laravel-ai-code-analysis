@@ -26,16 +26,16 @@ class ResetDbCommand extends Command
             $this->info("No existing SQLite database found at: {$dbPath}");
         }
 
-        // 3) Re-run migrations
-        // This will recreate the DB file if your migrations define that.
-        $exitCode = Artisan::call('migrate', [
+        // 3) Re-run migrations fresh
+        // migrate:fresh drops all tables and re-runs migrations
+        $exitCode = Artisan::call('migrate:fresh', [
             '--force' => true, // needed in non-interactive or production-like environments
         ]);
 
         if ($exitCode === 0) {
-            $this->info("Database successfully reset and migrations run.");
+            $this->info("Database successfully reset and migrations fresh run.");
         } else {
-            $this->error("Error running migrations. Check the logs above.");
+            $this->error("Error running migrations fresh. Check the logs above.");
         }
 
         return $exitCode;
