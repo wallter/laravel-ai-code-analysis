@@ -2,9 +2,10 @@
 
 namespace App\Providers;
 
+use App\Services\AI\CodeAnalysisService;
+use App\Services\AI\OpenAIService;
 use Illuminate\Support\ServiceProvider;
 use App\Services\Parsing\ParserService;
-use App\Services\AI\DocEnhancer;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,10 +16,6 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ParserService::class, function ($app) {
             return new ParserService();
-        });
-        
-        $this->app->singleton(DocEnhancer::class, function ($app) {
-            return new DocEnhancer();
         });
 
         $this->app->singleton(CodeAnalysisService::class, function ($app) {
