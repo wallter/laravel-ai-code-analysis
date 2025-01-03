@@ -286,7 +286,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             $value = $this->argToString($item->value);
             $elements[] = $key . $value;
         }
-        return '[' . implode(', ', $elements) . ']';
+            return '[' . implode(', ', $elements) . ']';
     }
 
     /**
@@ -388,26 +388,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         } else {
             return '';
         }
-    }
-
-    /**
-     * Resolve the namespace of a class node.
-     *
-     * @param Node $node
-     * @return string
-     */
-    private function getNamespace(Node $node): string
-    {
-        $namespace = '';
-        $current = $node;
-        while ($current->getAttribute('parent')) {
-            $current = $current->getAttribute('parent');
-            if ($current instanceof Node\Stmt\Namespace_) {
-                $namespace = $current->name ? $current->name->toString() : '';
-                break;
-            }
-        }
-        return $namespace;
     }
 
     /**
