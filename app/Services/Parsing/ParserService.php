@@ -178,7 +178,7 @@ class ParserService
 
             return $functions;
         } catch (\Exception $e) {
-            Log::error("Failed to extract functions from {$filePath}", ['exception' => $e]);
+            error("Failed to extract functions from {$filePath}", ['exception' => $e]);
             return [];
         }
     }

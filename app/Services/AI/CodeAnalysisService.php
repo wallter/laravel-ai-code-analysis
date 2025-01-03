@@ -36,8 +36,8 @@ class CodeAnalysisService
     {
         $completedPasses = $codeAnalysis->completed_passes ?? [];
 
-        $passOrder = Config::get('ai.operations.multi_pass_analysis.pass_order', []);
-        $multiPasses = Config::get('ai.operations.multi_pass_analysis.multi_pass_analysis', []);
+        $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
+        $multiPasses = config('ai.operations.multi_pass_analysis.multi_pass_analysis', []);
 
         // Determine the next pass to execute
         $nextPass = null;
@@ -49,7 +49,7 @@ class CodeAnalysisService
         }
 
         if (!$nextPass) {
-            Log::info("All passes completed for [{$codeAnalysis->file_path}].");
+            info("All passes completed for [{$codeAnalysis->file_path}].");
             return;
         }
 
@@ -87,7 +87,7 @@ class CodeAnalysisService
 
             $codeAnalysis->save();
 
-            Log::info("Pass [{$nextPass}] completed for [{$codeAnalysis->file_path}].");
+            info("Pass [{$nextPass}] completed for [{$codeAnalysis->file_path}].");
         } catch (\Throwable $e) {
             Log::error("Failed to perform pass [{$nextPass}] for [{$codeAnalysis->file_path}]: {$e->getMessage()}");
             // Optionally, implement retry logic or mark as failed
@@ -253,7 +253,7 @@ class CodeAnalysisService
         $results = [];
 
         // Retrieve passes from config
-        $multiPasses = Config::get('ai.operations.multi_pass_analysis.multi_pass_analysis', []);
+        $multiPasses = config('ai.operations.multi_pass_analysis.multi_pass_analysis', []);
 
         // For each pass (e.g. doc_generation, refactor_suggestions, etc.)
         foreach ($multiPasses as $passName => $passCfg) {

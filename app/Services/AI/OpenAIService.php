@@ -26,12 +26,12 @@ class OpenAIService
     public function performOperation(string $operationIdentifier, array $params = []): string
     {
         // 1) Retrieve config for this operation
-        $operationConfig = Config::get("ai.operations.{$operationIdentifier}", []);
+        $operationConfig = config("ai.operations.{$operationIdentifier}", []);
 
         // 2) Determine model, system message, tokens, temperature, etc.
-        $model       = $operationConfig['model']       ?? Config::get('ai.openai_model', 'gpt-4o-mini');
-        $maxTokens   = $operationConfig['max_tokens']  ?? Config::get('ai.max_tokens', 500);
-        $temperature = $operationConfig['temperature'] ?? Config::get('ai.temperature', 0.5);
+        $model       = $operationConfig['model']       ?? config('ai.openai_model', 'gpt-4o-mini');
+        $maxTokens   = $operationConfig['max_tokens']  ?? config('ai.max_tokens', 500);
+        $temperature = $operationConfig['temperature'] ?? config('ai.temperature', 0.5);
 
         // 3) If a specialized system message is in config, use it; else fallback.
         //    We'll store it under 'system_message' or similar in config.
@@ -82,14 +82,14 @@ class OpenAIService
         }
 
         try {
-            Log::info("Sending chat request to OpenAI [{$operationIdentifier}]", [
+            info("Sending chat request to OpenAI [{$operationIdentifier}]", [
                 'payload' => array_merge($payload, ['messages' => '<<omitted for brevity>>']),
             ]);
 
             // 6) Execute the chat() call
             $response = OpenAIFacade::chat()->create($payload);
 
-            Log::info("Received chat response from OpenAI [{$operationIdentifier}]", [
+            info("Received chat response from OpenAI [{$operationIdentifier}]", [
                 'response' => $response,
             ]);
 

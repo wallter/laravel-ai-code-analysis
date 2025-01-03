@@ -51,7 +51,7 @@ class AnalyzeCodeCommand extends BaseCodeCommand
             $limitClass = $this->getClassLimit();
             $limitMethod= $this->getMethodLimit();
 
-            Log::info('AnalyzeCodeCommand starting.', [
+            info('AnalyzeCodeCommand starting.', [
                 'file_count'   => $phpFiles->count(),
                 'limit_class'  => $limitClass,
                 'limit_method' => $limitMethod,
@@ -85,7 +85,7 @@ class AnalyzeCodeCommand extends BaseCodeCommand
             foreach ($phpFiles as $filePath) {
                 $bar->advance();
                 $this->lineIfVerbose("Analyzing file: [{$filePath}]");
-                Log::info("Analyzing file: {$filePath}");
+                info("Analyzing file: {$filePath}");
 
                 try {
                     // The main multi-pass analysis
@@ -121,9 +121,9 @@ class AnalyzeCodeCommand extends BaseCodeCommand
                         $analysisResults->put($filePath, $analysisData);
                     }
 
-                    Log::info("File [{$filePath}] analyzed successfully.");
+                    info("File [{$filePath}] analyzed successfully.");
                 } catch (\Throwable $e) {
-                    Log::error("Analysis failed for [{$filePath}]: {$e->getMessage()}", [
+                    error("Analysis failed for [{$filePath}]: {$e->getMessage()}", [
                         'exception' => $e,
                     ]);
                     $this->error("Error analyzing file [{$filePath}]. Check logs for more info.");
@@ -140,11 +140,11 @@ class AnalyzeCodeCommand extends BaseCodeCommand
 
             $duration = round(microtime(true) - $startTime, 2);
             $this->info("Analysis complete. Time: {$duration}s");
-            Log::info("AnalyzeCodeCommand completed successfully.", ['duration' => $duration]);
+            info("AnalyzeCodeCommand completed successfully.", ['duration' => $duration]);
             return 0;
         } catch (\Throwable $th) {
             DB::rollBack();
-            Log::error("AnalyzeCodeCommand encountered an error.", ['exception' => $th]);
+            error("AnalyzeCodeCommand encountered an error.", ['exception' => $th]);
             $this->error("A fatal error occurred. Check logs for details.");
             return 1;
         }
@@ -188,7 +188,7 @@ class AnalyzeCodeCommand extends BaseCodeCommand
                 'analysisResultsCount' => count($data),
             ]);
         } catch (\Throwable $e) {
-            Log::error("Could not export results to [{$filePath}]: " . $e->getMessage());
+            error("Could not export results to [{$filePath}]: " . $e->getMessage());
             $this->error("Failed to export JSON to [{$filePath}]. See logs for details.");
         }
     }

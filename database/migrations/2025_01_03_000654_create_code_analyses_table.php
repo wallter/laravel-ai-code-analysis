@@ -19,6 +19,8 @@ return new class extends Migration
             $table->json('ast');
             $table->json('analysis');
             $table->text('ai_output')->nullable();
+            $table->integer('current_pass')->default(0);
+            $table->json('completed_passes')->nullable();
             $table->timestamps();
         });
     }
