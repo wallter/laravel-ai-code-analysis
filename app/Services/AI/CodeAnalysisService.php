@@ -34,9 +34,14 @@ class CodeAnalysisService
      */
     public function processNextPass(CodeAnalysis $codeAnalysis): void
     {
+        // Ensure 'completed_passes' is an array
         $completedPasses = $codeAnalysis->completed_passes ?? [];
+        if (!is_array($completedPasses)) {
+            $completedPasses = json_decode($completedPasses, true) ?? [];
+        }
 
         $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
+        $passOrderCount = count($passOrder);
         $multiPasses = config('ai.operations.multi_pass_analysis.multi_pass_analysis', []);
 
         // Determine the next pass to execute
@@ -89,8 +94,8 @@ class CodeAnalysisService
 
             info("Pass [{$nextPass}] completed for [{$codeAnalysis->file_path}].");
         } catch (\Throwable $e) {
-            Log::error("Failed to perform pass [{$nextPass}] for [{$codeAnalysis->file_path}]: {$e->getMessage()}");
-            // Optionally, implement retry logic or mark as failed
+            Log::error("Failed to perform pass [{$nextPass}] for [{$codeAnalysis->file_path}]: {$e->getMessage()}", ['exception' => $e]);
+            $this->error("Failed to process pass for [{$codeAnalysis->file_path}]: {$e->getMessage()}");
         }
     }
 
