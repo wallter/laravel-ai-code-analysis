@@ -34,9 +34,9 @@ class DbBackup extends Command
      */
     public function handle(): int
     {
-        // Define source and default backup paths
-        $sourceDatabase = base_path('database/database.sqlite');
-        $backupPath = $this->option('path') ?: base_path('database/backups');
+        // Define source and default backup paths using database_path()
+        $sourceDatabase = database_path('database.sqlite');
+        $backupPath = $this->option('path') ?: database_path('backups');
 
         // Ensure the source database file exists
         if (!File::exists($sourceDatabase)) {
