@@ -30,9 +30,10 @@ class CodeAnalysisService
      * Process the next AI pass for a given CodeAnalysis record.
      *
      * @param CodeAnalysis $codeAnalysis
+     * @param bool $dryRun
      * @return void
      */
-    public function processNextPass(CodeAnalysis $codeAnalysis): void
+    public function processNextPass(CodeAnalysis $codeAnalysis, bool $dryRun = false): void
     {
         // Ensure 'completed_passes' is an array
         $completedPasses = $codeAnalysis->completed_passes ?? [];
@@ -80,19 +81,23 @@ class CodeAnalysisService
                 'temperature' => $passConfig['temperature'] ?? 0.5,
             ]);
 
-            // Append the response to ai_output
-            $aiOutput = json_decode($codeAnalysis->ai_output, true) ?? [];
-            $aiOutput[$nextPass] = $responseText;
-            $codeAnalysis->ai_output = json_encode($aiOutput, JSON_UNESCAPED_SLASHES);
+            if (!$dryRun) {
+                // Append the response to ai_output
+                $aiOutput = json_decode($codeAnalysis->ai_output, true) ?? [];
+                $aiOutput[$nextPass] = $responseText;
+                $codeAnalysis->ai_output = json_encode($aiOutput, JSON_UNESCAPED_SLASHES);
 
-            // Update completed_passes and current_pass
-            $completedPasses[] = $nextPass;
-            $codeAnalysis->completed_passes = $completedPasses;
-            $codeAnalysis->current_pass += 1;
+                // Update completed_passes and current_pass
+                $completedPasses[] = $nextPass;
+                $codeAnalysis->completed_passes = $completedPasses;
+                $codeAnalysis->current_pass += 1;
 
-            $codeAnalysis->save();
+                $codeAnalysis->save();
 
-            info("Pass [{$nextPass}] completed for [{$codeAnalysis->file_path}].");
+                info("Pass [{$nextPass}] completed for [{$codeAnalysis->file_path}].");
+            } else {
+                Log::info("Dry-run: Would append pass [{$nextPass}] to ai_output and completed_passes for [{$codeAnalysis->file_path}].");
+            }
         } catch (\Throwable $e) {
             Log::error("Failed to perform pass [{$nextPass}] for [{$codeAnalysis->file_path}]: {$e->getMessage()}", ['exception' => $e]);
             $this->error("Failed to process pass for [{$codeAnalysis->file_path}]: {$e->getMessage()}");
