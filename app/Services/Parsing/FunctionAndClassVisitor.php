@@ -32,30 +32,30 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     }
 
     /**
-     * Recursively converts a PhpParser Node into a JSON string.
+     * Recursively converts a PhpParser Node into an associative array.
      *
      * @param Node $node
      * @param int $currentDepth
-     * @return string
+     * @return array
      */
-    private function astToJson(Node $node, int $currentDepth = 0): string
+    private function astToArray(Node $node, int $currentDepth = 0): array
     {
         // Check for maximum depth to prevent deep recursion
         if ($currentDepth > $this->maxDepth) {
-            return json_encode([
+            return [
                 'nodeType' => $node->getType(),
                 'attributes' => $node->getAttributes(),
                 'note' => 'Max depth reached, recursion stopped.',
-            ]) ?: '{}';
+            ];
         }
 
         // Detect and prevent processing the same node multiple times
         if ($this->processedNodes->contains($node)) {
-            return json_encode([
+            return [
                 'nodeType' => $node->getType(),
                 'attributes' => $node->getAttributes(),
                 'note' => 'Recursion detected, node already processed.',
-            ]) ?: '{}';
+            ];
         }
 
         // Mark the current node as processed
@@ -69,50 +69,17 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         foreach ($node->getSubNodeNames() as $subNodeName) {
             $subNode = $node->$subNodeName;
             if ($subNode instanceof Node) {
-                $subNodeJson = $this->astToJson($subNode, $currentDepth + 1);
-                if ($subNodeJson === false) {
-                    // Handle json_encode failure
-                    $result[$subNodeName] = [
-                        'nodeType' => $subNode->getType(),
-                        'attributes' => $subNode->getAttributes(),
-                        'note' => 'Failed to encode AST node to JSON.',
-                    ];
-                } else {
-                    $result[$subNodeName] = json_decode($subNodeJson, true);
-                }
+                $result[$subNodeName] = $this->astToArray($subNode, $currentDepth + 1);
             } elseif (is_array($subNode)) {
                 $result[$subNodeName] = array_map(function ($item) use ($currentDepth) {
-                    if ($item instanceof Node) {
-                        $itemJson = $this->astToJson($item, $currentDepth + 1);
-                        return $itemJson !== false ? json_decode($itemJson, true) : [
-                            'nodeType' => $item->getType(),
-                            'attributes' => $item->getAttributes(),
-                            'note' => 'Failed to encode AST node to JSON.',
-                        ];
-                    }
-                    return $item;
+                    return ($item instanceof Node) ? $this->astToArray($item, $currentDepth + 1) : $item;
                 }, $subNode);
             } else {
                 $result[$subNodeName] = $subNode;
             }
         }
 
-        $json = json_encode($result);
-        if ($json === false) {
-            // Fallback in case json_encode fails
-            $fallback = json_encode([
-                'nodeType' => $node->getType(),
-                'attributes' => $node->getAttributes(),
-                'note' => 'Failed to encode AST node to JSON.',
-            ]);
-            if ($fallback === false) {
-                // As a last resort, return an empty JSON object
-                return '{}';
-            }
-            return $fallback;
-        }
-
-        return $json;
+        return $result;
     }
 
     /**
@@ -202,7 +169,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'fully_qualified_name' => $this->currentClassName 
                                         ? "{$this->currentClassName}::{$node->name->name}" 
                                         : "::{$node->name->name}",
-            'ast' => $this->astToJson($node),
+            'ast' => $this->astToArray($node),
         ];
     }
 
@@ -233,7 +200,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
                 'isStatic' => $method->isStatic(),
                 'line' => $method->getStartLine(),
                 'fully_qualified_name' => "{$node->name->name}::{$method->name->name}",
-                'ast' => $this->astToJson($method),
+                'ast' => $this->astToArray($method),
             ];
         }
 
@@ -251,7 +218,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'attributes' => $this->collectAttributes($node->attrGroups),
             'file' => $this->currentFile,
             'line' => $node->getStartLine(),
-            'ast' => $this->astToJson($node),
+            'ast' => $this->astToArray($node),
         ];
     }
 
