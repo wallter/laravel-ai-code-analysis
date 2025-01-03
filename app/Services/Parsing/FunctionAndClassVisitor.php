@@ -129,6 +129,16 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     }
 
     /**
+     * Returns all discovered classes.
+     */
+    public function getClasses(): array
+    {
+        return array_filter($this->items, function($item) {
+            return $item['type'] === 'Class';
+        });
+    }
+
+    /**
      * Collects data for a standalone function.
      */
     private function collectFunctionData(Node\Stmt\Function_ $node): array

@@ -61,7 +61,7 @@ class CodeAnalysisService
         $ast = $this->parserService->parseFile($filePath);
 
         // Initialize visitors
-        $classVisitor = new \App\Services\Parsing\ClassVisitor();
+        $classVisitor = new \App\Services\Parsing\FunctionAndClassVisitor();
         $functionVisitor = new \App\Services\Parsing\FunctionVisitor();
 
         // Traverse AST with visitors
