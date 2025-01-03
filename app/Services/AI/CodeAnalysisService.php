@@ -36,35 +36,35 @@ class CodeAnalysisService
     }
 
     /**
-     * 分析单个函数的 AST 节点。
+     * Analyze a single function's AST node.
      *
-     * @param Function_ $function AST 节点的函数
-     * @return array 分析数据
+     * @param Function_ $function The function AST node
+     * @return array Analysis data
      */
     public function analyzeFunctionAst(Function_ $function): array
     {
         $functionName = $function->name->toString();
-        Log::debug("开始分析函数: {$functionName}");
+        Log::debug("Starting analysis of function: {$functionName}");
 
         try {
-            // 收集参数
+            // Collect parameters
             $parameters = [];
             foreach ($function->params as $param) {
                 $paramName = $param->var->name;
                 $parameters[] = $paramName;
             }
-            Log::debug("函数参数: ", ['parameters' => $parameters]);
+            Log::debug("Function parameters: ", ['parameters' => $parameters]);
 
-            // 收集返回类型
+            // Collect return type
             $returnType = $function->getReturnType() ? $function->getReturnType()->toString() : 'void';
-            Log::debug("函数返回类型: {$returnType}");
+            Log::debug("Function return type: {$returnType}");
 
-            // 获取函数体代码
+            // Get function body code
             $stmts = $function->getStmts();
             $functionBody = $stmts ? $this->printer->prettyPrint($stmts) : '';
-            Log::debug("函数体代码长度: " . strlen($functionBody));
+            Log::debug("Function body code length: " . strlen($functionBody));
 
-            // 使用 OpenAIService 进行 AI 分析
+            // Use OpenAIService for AI analysis
             $analysisData = $this->openAIService->performOperation('analyze_function', [
                 'function_name' => $functionName,
                 'parameters'    => $parameters,
@@ -72,13 +72,13 @@ class CodeAnalysisService
                 'function_body' => $functionBody,
             ]);
 
-            Log::debug("完成分析函数: {$functionName}", [
+            Log::debug("Completed analysis of function: {$functionName}", [
                 'analysisData' => $analysisData,
             ]);
 
             return $analysisData;
         } catch (\Exception $e) {
-            Log::error("分析函数时出错: {$functionName}", [
+            Log::error("Error analyzing function: {$functionName}", [
                 'exception' => $e,
             ]);
             return [];
@@ -172,7 +172,7 @@ class CodeAnalysisService
         try {
             return File::get($filePath);
         } catch (\Throwable $t) {
-            Log::warning("Failed to retrieve file contents [{$filePath}]: ".$t->getMessage());
+            Log::warning("Failed to retrieve file contents [{$filePath}]: " . $t->getMessage());
             return '';
         }
     }
@@ -211,7 +211,7 @@ class CodeAnalysisService
 
                 $results[$passName] = $response;
             } catch (Exception $ex) {
-                Log::error("Multi-pass [{$passName}] failed: ".$ex->getMessage());
+                Log::error("Multi-pass [{$passName}] failed: " . $ex->getMessage());
                 $results[$passName] = ''; // or store error
             }
         }

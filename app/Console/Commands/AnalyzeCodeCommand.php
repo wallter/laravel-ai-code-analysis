@@ -153,6 +153,7 @@ class AnalyzeCodeCommand extends BaseCodeCommand
 
                             if ($outputFile) {
                                 $analysisResults->put("{$filePath}::{$function['name']}", $analysisData);
+                                Log::debug("Added analysis data to results for export: {$filePath}::{$function['name']}");
                             }
 
                             $fileEndTime = microtime(true);
@@ -182,11 +183,11 @@ class AnalyzeCodeCommand extends BaseCodeCommand
 
             // If requested, write analysis results to JSON
             if ($outputFile) {
-                Log::debug("即将导出分析结果到 JSON 文件: {$outputFile}", [
+                Log::debug("Exporting analysis results to JSON file: {$outputFile}", [
                     'analysisResultsCount' => $analysisResults->count(),
                 ]);
                 $this->exportResults($outputFile, $analysisResults->toArray());
-                Log::debug("已导出分析结果到 JSON 文件: {$outputFile}");
+                Log::debug("Exported analysis results to JSON file: {$outputFile}");
             }
 
             $totalEndTime = microtime(true);
@@ -198,37 +199,33 @@ class AnalyzeCodeCommand extends BaseCodeCommand
             $this->info('Code analysis completed successfully.');
             $this->info("Total time taken: {$totalDuration} seconds.");
             return 0;
-        } catch (\Throwable $e) {
-            Log::error('AnalyzeCodeCommand failed.', ['exception' => $e]);
-            $this->error('An error occurred during code analysis. See logs for details.');
-            return 1;
         }
-    }
 
-    /**
-     * Output to JSON file if requested.
-     */
-    protected function exportResults(string $filePath, array $data): void
-    {
-        try {
-            $jsonData = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-            if ($jsonData === false) {
-                throw new \RuntimeException('Failed to JSON-encode analysis results.');
+        /**
+         * Output to JSON file if requested.
+         */
+        protected function exportResults(string $filePath, array $data): void
+        {
+            try {
+                $jsonData = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+                if ($jsonData === false) {
+                    throw new \RuntimeException('Failed to JSON-encode analysis results.');
+                }
+                $dir = dirname($filePath);
+                if (!File::isDirectory($dir)) {
+                    File::makeDirectory($dir, 0775, true);
+                }
+                // Ensure the file has a .json extension
+                if (pathinfo($filePath, PATHINFO_EXTENSION) !== 'json') {
+                    $filePath .= '.json';
+                }
+                File::put($filePath, $jsonData);
+                $this->info("Analysis results saved to [{$filePath}]");
+                Log::info("Analysis results exported to [{$filePath}]");
+            } catch (\Throwable $e) {
+                Log::error("Could not write results to [{$filePath}]: " . $e->getMessage());
+                $this->error("Export to {$filePath} failed. Check logs for details.");
             }
-            $dir = dirname($filePath);
-            if (!File::isDirectory($dir)) {
-                File::makeDirectory($dir, 0775, true);
-            }
-            // Ensure the file has a .json extension
-            if (pathinfo($filePath, PATHINFO_EXTENSION) !== 'json') {
-                $filePath .= '.json';
-            }
-            File::put($filePath, $jsonData);
-            $this->info("Analysis results saved to [{$filePath}]");
-            Log::info("Analysis results exported to [{$filePath}]");
-        } catch (\Throwable $e) {
-            Log::error("Could not write results to [{$filePath}]: " . $e->getMessage());
-            $this->error("Export to {$filePath} failed. Check logs for details.");
         }
     }
 }
