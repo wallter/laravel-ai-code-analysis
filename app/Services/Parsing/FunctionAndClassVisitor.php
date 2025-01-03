@@ -11,10 +11,6 @@ use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\UnionType;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node\Identifier;
-// If your version of nikic/php-parser has Serializer\XML spelled as 'Xml':
-// use PhpParser\Serializer\Xml; 
-// Otherwise, for older versions, it might be spelled as 'XML' (all caps):
-
 /**
  * Collects both free-floating functions and classes with methods/attributes.
  */
