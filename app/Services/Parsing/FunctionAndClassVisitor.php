@@ -4,11 +4,7 @@ declare(strict_types=1);
 namespace App\Services\Parsing;
 
 use PhpParser\Node;
-use PhpParser\Node\Stmt\ClassLike;
-use PhpParser\Node\Stmt\ClassMethod;
-use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\NodeVisitorAbstract;
-use PhpParser\Modifiers;
 use Illuminate\Support\Collection;
 
 /**
@@ -25,131 +21,43 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $this->items = collect();
         $this->warnings = collect();
     }
-    
-    private $maxDepth = 2;
-    private $astSizeLimit = 100000;
-
-    private $currentFile = '';
-    private $currentClassName = '';
-    private $currentNamespace = '';
 
     /**
-     * Sets the current file being processed.
-     */
-    public function setCurrentFile(string $file)
-    {
-        $this->currentFile = $file;
-    }
-
-    /**
-     * Serialize the AST node to JSON.
+     * Returns all discovered items (functions, classes, etc.).
      *
-     * @param Node $node
-     * @return string|null
+     * @return array
      */
-    private function serializeAst(Node $node): ?string
-    {
-        return json_encode($node);
-    }
-
     public function getItems(): array
     {
         return $this->items->all();
     }
 
+    /**
+     * Returns all collected warnings.
+     *
+     * @return array
+     */
     public function getWarnings(): array
     {
-        return $this->warnings;
-    }
-
-    /**
-     * Helper to interpret method flags for visibility/static if `Class_::getModifierNames` is not available.
-     */
-    private function resolveModifierNames(int $flags): array
-    {
-        $names = [];
-
-        // These constants exist in \PhpParser\Modifier for visibility:
-        //   PUBLIC = 1
-        //   PROTECTED = 2
-        //   PRIVATE = 4
-        //   STATIC = 8
-        //   ABSTRACT = 16
-        //   FINAL = 32
-
-        // Visibility
-        if ($flags & Modifiers::PUBLIC) {
-            $names[] = 'public';
-        } elseif ($flags & Modifiers::PROTECTED) {
-            $names[] = 'protected';
-        } elseif ($flags & Modifiers::PRIVATE) {
-            $names[] = 'private';
-        }
-
-        // Static?
-        if ($flags & Modifiers::STATIC) {
-            $names[] = 'static';
-        }
-
-        // Abstract?
-        if ($flags & Modifiers::ABSTRACT) {
-            $names[] = 'abstract';
-        }
-
-        // Final?
-        if ($flags & Modifiers::FINAL) {
-            $names[] = 'final';
-        }
-
-        return $names;
-    }
-
-    /**
-     * Called on each node to detect free-floating functions and classes.
-     */
-    public function enterNode(Node $node): void
-    {
-        if ($node instanceof Node\Stmt\Function_) {
-            $this->items->push($this->collectFunctionData($node));
-        } elseif ($node instanceof ClassLike && $node->name !== null) {
-            $this->currentClassName = $node->name->name;
-            $this->currentNamespace = $this->getNamespace($node);
-            $this->items[] = $this->collectClassData($node);
-        }
-    }
-
-    /**
-     * Resets current class/namespace after leaving a class node.
-     */
-    public function leaveNode(Node $node): void
-    {
-        if ($node instanceof ClassLike && $node->name !== null) {
-            $this->currentClassName = '';
-            $this->currentNamespace = '';
-        }
-    }
-
-    /**
-     * Returns all discovered classes.
-     */
-    public function getClasses(): array
-    {
-        return $this->items->filter(function ($item) {
-            return $item['type'] === 'Class';
-        });
+        return $this->warnings->all();
     }
 
     /**
      * Collects data for a standalone function.
+     *
+     * @param Node\Stmt\Function_ $node
+     * @return array
      */
     private function collectFunctionData(Node\Stmt\Function_ $node): array
     {
-        $params = [];
-        foreach ($node->params as $param) {
-            $paramName = '$' . $param->var->name;
-            $paramType = $param->type ? $this->typeToString($param->type) : 'mixed';
-            $params[]  = ['name' => $paramName, 'type' => $paramType];
-        }
+        $params = collect($node->params)
+            ->map(function ($param) {
+                return [
+                    'name' => '$' . $param->var->name,
+                    'type' => $this->typeToString($param->type) ?: 'mixed',
+                ];
+            })
+            ->all();
 
         $docComment  = $node->getDocComment();
         $description = '';
@@ -160,37 +68,31 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             $docText     = $docComment->getText();
             $description = $this->extractShortDescription($docText);
             $annotations = $this->extractAnnotations($docText);
+            $restlerTags = $annotations;
         }
 
         $attributes = $this->collectAttributes($node->attrGroups);
 
-        // Serialize the AST
-        $astSerialized = $this->serializeAst($node);
-        $astSize = strlen($astSerialized);
-
-        // Check if AST exceeds the size limit
-        if ($astSize > $this->astSizeLimit) {
-            $this->warnings->push("AST size for function '{$node->name->name}' exceeds limit ({$astSize} bytes).");
-            $astSerialized = null;
-        }
-
         return [
-            'type' => 'Function',
-            'name' => $node->name->name,
-            'details' => [
+            'type'       => 'Function',
+            'name'       => $node->name->name,
+            'details'    => [
                 'params'       => $params,
                 'description'  => $description,
+                'restler_tags' => $restlerTags
             ],
             'annotations' => $annotations,
             'attributes'  => $attributes,
             'file'        => $this->currentFile,
             'line'        => $node->getStartLine(),
-            'ast'         => $astSerialized,
         ];
     }
 
     /**
      * Collects data for a class node.
+     *
+     * @param Node\Stmt\ClassLike $node
+     * @return array
      */
     private function collectClassData(ClassLike $node): array
     {
@@ -208,10 +110,11 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $attributes = $this->collectAttributes($node->attrGroups);
 
         // Gather methods
-        $methods = [];
-        foreach ($node->getMethods() as $method) {
-            $methods[] = $this->collectMethodData($method);
-        }
+        $methods = collect($node->getMethods())
+            ->map(function ($method) {
+                return $this->collectMethodData($method);
+            })
+            ->all();
 
         $className = $node->name->name;
         $namespace = $this->getNamespace($node);
@@ -235,16 +138,21 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     }
 
     /**
-     * Collect data for one class method.
+     * Collects data for one class method.
+     *
+     * @param Node\Stmt\ClassMethod $method
+     * @return array
      */
-    private function collectMethodData(ClassMethod $method): array
+    private function collectMethodData(Node\Stmt\ClassMethod $method): array
     {
-        $params = [];
-        foreach ($method->params as $param) {
-            $paramName = '$' . $param->var->name;
-            $paramType = $param->type ? $this->typeToString($param->type) : 'mixed';
-            $params[]  = ['name' => $paramName, 'type' => $paramType];
-        }
+        $params = collect($method->params)
+            ->map(function ($param) {
+                return [
+                    'name' => '$' . $param->var->name,
+                    'type' => $this->typeToString($param->type) ?: 'mixed',
+                ];
+            })
+            ->all();
 
         $docComment = $method->getDocComment();
         $description = '';
@@ -265,7 +173,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $astSize = strlen($astSerialized);
 
         if ($astSize > $this->astSizeLimit) {
-            $this->warnings[] = "AST size for method '{$method->name->name}' exceeds limit ({$astSize} bytes).";
+            $this->warnings->push("AST size for method '{$method->name->name}' exceeds limit ({$astSize} bytes).");
             $astSerialized = null;
         }
 
@@ -301,46 +209,50 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     private function extractShortDescription(string $docblock): string
     {
         $lines   = preg_split('/\R/', $docblock);
-        $cleaned = array_map(function($line) {
-            $line = preg_replace('/^\s*\/\*\*?/', '', $line);
-            $line = preg_replace('/\*\/\s*$/', '', $line);
-            $line = preg_replace('/^\s*\*\s?/', '', $line);
-            return $line;
-        }, $lines);
+        $cleaned = collect($lines)
+            ->map(function($line) {
+                $line = preg_replace('/^\s*\/\*\*?/', '', $line);
+                $line = preg_replace('/\*\/\s*$/', '', $line);
+                $line = preg_replace('/^\s*\*\s?/', '', $line);
+                return $line;
+            });
 
-        $description = '';
-        foreach ($cleaned as $line) {
-            if (trim($line) === '') {
-                break;
-            }
-            $description .= $line . ' ';
-        }
+        $description = $cleaned
+            ->takeUntil(function ($line) {
+                return trim($line) === '';
+            })
+            ->implode(' ');
 
         return trim($description);
     }
 
     /**
      * Extract lines with @annotation in docblock.
+     *
+     * @param string $docblock
+     * @return array
      */
     private function extractAnnotations(string $docblock): array
     {
-        $annotations = [];
-        $lines = preg_split('/\R/', $docblock);
-
-        foreach ($lines as $line) {
-            $line = trim($line, " \t\n\r\0\x0B*");
-            if (preg_match('/@(\w+)\s*(.*)/', $line, $matches)) {
-                $tag = $matches[1];
-                $value = $matches[2];
-                $annotations[$tag] = $this->parseAnnotationValue($value);
-            }
-        }
-
-        return $annotations;
+        return collect(explode("\n", $docblock))
+            ->mapWithKeys(function ($line) {
+                $line = trim($line, " \t\n\r\0\x0B*");
+                if (preg_match('/@(\w+)\s*(.*)/', $line, $matches)) {
+                    $tag = $matches[1];
+                    $value = $matches[2];
+                    return [$tag => $this->parseAnnotationValue($value)];
+                }
+                return [];
+            })
+            ->filter()
+            ->all();
     }
 
     /**
      * Parse an annotation line that may have nested braces like {@requires guest}.
+     *
+     * @param string $value
+     * @return mixed
      */
     private function parseAnnotationValue(string $value): mixed
     {
@@ -369,7 +281,80 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     }
 
     /**
+     * Collect attributes (PHP 8+).
+     *
+     * @param array $attrGroups
+     * @return array
+     */
+    private function collectAttributes(array $attrGroups): array
+    {
+        $attributes = [];
+        foreach ($attrGroups as $attrGroup) {
+            foreach ($attrGroup->attrs as $attr) {
+                $attrName = $attr->name->toString();
+                $args     = [];
+                foreach ($attr->args as $arg) {
+                    $args[] = $this->argToString($arg->value);
+                }
+                $attributes[] = $attrName . '(' . implode(', ', $args) . ')';
+            }
+        }
+        return $attributes;
+    }
+
+    /**
+     * Convert an attribute argument node to string.
+     *
+     * @param Node $node
+     * @return string
+     */
+    private function argToString(Node $node): string
+    {
+        if ($node instanceof Node\Scalar\String_) {
+            return '"' . $node->value . '"';
+        } elseif ($node instanceof Node\Scalar\LNumber) {
+            return (string) $node->value;
+        } elseif ($node instanceof Node\Expr\Array_) {
+            return $this->parseArray($node);
+        } elseif ($node instanceof Node\Expr\ConstFetch) {
+            return $node->name->toString();
+        }
+        return '...';
+    }
+
+    /**
+     * Parse an array node into a string representation.
+     *
+     * @param Node\Expr\Array_ $array
+     * @return string
+     */
+    private function parseArray(Node\Expr\Array_ $array): string
+    {
+        $elements = [];
+        foreach ($array->items as $item) {
+            $key = $item->key ? $this->argToString($item->key) . ' => ' : '';
+            $value = $this->argToString($item->value);
+            $elements[] = $key . $value;
+        }
+        return '[' . implode(', ', $elements) . ']';
+    }
+
+    /**
+     * Serialize the AST node to JSON.
+     *
+     * @param Node $node
+     * @return string|null
+     */
+    private function serializeAst(Node $node): ?string
+    {
+        return json_encode($node);
+    }
+
+    /**
      * Summarize a method's statement types.
+     *
+     * @param Node\Stmt\ClassMethod $method
+     * @return string
      */
     private function summarizeMethodBody(Node\Stmt\ClassMethod $method): string
     {
@@ -394,6 +379,10 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
 
     /**
      * Recursively gather method calls within a method's body up to maxDepth.
+     *
+     * @param Node $node
+     * @param int $currentDepth
+     * @return array
      */
     private function collectCalledMethods(Node $node, int $currentDepth = 0): array
     {
@@ -429,91 +418,10 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     }
 
     /**
-     * Collect attributes (PHP 8+).
-     */
-    private function collectAttributes(array $attrGroups): array
-    {
-        $attributes = [];
-        foreach ($attrGroups as $attrGroup) {
-            foreach ($attrGroup->attrs as $attr) {
-                $attrName = $attr->name->toString();
-                $args = [];
-                foreach ($attr->args as $arg) {
-                    $args[] = $this->argToString($arg->value);
-                }
-                $attributes[] = $attrName . '(' . implode(', ', $args) . ')';
-            }
-        }
-        return $attributes;
-    }
-
-    /**
-     * Convert an attribute argument node to string.
-     */
-    private function argToString(Node $node): string
-    {
-        if ($node instanceof Node\Scalar\String_) {
-            return '"' . $node->value . '"';
-        } elseif ($node instanceof Node\Scalar\LNumber) {
-            return (string) $node->value;
-        } elseif ($node instanceof Node\Expr\Array_) {
-            return $this->parseArray($node);
-        } elseif ($node instanceof Node\Expr\ConstFetch) {
-            return $node->name->toString();
-        }
-        return '...';
-    }
-
-    /**
-     * Parse an array node into a string representation.
-     */
-    private function parseArray(Node\Expr\Array_ $array): string
-    {
-        $elements = [];
-        foreach ($array->items as $item) {
-            $key = $item->key ? $this->argToString($item->key) . ' => ' : '';
-            $value = $this->argToString($item->value);
-            $elements[] = $key . $value;
-        }
-        return '[' . implode(', ', $elements) . ']';
-    }
-
-    /**
-     * Resolve the namespace of a class node.
-     */
-    private function getNamespace(Node $node): string
-    {
-        $namespace = '';
-        $current = $node;
-        while ($current->getAttribute('parent')) {
-            $current = $current->getAttribute('parent');
-            if ($current instanceof Namespace_) {
-                $namespace = $current->name ? $current->name->toString() : '';
-                break;
-            }
-        }
-        return $namespace;
-    }
-
-    private function typeToString($typeNode): string
-    {
-        if ($typeNode instanceof Node\Identifier) {
-            return $typeNode->name;
-        } elseif ($typeNode instanceof Node\NullableType) {
-            return '?' . $this->typeToString($typeNode->type);
-        } elseif ($typeNode instanceof Node\UnionType) {
-            return implode('|', array_map([$this, 'typeToString'], $typeNode->types));
-        } elseif ($typeNode instanceof Node\IntersectionType) {
-            return implode('&', array_map([$this, 'typeToString'], $typeNode->types));
-        } elseif ($typeNode instanceof Node\Name) {
-            return $typeNode->toString();
-        } else {
-            return 'mixed';
-        }
-    }
-
-    /**
      * Get the name of the caller in a method call.
+     *
+     * @param Node $var
+     * @return string
      */
     private function getCallerName($var): string
     {
@@ -533,10 +441,72 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     }
 
     /**
-     * Retrieve the collected BusinessRule calls.
+     * Resolve the namespace of a class node.
+     *
+     * @param Node $node
+     * @return string
      */
-    public function getBusinessRuleCalls(): array
+    private function getNamespace(Node $node): string
     {
-        return $this->businessRuleCalls;
+        $namespace = '';
+        $current = $node;
+        while ($current->getAttribute('parent')) {
+            $current = $current->getAttribute('parent');
+            if ($current instanceof Node\Stmt\Namespace_) {
+                $namespace = $current->name ? $current->name->toString() : '';
+                break;
+            }
+        }
+        return $namespace;
+    }
+
+    /**
+     * Interpret method flags for visibility/static.
+     *
+     * @param int $flags
+     * @return array
+     */
+    private function resolveModifierNames(int $flags): array
+    {
+        $names = [];
+
+        // Visibility
+        if ($flags & Node\Stmt\Class_::MODIFIER_PUBLIC) {
+            $names[] = 'public';
+        } elseif ($flags & Node\Stmt\Class_::MODIFIER_PROTECTED) {
+            $names[] = 'protected';
+        } elseif ($flags & Node\Stmt\Class_::MODIFIER_PRIVATE) {
+            $names[] = 'private';
+        }
+
+        // Static?
+        if ($flags & Node\Stmt\Class_::MODIFIER_STATIC) {
+            $names[] = 'static';
+        }
+
+        return $names;
+    }
+
+    /**
+     * Convert type node to string.
+     *
+     * @param mixed $typeNode
+     * @return string
+     */
+    private function typeToString($typeNode): string
+    {
+        if ($typeNode instanceof Node\Identifier) {
+            return $typeNode->name;
+        } elseif ($typeNode instanceof Node\NullableType) {
+            return '?' . $this->typeToString($typeNode->type);
+        } elseif ($typeNode instanceof Node\UnionType) {
+            return implode('|', array_map([$this, 'typeToString'], $typeNode->types));
+        } elseif ($typeNode instanceof Node\IntersectionType) {
+            return implode('&', array_map([$this, 'typeToString'], $typeNode->types));
+        } elseif ($typeNode instanceof Node\Name) {
+            return $typeNode->toString();
+        } else {
+            return 'mixed';
+        }
     }
 }
