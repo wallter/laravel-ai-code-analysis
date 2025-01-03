@@ -64,6 +64,7 @@ class ParseFilesCommand extends Command
             if ($this->output->isVerbose()) {
                 $this->info("Parsing file: $phpFile");
             }
+            $visitor->setCurrentFile($phpFile);
             $this->parseOneFile($phpFile, $parser, $traverser, $visitor);
             $bar->advance();
         });
@@ -275,6 +276,10 @@ class ParseFilesCommand extends Command
         $code = File::get($filePath);
         try {
             $ast = $parser->parse($code);
+            if ($ast === null) {
+                $this->warn("No AST generated for file: {$filePath}");
+                return;
+            }
             $traverser->traverse($ast);
         } catch (\Exception $e) {
             $this->error("Error parsing file {$filePath}: " . $e->getMessage());
