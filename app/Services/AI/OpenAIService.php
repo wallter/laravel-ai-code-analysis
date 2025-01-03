@@ -64,7 +64,14 @@ class OpenAIService
             'temperature' => $temperature,
         ];
 
-        // Merge any additional parameters (like custom temperature or messages array)
+        // Handle additional parameters specific to the operation
+        if (isset($operationConfig['additional_parameters'])) {
+            foreach ($operationConfig['additional_parameters'] as $key => $value) {
+                $payload[$key] = $value;
+            }
+        }
+
+        // Merge any additional parameters (like custom temperature or messages array) 
         // but ensure we don't overwrite our messages.
         // For instance, if 'messages' is passed, you can unify or replace them.
         // We'll do a simple merge for any other top-level keys.

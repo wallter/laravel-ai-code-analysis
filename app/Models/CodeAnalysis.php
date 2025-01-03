@@ -21,5 +21,6 @@ class CodeAnalysis extends Model
     protected $casts = [
         'ast' => 'array',
         'analysis' => 'array',
-        'completed_passes' => 'array', // Ensures JSON is cast to an array
+        'ai_output' => 'array',
+        'completed_passes' => 'array',
     ];

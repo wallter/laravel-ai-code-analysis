@@ -32,18 +32,25 @@ class ProcessPassesCommand extends Command
             return 0;
         }
 
+        Log::info("Pass processing command started.");
+        
         foreach ($pendingAnalyses as $analysis) {
+            Log::info("Starting pass processing for file: {$analysis->file_path}");
             $this->info("Processing next pass for [{$analysis->file_path}]...");
             try {
                 $this->codeAnalysisService->processNextPass($analysis);
                 $this->info("Processed next pass for [{$analysis->file_path}].");
+                Log::info("Completed pass processing for file: {$analysis->file_path}");
             } catch (\Throwable $e) {
+                Log::error("Error processing pass for file: {$analysis->file_path}", ['exception' => $e]);
                 $this->error("Failed to process pass for [{$analysis->file_path}]: {$e->getMessage()}");
                 // Optionally, log and continue
             }
         }
 
         $this->info("Pass processing completed.");
+        
+        Log::info("Pass processing command executed successfully.");
         return 0;
     }
 }

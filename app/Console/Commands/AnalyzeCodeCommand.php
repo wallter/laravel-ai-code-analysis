@@ -101,16 +101,20 @@ class AnalyzeCodeCommand extends BaseCodeCommand
                     $aiResults = $analysisData['ai_results'] ?? [];
 
                     // Persist in code_analyses DB table
-                    CodeAnalysis::updateOrCreate(
+                    $codeAnalysis = CodeAnalysis::updateOrCreate(
                         ['file_path' => $this->parserService->normalizePath($filePath)],
                         [
-                            'ast'               => json_encode($astData, JSON_UNESCAPED_SLASHES),
-                            'analysis'          => json_encode($aiResults, JSON_UNESCAPED_SLASHES),
-                            'ai_output'         => json_encode([], JSON_UNESCAPED_SLASHES), // Initialize as empty array
-                            'current_pass'      => 0,                                      // Initialize to first pass
-                            'completed_passes'  => json_encode([], JSON_UNESCAPED_SLASHES),// Initialize as empty array
+                            'ast'      => json_encode($astData, JSON_UNESCAPED_SLASHES),
+                            'analysis' => json_encode($aiResults, JSON_UNESCAPED_SLASHES),
                         ]
                     );
+
+                    if ($codeAnalysis->wasRecentlyCreated) {
+                        $codeAnalysis->ai_output = json_encode([], JSON_UNESCAPED_SLASHES);
+                        $codeAnalysis->current_pass = 0;
+                        $codeAnalysis->completed_passes = json_encode([], JSON_UNESCAPED_SLASHES);
+                        $codeAnalysis->save();
+                    }
 
                     // For optional final JSON output
                     if ($outputFile) {
