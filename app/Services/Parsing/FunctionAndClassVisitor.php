@@ -69,17 +69,45 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         foreach ($node->getSubNodeNames() as $subNodeName) {
             $subNode = $node->$subNodeName;
             if ($subNode instanceof Node) {
-                $result[$subNodeName] = json_decode($this->astToJson($subNode, $currentDepth + 1), true);
+                $subNodeJson = $this->astToJson($subNode, $currentDepth + 1);
+                if ($subNodeJson === false) {
+                    // Handle json_encode failure
+                    $result[$subNodeName] = [
+                        'nodeType' => $subNode->getType(),
+                        'attributes' => $subNode->getAttributes(),
+                        'note' => 'Failed to encode AST node to JSON.',
+                    ];
+                } else {
+                    $result[$subNodeName] = json_decode($subNodeJson, true);
+                }
             } elseif (is_array($subNode)) {
                 $result[$subNodeName] = array_map(function ($item) use ($currentDepth) {
-                    return ($item instanceof Node) ? json_decode($this->astToJson($item, $currentDepth + 1), true) : $item;
+                    if ($item instanceof Node) {
+                        $itemJson = $this->astToJson($item, $currentDepth + 1);
+                        return $itemJson !== false ? json_decode($itemJson, true) : [
+                            'nodeType' => $item->getType(),
+                            'attributes' => $item->getAttributes(),
+                            'note' => 'Failed to encode AST node to JSON.',
+                        ];
+                    }
+                    return $item;
                 }, $subNode);
             } else {
                 $result[$subNodeName] = $subNode;
             }
         }
 
-        return json_encode($result);
+        $json = json_encode($result);
+        if ($json === false) {
+            // Fallback in case json_encode fails
+            return json_encode([
+                'nodeType' => $node->getType(),
+                'attributes' => $node->getAttributes(),
+                'note' => 'Failed to encode AST node to JSON.',
+            ]);
+        }
+
+        return $json;
     }
 
     /**
