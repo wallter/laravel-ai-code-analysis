@@ -22,8 +22,7 @@ class CodeAnalysisService
     public function __construct(
         protected OpenAIService  $openAIService,
         protected ParserService  $parserService
-    ) {
-    }
+    ) {}
 
     /**
      * Main analysis entry point for a single file. 
@@ -44,17 +43,18 @@ class CodeAnalysisService
             return [];
         }
 
+        // Gather AST-based data
         $astData = $this->collectAstData($ast, $limitMethod);
 
-        // 2) Raw code
+        // Retrieve the raw code
         $rawCode = $this->retrieveRawCode($filePath);
 
-        // 3) Multi-pass AI analysis
-        $aiResults = $this->performMultiPassAnalysis($astData, $rawCode);
+        // Perform multi-pass AI analysis; each pass becomes a separate key
+        $multiPassResults = $this->performMultiPassAnalysis($astData, $rawCode);
 
         return [
-            'ast_data'    => $astData,    // Contains AST-related information
-            'ai_results'  => $aiResults,  // Contains AI-generated outputs like doc_generation, etc.
+            'ast_data'   => $astData,        // structured AST info
+            'ai_results' => $multiPassResults, // e.g. { "doc_generation": "...", "security_assessment": "...", ... }
         ];
     }
 
@@ -131,34 +131,31 @@ class CodeAnalysisService
      */
     protected function performMultiPassAnalysis(array $astData, string $rawCode): array
     {
-        $results    = [];
-        $multiPass  = Config::get('ai.operations.multi_pass_analysis', []);
+        // This will hold each pass result keyed by passName, e.g. 'doc_generation', 'refactor_suggestions', etc.
+        $results = [];
 
-        if (empty($multiPass)) {
-            Log::debug("No multi_pass_analysis found in config. Skipping AI passes.");
-            return $results;
-        }
+        // Retrieve passes from config
+        $multiPasses = Config::get('ai.operations.multi_pass_analysis.multi_pass_analysis', []);
 
-        foreach ($multiPass as $passName => $passCfg) {
-            Log::info("Performing multi-pass analysis: [{$passName}]", $passCfg);
-            
+        // For each pass (e.g. doc_generation, refactor_suggestions, etc.)
+        foreach ($multiPasses as $passName => $passCfg) {
             try {
-                $operation = Arr::get($passCfg, 'operation', 'code_analysis');
-                $type      = Arr::get($passCfg, 'type', 'both'); // 'ast', 'raw', or 'both'
-                $maxTokens = Arr::get($passCfg, 'max_tokens', 1024);
-                $temp      = Arr::get($passCfg, 'temperature', 0.5);
+                // Build a final prompt for this pass
+                $prompt = $this->buildPrompt($astData, $rawCode, $passCfg['type'], $passCfg);
 
-                $prompt = $this->buildPrompt($astData, $rawCode, $type, $passCfg);
-                $aiResponse = $this->openAIService->performOperation($operation, [
-                    'prompt'     => $prompt,
-                    'max_tokens' => $maxTokens,
-                    'temperature'=> $temp,
+                // Send to OpenAI (or your AI provider) for analysis
+                $responseText = $this->openAIService->performOperation($passCfg['operation'], [
+                    'prompt'      => $prompt,
+                    'max_tokens'  => $passCfg['max_tokens']  ?? 1024,
+                    'temperature' => $passCfg['temperature'] ?? 0.5,
+                    // Possibly override system message, etc.
                 ]);
 
-                $results[$passName] = $aiResponse;
-            } catch (Exception $e) {
-                Log::error("Pass [{$passName}] failed: " . $e->getMessage());
-                $results[$passName] = '';
+                // Store the raw text directly under the pass name
+                $results[$passName] = $responseText;
+            } catch (\Throwable $e) {
+                Log::error("Pass [{$passName}] failed: " . $e->getMessage(), ['exception' => $e]);
+                $results[$passName] = "(Error: {$e->getMessage()})";
             }
         }
 

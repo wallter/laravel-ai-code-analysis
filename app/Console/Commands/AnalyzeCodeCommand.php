@@ -97,11 +97,15 @@ class AnalyzeCodeCommand extends BaseCodeCommand
                         Log::warning("No analysis data produced for {$filePath}.");
                     }
 
+                    $astData = $analysisData['ast_data']     ?? [];
+                    $aiResults = $analysisData['ai_results'] ?? [];
+
                     // Persist in code_analyses DB table
                     CodeAnalysis::updateOrCreate(
                         ['file_path' => $this->parserService->normalizePath($filePath)],
-                        ['ast' => json_encode($analysisData['ast_data'] ?? [], JSON_UNESCAPED_SLASHES),
-                         'ai_output' => json_encode($analysisData['ai_results'] ?? [], JSON_UNESCAPED_SLASHES),
+                        [
+                            'ast' => json_encode($astData, JSON_UNESCAPED_SLASHES),
+                            'analysis' => json_encode($aiResults, JSON_UNESCAPED_SLASHES),
                         ]
                     );
 

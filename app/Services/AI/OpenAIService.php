@@ -17,7 +17,7 @@ class OpenAIService
      * Perform an operation based on the given operation identifier (from config/ai.php).
      *
      * @param  string  $operationIdentifier
-     * @param  array   $params  Additional parameters: 'user_message' (required), etc.
+     * @param  array   $params  Additional parameters: 'prompt' (required), etc.
      * @return string  AI-generated response (trimmed).
      *
      * @throws InvalidArgumentException if no prompt is provided and no default is set.
@@ -39,13 +39,13 @@ class OpenAIService
             ?? 'You are a helpful AI assistant.';
 
         // 4) The user-facing prompt
-        $promptTemplate = $operationConfig['user_message'] ?? '';
-        if (empty($params['user_message']) && empty($promptTemplate)) {
-            $msg = "No 'user_message' found for [{$operationIdentifier}] and no default prompt in config.";
+        $promptTemplate = $operationConfig['prompt'] ?? '';
+        if (empty($params['prompt']) && empty($promptTemplate)) {
+            $msg = "No 'prompt' found for [{$operationIdentifier}] and no default prompt in config.";
             Log::error($msg);
             throw new InvalidArgumentException($msg);
         }
-        $userMessage = $params['user_message'] ?? $promptTemplate;
+        $userMessage = $params['prompt'] ?? $promptTemplate;
 
         // 5) Construct the chat payload (system + user messages)
         $payload = [
@@ -69,7 +69,7 @@ class OpenAIService
         // For instance, if 'messages' is passed, you can unify or replace them.
         // We'll do a simple merge for any other top-level keys.
         foreach ($params as $key => $value) {
-            if (! in_array($key, ['user_message'])) {
+            if (! in_array($key, ['prompt'])) {
                 $payload[$key] = $value; 
             }
         }
