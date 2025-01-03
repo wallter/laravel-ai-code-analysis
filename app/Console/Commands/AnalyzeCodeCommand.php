@@ -192,6 +192,10 @@ class AnalyzeCodeCommand extends BaseCodeCommand
             $this->info('Code analysis completed successfully.');
             $this->info("Total time taken: {$totalDuration} seconds.");
             return 0;
+        } catch (\Exception $e) {
+            Log::error('AnalyzeCodeCommand failed.', ['exception' => $e]);
+            $this->error('An error occurred during code analysis. See logs for details.');
+            return 1;
         }
 
         /**
