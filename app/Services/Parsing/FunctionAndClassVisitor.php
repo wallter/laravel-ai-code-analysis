@@ -63,7 +63,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
 
         $result = [
             'nodeType' => $node->getType(),
-            'attributes' => $node->getAttributes(),
+            'attributes' => $this->processAttributes($node->getAttributes(), $currentDepth),
         ];
 
         foreach ($node->getSubNodeNames() as $subNodeName) {
@@ -72,14 +72,95 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
                 $result[$subNodeName] = $this->astToArray($subNode, $currentDepth + 1);
             } elseif (is_array($subNode)) {
                 $result[$subNodeName] = array_map(function ($item) use ($currentDepth) {
-                    return ($item instanceof Node) ? $this->astToArray($item, $currentDepth + 1) : $item;
+                    if ($item instanceof Node) {
+                        return $this->astToArray($item, $currentDepth + 1);
+                    } elseif (is_object($item)) {
+                        return $this->objectToArray($item, $currentDepth + 1);
+                    }
+                    return $item;
                 }, $subNode);
+            } elseif (is_object($subNode)) {
+                $result[$subNodeName] = $this->objectToArray($subNode, $currentDepth + 1);
             } else {
                 $result[$subNodeName] = $subNode;
             }
         }
 
         return $result;
+    }
+
+    /**
+     * Recursively converts an object into an associative array.
+     *
+     * @param object $obj
+     * @param int $currentDepth
+     * @return array
+     */
+    private function objectToArray(object $obj, int $currentDepth = 0): array
+    {
+        // Check for maximum depth to prevent deep recursion
+        if ($currentDepth > $this->maxDepth) {
+            return ['note' => 'Max depth reached, recursion stopped.'];
+        }
+
+        // Detect and prevent processing the same object multiple times
+        if ($this->processedNodes->contains($obj)) {
+            return ['note' => 'Recursion detected, object already processed.'];
+        }
+
+        // Mark the current object as processed
+        $this->processedNodes->attach($obj);
+
+        $result = [];
+
+        foreach (get_object_vars($obj) as $property => $value) {
+            if ($value instanceof Node) {
+                $result[$property] = $this->astToArray($value, $currentDepth + 1);
+            } elseif (is_array($value)) {
+                $result[$property] = array_map(function ($item) use ($currentDepth) {
+                    if ($item instanceof Node) {
+                        return $this->astToArray($item, $currentDepth + 1);
+                    } elseif (is_object($item)) {
+                        return $this->objectToArray($item, $currentDepth + 1);
+                    }
+                    return $item;
+                }, $value);
+            } elseif (is_object($value)) {
+                $result[$property] = $this->objectToArray($value, $currentDepth + 1);
+            } else {
+                $result[$property] = $value;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Processes attributes by converting any objects within to arrays.
+     *
+     * @param array $attributes
+     * @param int $currentDepth
+     * @return array
+     */
+    private function processAttributes(array $attributes, int $currentDepth = 0): array
+    {
+        return array_map(function ($value) use ($currentDepth) {
+            if ($value instanceof Node) {
+                return $this->astToArray($value, $currentDepth + 1);
+            } elseif (is_object($value)) {
+                return $this->objectToArray($value, $currentDepth + 1);
+            } elseif (is_array($value)) {
+                return array_map(function ($item) use ($currentDepth) {
+                    if ($item instanceof Node) {
+                        return $this->astToArray($item, $currentDepth + 1);
+                    } elseif (is_object($item)) {
+                        return $this->objectToArray($item, $currentDepth + 1);
+                    }
+                    return $item;
+                }, $value);
+            }
+            return $value;
+        }, $attributes);
     }
 
     /**
