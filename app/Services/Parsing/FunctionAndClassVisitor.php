@@ -15,12 +15,17 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
 {
     private Collection $items;
     private Collection $warnings;
+    private string $currentFile;
+    private int $astSizeLimit = 1000; // Adjust the limit as needed
+    private string $currentClassName;
+    private string $currentNamespace;
+    private int $maxDepth = 5; // Adjust the max depth as needed
 
     public function __construct()
     {
         $this->items = collect();
         $this->warnings = collect();
-    }
+    } // Properties with default values are already initialized above
 
     /**
      * Returns all discovered items (functions, classes, etc.).
@@ -30,6 +35,53 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     public function getItems(): array
     {
         return $this->items->all();
+    }
+
+    public function enterNode(Node $node)
+    {
+        if ($node instanceof Node\Stmt\Class_) {
+            $this->currentClassName = $node->name->name;
+        }
+
+        if ($node instanceof Node\Stmt\Namespace_) {
+            $this->currentNamespace = $node->name ? $node->name->toString() : '';
+        }
+    }
+
+    public function leaveNode(Node $node)
+    {
+        if ($node instanceof Node\Stmt\Class_) {
+            $this->currentClassName = '';
+        }
+
+        if ($node instanceof Node\Stmt\Namespace_) {
+            $this->currentNamespace = '';
+        }
+    }
+
+    public function setCurrentFile(string $file): void
+    {
+        $this->currentFile = $file;
+    }
+
+    public function setCurrentClassName(string $className): void
+    {
+        $this->currentClassName = $className;
+    }
+
+    public function setCurrentNamespace(string $namespace): void
+    {
+        $this->currentNamespace = $namespace;
+    }
+
+    public function setMaxDepth(int $depth): void
+    {
+        $this->maxDepth = $depth;
+    }
+
+    public function setAstSizeLimit(int $limit): void
+    {
+        $this->astSizeLimit = $limit;
     }
 
     /**
