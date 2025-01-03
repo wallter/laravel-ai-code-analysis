@@ -104,8 +104,11 @@ class AnalyzeCodeCommand extends BaseCodeCommand
                     CodeAnalysis::updateOrCreate(
                         ['file_path' => $this->parserService->normalizePath($filePath)],
                         [
-                            'ast' => json_encode($astData, JSON_UNESCAPED_SLASHES),
-                            'analysis' => json_encode($aiResults, JSON_UNESCAPED_SLASHES),
+                            'ast'               => json_encode($astData, JSON_UNESCAPED_SLASHES),
+                            'analysis'          => json_encode($aiResults, JSON_UNESCAPED_SLASHES),
+                            'ai_output'         => json_encode([], JSON_UNESCAPED_SLASHES), // Initialize as empty array
+                            'current_pass'      => 0,                                      // Initialize to first pass
+                            'completed_passes'  => json_encode([], JSON_UNESCAPED_SLASHES),// Initialize as empty array
                         ]
                     );
 

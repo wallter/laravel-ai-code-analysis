@@ -14,5 +14,12 @@ class CodeAnalysis extends Model
         'ast',
         'analysis',
         'ai_output', // Add this line
+        'current_pass',      // Added
+        'completed_passes',  // Added
     ];
+
+    protected $casts = [
+        'ast' => 'array',
+        'analysis' => 'array',
+        'completed_passes' => 'array', // Ensures JSON is cast to an array
 }

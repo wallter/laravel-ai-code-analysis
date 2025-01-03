@@ -47,6 +47,46 @@ return [
             'prompt'        => '',
         ],
 
+        'multi_pass_analysis' => [ // Ensure this key exists
+            'multi_pass_analysis' => [
+
+                'doc_generation' => [
+                    'operation'    => 'code_analysis',
+                    'type'         => 'both',
+                    'max_tokens'   => 1000,
+                    'temperature'  => 0.3,
+                    'prompt'       => implode("\n", [
+                        "You are a concise documentation generator for a PHP codebase.",
+                        "Create a short but clear doc from the AST data + raw code:",
+                        "- Summarize only essential info: class or trait's purpose, key methods, parameters, usage context.",
+                        "- Mention custom annotations (@url, etc.), but keep it under ~200 words.",
+                        "Be succinct and well-structured."
+                    ]),
+                ],
+
+                'refactor_suggestions' => [
+                    'operation'    => 'code_improvements',
+                    'type'         => 'raw',
+                    'max_tokens'   => 1800,
+                    'temperature'  => 0.6,
+                    'prompt'       => implode("\n", [
+                        "You are a senior PHP engineer analyzing the raw code. Provide actionable refactoring suggestions:",
+                        "- Focus on structural changes (class splitting, design patterns)",
+                        "- Emphasize SOLID principles, especially SRP",
+                        "- Discuss how to reduce duplication, enhance naming clarity, and improve maintainability",
+                        "Write your suggestions in a concise list or short paragraphs."
+                    ]),
+                ],
+
+                // Add additional passes here following the same structure
+            ],
+            'pass_order' => [ // Define the execution order
+                'doc_generation',
+                'refactor_suggestions',
+                // Add additional pass names in desired order
+            ],
+        ],
+
         'code_improvements' => [
             'model'         => 'gpt-4o-mini',
             'max_tokens'    => 2000,

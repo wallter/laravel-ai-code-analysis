@@ -25,7 +25,116 @@ class CodeAnalysisService
         protected ParserService  $parserService
     ) {}
 
-    public function analyzeAst(string $filePath, int $limitMethod = 0): array
+    /**
+     * Process the next AI pass for a given CodeAnalysis record.
+     *
+     * @param CodeAnalysis $codeAnalysis
+     * @return void
+     */
+    public function processNextPass(CodeAnalysis $codeAnalysis): void
+    {
+        $completedPasses = $codeAnalysis->completed_passes ?? [];
+
+        $passOrder = Config::get('ai.operations.multi_pass_analysis.pass_order', []);
+        $multiPasses = Config::get('ai.operations.multi_pass_analysis.multi_pass_analysis', []);
+
+        // Determine the next pass to execute
+        $nextPass = null;
+        foreach ($passOrder as $passName) {
+            if (!in_array($passName, $completedPasses)) {
+                $nextPass = $passName;
+                break;
+            }
+        }
+
+        if (!$nextPass) {
+            Log::info("All passes completed for [{$codeAnalysis->file_path}].");
+            return;
+        }
+
+        $passConfig = $multiPasses[$nextPass] ?? null;
+        if (!$passConfig) {
+            Log::error("Pass [{$nextPass}] not defined in configuration.");
+            return;
+        }
+
+        try {
+            // Build the prompt based on the pass type
+            $prompt = $this->buildPrompt(
+                json_decode($codeAnalysis->ast, true),
+                $this->retrieveRawCode($codeAnalysis->file_path),
+                $passConfig['type'],
+                $passConfig
+            );
+
+            // Perform the AI operation
+            $responseText = $this->openAIService->performOperation($passConfig['operation'], [
+                'prompt'      => $prompt,
+                'max_tokens'  => $passConfig['max_tokens'] ?? 1024,
+                'temperature' => $passConfig['temperature'] ?? 0.5,
+            ]);
+
+            // Append the response to ai_output
+            $aiOutput = json_decode($codeAnalysis->ai_output, true) ?? [];
+            $aiOutput[$nextPass] = $responseText;
+            $codeAnalysis->ai_output = json_encode($aiOutput, JSON_UNESCAPED_SLASHES);
+
+            // Update completed_passes and current_pass
+            $completedPasses[] = $nextPass;
+            $codeAnalysis->completed_passes = $completedPasses;
+            $codeAnalysis->current_pass += 1;
+
+            $codeAnalysis->save();
+
+            Log::info("Pass [{$nextPass}] completed for [{$codeAnalysis->file_path}].");
+        } catch (\Throwable $e) {
+            Log::error("Failed to perform pass [{$nextPass}] for [{$codeAnalysis->file_path}]: {$e->getMessage()}");
+            // Optionally, implement retry logic or mark as failed
+        }
+    }
+
+    /**
+     * Build the prompt for the AI based on the pass configuration.
+     *
+     * @param array $astData
+     * @param string $rawCode
+     * @param string $type
+     * @param array $passConfig
+     * @return string
+     */
+    protected function buildPrompt(array $astData, string $rawCode, string $type, array $passConfig): string
+    {
+        $basePrompt = Arr::get($passConfig, 'prompt', 'Analyze the code and provide insights:');
+        $prompt = $basePrompt;
+
+        if ($type === 'ast' || $type === 'both') {
+            $prompt .= "\n\nAST Data:\n";
+            $prompt .= json_encode($astData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        }
+
+        if ($type === 'raw' || $type === 'both') {
+            $prompt .= "\n\nRaw Code:\n" . $rawCode;
+        }
+
+        $prompt .= "\n\nPlease respond with thorough, structured insights.\n";
+        return $prompt;
+    }
+
+    /**
+     * Retrieve raw code from the file system.
+     *
+     * @param string $filePath
+     * @return string
+     */
+    protected function retrieveRawCode(string $filePath): string
+    {
+        try {
+            return File::get($filePath);
+        } catch (\Exception $ex) {
+            Log::warning("Could not read raw code from [{$filePath}]: " . $ex->getMessage());
+            return '';
+        }
+    }
     {
         // parseFile is your ParserService method that runs the AST parse
         $ast = $this->parserService->parseFile($filePath);
