@@ -57,13 +57,21 @@ class ParseFilesCommand extends Command
 
         $this->info("Found " . count($phpFiles) . " PHP files to parse.");
 
+        // Initialize progress bar
+        $bar = $this->output->createProgressBar(count($phpFiles));
+        $bar->start();
+
         // 3) Parse each PHP file
         foreach ($phpFiles as $phpFile) {
             if ($this->output->isVerbose()) {
                 $this->info("Parsing file: $phpFile");
             }
             $this->parseOneFile($phpFile, $parser, $traverser, $visitor);
+            $bar->advance();
         }
+
+        $bar->finish();
+        $this->newLine();
 
         $items = $visitor->getItems();
 
