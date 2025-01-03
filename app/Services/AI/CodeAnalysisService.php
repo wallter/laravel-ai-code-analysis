@@ -2,6 +2,7 @@
 
 namespace App\Services\AI;
 
+use App\Models\CodeAnalysis;
 use App\Services\Parsing\ParserService;
 use App\Services\Parsing\UnifiedAstVisitor;
 use Illuminate\Support\Arr;
@@ -137,24 +138,6 @@ class CodeAnalysisService
         ];
     }
 
-    protected function buildPrompt(array $astData, string $rawCode, string $type, array $passConfig): string
-    {
-        $basePrompt = Arr::get($passConfig, 'prompt', 'Analyze the code and provide insights:');
-        $prompt = $basePrompt;
-
-        if ($type === 'ast' || $type === 'both') {
-            $prompt .= "\n\nAST Data:\n";
-            $prompt .= json_encode($astData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        }
-
-        if ($type === 'raw' || $type === 'both') {
-            $prompt .= "\n\nRaw Code:\n" . $rawCode;
-        }
-
-        $prompt .= "\n\nPlease respond with thorough, structured insights.\n";
-        return $prompt;
-    }
-
     /**
      * Retrieve raw code from the file system.
      *
@@ -169,7 +152,6 @@ class CodeAnalysisService
             Log::warning("Could not read raw code from [{$filePath}]: " . $ex->getMessage());
             return '';
         }
-    }
 
         // Now use your single visitor
         $visitor = new UnifiedAstVisitor();
@@ -285,19 +267,6 @@ class CodeAnalysisService
         Log::debug("Collected classes={$analysis['class_count']}, free-functions={$analysis['function_count']}, methods={$analysis['method_count']}");
 
         return $analysis;
-    }
-
-    /**
-     * Load raw file contents for AI-based improvement suggestions.
-     */
-    protected function retrieveRawCode(string $filePath): string
-    {
-        try {
-            return File::get($filePath);
-        } catch (Exception $ex) {
-            Log::warning("Could not read raw code from [{$filePath}]: " . $ex->getMessage());
-            return '';
-        }
     }
 
     /**
