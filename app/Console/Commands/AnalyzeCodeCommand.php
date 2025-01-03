@@ -4,155 +4,112 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Services\Parsing\ParserService;
+use App\Services\Parsing\FunctionAndClassVisitor;
 use App\Services\AI\CodeAnalysisService;
-use App\Models\CodeAnalysis; 
-use Illuminate\Support\Facades\Log;
+use App\Models\CodeAnalysis;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 class AnalyzeCodeCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'code:analyze 
-                                {--output-file= : Specify the output file for the analysis results}
-                                {--limit-class= : Limit analysis to a specific number of classes}
-                                {--limit-method= : Limit analysis to a specific number of methods per class}';
+                            {--output-file= : Where to output analysis results}
+                            {--limit-class= : Limit how many classes to analyze}
+                            {--limit-method= : Limit how many methods per class}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Analyze PHP code, generate AST, and persist the analysis results';
 
-    protected ParserService $parserService;
-    protected CodeAnalysisService $codeAnalysisService;
-
-    /**
-     * Create a new command instance.
-     *
-     * @param ParserService $parserService
-     * @param CodeAnalysisService $codeAnalysisService
-     */
-    public function __construct(ParserService $parserService, CodeAnalysisService $codeAnalysisService)
-    {
+    public function __construct(
+        protected ParserService $parserService,
+        protected CodeAnalysisService $codeAnalysisService
+    ) {
         parent::__construct();
-        $this->parserService = $parserService;
-        $this->codeAnalysisService = $codeAnalysisService;
     }
 
-    /**
-     * Execute the console command.
-     *
-     * @return int
-     */
-    public function handle()
+    public function handle(): int
     {
-        // Collect PHP files using ParserService's collectPhpFiles method
         $phpFiles = $this->parserService->collectPhpFiles()->unique();
-
-        // Check if any PHP files were found
         if ($phpFiles->isEmpty()) {
             $this->error("No PHP files found to analyze.");
             return 1;
         }
 
-        // Retrieve options
-        $outputFile = $this->option('output-file');
-        $limitClass = intval($this->option('limit-class')) ?: config('ai.operations.analysis_limits.limit_class', 0);
-        $limitMethod = intval($this->option('limit-method')) ?: config('ai.operations.analysis_limits.limit_method', 0);
+        $outputFile   = $this->option('output-file') ?: null;
+        $limitClass   = intval($this->option('limit-class'))   ?: 0;
+        $limitMethod  = intval($this->option('limit-method'))  ?: 0;
 
-        $this->info("Starting analysis for " . $phpFiles->count() . " PHP files.");
+        $this->info("Analyzing {$phpFiles->count()} file(s)...");
 
-        // Apply limits if set
-        if ($limitClass > 0) {
-            $phpFiles = $phpFiles->take($limitClass);
-        }
-
-        $fileCount = $phpFiles->count();
-        $bar = $this->output->createProgressBar($fileCount);
+        $bar = $this->output->createProgressBar($phpFiles->count());
         $bar->start();
 
         DB::beginTransaction();
 
-        $analysisResults = collect();
-
-        $phpFiles->each(function ($filePath) use (&$analysisResults, $limitMethod, $bar) {
+        $analysisResults = [];
+        foreach ($phpFiles as $filePath) {
             try {
-                // Analyze the AST using CodeAnalysisService
-                $analysis = $this->codeAnalysisService->analyzeAst($filePath, $limitMethod);
+                // Create a new visitor each time (or reuse if you want)
+                $visitor = new FunctionAndClassVisitor();
 
-                // Retrieve the AST from ParserService
-                $ast = $this->parserService->parseFile($filePath);
+                // Parse file with that visitor
+                $ast = $this->parserService->parseFile(
+                    filePath: $filePath,
+                    visitors: [$visitor],
+                    useCache: false
+                );
 
-                // Persist the analysis and AST using updateOrCreate
+                // Now retrieve the data from the visitor
+                $classes   = $visitor->getClasses();
+                $functions = $visitor->getFunctions();
+
+                // Additional analysis from codeAnalysisService
+                $analysis = $this->codeAnalysisService->analyzeAstFromData($classes, $functions, [
+                    'limitClass'  => $limitClass,
+                    'limitMethod' => $limitMethod,
+                ]);
+
+                // Optionally store the combined “analysis” in CodeAnalysis
                 CodeAnalysis::updateOrCreate(
-                    ['file_path' => $this->parserService->normalizePath($filePath)],
+                    ['file_path' => $filePath],
                     [
-                        'ast' => json_encode($ast),
+                        'ast'      => json_encode($ast),
                         'analysis' => json_encode($analysis),
                     ]
                 );
 
-                if ($this->option('output-file')) {
-                    $analysisResults->put($filePath, $analysis);
-                }
+                // For final output
+                $analysisResults[$filePath] = $analysis;
 
-                $this->info("Successfully analyzed and persisted: {$filePath}");
-            } catch (\Exception $e) {
+                $this->info("Analyzed: {$filePath}");
+            } catch (\Throwable $e) {
                 Log::error("Analysis failed for {$filePath}: " . $e->getMessage());
-                $this->error("Failed to analyze: {$filePath}");
+                $this->error("Failed: {$filePath}");
             }
-
             $bar->advance();
-        });
+        }
 
         $bar->finish();
-        $this->newLine();
+        $this->line('');
+        DB::commit();
 
+        // Optionally write out a final results file
         if ($outputFile) {
-            $this->exportResults($outputFile, $analysisResults->all());
+            $this->writeResultsToFile($analysisResults, $outputFile);
             $this->info("Analysis results exported to {$outputFile}");
         }
 
-        DB::commit();
-
         $this->info("Code analysis completed.");
-
         return 0;
     }
 
-    /**
-     * Export analysis results to a specified output file.
-     *
-     * @param string $filePath
-     * @param array $data
-     * @return void
-     */
-    protected function exportResults(string $filePath, array $data): void
+    private function writeResultsToFile(array $analysisResults, string $filePath): void
     {
-        $jsonData = json_encode($data, JSON_PRETTY_PRINT);
-        if ($jsonData === false) {
-            $this->error("Failed to encode analysis results to JSON.");
-            Log::error("Failed to encode analysis results to JSON.");
+        $json = json_encode($analysisResults, JSON_PRETTY_PRINT);
+        if (!$json) {
+            $this->error("Failed to JSON-encode results for output file.");
             return;
         }
-
-        $dir = dirname($filePath);
-        if (!File::isDirectory($dir)) {
-            File::makeDirectory($dir, 0777, true, true);
-        }
-
-        if (File::put($filePath, $jsonData) === false) {
-            $this->error("Failed to write analysis results to {$filePath}");
-            Log::error("Failed to write analysis results to {$filePath}");
-            return;
-        }
-
-        $this->info("Analysis results successfully written to {$filePath}");
+        @mkdir(dirname($filePath), 0777, true);
+        file_put_contents($filePath, $json);
     }
 }

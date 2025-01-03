@@ -10,41 +10,12 @@ use Illuminate\Support\Collection;
 class FunctionVisitor extends NodeVisitorAbstract
 {
     private Collection $functions;
+    private string $currentFile = '';
 
     public function __construct()
     {
         $this->functions = collect();
     }
-
-    /**
-     * Recursively converts a PhpParser Node into an associative array.
-     *
-     * @param Node $node
-     * @return array
-     */
-    private function astToArray(Node $node): array
-    {
-        $result = [
-            'nodeType' => $node->getType(),
-            'attributes' => $node->getAttributes(),
-        ];
-
-        foreach ($node->getSubNodeNames() as $subNodeName) {
-            $subNode = $node->$subNodeName;
-            if ($subNode instanceof Node) {
-                $result[$subNodeName] = $this->astToArray($subNode);
-            } elseif (is_array($subNode)) {
-                $result[$subNodeName] = array_map(function ($item) {
-                    return ($item instanceof Node) ? $this->astToArray($item) : $item;
-                }, $subNode);
-            } else {
-                $result[$subNodeName] = $subNode;
-            }
-        }
-
-        return $result;
-    }
-    private string $currentFile = '';
 
     public function setCurrentFile(string $file): void
     {
@@ -72,19 +43,14 @@ class FunctionVisitor extends NodeVisitorAbstract
             $params[] = ['name' => $paramName, 'type' => $paramType];
         }
 
+        // you can parse doccomments if you like
         $docComment = $node->getDocComment();
-        $description = '';
-        $annotations = [];
-        $restlerTags = [];
+        $description = ''; // ...
+        $annotations = []; // ...
+        // $restlerTags = [];
 
-        if ($docComment) {
-            $docText = $docComment->getText();
-            $description = DocblockParser::extractShortDescription($docText);
-            $annotations = DocblockParser::extractAnnotations($docText);
-            $restlerTags = $annotations;
-        }
-
-        $attributes = DocblockParser::collectAttributes($node->attrGroups);
+        // no attributes for now, or do something similar to FunctionAndClassVisitor
+        $attributes = [];
 
         return [
             'type'       => 'Function',
@@ -92,7 +58,6 @@ class FunctionVisitor extends NodeVisitorAbstract
             'details'    => [
                 'params'       => $params,
                 'description'  => $description,
-                'restler_tags' => $restlerTags
             ],
             'annotations' => $annotations,
             'attributes'  => $attributes,
@@ -100,6 +65,27 @@ class FunctionVisitor extends NodeVisitorAbstract
             'line'        => $node->getStartLine(),
             'ast'         => $this->astToArray($node),
         ];
+    }
+
+    private function astToArray(Node $node): array
+    {
+        $result = [
+            'nodeType'   => $node->getType(),
+            'attributes' => $node->getAttributes(),
+        ];
+        foreach ($node->getSubNodeNames() as $subNodeName) {
+            $subNode = $node->$subNodeName;
+            if ($subNode instanceof Node) {
+                $result[$subNodeName] = $this->astToArray($subNode);
+            } elseif (is_array($subNode)) {
+                $result[$subNodeName] = array_map(fn($item) => ($item instanceof Node)
+                    ? $this->astToArray($item)
+                    : $item, $subNode);
+            } else {
+                $result[$subNodeName] = $subNode;
+            }
+        }
+        return $result;
     }
 
     private function typeToString($typeNode): string

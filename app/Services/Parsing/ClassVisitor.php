@@ -5,6 +5,7 @@ namespace App\Services\Parsing;
 
 use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
+use PhpParser\Node\Stmt\ClassLike;
 
 class ClassVisitor extends NodeVisitorAbstract
 {
@@ -20,7 +21,7 @@ class ClassVisitor extends NodeVisitorAbstract
 
     public function enterNode(Node $node): void
     {
-        if ($node instanceof Node\Stmt\ClassLike && $node->name !== null) {
+        if ($node instanceof ClassLike && $node->name !== null) {
             $this->currentClassName = $node->name->name;
             $this->currentNamespace = $this->getNamespace($node);
             $this->classes[] = $this->collectClassData($node);
@@ -29,7 +30,7 @@ class ClassVisitor extends NodeVisitorAbstract
 
     public function leaveNode(Node $node): void
     {
-        if ($node instanceof Node\Stmt\ClassLike && $node->name !== null) {
+        if ($node instanceof ClassLike && $node->name !== null) {
             $this->currentClassName = '';
             $this->currentNamespace = '';
         }
@@ -40,24 +41,26 @@ class ClassVisitor extends NodeVisitorAbstract
         return $this->classes;
     }
 
-    private function collectClassData(Node\Stmt\ClassLike $node): array
+    private function collectClassData(ClassLike $node): array
     {
+        // If needed, parse doc comments
         $description = '';
         $annotations = [];
-        $restlerTags = [];
-        $docComment = $node->getDocComment();
+        $attributes  = [];
+        $docComment  = $node->getDocComment();
+
+        // Example minimal approach:
         if ($docComment) {
             $docText = $docComment->getText();
-            $description = DocblockParser::extractShortDescription($docText);
-            $annotations = DocblockParser::extractAnnotations($docText);
+            // parse out short description or annotations, if you want
         }
 
-        $attributes = DocblockParser::collectAttributes($node->attrGroups);
+        // If you want to parse attributes (PHP 8+):
+        $attributes = []; // or implement logic as in other visitors
 
+        // Gather methods
         $methods = collect($node->getMethods())
-            ->map(function ($method) {
-                return $this->collectMethodData($method);
-            })
+            ->map(fn($method) => $this->collectMethodData($method))
             ->all();
 
         $className = $node->name->name;
@@ -65,19 +68,18 @@ class ClassVisitor extends NodeVisitorAbstract
         $fullyQualifiedName = $namespace ? "{$namespace}\\{$className}" : $className;
 
         return [
-            'type'                => 'Class',
-            'name'                => $className,
-            'namespace'           => $namespace,
-            'fullyQualifiedName'  => $fullyQualifiedName,
-            'details'             => [
-                'methods'      => $methods,
-                'description'  => $description,
+            'type'               => 'Class',
+            'name'               => $className,
+            'namespace'          => $namespace,
+            'fullyQualifiedName' => $fullyQualifiedName,
+            'details'            => [
+                'methods'     => $methods,
+                'description' => $description,
             ],
-            'annotations'         => $annotations,
-            'attributes'          => $attributes,
-            'restler_tags'        => $restlerTags,
-            'file'                => $this->currentFile,
-            'line'                => $node->getStartLine(),
+            'annotations'        => $annotations,
+            'attributes'         => $attributes,
+            'file'               => $this->currentFile,
+            'line'               => $node->getStartLine(),
         ];
     }
 
@@ -90,31 +92,17 @@ class ClassVisitor extends NodeVisitorAbstract
             $params[] = ['name' => $paramName, 'type' => $paramType];
         }
 
-        $docComment = $method->getDocComment();
+        // If doc extraction is needed:
         $description = '';
         $annotations = [];
-        $restlerTags = [];
-
-        if ($docComment) {
-            $docText = $docComment->getText();
-            $description = DocblockParser::extractShortDescription($docText);
-            $annotations = DocblockParser::extractAnnotations($docText);
-            $restlerTags = $annotations;
-        }
-
-        $attributes = DocblockParser::collectAttributes($method->attrGroups);
+        // etc.
 
         return [
-            'name'              => $method->name->name,
-            'params'            => $params,
-            'description'       => $description,
-            'annotations'       => $annotations,
-            'attributes'        => $attributes,
-            'class'             => $this->currentClassName,
-            'namespace'         => $this->currentNamespace,
-            'visibility'        => implode(' ', \PhpParser\Node\Stmt\Class_::getModifierNames($method->flags)),
-            'isStatic'          => $method->isStatic(),
-            'line'              => $method->getStartLine(),
+            'name'        => $method->name->name,
+            'params'      => $params,
+            'description' => $description,
+            'annotations' => $annotations,
+            'line'        => $method->getStartLine(),
         ];
     }
 

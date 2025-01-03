@@ -7,259 +7,168 @@ use App\Services\Parsing\ParserService;
 use App\Services\Parsing\FunctionAndClassVisitor;
 use App\Models\ParsedItem;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Collection;
 
 /**
- * Parses PHP files and outputs discovered classes & functions.
+ * Simple parse command that shows discovered classes & functions.
  */
 class ParseFilesCommand extends Command
 {
-    protected $signature = 'parse:files {--filter=} {--output-file=} {--limit-class=} {--limit-method=}';
-    protected $description = 'Parses configured or specified files/directories and lists discovered functions and classes';
+    protected $signature = 'parse:files 
+                           {--filter= : Filter items by name} 
+                           {--output-file= : JSON output path}
+                           {--limit-class= : Limit how many classes to parse} 
+                           {--limit-method= : Limit how many methods per class}';
 
-    /**
-     * @var ParserService
-     */
-    protected ParserService $parserService;
+    protected $description = 'Parses configured or specified files/directories and displays discovered classes & functions';
 
-    /**
-     * ParseFilesCommand constructor.
-     *
-     * @param ParserService $parserService
-     */
-    public function __construct(ParserService $parserService)
+    public function __construct(protected ParserService $parserService)
     {
         parent::__construct();
-        $this->parserService = $parserService;
     }
 
-    public function handle()
+    public function handle(): int
     {
-        // 1) Collect files and folders from config
-        $phpFiles = $this->parserService->collectPhpFiles()->unique();
+        $phpFiles    = $this->parserService->collectPhpFiles()->unique();
+        $filter      = $this->option('filter');
+        $outputFile  = $this->option('output-file');
+        $limitClass  = intval($this->option('limit-class'))  ?: 0;
+        $limitMethod = intval($this->option('limit-method')) ?: 0;
 
-        $filter     = $this->option('filter');
-        $outputFile = $this->option('output-file');
-        if ($outputFile && substr($outputFile, -5) !== '.json') {
-            $outputFile .= '.json';
+        if ($phpFiles->isEmpty()) {
+            $this->info("No PHP files found.");
+            return 0;
         }
-        $limitClass = $this->option('limit-class');
-        $limitMethod = $this->option('limit-method');
 
-        // 2) Setup parser & traverser using ParserService
-        $this->parserService->setupParserTraversal();
-        $parser = $this->parserService->createParser();
-        $traverser = $this->parserService->createTraverser();
+        // We'll parse all files with our single "FunctionAndClassVisitor".
         $visitor = new FunctionAndClassVisitor();
-        $traverser->addVisitor($visitor);
 
-        $this->info("Found " . $phpFiles->count() . " PHP files to parse.");
+        $this->info("Parsing {$phpFiles->count()} PHP file(s)...");
 
-        // Initialize progress bar
         $bar = $this->output->createProgressBar($phpFiles->count());
         $bar->start();
 
-        // 3) Parse each PHP file
-        $phpFiles->each(function ($phpFile) use ($parser, $traverser, $visitor, $bar) {
-            if ($this->output->isVerbose()) {
-                $this->info("Parsing file: $phpFile");
-            }
+        $parsedItems = collect();
+
+        foreach ($phpFiles as $phpFile) {
             $visitor->setCurrentFile($phpFile);
-            $this->parseOneFile($phpFile, $parser, $traverser, $visitor);
-            $bar->advance();
-        });
 
-        $bar->finish();
-        $this->newLine();
-
-        $items = collect($visitor->getItems());
-
-        // Display warnings
-        collect($visitor->getWarnings())->each(function ($warning) {
-            $this->warn($warning);
-        });
-
-        if ($limitClass) {
-            $items = $items->filter(fn($item) => $item['type'] !== 'Class')
-                ->merge(
-                    $items->where('type', 'Class')->take($limitClass)
+            // parseFile() with $visitor
+            try {
+                $this->parserService->parseFile(
+                    filePath: $phpFile,
+                    visitors: [$visitor],
+                    useCache: false
                 );
+            } catch (\Throwable $e) {
+                $this->warn("Could not parse {$phpFile}: {$e->getMessage()}");
+            }
+
+            $bar->advance();
         }
 
-        if ($limitMethod) {
-            $items = $items->map(function ($item) use ($limitMethod) {
-                if ($item['type'] === 'Class' && !empty($item['details']['methods'])) {
+        $bar->finish();
+        $this->line('');
+
+        // Gather the discovered data
+        $allItems = collect($visitor->getItems());
+
+        if ($limitClass) {
+            $allItems = $allItems->map(function ($item) use ($limitClass, $limitMethod) {
+                if ($item['type'] === 'Class') {
+                    // For example, you might skip if you exceed $limitClass
+                    // or you can do "top X classes" logic. Up to you.
+                }
+                if ($limitMethod && !empty($item['details']['methods'])) {
                     $item['details']['methods'] = array_slice($item['details']['methods'], 0, $limitMethod);
                 }
                 return $item;
             });
         }
 
-        $this->info("Collected " . $items->count() . " items from parsing.");
-
-        // 4) Apply filter if given
+        // apply filter if set
         if ($filter) {
-            $items = $items->filter(function($item) use ($filter) {
-                return stripos($item['name'], $filter) !== false;
-            });
+            $allItems = $allItems->filter(fn($item) => stripos($item['name'], $filter) !== false);
         }
 
-        // 5) Store parsed items in the database
-        $items->each(function ($item) {
-            // Store the class or function
+        // Store or display them. For demonstration, let's store in DB:
+        $allItems->each(function ($item) {
             ParsedItem::updateOrCreate(
                 [
-                    'type' => $item['type'],
-                    'name' => $item['name'],
+                    'type'      => $item['type'],
+                    'name'      => $item['name'],
                     'file_path' => $item['file'],
                 ],
                 [
-                    'line_number' => $item['line'],
-                    'annotations' => $item['annotations'] ?: [],
-                    'attributes' => $item['attributes'] ?: [],
-                    'details' => $item['details'] ?? [],
-                    'ast' => $item['ast'] ?? null,
+                    'line_number'  => $item['line'],
+                    'details'      => $item['details'] ?? [],
+                    'annotations'  => $item['annotations'] ?? [],
+                    'attributes'   => $item['attributes'] ?? [],
                     'fully_qualified_name' => $item['fully_qualified_name'] ?? null,
                 ]
             );
-
-            // If item is a class and has methods, store each method as a separate ParsedItem
-            if ($item['type'] === 'Class' && !empty($item['details']['methods'])) {
-                collect($item['details']['methods'])->each(function ($method) use ($item) {
-                    ParsedItem::updateOrCreate(
-                        [
-                            'type' => 'Method',
-                            'name' => $method['name'],
-                            'file_path' => $item['file'],
-                        ],
-                        [
-                            'line_number' => $method['line'] ?? null,
-                            'annotations' => $method['annotations'] ?: [],
-                            'attributes' => $method['attributes'] ?: [],
-                            'details' => [
-                                'params' => $method['params'] ?? [],
-                                'description' => $method['description'] ?? '',
-                            ],
-                            'class_name' => $method['class'] ?? '',
-                            'namespace' => $method['namespace'] ?? '',
-                            'visibility' => $method['visibility'] ?? '',
-                            'is_static' => $method['isStatic'] ?? false,
-                            'fully_qualified_name' => ($item['fully_qualified_name'] ?? '') . '::' . $method['name'],
-                            'operation_summary' => $method['operation_summary'] ?? '',
-                            'called_methods' => $method['called_methods'] ?? [],
-                            'ast' => $method['ast'] ?? null,
-                        ]
-                    );
-                });
-            }
         });
 
-        // 6) Output
-        if ($items->isEmpty()) {
-            $this->info('No functions or classes found.');
-            return 0;
-        }
+        $this->info("Parsed {$allItems->count()} items total.");
 
+        // If user wants JSON output
         if ($outputFile) {
-            $this->persistJsonOutput($items->all(), $outputFile);
+            $this->exportJson($allItems->values()->toArray(), $outputFile);
         } else {
-            $this->displayTable($items->all());
+            // Or display in table
+            $this->displaySummary($allItems->values()->toArray());
         }
 
         return 0;
     }
 
-
-    /**
-     * Return all PHP files recursively in the given directory.
-     */
-    private function getPhpFiles(string $directory): array
+    protected function exportJson(array $items, string $filePath)
     {
-        return $this->parserService->getPhpFiles($directory);
-    }
-
-    /**
-     * Display results in a table in the console.
-     */
-    private function displayTable(array $items)
-    {
-        $this->table(
-            ['Type', 'Name', 'Details/Params', 'Annotations', 'Attributes', 'Location'],
-            collect($items)->map(function($item) {
-                if ($item['type'] === 'Function') {
-                    $paramStr   = collect($item['details']['params'])->map(fn($p) => "{$p['type']} {$p['name']}")->implode(', ');
-                    $details    = $paramStr;
-                    if (!empty($item['details']['description'])) {
-                        $details .= ' - ' . $item['details']['description'];
-                    }
-                    $allAnnotations = collect($item['annotations'])->merge($item['details']['restler_tags'] ?? [])->toArray();
-                    $annotations = collect($allAnnotations)->map(function($values, $tag) {
-                        return collect($values)->map(fn($value) => "@{$tag} {$value}")->implode("\n");
-                    })->implode("\n");
-                    $attributes  = collect($item['attributes'])->implode("\n");
-                    $location    = "{$item['file']}:{$item['line']}";
-                    return [$item['type'], $item['name'], $details, $annotations, $attributes, $location];
-                } else { // 'Class'
-                    $methods = collect($item['details']['methods'])->map(function($m) {
-                        $params = collect($m['params'])->map(fn($p) => "{$p['type']} {$p['name']}")->implode(', ');
-                        $desc   = $m['description'] ? ' - ' . $m['description'] : '';
-                        $methodAnnotations = collect($m['annotations'])->map(function($values, $tag) {
-                            return collect($values)->map(fn($value) => "@{$tag} {$value}")->implode("\n");
-                        })->implode("\n");
-                        return "{$m['name']}($params)$desc\n$methodAnnotations";
-                    })->implode(', ');
-                    if (!empty($item['details']['description'])) {
-                        $methods .= ' - ' . $item['details']['description'];
-                    }
-                    $annotations = collect($item['annotations'])->implode("\n");
-                    $attributes  = collect($item['attributes'])->implode("\n");
-                    $location    = "{$item['file']}:{$item['line']}";
-                    return [$item['type'], $item['name'], $methods, $annotations, $attributes, $location];
-                }
-            })->toArray()
-        );
-    }
-
-    /**
-     * Write the output to a JSON file.
-     */
-    private function persistJsonOutput(array $items, string $outputFile)
-    {
-        $jsonData = json_encode($items, JSON_PRETTY_PRINT);
-        if ($jsonData === false) {
-            $this->error("Failed to encode data to JSON.");
+        $encoded = json_encode($items, JSON_PRETTY_PRINT);
+        if (!$encoded) {
+            $this->warn("Failed to encode to JSON.");
             return;
         }
-
-        $dir = dirname($outputFile);
-        if (!File::isDirectory($dir)) {
-            File::makeDirectory($dir, 0777, true, true);
-        }
-
-        File::put($outputFile, $jsonData);
-        $this->info("Output written to {$outputFile}");
+        @mkdir(dirname($filePath), 0777, true);
+        File::put($filePath, $encoded);
+        $this->info("Output written to {$filePath}");
     }
 
-    /**
-     * Parse a single PHP file.
-     *
-     * @param string $filePath
-     * @param Parser $parser
-     * @param NodeTraverser $traverser
-     * @param FunctionAndClassVisitor $visitor
-     */
-    private function parseOneFile(string $filePath, $parser, $traverser, $visitor)
+    protected function displaySummary(array $items)
     {
-        $code = File::get($filePath);
-        try {
-            $ast = $parser->parse($code);
-            if ($ast === null) {
-                $this->warn("No AST generated for file: {$filePath}");
-                return;
-            }
-            $traverser->traverse($ast);
-        } catch (\Exception $e) {
-            $this->error("Error parsing file {$filePath}: " . $e->getMessage());
-        }
+        $this->table(
+            ['Type', 'Name', 'Params/Methods', 'File', 'Line'],
+            collect($items)->map(function ($item) {
+                if ($item['type'] === 'Class') {
+                    $methodsStr = collect($item['details']['methods'] ?? [])
+                        ->map(fn($m) => $m['name'])
+                        ->implode(', ');
+                    return [
+                        $item['type'],
+                        $item['name'],
+                        $methodsStr,
+                        $item['file'],
+                        $item['line'],
+                    ];
+                } elseif ($item['type'] === 'Function') {
+                    $paramStr = collect($item['details']['params'] ?? [])->map(
+                        fn($p) => $p['type'].' '.$p['name']
+                    )->implode(', ');
+                    return [
+                        $item['type'],
+                        $item['name'],
+                        $paramStr,
+                        $item['file'],
+                        $item['line'],
+                    ];
+                }
+                return [
+                    $item['type'],
+                    $item['name'],
+                    '',
+                    $item['file'],
+                    $item['line'],
+                ];
+            })->toArray()
+        );
     }
 }
