@@ -23,11 +23,3 @@ class CodeAnalysis extends Model
         'ai_output' => 'array',
         'completed_passes' => 'array',
     ];
-}
-
-    protected $casts = [
-        'ast' => 'array',
-        'analysis' => 'array',
-        'ai_output' => 'array',
-        'completed_passes' => 'array',
-    ];
