@@ -17,7 +17,7 @@ class AnalyzeCodeCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'code:analyze {directory} 
+    protected $signature = 'code:analyze 
                                 {--output-file= : Specify the output file for the analysis results}
                                 {--limit-class= : Limit analysis to a specific number of classes}
                                 {--limit-method= : Limit analysis to a specific number of methods per class}';
@@ -52,7 +52,8 @@ class AnalyzeCodeCommand extends Command
      */
     public function handle()
     {
-        $directory = $this->argument('directory');
+        // Retrieve the default directory from configuration
+        $directory = Config::get('code_analysis.default_directory');
 
         if (!is_dir($directory)) {
             $this->error("The directory '{$directory}' does not exist.");
