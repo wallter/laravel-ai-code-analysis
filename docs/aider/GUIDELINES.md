@@ -6,7 +6,9 @@ It outlines best practices, constraints, and usage patterns to maintain a consis
 ---
 
 ## 0. TLDR;
+- Always respond in English. 
 - DO NOT CREATE or use an `app/Console/Kernel.php`, commands are auto-discovered by laravel v11
+- Use Laravel collections when possible.
 
 ---
 
