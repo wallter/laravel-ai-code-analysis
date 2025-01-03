@@ -102,6 +102,41 @@ class CodeAnalysisService
      * @param array $passConfig
      * @return string
      */
+    // parseFile is your ParserService method that runs the AST parse
+    public function analyzeAst(string $filePath, int $limitMethod): array
+    {
+        $ast = $this->parserService->parseFile($filePath);
+        if (empty($ast)) {
+            return [];
+        }
+
+        // Now use your single visitor
+        $visitor = new UnifiedAstVisitor();
+        $visitor->setCurrentFile($filePath);
+
+        $traverser = new \PhpParser\NodeTraverser();
+        $traverser->addVisitor(new NameResolver()); // optional
+        $traverser->addVisitor($visitor);
+        $traverser->traverse($ast);
+
+        // The "items" contain both classes + methods + free-floating functions
+        $items = $visitor->getItems();
+
+        // Summarize AST quickly:
+        $astData = $this->buildSummary($items, $limitMethod);
+
+        // Raw code for AI passes
+        $rawCode = $this->retrieveRawCode($filePath);
+
+        // Perform multi-pass
+        $multiPassResults = $this->performMultiPassAnalysis($astData, $rawCode);
+
+        return [
+            'ast_data'   => $astData,
+            'ai_results' => $multiPassResults,
+        ];
+    }
+
     protected function buildPrompt(array $astData, string $rawCode, string $type, array $passConfig): string
     {
         $basePrompt = Arr::get($passConfig, 'prompt', 'Analyze the code and provide insights:');
@@ -135,11 +170,6 @@ class CodeAnalysisService
             return '';
         }
     }
-        // parseFile is your ParserService method that runs the AST parse
-        $ast = $this->parserService->parseFile($filePath);
-        if (empty($ast)) {
-            return [];
-        }
 
         // Now use your single visitor
         $visitor = new UnifiedAstVisitor();
