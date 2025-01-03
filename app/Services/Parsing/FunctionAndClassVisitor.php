@@ -95,52 +95,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     }
 
     /**
-     * Collects data for a standalone function.
-     *
-     * @param Node\Stmt\Function_ $node
-     * @return array
-     */
-    private function collectFunctionData(Node\Stmt\Function_ $node): array
-    {
-        $params = collect($node->params)
-            ->map(function ($param) {
-                return [
-                    'name' => '$' . $param->var->name,
-                    'type' => $this->typeToString($param->type) ?: 'mixed',
-                ];
-            })
-            ->all();
-
-        $docComment  = $node->getDocComment();
-        $description = '';
-        $annotations = [];
-        $restlerTags = [];
-
-        if ($docComment) {
-            $docText     = $docComment->getText();
-            $description = $this->extractShortDescription($docText);
-            $annotations = $this->extractAnnotations($docText);
-            $restlerTags = $annotations;
-        }
-
-        $attributes = $this->collectAttributes($node->attrGroups);
-
-        return [
-            'type'       => 'Function',
-            'name'       => $node->name->name,
-            'details'    => [
-                'params'       => $params,
-                'description'  => $description,
-                'restler_tags' => $restlerTags
-            ],
-            'annotations' => $annotations,
-            'attributes'  => $attributes,
-            'file'        => $this->currentFile,
-            'line'        => $node->getStartLine(),
-        ];
-    }
-
-    /**
      * Collects data for one class method.
      *
      * @param Node\Stmt\ClassMethod $method
