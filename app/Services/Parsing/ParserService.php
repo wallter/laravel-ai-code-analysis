@@ -116,15 +116,4 @@ class ParserService
 
         return $ast;
     }
-
-    /**
-     * Normalize a file path.
-     *
-     * @param string $path
-     * @return string
-     */
-    public function normalizePath(string $path): string
-    {
-        return realpath($path) ?: $path;
-    }
 }
