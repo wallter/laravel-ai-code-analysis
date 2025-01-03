@@ -1,17 +1,13 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Services\Parsing;
 
 use PhpParser\Node;
-use PhpParser\Node\Name;
-use PhpParser\Node\NullableType;
 use PhpParser\Node\Stmt\ClassLike;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Namespace_;
-use PhpParser\Node\UnionType;
 use PhpParser\NodeVisitorAbstract;
-use PhpParser\Node\Identifier;
-use PhpParser\Modifier; // Added to use the updated Modifier constants
 use PhpParser\Modifiers;
 
 // If your version of nikic/php-parser has Serializer\XML spelled as 'Xml':

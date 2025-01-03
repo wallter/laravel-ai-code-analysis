@@ -1,13 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Services\Parsing;
 
 use PhpParser\ParserFactory;
 use App\Models\CodeAnalysis;
-use App\Services\Parsing\FunctionVisitor;
-use App\Services\Parsing\ClassVisitor;
 use PhpParser\NodeTraverser;
-use Illuminate\Support\Facades\File;
 
 class ParserService
 {
