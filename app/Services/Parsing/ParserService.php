@@ -7,9 +7,13 @@ use PhpParser\ParserFactory;
 use PhpParser\NodeTraverser;
 use PhpParser\Parser;
 use PhpParser\NodeVisitor;
+use PhpParser\NodeFinder;
 use App\Models\CodeAnalysis;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
+use PhpParser\Node\Stmt\Function_;
+use PhpParser\Node;
 
 /**
  * Provides helper methods to collect, parse, and optionally store AST data.
@@ -146,5 +150,36 @@ class ParserService
     public function normalizePath(string $path): string
     {
         return realpath($path) ?: $path;
+    }
+
+    /**
+     * Extract individual functions from a PHP file.
+     *
+     * @param string $filePath
+     * @return array An array of functions with 'name' and 'ast' keys.
+     */
+    public function getFunctionsFromFile(string $filePath): array
+    {
+        try {
+            $ast = $this->parseFile($filePath);
+
+            $nodeFinder = new NodeFinder();
+            /** @var Function_[] $functionNodes */
+            $functionNodes = $nodeFinder->findInstanceOf($ast, Function_::class);
+
+            $functions = [];
+
+            foreach ($functionNodes as $func) {
+                $functions[] = [
+                    'name' => $func->name->toString(),
+                    'ast'  => $func,
+                ];
+            }
+
+            return $functions;
+        } catch (\Exception $e) {
+            Log::error("Failed to extract functions from {$filePath}", ['exception' => $e]);
+            return [];
+        }
     }
 }
