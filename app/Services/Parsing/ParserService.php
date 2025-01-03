@@ -94,7 +94,7 @@ class ParserService
     public function parseFile(string $filePath): array
     {
         // Check if the file has already been parsed and stored
-        $existingAnalysis = $this->codeAnalysis->where('file_path', $this->normalizePath($filePath))->first();
+        $existingAnalysis = CodeAnalysis::where('file_path', $this->normalizePath($filePath))->first();
         if ($existingAnalysis) {
             return json_decode($existingAnalysis->ast, true);
         }
