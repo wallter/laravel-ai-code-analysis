@@ -132,7 +132,7 @@ class ParserService
     public function createTraverser(): NodeTraverser
     {
         $traverser = new NodeTraverser();
-        $traverser->addVisitor(new ParentConnectingVisitor());
+        // Removed ParentConnectingVisitor to prevent recursion in AST
         return $traverser;
     }
 
