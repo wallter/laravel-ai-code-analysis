@@ -50,7 +50,6 @@ class ClassVisitor extends NodeVisitorAbstract
             $docText = $docComment->getText();
             $description = DocblockParser::extractShortDescription($docText);
             $annotations = DocblockParser::extractAnnotations($docText);
-            $restlerTags = $annotations;
         }
 
         $attributes = DocblockParser::collectAttributes($node->attrGroups);
@@ -72,7 +71,6 @@ class ClassVisitor extends NodeVisitorAbstract
             'details'             => [
                 'methods'      => $methods,
                 'description'  => $description,
-                'restler_tags' => $restlerTags
             ],
             'annotations'         => $annotations,
             'attributes'          => $attributes,

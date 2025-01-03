@@ -159,7 +159,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             $docText     = $docComment->getText();
             $description = $this->extractShortDescription($docText);
             $annotations = $this->extractAnnotations($docText);
-            $restlerTags = $annotations;
         }
 
         $attributes = $this->collectAttributes($node->attrGroups);
@@ -180,7 +179,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'details' => [
                 'params'       => $params,
                 'description'  => $description,
-                'restler_tags' => $restlerTags,
             ],
             'annotations' => $annotations,
             'attributes'  => $attributes,
@@ -230,7 +228,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             ],
             'annotations'  => $annotations,
             'attributes'   => $attributes,
-            'restler_tags' => $restlerTags,
             'file'         => $this->currentFile,
             'line'         => $node->getStartLine(),
         ];

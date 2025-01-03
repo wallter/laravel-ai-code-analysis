@@ -31,7 +31,7 @@ class DocblockParser
     public static function extractAnnotations(string $docblock): array
     {
         $annotations = [];
-        $lines       = preg_split('/\R/', $docblock);
+        $lines = preg_split('/\R/', $docblock);
         foreach ($lines as $line) {
             $line = trim($line, " \t\n\r\0\x0B*");
             if (preg_match('/@(\w+)\s*(.*)/', $line, $matches)) {
