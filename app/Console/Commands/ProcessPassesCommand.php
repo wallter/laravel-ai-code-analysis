@@ -29,6 +29,9 @@ class ProcessPassesCommand extends Command
         $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
         $passOrderCount = count($passOrder);
 
+        // Log the retrieved pass order for debugging
+        Log::info('Retrieved pass_order from config:', ['passOrder' => $passOrder, 'passOrderCount' => $passOrderCount]);
+
         // Fetch all analyses that have pending passes by filtering in PHP
         $pendingAnalyses = CodeAnalysis::all()
             ->filter(function ($analysis) use ($passOrderCount) {
