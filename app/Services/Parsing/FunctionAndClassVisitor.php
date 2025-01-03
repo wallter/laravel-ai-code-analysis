@@ -11,6 +11,12 @@ use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\UnionType;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node\Identifier;
+use PhpParser\Modifier; // Added to use the updated Modifier constants
+
+// If your version of nikic/php-parser has Serializer\XML spelled as 'Xml':
+// use PhpParser\Serializer\Xml; 
+// Otherwise, for older versions, it might be spelled as 'XML' (all caps):
+
 /**
  * Collects both free-floating functions and classes with methods/attributes.
  */
@@ -57,20 +63,20 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     {
         $names = [];
 
-        // These constants exist in \PhpParser\Node\Stmt\Class_ for visibility:
-        //   MODIFIER_PUBLIC = 1
-        //   MODIFIER_PROTECTED = 2
-        //   MODIFIER_PRIVATE = 4
-        //   MODIFIER_STATIC = 8
-        //   MODIFIER_ABSTRACT = 16
-        //   MODIFIER_FINAL = 32
+        // These constants exist in \PhpParser\Modifier for visibility:
+        //   PUBLIC = 1
+        //   PROTECTED = 2
+        //   PRIVATE = 4
+        //   STATIC = 8
+        //   ABSTRACT = 16
+        //   FINAL = 32
 
         // Visibility
-        if ($flags & \PhpParser\Node\Stmt\Class_::MODIFIER_PUBLIC) {
+        if ($flags & Modifier::PUBLIC) {
             $names[] = 'public';
-        } elseif ($flags & \PhpParser\Node\Stmt\Class_::MODIFIER_PROTECTED) {
+        } elseif ($flags & Modifier::PROTECTED) {
             $names[] = 'protected';
-        } elseif ($flags & \PhpParser\Node\Stmt\Class_::MODIFIER_PRIVATE) {
+        } elseif ($flags & Modifier::PRIVATE) {
             $names[] = 'private';
         } elseif ($node instanceof Node\Expr\StaticCall) {
             if ($node->class->toString() === 'v5\\Service\\BusinessRule') {
@@ -109,17 +115,17 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         }
 
         // Static?
-        if ($flags & \PhpParser\Node\Stmt\Class_::MODIFIER_STATIC) {
+        if ($flags & Modifier::STATIC) {
             $names[] = 'static';
         }
 
         // Abstract?
-        if ($flags & \PhpParser\Node\Stmt\Class_::MODIFIER_ABSTRACT) {
+        if ($flags & Modifier::ABSTRACT) {
             $names[] = 'abstract';
         }
 
         // Final?
-        if ($flags & \PhpParser\Node\Stmt\Class_::MODIFIER_FINAL) {
+        if ($flags & Modifier::FINAL) {
             $names[] = 'final';
         }
 
