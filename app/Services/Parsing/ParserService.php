@@ -6,11 +6,33 @@ namespace App\Services\Parsing;
 use PhpParser\ParserFactory;
 use App\Models\CodeAnalysis;
 use PhpParser\NodeTraverser;
+use PhpParser\NodeVisitor\ParentConnectingVisitor;
+use PhpParser\Parser;
+use PhpParser\NodeVisitor;
 
 class ParserService
 {
+    /**
+     * @var Parser
+     */
+    protected Parser $parser;
+
+    /**
+     * @var NodeTraverser
+     */
+    protected NodeTraverser $traverser;
+
+    /**
+     * @var NodeVisitor
+     */
+    protected NodeVisitor $visitor;
+
     public function __construct()
     {
+        $this->parser = $this->createParser();
+        $this->traverser = $this->createTraverser();
+        $this->visitor = new FunctionAndClassVisitor();
+        $this->traverser->addVisitor($this->visitor);
     }
 
     /**
@@ -96,9 +118,9 @@ class ParserService
     /**
      * Create a new PHP parser instance using the newest supported version.
      *
-     * @return \PhpParser\Parser
+     * @return Parser
      */
-    public function createParser()
+    public function createParser(): Parser
     {
         return (new ParserFactory())->createForNewestSupportedVersion();
     }
@@ -106,13 +128,23 @@ class ParserService
     /**
      * Create a new NodeTraverser instance.
      *
-     * @return \PhpParser\NodeTraverser
+     * @return NodeTraverser
      */
-    public function createTraverser()
+    public function createTraverser(): NodeTraverser
     {
         $traverser = new NodeTraverser();
-        $traverser->addVisitor(new \PhpParser\NodeVisitor\ParentConnectingVisitor());
+        $traverser->addVisitor(new ParentConnectingVisitor());
         return $traverser;
+    }
+
+    /**
+     * Get the configured visitor.
+     *
+     * @return NodeVisitor
+     */
+    public function getVisitor(): NodeVisitor
+    {
+        return $this->visitor;
     }
 
     /**
@@ -131,20 +163,14 @@ class ParserService
             return json_decode($existingAnalysis->ast, true);
         }
 
-        $parser = $this->createParser();
-        $traverser = $this->createTraverser();
-        $visitor = new \App\Services\Parsing\ClassVisitor();
-
-        $traverser->addVisitor($visitor);
-
         $code = file_get_contents($filePath);
-        $ast = $parser->parse($code);
+        $ast = $this->parser->parse($code);
 
         if ($ast === null) {
             throw new \Exception("Failed to parse AST for file: {$filePath}");
         }
 
-        $traverser->traverse($ast);
+        $this->traverser->traverse($ast);
 
         return $ast;
     }

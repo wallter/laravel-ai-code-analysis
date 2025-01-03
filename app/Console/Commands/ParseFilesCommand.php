@@ -51,10 +51,8 @@ class ParseFilesCommand extends Command
         $visitor = new FunctionAndClassVisitor();
         $traverser->addVisitor($visitor);
 
-        $phpFiles = [];
-
         // 3) Collect all PHP files from the folders
-        foreach ($folderPaths as $folderPath) {
+        foreach (config('parsing.folders', []) as $folderPath) {
             $realPath = $this->parserService->normalizePath($folderPath);
             $this->info("Scanning folder: $realPath");
             if (!File::isDirectory($realPath)) {
@@ -66,7 +64,7 @@ class ParseFilesCommand extends Command
         }
 
         // Add individual files to the list
-        foreach ($filePaths as $filePath) {
+        foreach (config('parsing.files', []) as $filePath) {
             $realPath = $this->parserService->normalizePath($filePath);
             if (!File::exists($realPath)) {
                 $this->warn("File not found: {$realPath}");
@@ -117,7 +115,7 @@ class ParseFilesCommand extends Command
 
         $this->info("Collected " . count($items) . " items from parsing.");
 
-        // 4) Apply filter if given
+        // 5) Apply filter if given
         if ($filter) {
             $items = array_filter($items, function($item) use ($filter) {
                 return stripos($item['name'], $filter) !== false;
@@ -175,7 +173,7 @@ class ParseFilesCommand extends Command
             }
         }
 
-        // 5) Output
+        // 7) Output
         if (empty($items)) {
             $this->info('No functions or classes found.');
             return 0;
@@ -196,16 +194,7 @@ class ParseFilesCommand extends Command
      */
     private function getPhpFiles(string $directory): array
     {
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($directory)
-        );
-        $phpFiles = [];
-        foreach ($iterator as $file) {
-            if ($file->isFile() && strtolower($file->getExtension()) === 'php') {
-                $phpFiles[] = $file->getRealPath();
-            }
-        }
-        return $phpFiles;
+        return $this->parserService->getPhpFiles($directory);
     }
 
     /**
@@ -284,29 +273,6 @@ class ParseFilesCommand extends Command
     }
 
     /**
-     * Normalizes path if it's relative, otherwise returns as is.
-     */
-    private function normalizePath(string $path): string
-    {
-        if ($this->isAbsolutePath($path)) {
-            return $path;
-        }
-        return base_path($path);
-    }
-
-    /**
-     * Determines if a given path is absolute.
-     *
-     * @param string $path
-     * @return bool
-     */
-    private function isAbsolutePath(string $path): bool
-    {
-        // Check for Unix-like or Windows absolute path
-        return preg_match('/^(\/|[A-Za-z]:[\/\\\\])/', $path) === 1;
-    }
-    
-    /**
      * Decode the 'ast' property in items to avoid escaping in output JSON.
      */
     private function decodeAstProperties(array $items): array
@@ -330,8 +296,8 @@ class ParseFilesCommand extends Command
      * Parse a single PHP file.
      *
      * @param string $filePath
-     * @param mixed $parser
-     * @param mixed $traverser
+     * @param Parser $parser
+     * @param NodeTraverser $traverser
      * @param FunctionAndClassVisitor $visitor
      */
     private function parseOneFile(string $filePath, $parser, $traverser, $visitor)
