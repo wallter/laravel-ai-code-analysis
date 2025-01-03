@@ -20,7 +20,7 @@ use Illuminate\Support\Collection;
  * This command:
  * 1) Collects .php files from ParserService
  * 2) Optionally limits the number of files (limit-class)
- * 3) For each file, calls CodeAnalysisService->analyzeAst(...)
+ * 3) For each file, extracts individual functions and calls CodeAnalysisService->analyzeAst(...)
  * 4) Stores results in 'code_analyses' DB table
  * 5) Optionally writes results to a JSON file
  */
@@ -51,7 +51,7 @@ class AnalyzeCodeCommand extends BaseCodeCommand
         CodeAnalysisService $codeAnalysisService
     ) {
         parent::__construct();
-        $this->parserService      = $parserService;
+        $this->parserService       = $parserService;
         $this->codeAnalysisService = $codeAnalysisService;
     }
 
@@ -115,41 +115,62 @@ class AnalyzeCodeCommand extends BaseCodeCommand
                 $progressBar->advance();
 
                 if ($this->output->isVerbose()) {
-                    $this->line("Analyzing file: [{$filePath}]");
+                    $this->line("Processing file: [{$filePath}]");
                 }
 
                 Log::info("Starting analysis of file: {$filePath}");
 
-                $fileStartTime = microtime(true);
-
                 try {
-                    // Multi-pass analysis on the given file
-                    $analysisData = $this->codeAnalysisService->analyzeAst($filePath, $limitMethod);
+                    // Extract individual functions from the file
+                    $functions = $this->parserService->getFunctionsFromFile($filePath);
 
-                    CodeAnalysis::updateOrCreate(
-                        ['file_path' => $this->parserService->normalizePath($filePath)],
-                        [
-                            // We store the entire analysis as well as AST in DB
-                            'ast'      => json_encode($analysisData, JSON_UNESCAPED_SLASHES),
-                            'analysis' => json_encode($analysisData, JSON_UNESCAPED_SLASHES),
-                        ]
-                    );
-
-                    if ($outputFile) {
-                        $analysisResults->put($filePath, $analysisData);
+                    if ($limitMethod > 0 && $limitMethod < count($functions)) {
+                        $functions = array_slice($functions, 0, $limitMethod);
+                        $this->info("Applying limit-method: analyzing only first {$limitMethod} method(s) in {$filePath}.");
+                        Log::info("Applying limit-method: analyzing only first {$limitMethod} method(s) in {$filePath}.");
                     }
 
-                    $fileEndTime = microtime(true);
-                    $duration = round($fileEndTime - $fileStartTime, 2);
+                    foreach ($functions as $function) {
+                        $this->info("Analyzing function: [{$function['name']}] in [{$filePath}]");
+                        Log::info("Starting analysis of function: {$function['name']} in {$filePath}");
 
-                    Log::info("File analyzed successfully: {$filePath}", [
-                        'duration_seconds' => $duration,
-                    ]);
+                        $fileStartTime = microtime(true);
+
+                        try {
+                            // Analyze individual function
+                            $analysisData = $this->codeAnalysisService->analyzeAst($function['ast'], $limitMethod);
+
+                            CodeAnalysis::updateOrCreate(
+                                ['file_path' => $this->parserService->normalizePath($filePath), 'function_name' => $function['name']],
+                                [
+                                    // We store the entire analysis as well as AST in DB
+                                    'ast'      => json_encode($function['ast'], JSON_UNESCAPED_SLASHES),
+                                    'analysis' => json_encode($analysisData, JSON_UNESCAPED_SLASHES),
+                                ]
+                            );
+
+                            if ($outputFile) {
+                                $analysisResults->put("{$filePath}::{$function['name']}", $analysisData);
+                            }
+
+                            $fileEndTime = microtime(true);
+                            $duration = round($fileEndTime - $fileStartTime, 2);
+
+                            Log::info("Function analyzed successfully: {$function['name']} in {$filePath}", [
+                                'duration_seconds' => $duration,
+                            ]);
+                        } catch (\Throwable $e) {
+                            Log::error("Analysis failed for function {$function['name']} in {$filePath}", [
+                                'exception' => $e,
+                            ]);
+                            $this->error("Analysis error on function [{$function['name']}] in [{$filePath}]. See logs for details.");
+                        }
+                    }
                 } catch (\Throwable $e) {
-                    Log::error("Analysis failed for {$filePath}", [
+                    Log::error("Failed to extract functions from {$filePath}", [
                         'exception' => $e,
                     ]);
-                    $this->error("Analysis error on [{$filePath}]. See logs for details.");
+                    $this->error("Failed to process [{$filePath}]. See logs for details.");
                 }
             }
 
@@ -171,36 +192,32 @@ class AnalyzeCodeCommand extends BaseCodeCommand
             $this->info('Code analysis completed successfully.');
             $this->info("Total time taken: {$totalDuration} seconds.");
             return 0;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            Log::error('AnalyzeCodeCommand failed.', [
-                'exception' => $th,
-            ]);
-            $this->error("A critical error occurred. Please check logs for details.");
-            return 1;
         }
-    }
 
-    /**
-     * Output to JSON file if requested.
-     */
-    protected function exportResults(string $filePath, array $data): void
-    {
-        try {
-            $jsonData = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-            if ($jsonData === false) {
-                throw new \RuntimeException('Failed to JSON-encode analysis results.');
+        /**
+         * Output to JSON file if requested.
+         */
+        protected function exportResults(string $filePath, array $data): void
+        {
+            try {
+                $jsonData = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+                if ($jsonData === false) {
+                    throw new \RuntimeException('Failed to JSON-encode analysis results.');
+                }
+                $dir = dirname($filePath);
+                if (!File::isDirectory($dir)) {
+                    File::makeDirectory($dir, 0775, true);
+                }
+                // Ensure the file has a .json extension
+                if (pathinfo($filePath, PATHINFO_EXTENSION) !== 'json') {
+                    $filePath .= '.json';
+                }
+                File::put($filePath, $jsonData);
+                $this->info("Analysis results saved to [{$filePath}]");
+                Log::info("Analysis results exported to [{$filePath}]");
+            } catch (\Throwable $e) {
+                Log::error("Could not write results to [{$filePath}]: " . $e->getMessage());
+                $this->error("Export to {$filePath} failed. Check logs for details.");
             }
-            $dir = dirname($filePath);
-            if (!File::isDirectory($dir)) {
-                File::makeDirectory($dir, 0775, true);
-            }
-            File::put($filePath, $jsonData);
-            $this->info("Analysis results saved to [{$filePath}]");
-            Log::info("Analysis results exported to [{$filePath}]");
-        } catch (\Throwable $e) {
-            Log::error("Could not write results to [{$filePath}]: " . $e->getMessage());
-            $this->error("Export to {$filePath} failed. Check logs for details.");
         }
     }
-}
