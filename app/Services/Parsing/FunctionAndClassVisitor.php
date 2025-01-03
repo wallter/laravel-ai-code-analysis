@@ -17,7 +17,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
 {
     private Collection $items;
     private Collection $warnings;
-    private string $currentFile;
+    private string $currentFile = '';
     private int $astSizeLimit = 1000; // Adjust the limit as needed
     private string $currentClassName = '';
     private string $currentNamespace = '';
