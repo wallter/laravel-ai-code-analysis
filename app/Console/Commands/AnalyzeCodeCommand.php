@@ -5,10 +5,10 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Services\Parsing\ParserService;
 use App\Services\AI\CodeAnalysisService;
-use App\Models\CodeAnalysis; // Assuming a model for persistence
+use App\Models\CodeAnalysis; 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
 
 class AnalyzeCodeCommand extends Command
 {
@@ -63,8 +63,8 @@ class AnalyzeCodeCommand extends Command
 
         // Retrieve options
         $outputFile = $this->option('output-file');
-        $limitClass = intval($this->option('limit-class')) ?: Config::get('ai.operations.analysis_limits.limit_class', 0);
-        $limitMethod = intval($this->option('limit-method')) ?: Config::get('ai.operations.analysis_limits.limit_method', 0);
+        $limitClass = intval($this->option('limit-class')) ?: config('ai.operations.analysis_limits.limit_class', 0);
+        $limitMethod = intval($this->option('limit-method')) ?: config('ai.operations.analysis_limits.limit_method', 0);
 
         $this->info("Starting analysis for directory: {$directory}");
 
