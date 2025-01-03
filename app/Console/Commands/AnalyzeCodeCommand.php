@@ -61,6 +61,7 @@ class AnalyzeCodeCommand extends BaseCodeCommand
      */
     protected function executeCommand(): int
     {
+        $totalStartTime = microtime(true);
         try {
             // Collect .php files from config
             $phpFiles = $this->parserService->collectPhpFiles()->unique();
@@ -89,10 +90,12 @@ class AnalyzeCodeCommand extends BaseCodeCommand
             if ($limitClass > 0 && $limitClass < $phpFiles->count()) {
                 $phpFiles = $phpFiles->take($limitClass);
                 $this->info("Applying limit-class: analyzing only first {$limitClass} file(s).");
+                Log::info("Applying limit-class: analyzing only first {$limitClass} file(s).");
             }
 
             if ($phpFiles->isEmpty()) {
                 $this->warn('No .php files found (or all limited out). Nothing to analyze.');
+                Log::warning('No .php files found (or all limited out). Nothing to analyze.');
                 return 0; // Normal exit
             }
 
@@ -115,6 +118,10 @@ class AnalyzeCodeCommand extends BaseCodeCommand
                     $this->line("Analyzing file: [{$filePath}]");
                 }
 
+                Log::info("Starting analysis of file: {$filePath}");
+
+                $fileStartTime = microtime(true);
+
                 try {
                     // Multi-pass analysis on the given file
                     $analysisData = $this->codeAnalysisService->analyzeAst($filePath, $limitMethod);
@@ -132,7 +139,12 @@ class AnalyzeCodeCommand extends BaseCodeCommand
                         $analysisResults->put($filePath, $analysisData);
                     }
 
-                    Log::info("File analyzed successfully: {$filePath}");
+                    $fileEndTime = microtime(true);
+                    $duration = round($fileEndTime - $fileStartTime, 2);
+
+                    Log::info("File analyzed successfully: {$filePath}", [
+                        'duration_seconds' => $duration,
+                    ]);
                 } catch (\Throwable $e) {
                     Log::error("Analysis failed for {$filePath}", [
                         'exception' => $e,
@@ -150,7 +162,14 @@ class AnalyzeCodeCommand extends BaseCodeCommand
                 $this->exportResults($outputFile, $analysisResults->toArray());
             }
 
+            $totalEndTime = microtime(true);
+            $totalDuration = round($totalEndTime - $totalStartTime, 2);
+            Log::info('Code analysis completed successfully.', [
+                'total_duration_seconds' => $totalDuration,
+                'total_files_analyzed'   => $fileCount,
+            ]);
             $this->info('Code analysis completed successfully.');
+            $this->info("Total time taken: {$totalDuration} seconds.");
             return 0;
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -180,7 +199,7 @@ class AnalyzeCodeCommand extends BaseCodeCommand
             $this->info("Analysis results saved to [{$filePath}]");
             Log::info("Analysis results exported to [{$filePath}]");
         } catch (\Throwable $e) {
-            Log::error("Could not write results to [{$filePath}]: ".$e->getMessage());
+            Log::error("Could not write results to [{$filePath}]: " . $e->getMessage());
             $this->error("Export to {$filePath} failed. Check logs for details.");
         }
     }
