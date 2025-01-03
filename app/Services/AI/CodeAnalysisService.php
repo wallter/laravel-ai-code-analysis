@@ -49,7 +49,7 @@ class CodeAnalysisService
         $astData = $this->buildSummary($items, $limitMethod);
 
         // Raw code for AI passes
-        $rawCode = $this->fetchRawCode($filePath);
+        $rawCode = $this->retrieveRawCode($filePath);
 
         // Perform multi-pass
         $multiPassResults = $this->performMultiPassAnalysis($astData, $rawCode);
