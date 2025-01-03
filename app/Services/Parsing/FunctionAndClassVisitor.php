@@ -112,6 +112,9 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             'attributes' => $this->collectAttributes($node->attrGroups),
             'file' => $this->currentFile,
             'line' => $node->getStartLine(),
+            'fully_qualified_name' => $this->currentClassName 
+                                        ? "{$this->currentClassName}::{$node->name->name}" 
+                                        : "::{$node->name->name}",
         ];
     }
 
@@ -141,12 +144,16 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
                 'visibility' => $this->resolveVisibility($method),
                 'isStatic' => $method->isStatic(),
                 'line' => $method->getStartLine(),
+                'fully_qualified_name' => "{$node->name->name}::{$method->name->name}",
             ];
         }
 
         return [
             'type' => 'Class',
             'name' => $node->name->name,
+            'fully_qualified_name' => $this->currentNamespace 
+                                        ? "{$this->currentNamespace}\\{$node->name->name}" 
+                                        : $node->name->name,
             'details' => [
                 'methods' => $methods,
                 'description' => $this->extractDescription($node->getDocComment()),
