@@ -87,7 +87,7 @@ class ParseFilesCommand extends Command
         }
 
         if ($limitMethod) {
-            $items = $items->map(function (&$item) use ($limitMethod) {
+            $items = $items->map(function ($item) use ($limitMethod) {
                 if ($item['type'] === 'Class' && !empty($item['details']['methods'])) {
                     $item['details']['methods'] = array_slice($item['details']['methods'], 0, $limitMethod);
                 }
@@ -247,12 +247,12 @@ class ParseFilesCommand extends Command
      */
     private function decodeAstProperties(array $items): array
     {
-        return collect($items)->map(function (&$item) {
+        return collect($items)->map(function ($item) {
             if (isset($item['ast']) && is_string($item['ast'])) {
                 $item['ast'] = json_decode($item['ast'], true);
             }
             if (isset($item['details']['methods']) && is_array($item['details']['methods'])) {
-                $item['details']['methods'] = collect($item['details']['methods'])->map(function (&$method) {
+                $item['details']['methods'] = collect($item['details']['methods'])->map(function ($method) {
                     if (isset($method['ast']) && is_string($method['ast'])) {
                         $method['ast'] = json_decode($method['ast'], true);
                     }
