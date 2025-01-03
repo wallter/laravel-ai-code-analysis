@@ -19,9 +19,17 @@ use PhpParser\Modifiers;
  */
 class FunctionAndClassVisitor extends NodeVisitorAbstract
 {
-    private $items = [];
-    private $businessRuleCalls = [];
-    private $warnings = [];
+    use Illuminate\Support\Collection;
+
+    private Collection $items;
+    private Collection $warnings;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->items = collect();
+        $this->warnings = collect();
+    }
     private $maxDepth = 2;
     private $astSizeLimit = 100000;
 
