@@ -4,6 +4,7 @@ namespace App\Services\AI;
 
 use App\Services\AI\OpenAIService;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Collection;
 use App\Services\Parsing\ParserService;
 use Exception;
 use PhpParser\NodeTraverser;
@@ -12,14 +13,13 @@ use PhpParser\NodeVisitor\NameResolver;
 class CodeAnalysisService
 {
     protected OpenAIService $openAIService;
+    protected ParserService $parserService;
 
     public function __construct(OpenAIService $openAIService, ParserService $parserService)
     {
         $this->openAIService = $openAIService;
         $this->parserService = $parserService;
     }
-
-    protected ParserService $parserService;
 
     /**
      * Send an analysis request to OpenAI API.
@@ -51,7 +51,7 @@ class CodeAnalysisService
     /**
      * Analyze the given AST and return analysis results.
      *
-     * @param array $ast
+     * @param string $filePath
      * @param int $limitMethod
      * @return array
      */
@@ -73,32 +73,32 @@ class CodeAnalysisService
         $nodeTraverser->traverse($ast);
 
         // Collect data from visitors
-        $classes = $classVisitor->getClasses();
-        $functions = $functionVisitor->getFunctions();
+        $classes = collect($classVisitor->getClasses());
+        $functions = collect($functionVisitor->getFunctions());
 
-        $analysisResults = [
-            'class_count' => count($classes),
-            'method_count' => 0,
-            'function_count' => count($functions),
-            'classes' => [],
-            'functions' => $functions,
-        ];
+        $analysisResults = collect([
+            'class_count' => $classes->count(),
+            'method_count' => $classes->sum(function ($class) use ($limitMethod) {
+                $methods = $class['details']['methods'];
+                if ($limitMethod > 0) {
+                    $methods = array_slice($methods, 0, $limitMethod);
+                }
+                return count($methods);
+            }),
+            'function_count' => $functions->count(),
+            'classes' => $classes->map(function ($class) use ($limitMethod) {
+                $methods = $class['details']['methods'];
+                if ($limitMethod > 0) {
+                    $methods = array_slice($methods, 0, $limitMethod);
+                }
+                return [
+                    'name' => $class['name'],
+                    'methods' => $methods,
+                ];
+            }),
+            'functions' => $functions->all(),
+        ]);
 
-        foreach ($classes as $class) {
-            // Apply method limit
-            $methods = $class['details']['methods'];
-            if ($limitMethod > 0) {
-                $methods = array_slice($methods, 0, $limitMethod);
-            }
-            $methodCount = count($methods);
-            $analysisResults['method_count'] += $methodCount;
-
-            $analysisResults['classes'][] = [
-                'name' => $class['name'],
-                'methods' => $methods,
-            ];
-        }
-
-        return $analysisResults;
+        return $analysisResults->toArray();
     }
 }
