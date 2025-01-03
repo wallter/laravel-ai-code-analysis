@@ -8,6 +8,7 @@ use PhpParser\NodeVisitorAbstract;
 use Illuminate\Support\Collection;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\Function_;
+use SplObjectStorage;
 
 /**
  * Collects both free-floating functions and classes with methods/attributes.
@@ -21,21 +22,45 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     private string $currentClassName = '';
     private string $currentNamespace = '';
     private int $maxDepth = 5; // Adjust the max depth as needed
+    private SplObjectStorage $processedNodes;
 
     public function __construct()
     {
         $this->items = collect();
         $this->warnings = collect();
+        $this->processedNodes = new SplObjectStorage();
     }
 
     /**
      * Recursively converts a PhpParser Node into an associative array.
      *
      * @param Node $node
+     * @param int $currentDepth
      * @return array
      */
-    private function astToArray(Node $node): array
+    private function astToArray(Node $node, int $currentDepth = 0): array
     {
+        // Check for maximum depth to prevent deep recursion
+        if ($currentDepth > $this->maxDepth) {
+            return [
+                'nodeType' => $node->getType(),
+                'attributes' => $node->getAttributes(),
+                'note' => 'Max depth reached, recursion stopped.',
+            ];
+        }
+
+        // Detect and prevent processing the same node multiple times
+        if ($this->processedNodes->contains($node)) {
+            return [
+                'nodeType' => $node->getType(),
+                'attributes' => $node->getAttributes(),
+                'note' => 'Recursion detected, node already processed.',
+            ];
+        }
+
+        // Mark the current node as processed
+        $this->processedNodes->attach($node);
+
         $result = [
             'nodeType' => $node->getType(),
             'attributes' => $node->getAttributes(),
@@ -44,10 +69,10 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         foreach ($node->getSubNodeNames() as $subNodeName) {
             $subNode = $node->$subNodeName;
             if ($subNode instanceof Node) {
-                $result[$subNodeName] = $this->astToArray($subNode);
+                $result[$subNodeName] = $this->astToArray($subNode, $currentDepth + 1);
             } elseif (is_array($subNode)) {
-                $result[$subNodeName] = array_map(function ($item) {
-                    return ($item instanceof Node) ? $this->astToArray($item) : $item;
+                $result[$subNodeName] = array_map(function ($item) use ($currentDepth) {
+                    return ($item instanceof Node) ? $this->astToArray($item, $currentDepth + 1) : $item;
                 }, $subNode);
             } else {
                 $result[$subNodeName] = $subNode;
