@@ -41,7 +41,9 @@ class EnhanceDocsCommandTest extends TestCase
              ->expectsOutput("Updated description for {$parsedItem->name}.")
              ->assertExitCode(0);
 
-        // Assert the item's description is updated
+        // Ensure annotations are correctly parsed
+        $this->assertNotEmpty($parsedItem->details['annotations'], 'Annotations should not be empty.');
+        $this->assertArrayHasKey('exampleAnnotation', $parsedItem->details['annotations'], 'Specific annotation should be present.');
         $this->assertEquals('Enhanced description', $parsedItem->fresh()->details['description']);
     }
     protected function tearDown(): void
