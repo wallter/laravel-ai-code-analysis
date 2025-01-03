@@ -45,7 +45,7 @@ class OpenAIService
             Log::error($msg);
             throw new InvalidArgumentException($msg);
         }
-        $userPrompt = $params['prompt'] ?? $promptTemplate;
+        $userMessage = $params['user_message'] ?? $promptTemplate;
 
         // 5) Construct the chat payload (system + user messages)
         $payload = [
@@ -57,7 +57,7 @@ class OpenAIService
                 ],
                 [
                     'role'    => 'user',
-                    'content' => $userPrompt,
+                    'content' => $userMessage,
                 ],
             ],
             'max_tokens'  => $maxTokens,

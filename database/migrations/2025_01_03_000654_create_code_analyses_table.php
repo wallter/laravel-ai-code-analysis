@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('file_path')->unique();
             $table->json('ast');
             $table->json('analysis');
+            $table->text('ai_output')->nullable();
             $table->timestamps();
         });
     }
