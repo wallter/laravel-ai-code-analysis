@@ -25,15 +25,15 @@ class ProcessPassesCommand extends Command
      */
     public function handle(): int
     {
-        // Fetch all analyses that have pending passes
-        $pendingAnalyses = CodeAnalysis::whereRaw(
-            'JSON_LENGTH(completed_passes) < JSON_LENGTH(?)', 
-            [
-                json_encode(
-                    config('ai.operations.multi_pass_analysis.pass_order', [])
-                )
-            ]
-        )->get();
+        // Retrieve pass order from configuration
+        $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
+        $passOrderCount = count($passOrder);
+
+        // Fetch all analyses that have pending passes by filtering in PHP
+        $pendingAnalyses = CodeAnalysis::all()
+            ->filter(function ($analysis) use ($passOrderCount) {
+                return count($analysis->completed_passes ?? []) < $passOrderCount;
+            });
 
         if ($pendingAnalyses->isEmpty()) {
             $this->info("No pending passes to process.");
