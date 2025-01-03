@@ -66,6 +66,7 @@ class AnalyzeCodeCommand extends Command
 
         $this->info("Starting analysis for directory: {$directory}");
 
+        // Retrieve PHP files using ParserService
         $phpFiles = $this->parserService->getPhpFiles($directory);
 
         // Apply limits if set
@@ -83,9 +84,13 @@ class AnalyzeCodeCommand extends Command
 
         foreach ($phpFiles as $filePath) {
             try {
+                // Analyze the AST using CodeAnalysisService
                 $analysis = $this->codeAnalysisService->analyzeAst($filePath, $limitMethod);
 
-                // Persist the analysis using updateOrCreate
+                // Retrieve the AST from ParserService
+                $ast = $this->parserService->parseFile($filePath);
+
+                // Persist the analysis and AST using updateOrCreate
                 CodeAnalysis::updateOrCreate(
                     ['file_path' => $this->parserService->normalizePath($filePath)],
                     [

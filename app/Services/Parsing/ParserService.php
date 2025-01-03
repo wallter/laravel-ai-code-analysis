@@ -7,11 +7,58 @@ use App\Models\CodeAnalysis;
 use App\Services\Parsing\FunctionVisitor;
 use App\Services\Parsing\ClassVisitor;
 use PhpParser\NodeTraverser;
+use Illuminate\Support\Facades\File;
 
 class ParserService
 {
     public function __construct()
     {
+    }
+
+    /**
+     * Retrieve all PHP files recursively from a given directory.
+     *
+     * @param string $directory
+     * @return array
+     */
+    public function getPhpFiles(string $directory): array
+    {
+        if (!is_dir($directory)) {
+            return [];
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($directory, \RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+        $phpFiles = [];
+        foreach ($iterator as $file) {
+            if ($file->isFile() && strtolower($file->getExtension()) === 'php') {
+                $phpFiles[] = $file->getRealPath();
+            }
+        }
+        return $phpFiles;
+    }
+
+    /**
+     * Normalize a file path.
+     *
+     * @param string $path
+     * @return string
+     */
+    public function normalizePath(string $path): string
+    {
+        return realpath($path) ?: $path;
+    }
+
+    /**
+     * Determine if a given path is absolute.
+     *
+     * @param string $path
+     * @return bool
+     */
+    public function isAbsolutePath(string $path): bool
+    {
+        return preg_match('/^(\/|[A-Za-z]:[\/\\\\])/', $path) === 1;
     }
 
     /**

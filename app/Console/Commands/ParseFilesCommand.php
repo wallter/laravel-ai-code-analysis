@@ -7,7 +7,6 @@ use PhpParser\Error;
 use App\Services\Parsing\ParserService;
 use PhpParser\NodeTraverser;
 use App\Services\Parsing\FunctionAndClassVisitor;
-use Illuminate\Support\Facades\File;
 use App\Models\ParsedItem;
 
 /**
@@ -49,29 +48,28 @@ class ParseFilesCommand extends Command
         $limitMethod = $this->option('limit-method');
 
         // 2) Setup parser & traverser using ParserService
-        $parser     = $this->parserService->createParser();
-        $traverser  = $this->parserService->createTraverser();
-        $visitor    = new FunctionAndClassVisitor();
+        $parser = $this->parserService->createParser();
+        $traverser = $this->parserService->createTraverser();
+        $visitor = new FunctionAndClassVisitor();
         $traverser->addVisitor($visitor);
 
-        $items      = [];
-        $phpFiles   = [];
+        $phpFiles = [];
 
         // 3) Collect all PHP files from the folders
         foreach ($folderPaths as $folderPath) {
-            $realPath = $this->normalizePath($folderPath);
+            $realPath = $this->parserService->normalizePath($folderPath);
             $this->info("Scanning folder: $realPath");
             if (!File::isDirectory($realPath)) {
                 $this->warn("Folder not found: {$realPath}");
                 continue;
             }
-            $folderPhpFiles = $this->getPhpFiles($realPath);
+            $folderPhpFiles = $this->parserService->getPhpFiles($realPath);
             $phpFiles = array_merge($phpFiles, $folderPhpFiles);
         }
 
         // Add individual files to the list
         foreach ($filePaths as $filePath) {
-            $realPath = $this->normalizePath($filePath);
+            $realPath = $this->parserService->normalizePath($filePath);
             if (!File::exists($realPath)) {
                 $this->warn("File not found: {$realPath}");
                 continue;
@@ -231,27 +229,6 @@ class ParseFilesCommand extends Command
         return 0;
     }
 
-    /**
-     * Parse a single file with the provided parser/traverser/visitor.
-     */
-    private function parseOneFile(string $filePath, $parser, $traverser, $visitor)
-    {
-        try {
-            $code = File::get($filePath);
-            $ast  = $parser->parse($code);
-            if ($ast === null) {
-                throw new \Exception("Unable to parse AST for {$filePath}.");
-            }
-
-            // Set the "current file" context
-            $visitor->setCurrentFile($filePath);
-            $traverser->traverse($ast);
-        } catch (Error $e) {
-            $this->error("Parse error in {$filePath}: {$e->getMessage()}");
-        } catch (\Exception $e) {
-            $this->error("Error processing {$filePath}: {$e->getMessage()}");
-        }
-    }
 
     /**
      * Return all PHP files recursively in the given directory.
