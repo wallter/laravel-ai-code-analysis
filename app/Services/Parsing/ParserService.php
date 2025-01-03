@@ -63,7 +63,7 @@ class ParserService
             return $realPath;
         })->filter();
 
-        return $phpFiles->merge($individualFiles)->unique();
+        return $phpFiles->merge($individualFiles)->unique()->values();
     }
 
     /**
@@ -156,10 +156,8 @@ class ParserService
      */
     public function parseFile(string $filePath): array
     {
-        // Check if the file has already been parsed and stored
-        $existingAnalysis = CodeAnalysis::where('file_path', $this->normalizePath($filePath))->first();
         if ($existingAnalysis) {
-            return json_decode($existingAnalysis->ast, true);
+            return collect(json_decode($existingAnalysis->ast, true));
         }
 
         $code = File::get($filePath);
@@ -169,9 +167,11 @@ class ParserService
             throw new \Exception("Failed to parse AST for file: {$filePath}");
         }
 
-        $this->traverser->traverse($ast);
+        collect($ast)->each(function ($node) {
+            $this->traverser->traverse([$node]);
+        });
 
-        return $ast;
+        return collect($ast);
     }
 
     /**

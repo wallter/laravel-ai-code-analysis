@@ -54,10 +54,11 @@ class ClassVisitor extends NodeVisitorAbstract
 
         $attributes = DocblockParser::collectAttributes($node->attrGroups);
 
-        $methods = [];
-        foreach ($node->getMethods() as $method) {
-            $methods[] = $this->collectMethodData($method);
-        }
+        $methods = collect($node->getMethods())
+            ->map(function ($method) {
+                return $this->collectMethodData($method);
+            })
+            ->all();
 
         $className = $node->name->name;
         $namespace = $this->getNamespace($node);

@@ -8,7 +8,14 @@ use PhpParser\NodeVisitorAbstract;
 
 class FunctionVisitor extends NodeVisitorAbstract
 {
-    private array $functions = [];
+    use Illuminate\Support\Collection;
+
+    private Collection $functions;
+
+    public function __construct()
+    {
+        $this->functions = collect();
+    }
     private string $currentFile = '';
 
     public function setCurrentFile(string $file): void
@@ -19,13 +26,13 @@ class FunctionVisitor extends NodeVisitorAbstract
     public function enterNode(Node $node): void
     {
         if ($node instanceof Node\Stmt\Function_) {
-            $this->functions[] = $this->collectFunctionData($node);
+            $this->functions->push($this->collectFunctionData($node));
         }
     }
 
     public function getFunctions(): array
     {
-        return $this->functions;
+        return $this->functions->all();
     }
 
     private function collectFunctionData(Node\Stmt\Function_ $node): array

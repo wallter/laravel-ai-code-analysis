@@ -17,29 +17,30 @@ class DocblockParser
             return $line;
         }, $lines);
 
-        $description = '';
-        foreach ($cleaned as $line) {
-            if (trim($line) === '') {
-                break;
-            }
-            $description .= $line . ' ';
-        }
+        $description = collect($cleaned)
+            ->takeUntil(function ($line) {
+                return trim($line) === '';
+            })
+            ->implode(' ');
 
         return trim($description);
     }
 
     public static function extractAnnotations(string $docblock): array
     {
-        $annotations = [];
-        $lines = preg_split('/\R/', $docblock);
-        foreach ($lines as $line) {
-            $line = trim($line, " \t\n\r\0\x0B*");
-            if (preg_match('/@(\w+)\s*(.*)/', $line, $matches)) {
-                $tag = $matches[1];
-                $value = $matches[2];
-                $annotations[$tag] = self::parseAnnotationValue($value);
-            }
-        }
+        $annotations = collect($lines)
+            ->mapWithKeys(function ($line) {
+                $line = trim($line, " \t\n\r\0\x0B*");
+                if (preg_match('/@(\w+)\s*(.*)/', $line, $matches)) {
+                    $tag = $matches[1];
+                    $value = $matches[2];
+                    return [$tag => self::parseAnnotationValue($value)];
+                }
+                return [];
+            })
+            ->filter()
+            ->all();
+
         return $annotations;
     }
 

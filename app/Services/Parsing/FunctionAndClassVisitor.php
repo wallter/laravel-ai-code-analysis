@@ -101,7 +101,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     public function enterNode(Node $node): void
     {
         if ($node instanceof Node\Stmt\Function_) {
-            $this->items[] = $this->collectFunctionData($node);
+            $this->items->push($this->collectFunctionData($node));
         } elseif ($node instanceof ClassLike && $node->name !== null) {
             $this->currentClassName = $node->name->name;
             $this->currentNamespace = $this->getNamespace($node);
@@ -133,7 +133,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
      */
     public function getClasses(): array
     {
-        return array_filter($this->items, function($item) {
+        return $this->items->filter(function ($item) {
             return $item['type'] === 'Class';
         });
     }
@@ -169,7 +169,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
 
         // Check if AST exceeds the size limit
         if ($astSize > $this->astSizeLimit) {
-            $this->warnings[] = "AST size for function '{$node->name->name}' exceeds limit ({$astSize} bytes).";
+            $this->warnings->push("AST size for function '{$node->name->name}' exceeds limit ({$astSize} bytes).");
             $astSerialized = null;
         }
 
