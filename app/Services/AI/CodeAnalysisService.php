@@ -2,103 +2,193 @@
 
 namespace App\Services\AI;
 
-use App\Services\AI\OpenAIService;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Collection;
 use App\Services\Parsing\ParserService;
-use Exception;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
+use Exception;
 
+/**
+ * CodeAnalysisService
+ *
+ * Handles comprehensive code analysis by combining:
+ *   • AST-based structural insights (classes, methods, etc.)
+ *   • Raw code analysis
+ *   • Multiple AI passes defined in config/ai.php
+ *
+ * The "multi_pass_analysis" config array defines how each pass is done, 
+ * referencing either the AST or raw code, or both.
+ *
+ * Each pass merges results into a final structure returned to callers.
+ */
 class CodeAnalysisService
 {
-    protected OpenAIService $openAIService;
-    protected ParserService $parserService;
-
-    public function __construct(OpenAIService $openAIService, ParserService $parserService)
-    {
-        $this->openAIService = $openAIService;
-        $this->parserService = $parserService;
+    public function __construct(
+        protected OpenAIService $openAIService,
+        protected ParserService $parserService
+    ) {
     }
 
     /**
-     * Send an analysis request to OpenAI API.
+     * Perform the analysis on a single file path.
+     * 1) Parse the file => get AST
+     * 2) Gather structural data (class_count, function_count, etc.)
+     * 3) Retrieve raw code
+     * 4) Perform multi-pass AI analysis (configured in ai.php)
      *
-     * @param string $input
-     * @return array
+     * @param string $filePath
+     * @param int    $limitMethod  Restrict how many methods to process per class
+     *
+     * @return array Combined final analysis results
      */
-    public function sendAnalysisRequest(string $input): array
+    public function analyzeAst(string $filePath, int $limitMethod = 0): array
     {
-        try {
-            // Example usage of ParserService to normalize input if it's a file path
-            if (is_string($input) && file_exists($input)) {
-                $input = $this->parserService->normalizePath($input);
+        Log::debug("Starting analyzeAst for [{$filePath}], limitMethod={$limitMethod}");
+
+        // 1) Parse AST
+        $ast = $this->parserService->parseFile($filePath);
+
+        // 2) Collect structural data from the AST
+        $astData = $this->collectAstData($ast, $limitMethod);
+
+        // 3) Retrieve raw code
+        $rawCode = $this->retrieveRawCode($filePath);
+
+        // 4) Multi-pass AI analysis => merges with $astData
+        $multiPassResults = $this->performMultiPassAnalysis($astData, $rawCode);
+
+        $analysisResults = array_merge($astData, $multiPassResults);
+
+        Log::debug("Completed analysis for [{$filePath}]");
+        return $analysisResults;
+    }
+
+    /**
+     * Uses visitors (FunctionAndClassVisitor, FunctionVisitor, etc.) 
+     * to produce basic structural data. Respects $limitMethod.
+     */
+    protected function collectAstData(array $ast, int $limitMethod): array
+    {
+        $nodeTraverser = new NodeTraverser();
+
+        // Example: We have a combined visitor or multiple
+        $classVisitor = new \App\Services\Parsing\FunctionAndClassVisitor();
+        $functionVisitor = new \App\Services\Parsing\FunctionVisitor();
+
+        $nodeTraverser->addVisitor(new NameResolver());
+        $nodeTraverser->addVisitor($classVisitor);
+        $nodeTraverser->addVisitor($functionVisitor);
+        $nodeTraverser->traverse($ast);
+
+        $classes   = collect($classVisitor->getClasses());
+        $functions = collect($functionVisitor->getFunctions());
+
+        $analysis = [
+            'class_count'    => $classes->count(),
+            'method_count'   => 0,
+            'function_count' => $functions->count(),
+            'classes'        => [],
+            'functions'      => $functions->values()->all(),
+        ];
+
+        $analysis['classes'] = $classes->map(function ($class) use ($limitMethod, &$analysis) {
+            // E.g. the visitor places an array of methods under $class['details']['methods']
+            $methods = Arr::get($class, 'details.methods', []);
+            if ($limitMethod > 0 && count($methods) > $limitMethod) {
+                $methods = array_slice($methods, 0, $limitMethod);
             }
-            $responseText = $this->openAIService->performOperation('code_analysis', [
-                'prompt' => $input,
-            ]);
+            $analysis['method_count'] += count($methods);
 
             return [
-                'summary' => $responseText,
-                'tokens'  => 0, // Tokens usage not tracked in OpenAIService
+                'name'    => Arr::get($class, 'name', ''),
+                'methods' => $methods,
             ];
-        } catch (Exception $e) {
-            Log::error('Failed to get a valid response from OpenAI.', ['exception' => $e]);
-            return [];
+        })->values()->all();
+
+        return $analysis;
+    }
+
+    /**
+     * Reads the raw file content.
+     */
+    protected function retrieveRawCode(string $filePath): string
+    {
+        try {
+            return File::get($filePath);
+        } catch (\Throwable $t) {
+            Log::warning("Failed to retrieve file contents [{$filePath}]: ".$t->getMessage());
+            return '';
         }
     }
 
     /**
-     * Analyze the given AST and return analysis results.
-     *
-     * @param string $filePath
-     * @param int $limitMethod
-     * @return array
+     * Looks up multi-pass definitions from config('ai.operations.multi_pass_analysis')
+     * and processes each pass accordingly, returning a combined array of results.
      */
-    public function analyzeAst(string $filePath, int $limitMethod = 0): array
+    protected function performMultiPassAnalysis(array $astData, string $rawCode): array
     {
-        // Use ParserService to parse the file
-        $ast = $this->parserService->parseFile($filePath);
+        $results = [];
+        $multiPasses = Config::get('ai.operations.multi_pass_analysis', []);
 
-        // Initialize visitors
-        $classVisitor = new \App\Services\Parsing\FunctionAndClassVisitor();
-        $functionVisitor = new \App\Services\Parsing\FunctionVisitor();
+        if (empty($multiPasses)) {
+            Log::debug('No multi_pass_analysis config found, skipping advanced passes.');
+            return $results;
+        }
 
-        // Traverse AST with visitors
-        $nodeTraverser = new NodeTraverser();
-        $nodeTraverser->addVisitor(new NameResolver());
-        $nodeTraverser->addVisitor($classVisitor);
-        $nodeTraverser->addVisitor($functionVisitor);
+        foreach ($multiPasses as $passName => $passConfig) {
+            try {
+                // Each pass has an 'operation' and 'prompt' structure, plus
+                // whether it references 'ast', 'raw', or 'both'.
+                $operation = Arr::get($passConfig, 'operation', 'code_analysis');
+                $modelType = Arr::get($passConfig, 'type', 'both'); // 'ast', 'raw', or 'both'
+                $maxTokens = Arr::get($passConfig, 'max_tokens', 800);
+                $temp      = Arr::get($passConfig, 'temperature', 0.5);
 
-        $nodeTraverser->traverse($ast);
+                // Build the dynamic prompt
+                $prompt = $this->buildPromptForPass($astData, $rawCode, $modelType, $passConfig);
 
-        // Collect data from visitors
-        $classes = collect($classVisitor->getClasses());
-        $functions = collect($functionVisitor->getFunctions());
+                $response = $this->openAIService->performOperation($operation, [
+                    'prompt'     => $prompt,
+                    'max_tokens' => $maxTokens,
+                    'temperature'=> $temp,
+                ]);
 
-        $analysisResults = collect([
-            'class_count' => $classes->count(),
-            'method_count' => $classes->sum(function ($class) use ($limitMethod) {
-                $methods = $class['details']['methods'];
-                if ($limitMethod > 0) {
-                    $methods = array_slice($methods, 0, $limitMethod);
-                }
-                return count($methods);
-            }),
-            'function_count' => $functions->count(),
-            'classes' => $classes->map(function ($class) use ($limitMethod) {
-                $methods = $class['details']['methods'];
-                if ($limitMethod > 0) {
-                    $methods = array_slice($methods, 0, $limitMethod);
-                }
-                return [
-                    'name' => $class['name'],
-                    'methods' => $methods,
-                ];
-            }),
-            'functions' => $functions->all(),
-        ]);
+                $results[$passName] = $response;
+            } catch (Exception $ex) {
+                Log::error("Multi-pass [{$passName}] failed: ".$ex->getMessage());
+                $results[$passName] = ''; // or store error
+            }
+        }
 
-        return $analysisResults->toArray();
+        return $results;
+    }
+
+    /**
+     * Builds a prompt string suitable for a single pass from multi_pass_analysis config.
+     */
+    protected function buildPromptForPass(
+        array  $astData,
+        string $rawCode,
+        string $modelType,
+        array  $passConfig
+    ): string {
+        // Optional base template
+        $basePrompt = Arr::get($passConfig, 'prompt', 'Analyze the data and provide insights:');
+        $prompt = $basePrompt;
+
+        if ($modelType === 'ast' || $modelType === 'both') {
+            $prompt .= "\n\nAST data:\n" . json_encode($astData, JSON_PRETTY_PRINT);
+        }
+        if ($modelType === 'raw' || $modelType === 'both') {
+            $prompt .= "\n\nRaw code:\n" . $rawCode;
+        }
+
+        // Possibly add more instructions or disclaimers
+        $prompt .= "\n\nRespond with clear, actionable insights.";
+
+        return $prompt;
     }
 }
