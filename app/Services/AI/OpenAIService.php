@@ -17,7 +17,7 @@ class OpenAIService
      * Perform an operation based on the given operation identifier (from config/ai.php).
      *
      * @param  string  $operationIdentifier
-     * @param  array   $params  Additional parameters: 'prompt' (required), etc.
+     * @param  array   $params  Additional parameters: 'user_message' (required), etc.
      * @return string  AI-generated response (trimmed).
      *
      * @throws InvalidArgumentException if no prompt is provided and no default is set.
@@ -39,9 +39,9 @@ class OpenAIService
             ?? 'You are a helpful AI assistant.';
 
         // 4) The user-facing prompt
-        $promptTemplate = $operationConfig['prompt'] ?? '';
-        if (empty($params['prompt']) && empty($promptTemplate)) {
-            $msg = "No 'prompt' found for [{$operationIdentifier}] and no default prompt in config.";
+        $promptTemplate = $operationConfig['user_message'] ?? '';
+        if (empty($params['user_message']) && empty($promptTemplate)) {
+            $msg = "No 'user_message' found for [{$operationIdentifier}] and no default prompt in config.";
             Log::error($msg);
             throw new InvalidArgumentException($msg);
         }
@@ -53,11 +53,11 @@ class OpenAIService
             'messages'    => [
                 [
                     'role'    => 'system',
-                    'content' => $systemMessage,
+                    'content' => str_replace(PHP_EOL, "\n", $systemMessage),
                 ],
                 [
                     'role'    => 'user',
-                    'content' => $userMessage,
+                    'content' => str_replace(PHP_EOL, "\n", $userMessage),
                 ],
             ],
             'max_tokens'  => $maxTokens,
@@ -69,7 +69,7 @@ class OpenAIService
         // For instance, if 'messages' is passed, you can unify or replace them.
         // We'll do a simple merge for any other top-level keys.
         foreach ($params as $key => $value) {
-            if (! in_array($key, ['prompt'])) {
+            if (! in_array($key, ['user_message'])) {
                 $payload[$key] = $value; 
             }
         }
