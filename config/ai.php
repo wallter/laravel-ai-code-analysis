@@ -87,26 +87,37 @@ return [
             'temperature' => env('CODE_ANALYSIS_TEMPERATURE', 0.5),
             'prompt' => env('CODE_ANALYSIS_PROMPT', 'Your default prompt here...'),
         ],
+
+        /*
+        |------------------------------------------------------------------
+        | Analysis Limits
+        |------------------------------------------------------------------
+        |
+        | Define default limits for classes and methods during code analysis.
+        | These can be overridden via command-line options.
+        |
+        */
+        'analysis_limits' => [
+            'limit_class' => env('ANALYSIS_LIMIT_CLASS', 0), // 0 means no limit
+            'limit_method' => env('ANALYSIS_LIMIT_METHOD', 0), // 0 means no limit
+        ],
+
+        /*
+        |------------------------------------------------------------------
+        | AST Insights Operation
+        |------------------------------------------------------------------
+        |
+        | Configuration for the AST insights operation. This setup is used
+        | to provide insights based on the provided Abstract Syntax Tree.
+        |
+        */
+        'ast_insights' => [
+            'model' => env('AST_INSIGHTS_MODEL', 'gpt-3.5-turbo'),
+            'max_tokens' => env('AST_INSIGHTS_MAX_TOKENS', 300),
+            'temperature' => env('AST_INSIGHTS_TEMPERATURE', 0.5),
+            'prompt' => env('AST_INSIGHTS_PROMPT', 'Provide insights based on the given AST.'),
+        ],
+
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Code Analysis Limits
-    |--------------------------------------------------------------------------
-    |
-    | Define default limits for classes and methods during code analysis.
-    | These can be overridden via command-line options.
-    |
-    */
-    'analysis_limits' => [
-        'limit_class' => env('ANALYSIS_LIMIT_CLASS', 0), // 0 means no limit
-        'limit_method' => env('ANALYSIS_LIMIT_METHOD', 0), // 0 means no limit
-    ],
-
-    'ast_insights' => [
-        'model' => env('AST_INSIGHTS_MODEL', 'gpt-3.5-turbo'),
-        'max_tokens' => env('AST_INSIGHTS_MAX_TOKENS', 300),
-        'temperature' => env('AST_INSIGHTS_TEMPERATURE', 0.5),
-        'prompt' => env('AST_INSIGHTS_PROMPT', 'Provide insights based on the given AST.'),
-    ],
 ];
