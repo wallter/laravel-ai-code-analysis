@@ -5,11 +5,10 @@ namespace App\Services\Parsing;
 
 use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
+use Illuminate\Support\Collection;
 
 class FunctionVisitor extends NodeVisitorAbstract
 {
-    use Illuminate\Support\Collection;
-
     private Collection $functions;
 
     public function __construct()

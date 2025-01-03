@@ -26,12 +26,12 @@ class OpenAIService
     public function performOperation(string $operationIdentifier, array $params = []): string
     {
         // Retrieve the configuration for the specified operation
-        $operationConfig = Config::get("ai.operations.{$operationIdentifier}", []);
+        $operationConfig = config("ai.operations.{$operationIdentifier}", []);
 
         // Use default configuration values if specific ones are not set in operationConfig
-        $model = $operationConfig['model'] ?? Config::get('ai.openai_model', 'text-davinci-003');
-        $maxTokens = $operationConfig['max_tokens'] ?? Config::get('ai.max_tokens', 500);
-        $temperature = $operationConfig['temperature'] ?? Config::get('ai.temperature', 0.5);
+        $model = $operationConfig['model'] ?? config('ai.openai_model', 'text-davinci-003');
+        $maxTokens = $operationConfig['max_tokens'] ?? config('ai.max_tokens', 500);
+        $temperature = $operationConfig['temperature'] ?? config('ai.temperature', 0.5);
         $promptTemplate = $operationConfig['prompt'] ?? '';
 
         // Ensure that a prompt is provided
