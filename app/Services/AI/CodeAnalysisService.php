@@ -42,74 +42,6 @@ class CodeAnalysisService
             $completedPasses = json_decode($completedPasses, true) ?? [];
         }
 
-        $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
-        $passOrderCount = count($passOrder);
-        $multiPasses = config('ai.operations.multi_pass_analysis.multi_pass_analysis', []);
-
-        // Determine the next pass to execute
-        $nextPass = null;
-        foreach ($passOrder as $passName) {
-            if (!in_array($passName, $completedPasses)) {
-                $nextPass = $passName;
-                break;
-            }
-        }
-
-        if (!$nextPass) {
-            info("All passes completed for [{$codeAnalysis->file_path}].");
-            return;
-        }
-
-        $passConfig = $multiPasses[$nextPass] ?? null;
-        if (!$passConfig) {
-            Log::error("Pass [{$nextPass}] not defined in configuration.");
-            return;
-        }
-
-        try {
-            // Set context for AI operation
-            Context::add('pass_name', $nextPass);
-            Context::add('file_path', $codeAnalysis->file_path);
-
-            // Build the prompt based on the pass type
-            $prompt = $this->buildPrompt(
-                json_decode($codeAnalysis->ast, true),
-                $this->retrieveRawCode($codeAnalysis->file_path),
-                $passConfig['type'],
-                $passConfig
-            );
-
-            // Perform the AI operation
-            $responseText = $this->openAIService->performOperation($passConfig['operation'], [
-                'prompt'      => $prompt,
-                'max_tokens'  => $passConfig['max_tokens'] ?? 1024,
-                'temperature' => $passConfig['temperature'] ?? 0.5,
-            ]);
-
-            if (!$dryRun) {
-                // Append the response to ai_output
-                $aiOutput = json_decode($codeAnalysis->ai_output, true) ?? [];
-                $aiOutput[$nextPass] = $responseText;
-                $codeAnalysis->ai_output = json_encode($aiOutput, JSON_UNESCAPED_SLASHES);
-
-                // Update completed_passes and current_pass
-                $completedPasses[] = $nextPass;
-                $codeAnalysis->completed_passes = $completedPasses;
-                $codeAnalysis->current_pass += 1;
-
-                $codeAnalysis->save();
-
-                info("Pass [{$nextPass}] completed for [{$codeAnalysis->file_path}].");
-                
-                // Remove context after successful operation
-                Context::forget('pass_name');
-                Context::forget('file_path');
-            } else {
-                // Remove context in dry-run
-                Context::forget('pass_name');
-                Context::forget('file_path');
-                Log::info("Dry-run: Would append pass [{$nextPass}] to ai_output and completed_passes for [{$codeAnalysis->file_path}].");
-            }
 
         $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
         $passOrderCount = count($passOrder);
@@ -181,7 +113,6 @@ class CodeAnalysisService
             }
         } catch (\Throwable $e) {
             Log::error("Failed to perform pass [{$nextPass}] for [{$codeAnalysis->file_path}]: {$e->getMessage()}", ['exception' => $e]);
-            $this->error("Failed to process pass for [{$codeAnalysis->file_path}]: {$e->getMessage()}");
         }
     }
 
