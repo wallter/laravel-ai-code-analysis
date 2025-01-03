@@ -20,7 +20,7 @@ return [
     | Default Model, Tokens, Temperature
     |--------------------------------------------------------------------------
     */
-    'openai_model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+    'openai_model' => env('OPENAI_MODEL', 'gpt-4o'),
     'max_tokens'   => env('OPENAI_MAX_TOKENS', 500),
     'temperature'  => env('OPENAI_TEMPERATURE', 0.5),
 
@@ -40,7 +40,7 @@ return [
     'operations' => [
 
         'code_analysis' => [
-            'model'         => env('CODE_ANALYSIS_MODEL', 'gpt-4o-mini'),
+            'model'         => env('CODE_ANALYSIS_MODEL', 'gpt-4o'),
             'max_tokens'    => env('CODE_ANALYSIS_MAX_TOKENS', 1500),
             'temperature'   => env('CODE_ANALYSIS_TEMPERATURE', 0.4),
             'system_message'=> 'You are an assistant that generates comprehensive documentation from AST data. Focus on describing classes, methods, parameters, and the usage context.',
@@ -48,7 +48,7 @@ return [
         ],
 
         'code_improvements' => [
-            'model'         => 'gpt-4o-mini',
+            'model'         => 'gpt-4o',
             'max_tokens'    => 2000,
             'temperature'   => 0.7,
             'system_message'=> 'You are an assistant that suggests code improvements, best practices, and refactoring steps.',
@@ -56,7 +56,7 @@ return [
         ],
 
         'ast_insights' => [
-            'model'         => 'gpt-4o-mini',
+            'model'         => 'gpt-4o',
             'max_tokens'    => 300,
             'temperature'   => 0.5,
             'system_message'=> 'You provide AST-based insights, focusing on structure and relationships in code.',
@@ -65,7 +65,7 @@ return [
 
         // Possibly more specialized operations, each with a different system or prompt text:
         'some_other_op' => [
-            'model'         => 'gpt-4o-mini',
+            'model'         => 'gpt-4o',
             'max_tokens'    => 1000,
             'temperature'   => 0.6,
             'system_message'=> 'You are an expert in code security analysis, focusing on vulnerabilities.',
@@ -96,55 +96,55 @@ return [
 
             'doc_generation' => [
                 'operation'   => 'code_analysis',
-                'type'        => 'ast',
-                'prompt'      => "Generate comprehensive documentation from the following AST data. Focus on describing classes, methods, parameters, and the usage context.\n",
-                'max_tokens'  => 1200,
+                'type'        => 'both',
+                'prompt'      => "Generate comprehensive documentation from the following AST data and raw code. Focus on describing classes, methods, parameters, and the usage context.\n",
+                'max_tokens'  => 2500,
                 'temperature' => 0.3,
             ],
 
-            // 'refactor_suggestions' => [
-            //     'operation'   => 'code_improvements',
-            //     'type'        => 'raw',
-            //     'prompt'      => "Review the raw PHP code and suggest meaningful refactors, best practices, or design improvements.\n",
-            //     'max_tokens'  => 1500,
-            //     'temperature' => 0.6,
-            // ],
+            'refactor_suggestions' => [
+                'operation'   => 'code_improvements',
+                'type'        => 'raw',
+                'prompt'      => "Review the raw PHP code and suggest meaningful refactors, best practices, or design improvements.\n",
+                'max_tokens'  => 1500,
+                'temperature' => 0.6,
+            ],
 
-            // 'complexity_analysis' => [
-            //     'operation'   => 'code_analysis',
-            //     'type'        => 'both',
-            //     'prompt'      => "Perform a complexity analysis on the code structure (classes, methods) and the raw code.\n",
-            //     'max_tokens'  => 800,
-            //     'temperature' => 0.4,
-            // ],
+            'complexity_analysis' => [
+                'operation'   => 'code_analysis',
+                'type'        => 'both',
+                'prompt'      => "Perform a complexity analysis on the code structure (classes, methods) and the raw code.\n",
+                'max_tokens'  => 800,
+                'temperature' => 0.4,
+            ],
 
-            // 'security_assessment' => [
-            //     'operation'   => 'code_improvements',
-            //     'type'        => 'raw',
-            //     'prompt'      => "Analyze this PHP code for potential security vulnerabilities or insecure practices.\n",
-            //     'max_tokens'  => 1000,
-            //     'temperature' => 0.5,
-            // ],
+            'security_assessment' => [
+                'operation'   => 'code_improvements',
+                'type'        => 'raw',
+                'prompt'      => "Analyze this PHP code for potential security vulnerabilities or insecure practices.\n",
+                'max_tokens'  => 1000,
+                'temperature' => 0.5,
+            ],
 
-            // 'performance_tips' => [
-            //     'operation'   => 'code_improvements',
-            //     'type'        => 'both',
-            //     'prompt'      => "Review the structural AST data and raw code to identify performance bottlenecks.\n",
-            //     'max_tokens'  => 1200,
-            //     'temperature' => 0.5,
-            // ],
+            'performance_tips' => [
+                'operation'   => 'code_improvements',
+                'type'        => 'both',
+                'prompt'      => "Review the structural AST data and raw code to identify performance bottlenecks.\n",
+                'max_tokens'  => 1200,
+                'temperature' => 0.5,
+            ],
 
-            // 'doc_summary' => [
-            //     'operation' => 'code_analysis',
-            //     'type'      => 'ast',
-            //     'prompt'    => "Generate a doc summary from the AST structure.\n",
-            // ],
+            'doc_summary' => [
+                'operation' => 'code_analysis',
+                'type'      => 'ast',
+                'prompt'    => "Generate a doc summary from the AST structure.\n",
+            ],
 
-            // 'improvements' => [
-            //     'operation' => 'code_improvements',
-            //     'type'      => 'raw',
-            //     'prompt'    => "Evaluate the raw code for potential improvements.\n",
-            // ],
+            'improvements' => [
+                'operation' => 'code_improvements',
+                'type'      => 'raw',
+                'prompt'    => "Evaluate the raw code for potential improvements.\n",
+            ],
         ],
     ],
 ];
