@@ -156,8 +156,9 @@ class ParserService
      */
     public function parseFile(string $filePath): array
     {
+        $existingAnalysis = CodeAnalysis::where('file_path', $filePath)->first();
         if ($existingAnalysis) {
-            return collect(json_decode($existingAnalysis->ast, true));
+            return json_decode($existingAnalysis->ast, true);
         }
 
         $code = File::get($filePath);
@@ -171,7 +172,7 @@ class ParserService
             $this->traverser->traverse([$node]);
         });
 
-        return collect($ast);
+        return $ast;
     }
 
     /**
