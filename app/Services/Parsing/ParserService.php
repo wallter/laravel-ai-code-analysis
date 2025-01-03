@@ -14,6 +14,40 @@ class ParserService
     }
 
     /**
+     * Collect all PHP files from configured folders and individual files.
+     *
+     * @return array An array of absolute paths to PHP files.
+     */
+    public function collectPhpFiles(): array
+    {
+        $filePaths   = config('parsing.files', []);
+        $folderPaths = config('parsing.folders', []);
+        $phpFiles = [];
+
+        // Collect PHP files from folders
+        foreach ($folderPaths as $folderPath) {
+            $realPath = $this->normalizePath($folderPath);
+            if (!is_dir($realPath)) {
+                continue;
+            }
+            $folderPhpFiles = $this->getPhpFiles($realPath);
+            $phpFiles = array_merge($phpFiles, $folderPhpFiles);
+        }
+
+        // Collect individual PHP files
+        foreach ($filePaths as $filePath) {
+            $realPath = $this->normalizePath($filePath);
+            if (!file_exists($realPath)) {
+                continue;
+            }
+            $phpFiles[] = $realPath;
+        }
+
+        // Remove duplicate file paths
+        return array_unique($phpFiles);
+    }
+
+    /**
      * Retrieve all PHP files recursively from a given directory.
      *
      * @param string $directory

@@ -35,8 +35,7 @@ class ParseFilesCommand extends Command
     public function handle()
     {
         // 1) Collect files and folders from config
-        $filePaths   = config('parsing.files', []);
-        $folderPaths = config('parsing.folders', []);
+        $phpFiles = $this->parserService->collectPhpFiles();
 
         $filter     = $this->option('filter');
         $outputFile = $this->option('output-file');
