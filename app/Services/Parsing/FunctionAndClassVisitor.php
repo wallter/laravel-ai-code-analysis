@@ -461,4 +461,28 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             return 'mixed';
         }
     }
+
+    /**
+     * Returns all discovered classes.
+     *
+     * @return array
+     */
+    public function getClasses(): array
+    {
+        return $this->items->filter(function ($item) {
+            return isset($item['type']) && $item['type'] === 'Class';
+        })->values()->all();
+    }
+
+    /**
+     * Returns all discovered functions.
+     *
+     * @return array
+     */
+    public function getFunctions(): array
+    {
+        return $this->items->filter(function ($item) {
+            return isset($item['type']) && $item['type'] === 'Function';
+        })->values()->all();
+    }
 }
