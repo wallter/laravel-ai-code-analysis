@@ -102,3 +102,4 @@ class CodeAnalysisService
 
         return $analysisResults;
     }
+}
