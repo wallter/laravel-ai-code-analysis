@@ -48,11 +48,6 @@ class DbBackupCommand extends Command
             return 1;
         }
 
-        if (!$dbConfig) {
-            $this->error("Database connection '{$defaultConnection}' is not configured.");
-            return 1;
-        }
-
         $dbDriver = $dbConfig['driver'];
 
         // Ensure the database driver is SQLite
@@ -61,35 +56,14 @@ class DbBackupCommand extends Command
             return 1;
         }
 
-
         try {
-            if ($dbDriver === 'sqlite') {
-                $databasePath = base_path($dbConfig['database']);
-                if (!file_exists($databasePath)) {
-                    $this->error("SQLite database file not found at {$databasePath}.");
-                    return 1;
-                }
-
-                $timestamp = Carbon::now()->format('Y_m_d_His');
-                $backupFileName = "backup_sqlite_{$timestamp}.sqlite";
-                $backupFilePath = "{$backupPath}/{$backupFileName}";
-
-                if (!copy($databasePath, $backupFilePath)) {
-                    $this->error("Failed to copy SQLite database to {$backupFilePath}.");
-                    return 1;
-                }
-
-                $this->info("SQLite database backed up successfully to {$backupFilePath}.");
-            }
-
-            // Resolve the absolute path to the SQLite database file
-            $databasePath = base_path($dbConfig['database']);
+            // Set the correct database path
+            $databasePath = $dbConfig['database'];
             if (!File::exists($databasePath)) {
                 $this->error("SQLite database file not found at {$databasePath}.");
                 return 1;
             }
 
-            // Generate a timestamped backup file name
             $timestamp = Carbon::now()->format('Y_m_d_His');
             $backupFileName = "backup_sqlite_{$timestamp}.sqlite";
             $backupFilePath = "{$backupPath}/{$backupFileName}";
