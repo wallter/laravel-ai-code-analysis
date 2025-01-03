@@ -138,7 +138,9 @@ class AnalyzeCodeCommand extends BaseCodeCommand
 
                         try {
                             // Analyze individual function
-                            $analysisData = $this->codeAnalysisService->analyzeAst($function['ast'], $limitMethod);
+                            Log::debug("Calling analyzeFunctionAst for function: {$function['name']}");
+                            $analysisData = $this->codeAnalysisService->analyzeFunctionAst($function['ast']);
+                            Log::debug("Received analysis data for function: {$function['name']}", ['analysisData' => $analysisData]);
 
                             CodeAnalysis::updateOrCreate(
                                 ['file_path' => $this->parserService->normalizePath($filePath), 'function_name' => $function['name']],
@@ -180,7 +182,11 @@ class AnalyzeCodeCommand extends BaseCodeCommand
 
             // If requested, write analysis results to JSON
             if ($outputFile) {
+                Log::debug("即将导出分析结果到 JSON 文件: {$outputFile}", [
+                    'analysisResultsCount' => $analysisResults->count(),
+                ]);
                 $this->exportResults($outputFile, $analysisResults->toArray());
+                Log::debug("已导出分析结果到 JSON 文件: {$outputFile}");
             }
 
             $totalEndTime = microtime(true);

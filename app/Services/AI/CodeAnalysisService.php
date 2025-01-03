@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
+use PhpParser\Node\Stmt\Function_;
+use PhpParser\PrettyPrinter\Standard as PrettyPrinter;
 use Exception;
 
 /**
@@ -30,6 +32,57 @@ class CodeAnalysisService
         protected OpenAIService $openAIService,
         protected ParserService $parserService
     ) {
+        $this->printer = new PrettyPrinter();
+    }
+
+    /**
+     * 分析单个函数的 AST 节点。
+     *
+     * @param Function_ $function AST 节点的函数
+     * @return array 分析数据
+     */
+    public function analyzeFunctionAst(Function_ $function): array
+    {
+        $functionName = $function->name->toString();
+        Log::debug("开始分析函数: {$functionName}");
+
+        try {
+            // 收集参数
+            $parameters = [];
+            foreach ($function->params as $param) {
+                $paramName = $param->var->name;
+                $parameters[] = $paramName;
+            }
+            Log::debug("函数参数: ", ['parameters' => $parameters]);
+
+            // 收集返回类型
+            $returnType = $function->getReturnType() ? $function->getReturnType()->toString() : 'void';
+            Log::debug("函数返回类型: {$returnType}");
+
+            // 获取函数体代码
+            $stmts = $function->getStmts();
+            $functionBody = $stmts ? $this->printer->prettyPrint($stmts) : '';
+            Log::debug("函数体代码长度: " . strlen($functionBody));
+
+            // 使用 OpenAIService 进行 AI 分析
+            $analysisData = $this->openAIService->performOperation('analyze_function', [
+                'function_name' => $functionName,
+                'parameters'    => $parameters,
+                'return_type'   => $returnType,
+                'function_body' => $functionBody,
+            ]);
+
+            Log::debug("完成分析函数: {$functionName}", [
+                'analysisData' => $analysisData,
+            ]);
+
+            return $analysisData;
+        } catch (\Exception $e) {
+            Log::error("分析函数时出错: {$functionName}", [
+                'exception' => $e,
+            ]);
+            return [];
+        }
     }
 
     /**
