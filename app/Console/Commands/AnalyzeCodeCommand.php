@@ -83,10 +83,6 @@ class AnalyzeCodeCommand extends Command
                         'analysis' => json_encode($analysis),
                     ]
                 );
-                    'file_path' => $this->parserService->normalizePath($filePath),
-                    'ast' => json_encode($ast),
-                    'analysis' => json_encode($analysis),
-                ]);
 
                 $this->info("Successfully analyzed and persisted: {$filePath}");
             } catch (\Exception $e) {
