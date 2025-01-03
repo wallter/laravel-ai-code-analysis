@@ -9,18 +9,13 @@ use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Modifiers;
-
-// If your version of nikic/php-parser has Serializer\XML spelled as 'Xml':
-// use PhpParser\Serializer\Xml; 
-// Otherwise, for older versions, it might be spelled as 'XML' (all caps):
+use Illuminate\Support\Collection;
 
 /**
  * Collects both free-floating functions and classes with methods/attributes.
  */
 class FunctionAndClassVisitor extends NodeVisitorAbstract
 {
-    use Illuminate\Support\Collection;
-
     private Collection $items;
     private Collection $warnings;
 
@@ -30,6 +25,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         $this->items = collect();
         $this->warnings = collect();
     }
+    
     private $maxDepth = 2;
     private $astSizeLimit = 100000;
 
@@ -131,14 +127,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
             $this->currentClassName = '';
             $this->currentNamespace = '';
         }
-    }
-
-    /**
-     * Returns all discovered items (functions, classes, etc.).
-     */
-    public function getItems(): array
-    {
-        return $this->items;
     }
 
     /**
