@@ -46,39 +46,18 @@ class ParseFilesCommand extends Command
         $limitMethod = $this->option('limit-method');
 
         // 2) Setup parser & traverser using ParserService
+        $this->parserService->setupParserTraversal();
         $parser = $this->parserService->createParser();
         $traverser = $this->parserService->createTraverser();
         $visitor = new FunctionAndClassVisitor();
         $traverser->addVisitor($visitor);
-
-        // 3) Collect all PHP files from the folders
-        foreach (config('parsing.folders', []) as $folderPath) {
-            $realPath = $this->parserService->normalizePath($folderPath);
-            $this->info("Scanning folder: $realPath");
-            if (!File::isDirectory($realPath)) {
-                $this->warn("Folder not found: {$realPath}");
-                continue;
-            }
-            $folderPhpFiles = $this->parserService->getPhpFiles($realPath);
-            $phpFiles = array_merge($phpFiles, $folderPhpFiles);
-        }
-
-        // Add individual files to the list
-        foreach (config('parsing.files', []) as $filePath) {
-            $realPath = $this->parserService->normalizePath($filePath);
-            if (!File::exists($realPath)) {
-                $this->warn("File not found: {$realPath}");
-                continue;
-            }
-            $phpFiles[] = $realPath;
-        }
 
         // Remove duplicates
         $phpFiles = array_unique($phpFiles);
 
         $this->info("Found " . count($phpFiles) . " PHP files to parse.");
 
-        // 4) Parse each PHP file
+        // 3) Parse each PHP file
         foreach ($phpFiles as $phpFile) {
             if ($this->output->isVerbose()) {
                 $this->info("Parsing file: $phpFile");
@@ -115,14 +94,14 @@ class ParseFilesCommand extends Command
 
         $this->info("Collected " . count($items) . " items from parsing.");
 
-        // 5) Apply filter if given
+        // 4) Apply filter if given
         if ($filter) {
             $items = array_filter($items, function($item) use ($filter) {
                 return stripos($item['name'], $filter) !== false;
             });
         }
 
-        // 6) Store parsed items in the database
+        // 5) Store parsed items in the database
         foreach ($items as $item) {
             // Store the class or function
             ParsedItem::updateOrCreate(
@@ -173,7 +152,7 @@ class ParseFilesCommand extends Command
             }
         }
 
-        // 7) Output
+        // 6) Output
         if (empty($items)) {
             $this->info('No functions or classes found.');
             return 0;

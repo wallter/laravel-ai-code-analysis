@@ -9,6 +9,7 @@ use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\ParentConnectingVisitor;
 use PhpParser\Parser;
 use PhpParser\NodeVisitor;
+use Illuminate\Support\Facades\File;
 
 class ParserService
 {
@@ -173,5 +174,17 @@ class ParserService
         $this->traverser->traverse($ast);
 
         return $ast;
+    }
+
+    /**
+     * Setup parser and traverser with visitor.
+     *
+     * @return void
+     */
+    public function setupParserTraversal()
+    {
+        $this->traverser = $this->createTraverser();
+        $this->visitor = new FunctionAndClassVisitor();
+        $this->traverser->addVisitor($this->visitor);
     }
 }
