@@ -47,22 +47,25 @@ class ProcessPassesCommand extends Command
 
         if ($pendingAnalyses->isEmpty()) {
             $this->info("No pending passes to process.");
+            Log::info("No pending passes to process.");
             return 0;
         }
 
-        info("Pass processing command started.");
-        
+        Log::info("Pass processing command started.", ['dryRun' => $dryRun]);
+
         foreach ($pendingAnalyses as $analysis) {
-            info("Starting pass processing for file: {$analysis->file_path}");
+            Log::info("Starting pass processing for file: {$analysis->file_path}", ['dryRun' => $dryRun]);
             $this->info("Processing next pass for [{$analysis->file_path}]...");
             try {
                 $this->codeAnalysisService->processNextPass($analysis, $dryRun);
                 if (!$dryRun) {
                     $this->info("Processed next pass for [{$analysis->file_path}].");
+                    Log::info("Processed next pass for [{$analysis->file_path}].");
                 } else {
                     $this->info("Dry-run: processed next pass for [{$analysis->file_path}].");
+                    Log::info("Dry-run: processed next pass for [{$analysis->file_path}].");
                 }
-                info("Completed pass processing for file: {$analysis->file_path}" . ($dryRun ? " (dry-run)" : ""));
+                Log::info("Completed pass processing for file: {$analysis->file_path}" . ($dryRun ? " (dry-run)" : ""), ['dryRun' => $dryRun]);
             } catch (\Throwable $e) {
                 Log::error("Error processing pass for file: {$analysis->file_path}", ['exception' => $e]);
                 $this->error("Failed to process pass for [{$analysis->file_path}]: {$e->getMessage()}");
@@ -72,10 +75,11 @@ class ProcessPassesCommand extends Command
 
         if ($dryRun) {
             $this->info("Dry-run pass processing completed.");
-            info("Pass processing command executed in dry-run mode.");
+            Log::info("Dry-run pass processing completed.");
+            Log::info("Pass processing command executed in dry-run mode.", ['dryRun' => $dryRun]);
         } else {
             $this->info("Pass processing completed.");
-            info("Pass processing command executed successfully.");
+            Log::info("Pass processing command executed successfully.", ['dryRun' => $dryRun]);
         }
         return 0;
     }
