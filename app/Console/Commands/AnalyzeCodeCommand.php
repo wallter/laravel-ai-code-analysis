@@ -66,8 +66,7 @@ class AnalyzeCodeCommand extends Command
         $limitClass = intval($this->option('limit-class')) ?: config('ai.operations.analysis_limits.limit_class', 0);
         $limitMethod = intval($this->option('limit-method')) ?: config('ai.operations.analysis_limits.limit_method', 0);
 
-        $this->info("Starting analysis for directory: {$directory}");
-
+        $this->info("Starting analysis for " . $phpFiles->count() . " PHP files.");
 
         // Apply limits if set
         if ($limitClass > 0) {
