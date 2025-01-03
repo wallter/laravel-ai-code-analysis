@@ -7,6 +7,7 @@ use App\Services\Parsing\ParserService;
 use App\Services\AI\CodeAnalysisService;
 use App\Models\CodeAnalysis; // Assuming a model for persistence
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class AnalyzeCodeCommand extends Command
 {
@@ -52,19 +53,36 @@ class AnalyzeCodeCommand extends Command
         if (!is_dir($directory)) {
             $this->error("The directory '{$directory}' does not exist.");
             return 1;
+            $bar->advance();
         }
+
+        DB::commit();
+        $bar->finish();
+        $this->newLine();
 
         $this->info("Starting analysis for directory: {$directory}");
 
         $phpFiles = $this->parserService->getPhpFiles($directory);
+
+        $fileCount = count($phpFiles);
+        $bar = $this->output->createProgressBar($fileCount);
+        $bar->start();
+
+        DB::beginTransaction();
 
         foreach ($phpFiles as $filePath) {
             try {
                 $ast = $this->parserService->parseFile($filePath);
                 $analysis = $this->codeAnalysisService->analyzeAst($ast);
 
-                // Persist the analysis
-                CodeAnalysis::create([
+                // Persist the analysis using updateOrCreate
+                CodeAnalysis::updateOrCreate(
+                    ['file_path' => $this->parserService->normalizePath($filePath)],
+                    [
+                        'ast' => json_encode($ast),
+                        'analysis' => json_encode($analysis),
+                    ]
+                );
                     'file_path' => $this->parserService->normalizePath($filePath),
                     'ast' => json_encode($ast),
                     'analysis' => json_encode($analysis),

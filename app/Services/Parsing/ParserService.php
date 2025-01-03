@@ -3,12 +3,20 @@
 namespace App\Services\Parsing;
 
 use PhpParser\ParserFactory;
+use App\Models\CodeAnalysis;
 use App\Services\Parsing\FunctionVisitor;
 use App\Services\Parsing\ClassVisitor;
 use PhpParser\NodeTraverser;
 
 class ParserService
 {
+    protected CodeAnalysis $codeAnalysis;
+
+    public function __construct(CodeAnalysis $codeAnalysis)
+    {
+        $this->codeAnalysis = $codeAnalysis;
+    }
+
     /**
      * Create a new PHP parser instance using the newest supported version.
      *
@@ -41,6 +49,12 @@ class ParserService
      */
     public function parseFile(string $filePath): array
     {
+        // Check if the file has already been parsed and stored
+        $existingAnalysis = $this->codeAnalysis->where('file_path', $this->normalizePath($filePath))->first();
+        if ($existingAnalysis) {
+            return json_decode($existingAnalysis->ast, true);
+        }
+
         $parser = $this->createParser();
         $traverser = $this->createTraverser();
         $visitor = new \App\Services\Parsing\ClassVisitor();

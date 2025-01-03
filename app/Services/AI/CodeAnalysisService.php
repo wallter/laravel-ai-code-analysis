@@ -5,6 +5,7 @@ namespace App\Services\AI;
 use App\Services\AI\OpenAIService;
 use Illuminate\Support\Facades\Log;
 use Exception;
+use PhpParser\NodeVisitor\NameResolver;
 
 class CodeAnalysisService
 {
@@ -48,6 +49,10 @@ class CodeAnalysisService
     {
         // Implement your AST analysis logic here.
         // For example, count classes, methods, functions, etc.
+
+        $nodeTraverser = new NodeTraverser();
+        $nodeTraverser->addVisitor(new NameResolver());
+        $ast = $nodeTraverser->traverse($ast);
 
         $classCount = 0;
         $methodCount = 0;
