@@ -79,7 +79,8 @@ class ParseFilesCommand extends BaseCodeCommand
             } catch (\Throwable $e) {
                 $this->warn("Could not parse {$filePath}: {$e->getMessage()}");
                 if ($this->isVerbose()) {
-                    $this->error("Error details:", ['exception' => $e]);
+                    // Removed the second argument to prevent TypeError
+                    $this->error("Error details: " . $e->getMessage());
                 }
             }
 
