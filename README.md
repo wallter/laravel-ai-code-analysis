@@ -60,6 +60,16 @@ php artisan passes:process --verbose
 php artisan queue:work
 ```
 - Check console output
+
+### Running the Development Server
+
+Start the Laravel development server to run the application locally:
+
+```bash
+php artisan serve
+```
+
+The server will start at [http://localhost:8000](http://localhost:8000) by default. You can access the application by navigating to this URL in your web browser.
 - Monitor Laravel logs `storage/logs/laravel.log` for detailed output
 
 ## Features
@@ -143,6 +153,31 @@ php artisan queue:work
 
    ```bash
    php artisan migrate
+   ```
+
+## UI Setup
+
+1. **Install Frontend Dependencies**
+
+   Navigate to the `resources/js` directory and install the necessary npm packages:
+
+   ```bash
+   cd resources/js
+   npm install
+   ```
+
+2. **Build Frontend Assets**
+
+   Compile the frontend assets using Laravel Mix:
+
+   ```bash
+   npm run dev
+   ```
+
+   For production builds, use:
+
+   ```bash
+   npm run production
    ```
 
 ## Configuration
@@ -320,6 +355,22 @@ The project includes (some unmaintained ... yes, got a bit lazy here) PHPUnit te
 2. **Test Structure**
 
    Tests are located in the `tests` directory and extend the base `TestCase` class. You can find feature tests for various commands and services.
+
+## Screenshots
+
+<!-- Add your screenshots below by replacing the placeholder paths with actual image paths -->
+
+### UI Overview
+
+![UI Overview](screenshots/ui-overview.png)
+
+### Code Analysis Dashboard
+
+![Code Analysis Dashboard](screenshots/code-analysis-dashboard.png)
+
+### Documentation Generation
+
+![Documentation Generation](screenshots/documentation-generation.png)
 
 ## Contributing
 
