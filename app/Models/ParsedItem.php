@@ -2,10 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ParsedItem extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'type',
         'name',
@@ -22,7 +27,6 @@ class ParsedItem extends Model
         'operation_summary',
         'called_methods',
         'ast',
-        'fully_qualified_name',
     ];
 
     protected $casts = [
@@ -35,20 +39,18 @@ class ParsedItem extends Model
     ];
 
     /**
-     * Define the one-to-one relationship with CodeAnalysis.
+     * Get the CodeAnalysis associated with the ParsedItem.
      */
-    public function aiResult()
+    public function codeAnalysis(): HasOne
     {
-        return $this->hasOne(AiResult::class);
+        return $this->hasOne(CodeAnalysis::class);
     }
 
     /**
-     * Define the one-to-one relationship with CodeAnalysis.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * Get the AiResults associated with the ParsedItem.
      */
-    public function codeAnalysis()
+    public function aiResults(): HasMany
     {
-        return $this->hasOne(CodeAnalysis::class);
+        return $this->hasMany(AiResult::class);
     }
 }

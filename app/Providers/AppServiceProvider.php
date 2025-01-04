@@ -5,7 +5,6 @@ namespace App\Providers;
 use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
 use App\Services\Parsing\ParserService;
-use App\Models\CodeAnalysis;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -25,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(CodeAnalysisService::class, function ($app) {
             return new CodeAnalysisService(
-                $app->make(OpenAIService::class), // Ensure correct order
+                $app->make(OpenAIService::class),
                 $app->make(ParserService::class)
             );
         });
