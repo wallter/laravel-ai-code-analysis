@@ -46,8 +46,6 @@ php artisan key:generate
 php artisan migrate
 
 # 3) Set your file/folder scanning in config/parsing.php
-#    Start the queue if you want asynchronous passes:
-php artisan queue:work
 
 # 4) Parse code, store results:
 php artisan parse:files --output-file=docs/parse_all.json --verbose
@@ -57,6 +55,9 @@ php artisan analyze:files --output-file=docs/analyze_all.json --verbose
 
 # 6) Process additional passes if needed:
 php artisan passes:process --verbose
+
+# 7) Run/Start queue processing to asyncronous proccess passes via OpenAI:
+php artisan queue:work
 ```
 - Check console output
 - Monitor Laravel logs `storage/logs/laravel.log` for detailed output
