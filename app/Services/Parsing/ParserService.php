@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 
 namespace App\Services\Parsing;
 
@@ -7,9 +6,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Collection;
 use App\Models\CodeAnalysis;
-use PhpParser\Parser;
 use PhpParser\ParserFactory;
 use PhpParser\NodeTraverser;
+use Exception;
 
 /**
  * Provides file collection and single-visitor parsing.
@@ -17,95 +16,87 @@ use PhpParser\NodeTraverser;
 class ParserService
 {
     /**
-     * Collect .php files from config:
-     *   config('parsing.files') and config('parsing.folders')
+     * Collect .php files from config('parsing.files') + config('parsing.folders')
      */
     public function collectPhpFiles(): Collection
     {
-        Log::info("Collecting PHP files from configuration.");
-
+        Log::info("ParserService: collecting .php files via config('parsing.files','parsing.folders').");
         $files   = config('parsing.files', []);
         $folders = config('parsing.folders', []);
 
-        $filePaths   = collect($files)->map(fn($f) => realpath($f))->filter();
-        $folderFiles = collect($folders)->flatMap(fn($dir) => $this->getPhpFiles($dir));
+        $fileList   = collect($files)->map(fn($f) => realpath($f))->filter();
+        $folderList = collect($folders)->flatMap(fn($dir) => $this->getPhpFiles($dir));
 
-        $merged = $filePaths->merge($folderFiles)->unique()->values();
-
-        Log::info("Collected PHP files.", ['count' => $merged->count()]);
+        $merged = $fileList->merge($folderList)->unique()->values();
+        Log::info("ParserService: total .php files => {$merged->count()}");
         return $merged;
     }
 
     /**
-     * Parse a single file and return discovered items (classes, traits, functions).
+     * Parse a single PHP file with optional visitors, and return the raw AST array.
+     * If $useCache is true, we check code_analyses table first.
      */
-    public function parseFileForItems(string $filePath, bool $useCache = false): array
+    public function parseFile(string $filePath, array $visitors = [], bool $useCache = false): array
     {
-        // Use the same parser method but attach UnifiedAstVisitor
-        $visitor = new UnifiedAstVisitor();
-        $this->parseFile($filePath, [$visitor], $useCache);
-        return $visitor->getItems();
-    }
+        $realPath = realpath($filePath) ?: $filePath;
+        Log::debug("ParserService.parseFile => [{$realPath}], useCache={$useCache}");
 
-    /**
-     * Parse a PHP file with optional visitors.
-     */
-    public function parseFile(
-        string $filePath,
-        array $visitors = [],
-        bool $useCache = false
-    ): array {
-        $filePath = realpath($filePath) ?: $filePath;
-
-        // If caching is desired
         if ($useCache) {
-            $cached = CodeAnalysis::where('file_path', $filePath)->first();
+            $cached = CodeAnalysis::where('file_path', $realPath)->first();
             if ($cached && !empty($cached->ast)) {
-                Log::info("Found cached AST for file.", ['filePath' => $filePath]);
-                return json_decode($cached->ast, true) ?? [];
+                Log::info("ParserService: Found cached AST for [{$realPath}].");
+                return $cached->ast;
             }
         }
 
         // Read code
-        $code = File::get($filePath);
-
-        // Parse
-        $parser = (new ParserFactory())->createForNewestSupportedVersion();
-        $ast = $parser->parse($code);
-        if (!$ast) {
-            throw new \Exception("Failed to parse AST for file: {$filePath}");
+        try {
+            $code = File::get($realPath);
+        } catch (\Throwable $ex) {
+            Log::error("ParserService: failed to read [{$realPath}]: " . $ex->getMessage());
+            return [];
         }
 
-        // Traverse
+        // Create parser & parse
+        $parser = (new ParserFactory())->createForNewestSupportedVersion();
+        $ast = [];
+        try {
+            $ast = $parser->parse($code);
+            if (!$ast) {
+                Log::warning("ParserService: AST is null for [{$realPath}].");
+                return [];
+            }
+        } catch (\Throwable $e) {
+            Log::error("ParserService: parse error [{$realPath}]: " . $e->getMessage());
+            return [];
+        }
+
+        // Optionally traverse with visitors
         if (!empty($visitors)) {
             $traverser = new NodeTraverser();
             foreach ($visitors as $v) {
-                // Let visitor know the current file
                 if (method_exists($v, 'setCurrentFile')) {
-                    $v->setCurrentFile($filePath);
+                    $v->setCurrentFile($realPath);
                 }
                 $traverser->addVisitor($v);
             }
             $traverser->traverse($ast);
         }
 
-        // Optionally store the AST
+        // Optionally store AST in DB
         if ($useCache) {
-            CodeAnalysis::updateOrCreate(
-                ['file_path' => $filePath],
-                ['ast' => json_encode($ast)]
-            );
+            try {
+                CodeAnalysis::updateOrCreate(
+                    ['file_path' => $realPath],
+                    ['ast' => $ast]
+                );
+                Log::info("ParserService: Cached AST in DB for [{$realPath}].");
+            } catch (\Throwable $e) {
+                Log::error("ParserService: failed caching AST [{$realPath}]: " . $e->getMessage());
+            }
         }
 
         return $ast;
-    }
-
-    /**
-     * Convert a path to an absolute path if possible.
-     */
-    public function normalizePath(string $path): string
-    {
-        return realpath($path) ?: $path;
     }
 
     /**
@@ -115,7 +106,7 @@ class ParserService
     {
         $realDir = realpath($directory);
         if (!$realDir || !is_dir($realDir)) {
-            Log::warning("Folder does not exist.", ['folder' => $directory]);
+            Log::warning("ParserService.getPhpFiles: folder not found or invalid => [{$directory}].");
             return collect();
         }
 
@@ -129,11 +120,8 @@ class ParserService
                 $phpFiles[] = $file->getRealPath();
             }
         }
-        Log::info("Retrieved PHP files from directory.", [
-            'directory' => $realDir,
-            'count'     => count($phpFiles),
-        ]);
 
+        Log::info("ParserService.getPhpFiles => [{$realDir}] => found [".count($phpFiles)."] .php files.");
         return collect($phpFiles);
     }
 }

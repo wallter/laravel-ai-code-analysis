@@ -65,7 +65,7 @@ class ParseFilesCommand extends Command
         foreach ($phpFiles as $filePath) {
             try {
                 // Parse and merge results
-                $items = $this->parserService->parseFileForItems($filePath);
+                $items = $this->parserService->parseFile($filePath);
                 $collectedItems = $collectedItems->merge($items);
 
                 $this->info("Successfully parsed: {$filePath}");

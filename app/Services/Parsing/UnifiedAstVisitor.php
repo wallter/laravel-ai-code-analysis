@@ -11,12 +11,13 @@ use PhpParser\Node\Stmt\Function_;
 use Illuminate\Support\Collection;
 
 /**
- * Single-pass visitor collecting classes (incl. traits, interfaces), and functions.
+ * Single-pass visitor collecting classes (traits, interfaces) and free-floating functions.
+ * Captures docblocks, methods, parameters, etc.
  */
 class UnifiedAstVisitor extends NodeVisitorAbstract
 {
     protected Collection $items;
-    protected ?string $currentFile = null;
+    protected ?string $currentFile      = null;
     protected ?string $currentNamespace = null;
 
     public function __construct()
@@ -24,33 +25,43 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
         $this->items = collect();
     }
 
+    /**
+     * Set the current file being parsed; used for referencing in output.
+     */
     public function setCurrentFile(string $file): void
     {
         $this->currentFile = $file;
     }
 
+    /**
+     * Called when entering a node in the AST.
+     */
     public function enterNode(Node $node)
     {
         // Track namespace
         if ($node instanceof Namespace_) {
-            $this->currentNamespace = $node->name ? $node->name->toString() : null;
+            $this->currentNamespace = $node->name
+                ? $node->name->toString()
+                : null;
         }
 
-        // Collect classes, traits, and interfaces
+        // Collect Class, Trait, or Interface
         if ($node instanceof ClassLike && $node->name !== null) {
-            $type = $this->resolveClassLikeType($node);
+            $type    = $this->resolveClassLikeType($node);
             $docInfo = $this->extractDocInfo($node);
             $methods = $this->collectMethods($node);
 
             $this->items->push([
-                'type'       => $type, // "Class", "Trait", or "Interface"
-                'name'       => (string) $node->name,
-                'namespace'  => $this->currentNamespace,
-                'annotations'=> $docInfo['annotations'],
-                'description'=> $docInfo['shortDescription'],
-                'details'    => ['methods' => $methods],
-                'file'       => $this->currentFile,
-                'line'       => $node->getStartLine(),
+                'type'        => $type, // "Class", "Trait", or "Interface"
+                'name'        => $node->name->toString(),
+                'namespace'   => $this->currentNamespace,
+                'annotations' => $docInfo['annotations'],
+                'description' => $docInfo['shortDescription'],
+                'details'     => [
+                    'methods' => $methods,
+                ],
+                'file'        => $this->currentFile,
+                'line'        => $node->getStartLine(),
             ]);
         }
 
@@ -60,49 +71,63 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
             $params  = $this->collectFunctionParams($node);
 
             $this->items->push([
-                'type'       => 'Function',
-                'name'       => $node->name->name,
-                'annotations'=> $docInfo['annotations'],
-                'details'    => [
+                'type'        => 'Function',
+                'name'        => $node->name->toString(),
+                'annotations' => $docInfo['annotations'],
+                'details'     => [
                     'params'      => $params,
                     'description' => $docInfo['shortDescription'],
                 ],
-                'file'       => $this->currentFile,
-                'line'       => $node->getStartLine(),
+                'file'        => $this->currentFile,
+                'line'        => $node->getStartLine(),
             ]);
         }
     }
 
+    /**
+     * Called when leaving a node.
+     */
     public function leaveNode(Node $node)
     {
+        // Reset namespace after leaving a Namespace_ node
         if ($node instanceof Namespace_) {
             $this->currentNamespace = null;
         }
     }
 
+    /**
+     * Returns an array of all collected items (classes, traits, interfaces, functions).
+     */
     public function getItems(): array
     {
         return $this->items->all();
     }
 
-    // -----------------------------------------------------
-    // PRIVATE/PROTECTED METHODS
-    // -----------------------------------------------------
+    // -------------------------------------------------------------------
+    // Below are private/protected helper methods for docblock, etc.
+    // -------------------------------------------------------------------
 
+    /**
+     * Distinguish if a node is a Class, Trait, or Interface.
+     */
     protected function resolveClassLikeType(ClassLike $node): string
     {
         if ($node instanceof \PhpParser\Node\Stmt\Interface_) {
             return 'Interface';
-        } elseif ($node instanceof \PhpParser\Node\Stmt\Trait_) {
+        }
+        if ($node instanceof \PhpParser\Node\Stmt\Trait_) {
             return 'Trait';
-        } elseif ($node instanceof \PhpParser\Node\Stmt\Class_) {
-            // Could also distinguish abstract/final if needed
+        }
+        if ($node instanceof \PhpParser\Node\Stmt\Class_) {
+            // Could further detect abstract/final classes if desired
             return 'Class';
         }
-        
-        return 'Class';
+        return 'Class'; // default fallback
     }
 
+    /**
+     * Gather methods from a ClassLike node, extracting doc info & parameters.
+     */
     protected function collectMethods(ClassLike $node): array
     {
         $methods = [];
@@ -111,7 +136,7 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
             $params = $this->collectMethodParams($method);
 
             $methods[] = [
-                'name'        => $method->name->name,
+                'name'        => $method->name->toString(),
                 'description' => $mDoc['shortDescription'],
                 'annotations' => $mDoc['annotations'],
                 'params'      => $params,
@@ -121,6 +146,9 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
         return $methods;
     }
 
+    /**
+     * Collect parameters from a class method.
+     */
     protected function collectMethodParams(Node\Stmt\ClassMethod $method): array
     {
         $params = [];
@@ -133,6 +161,9 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
         return $params;
     }
 
+    /**
+     * Collect parameters from a free-floating function.
+     */
     protected function collectFunctionParams(Function_ $function): array
     {
         $params = [];
@@ -145,6 +176,9 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
         return $params;
     }
 
+    /**
+     * Convert a PhpParser type node into a string representation.
+     */
     protected function typeToString($typeNode): string
     {
         if ($typeNode instanceof Node\Identifier) {
@@ -162,6 +196,9 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
         return 'mixed';
     }
 
+    /**
+     * Extract docblock info (short description + annotations) from a node.
+     */
     protected function extractDocInfo(Node $node): array
     {
         $docComment = $node->getDocComment();

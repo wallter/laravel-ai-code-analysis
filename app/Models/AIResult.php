@@ -9,12 +9,14 @@ class AIResult extends Model
 {
     use HasFactory;
 
+    protected $table = 'ai_results';
+
     protected $fillable = [
         'code_analysis_id',
-        'pass_name',        // e.g. "doc_generation", "performance_analysis"
+        'pass_name',
         'prompt_text',
         'response_text',
-        'metadata',         // store tokens, cost, etc. if needed
+        'metadata',
     ];
 
     protected $casts = [

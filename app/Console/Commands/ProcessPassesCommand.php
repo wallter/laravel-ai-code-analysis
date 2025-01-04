@@ -10,95 +10,139 @@ use Illuminate\Support\Facades\Context;
 
 class ProcessPassesCommand extends Command
 {
-    protected $signature = 'passes:process {--dry-run : Run the command without persisting any changes}';
-    protected $description = 'Process the next AI pass for each CodeAnalysis record.';
+    protected $signature = 'passes:process
+        {--dry-run : Run without persisting changes}
+        {--verbose : Show extra debugging info in console output}';
 
-    /**
-     * Inject the CodeAnalysisService.
-     */
-    public function __construct(protected CodeAnalysisService $codeAnalysisService)
+    protected $description = 'Process the next AI pass for each CodeAnalysis record with incomplete passes.';
+
+    public function __construct(protected CodeAnalysisService $analysisService)
     {
         parent::__construct();
     }
 
-    /**
-     * Execute the command.
-     */
     public function handle(): int
     {
-        $dryRun = $this->option('dry-run');
-
-        // Set dryRun context
+        // 1) Determine if we’re running in dry-run mode
+        $dryRun = (bool) $this->option('dry-run');
         Context::add('dryRun', $dryRun);
+        Log::info("ProcessPassesCommand started.", ['dryRun' => $dryRun]);
 
-        // Retrieve pass order from configuration
-        $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
+        // 2) Retrieve the pass order from config
+        $passOrder      = config('ai.operations.multi_pass_analysis.pass_order', []);
         $passOrderCount = count($passOrder);
 
-        // Log the retrieved pass order for debugging
-        Context::add('passOrder', $passOrder);
-        Context::add('passOrderCount', $passOrderCount);
-        Log::info('Retrieved pass_order from config.');
+        $this->info("Found [{$passOrderCount}] passes in pass_order: " . implode(', ', $passOrder));
+        Log::debug("Passes => " . json_encode($passOrder));
 
-        // Fetch all analyses that have pending passes by filtering in PHP
-        $pendingAnalyses = CodeAnalysis::all()
-            ->filter(function ($analysis) use ($passOrderCount) {
-                Context::add('passOrderCount', $passOrderCount);
-                Context::add('current_pass', $analysis->current_pass);
-                Context::add('completed_passes', $analysis->completed_passes ?? []);
-                Log::info("Checking analysis: {$analysis->file_path}");
-                return count((array) ($analysis->completed_passes ?? [])) < $passOrderCount;
-            });
-
-        if ($pendingAnalyses->isEmpty()) {
-            $this->info("No pending passes to process.");
-            Log::info("No pending passes to process.");
-            // Remove context after processing
-            Context::forget('file_path');
-            Context::forget('current_pass');
+        if ($passOrderCount < 1) {
+            $this->warn("No pass_order defined in config('ai.operations.multi_pass_analysis.pass_order').");
+            Log::warning("PassOrder is empty. Aborting.");
+            Context::forget('dryRun');
             return 0;
         }
 
-        // Remove dryRun context
-        Context::forget('dryRun');
+        // 3) Gather all CodeAnalysis records
+        $allAnalyses = CodeAnalysis::all();
+        if ($allAnalyses->isEmpty()) {
+            $this->warn("No CodeAnalysis records in DB. Try running 'analyze:files' first.");
+            Log::info("No CodeAnalysis found. Stopping.");
+            Context::forget('dryRun');
+            return 0;
+        }
 
-        Log::info("Pass processing command started.", ['dryRun' => $dryRun]);
+        // 4) Identify which analyses still have passes pending
+        $pendingAnalyses = $allAnalyses->filter(function ($analysis) use ($passOrderCount) {
+            $completed      = (array) ($analysis->completed_passes ?? []);
+            $doneCount      = count($completed);
+            $hasMoreToDo    = $doneCount < $passOrderCount;
 
+            Log::debug("Check [{$analysis->file_path}]: doneCount={$doneCount}, currentPass={$analysis->current_pass}, hasMoreToDo=" . ($hasMoreToDo ? 'true' : 'false'));
+            return $hasMoreToDo;
+        });
+
+        if ($pendingAnalyses->isEmpty()) {
+            $this->info("No pending passes to process.");
+            Log::info("No pending passes found.");
+            Context::forget('dryRun');
+            return 0;
+        }
+
+        // 5) Show how many records we’ll process
+        $this->info("Found [{$pendingAnalyses->count()}] file(s) needing additional passes.");
+        Log::info("ProcessPassesCommand: Found {$pendingAnalyses->count()} record(s) needing passes.");
+
+        // Create a progress bar for the pending analyses
+        $bar = $this->output->createProgressBar($pendingAnalyses->count());
+        $bar->setFormat("verbose");
+        $bar->start();
+
+        // We’ll store final statuses to display in a summary table
+        $finalStatuses = [];
+
+        // 6) Process each record needing passes
         foreach ($pendingAnalyses as $analysis) {
-            // Set context for each analysis
-            Context::add('file_path', $analysis->file_path);
-            Context::add('current_pass', $analysis->current_pass + 1);
-
-            Context::add('file_path', $analysis->file_path);
-            Context::add('current_pass', $analysis->current_pass + 1);
-            Log::info("Starting pass processing for file: {$analysis->file_path}");
-            $this->info("Processing next pass for [{$analysis->file_path}]...");
-            try {
-                $this->codeAnalysisService->processNextPass($analysis, $dryRun);
-                if (!$dryRun) {
-                    $this->info("Processed next pass for [{$analysis->file_path}].");
-                    Log::info("Processed next pass for [{$analysis->file_path}].");
-                } else {
-                    $this->info("Dry-run: processed next pass for [{$analysis->file_path}].");
-                    Log::info("Dry-run: processed next pass for [{$analysis->file_path}].");
-                }
-                Log::info("Completed pass processing for file: {$analysis->file_path}" . ($dryRun ? " (dry-run)" : ""), ['dryRun' => $dryRun]);
-            } catch (\Throwable $e) {
-                Log::error("Error processing pass for file: {$analysis->file_path}", ['exception' => $e]);
-                $this->error("Failed to process pass for [{$analysis->file_path}]: {$e->getMessage()}");
-                // Optionally, log and continue
+            // Optional verbose info
+            if ($this->option('verbose')) {
+                $this->comment(">>> Starting passes for [{$analysis->file_path}]. Already completed: " 
+                    . implode(', ', $analysis->completed_passes ?? []));
             }
+
+            try {
+                // This runs all missing passes
+                $this->analysisService->runAnalysis($analysis, $dryRun);
+
+                $completeList = $analysis->completed_passes ?: [];
+
+                if ($dryRun) {
+                    $this->comment("[DRY-RUN] => Would have completed passes for [{$analysis->file_path}]: " 
+                        . implode(', ', $completeList));
+                } else {
+                    $this->info("Passes now completed for [{$analysis->file_path}]: " 
+                        . implode(', ', $completeList));
+                    Log::info("Completed passes => " . json_encode($completeList));
+                }
+
+                // Collect final status for table display
+                $finalStatuses[] = [
+                    'file_path'      => $analysis->file_path,
+                    'current_pass'   => $analysis->current_pass,
+                    'completed_pass' => implode(', ', $analysis->completed_passes ?? []),
+                ];
+            } catch (\Throwable $e) {
+                Log::error("Error processing passes for [{$analysis->file_path}].", [
+                    'exception' => $e
+                ]);
+                $this->error("Failed to process passes for [{$analysis->file_path}]: {$e->getMessage()}");
+            }
+
+            // Advance progress bar for each record
+            $bar->advance();
         }
 
+        $bar->finish();
+        $this->newLine();
+
+        // 7) Final summary table
+        $this->line("Summary of processed records:");
+        $this->table(
+            ['File Path', 'Current Pass', 'Completed Passes'],
+            array_map(fn($row) => [
+                $row['file_path'],
+                $row['current_pass'],
+                $row['completed_pass'],
+            ], $finalStatuses)
+        );
+
+        // 8) Wrap up
         if ($dryRun) {
-            $this->info("Dry-run pass processing completed.");
-            Log::info("Dry-run pass processing completed.");
-            Log::info("Pass processing command executed in dry-run mode.");
+            $this->warn("Dry-run pass processing completed (no DB changes).");
+            Log::info("Dry-run pass processing completed, no DB updates.");
         } else {
-            $this->info("Pass processing completed.");
-            Log::info("Pass processing command executed successfully.");
+            $this->info("Pass processing completed for all pending analyses.");
+            Log::info("Pass processing completed for all pending analyses.");
         }
-        // Remove dryRun context after all processing
+
         Context::forget('dryRun');
         return 0;
     }

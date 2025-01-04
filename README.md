@@ -19,9 +19,14 @@ This Laravel-based project leverages advanced AI to deliver comprehensive multi-
   - [Installation](#installation)
   - [Configuration](#configuration)
     - [AI Service Configuration](#ai-service-configuration)
-    - [Parsing Configuration](#parsing-configuration)
+      - [Parsing Configuration](#parsing-configuration)
+    - [Parsing Configuration](#parsing-configuration-1)
   - [Usage](#usage)
-  - [Testing](#testing)
+    - [Artisan Commands](#artisan-commands)
+    - [Token \& Cost Tracking](#token--cost-tracking)
+    - [Queued Analysis](#queued-analysis)
+    - [Testing](#testing)
+  - [Testing](#testing-1)
   - [Contributing](#contributing)
   - [License](#license)
 
@@ -202,6 +207,12 @@ The AI capabilities are configured in `config/ai.php`. This file defines the AI 
       // Additional pass definitions...
   ],
   ```
+#### Parsing Configuration
+
+In `config/parsing.php`, define:
+	- Folders to scan (recursively) for .php files
+	- Specific .php files to parse
+	- The ParserService will gather AST data from these paths.
 
 - **Analysis Limits**
 
