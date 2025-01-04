@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\Function_;
 use PhpParser\Node\Stmt\Namespace_;
+use Illuminate\Support\Facades\Log;
 use SplObjectStorage;
 
 /**
@@ -81,18 +82,28 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
     public function enterNode(Node $node)
     {
         if ($node instanceof Class_) {
+            Log::debug("FunctionAndClassVisitor: Found Class node - " . $node->name->name);
             $classData = $this->collectClassData($node);
             $this->items->push($classData);
             $this->currentClassName = $node->name->name;
+            Log::debug("FunctionAndClassVisitor: Exiting Class node.");
+        }
+
+        if ($node instanceof Namespace_) {
+            $this->currentNamespace = '';
+            Log::debug("FunctionAndClassVisitor: Exiting Namespace.");
         }
 
         if ($node instanceof Function_) {
+            Log::debug("FunctionAndClassVisitor: Found Function node - " . $node->name->name);
             $functionData = $this->collectFunctionData($node);
             $this->items->push($functionData);
         }
 
         if ($node instanceof Namespace_) {
-            $this->currentNamespace = $node->name ? $node->name->toString() : '';
+            $namespace = $node->name ? $node->name->toString() : '';
+            Log::debug("FunctionAndClassVisitor: Current Namespace - " . $namespace);
+            $this->currentNamespace = $namespace;
         }
     }
 
@@ -219,6 +230,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
 
     private function collectFunctionData(Function_ $node): array
     {
+        Log::debug("FunctionAndClassVisitor: Collecting data for Function - " . $node->name->name);
         return [
             'type' => 'Function',
             'name' => $node->name->name,
@@ -239,6 +251,7 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
 
     private function collectClassData(Class_ $node): array
     {
+        Log::debug("FunctionAndClassVisitor: Collecting data for Class - " . $node->name->name);
         $methods = [];
         foreach ($node->getMethods() as $method) {
             $methods[] = [
