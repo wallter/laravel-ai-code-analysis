@@ -9,6 +9,9 @@ export default {
         './resources/**/*.js',
         './resources/**/*.vue',
     ],
+    plugins: [
+        require('@tailwindcss/typography'),
+    ],
     theme: {
         extend: {
             fontFamily: {

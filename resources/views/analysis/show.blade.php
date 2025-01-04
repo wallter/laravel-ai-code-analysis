@@ -144,7 +144,7 @@
             <!-- Distinct container for Markdown vs Raw -->
             <div x-show="!viewRaw" x-transition>
               <div class="bg-gray-50 p-4 rounded shadow mt-2">
-                <div class="prose prose-indigo max-w-none">
+                <div class="prose prose-indigo">
                     {!! \Illuminate\Support\Str::markdown($rawMarkdown) !!}
                 </div>
               </div>
