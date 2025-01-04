@@ -81,22 +81,21 @@ class ParserService
      *
      * @param string          $filePath
      * @param NodeVisitor[]   $visitors  Additional visitors you want to run on this parse.
-     * @param bool            $useCache  If true, attempt to load and store AST in CodeAnalysis model.
      * @return array          The raw AST array returned by PhpParser (not the visitors' data).
      *
      * @throws \PhpParser\Error|\Exception
      */
-    public function parseFile(string $filePath, array $visitors = [], bool $useCache = false): array
+    public function parseFile(string $filePath, array $visitors = []): array
     {
         $filePath = $this->normalizePath($filePath);
 
-        // Attempt to retrieve cached AST, if enabled
-        if ($useCache) {
-            $existingAnalysis = CodeAnalysis::where('file_path', $filePath)->first();
-            if ($existingAnalysis) {
-                return json_decode($existingAnalysis->ast, true) ?? [];
-            }
+        $existingAnalysis = CodeAnalysis::where('file_path', $filePath)->first();
+        if ($existingAnalysis) {
+            Log::info("Using cached CodeAnalysis AST for file: {$filePath}");
+            return json_decode($existingAnalysis->ast, true) ?? [];
         }
+
+        Log::info("No cached CodeAnalysis AST found for file: {$filePath}");
 
         // Set context for file parsing
         Context::add('file_path', $filePath);
@@ -117,13 +116,10 @@ class ParserService
             $traverser->traverse($ast);
         }
 
-        // Optionally store the AST in DB
-        if ($useCache) {
-            CodeAnalysis::updateOrCreate(
-                [ 'file_path' => $filePath ],
-                [ 'ast' => json_encode($ast) ]
-            );
-        }
+        CodeAnalysis::updateOrCreate(
+            [ 'file_path' => $filePath ],
+            [ 'ast' => json_encode($ast) ]
+        );
 
         // Remove context after parsing
         Context::forget('file_path');
