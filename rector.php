@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
-use Rector\Laravel\Set\LaravelLevelSetList;
-use Rector\Laravel\Set\LaravelSetList;
+declare(strict_types=1);
+
 use Rector\Config\RectorConfig;
+use RectorLaravel\Set\LaravelLevelSetList;
+use RectorLaravel\Set\LaravelSetList;
 
 return RectorConfig::configure()
     ->withSets([
