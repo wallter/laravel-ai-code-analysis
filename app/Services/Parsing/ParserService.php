@@ -3,230 +3,129 @@ declare(strict_types=1);
 
 namespace App\Services\Parsing;
 
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Collection;
+use App\Models\CodeAnalysis;
+use PhpParser\Parser;
 use PhpParser\ParserFactory;
 use PhpParser\NodeTraverser;
-use PhpParser\Parser;
-use PhpParser\NodeVisitor;
-use PhpParser\NodeFinder;
-use App\Models\CodeAnalysis;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Collection;
-use PhpParser\Node\Stmt\Function_;
-use PhpParser\Node;
-use Illuminate\Support\Facades\Context;
 
 /**
- * Provides helper methods to collect, parse, and optionally store AST data.
+ * Provides file collection and single-visitor parsing.
  */
 class ParserService
 {
     /**
-     * Create a new PHP parser instance using the newest supported version.
-     */
-    public function createParser(): Parser
-    {
-        return (new ParserFactory())->createForNewestSupportedVersion();
-    }
-
-    /**
-     * Create a new NodeTraverser instance, optionally adding parent/connecting visitors if desired.
-     */
-    public function createTraverser(array $visitors = []): NodeTraverser
-    {
-        $traverser = new NodeTraverser();
-        foreach ($visitors as $visitor) {
-            $traverser->addVisitor($visitor);
-        }
-        return $traverser;
-    }
-
-    /**
-     * Collect all PHP files from configured folders and individual files.
+     * Collect .php files from config:
+     *   config('parsing.files') and config('parsing.folders')
      */
     public function collectPhpFiles(): Collection
     {
         Log::info("Collecting PHP files from configuration.");
-        $filesConfig   = config('parsing.files', []);
-        $foldersConfig = config('parsing.folders', []);
-        
-        $filePaths   = collect($filesConfig);
-        $folderPaths = collect($foldersConfig);
 
+        $files   = config('parsing.files', []);
+        $folders = config('parsing.folders', []);
 
-        // Collect from folders
-        $phpFiles = $folderPaths
-            ->map(function ($folderPath) {
-                $realPath = $this->normalizePath($folderPath);
-                if (!is_dir($realPath)) {
-                    Log::warning("Folder does not exist or is not a directory.", ['folder' => $realPath]);
-                    return collect([]);
-                }
-                $phpFiles = $this->getPhpFiles($realPath);
-                return collect($phpFiles);
-            })
-            ->flatten();
+        $filePaths   = collect($files)->map(fn($f) => realpath($f))->filter();
+        $folderFiles = collect($folders)->flatMap(fn($dir) => $this->getPhpFiles($dir));
 
-        // Collect individual files
-        $individualFiles = $filePaths->map(function ($filePath) {
-            $realPath = $this->normalizePath($filePath);
-            if (!file_exists($realPath)) {
-                Log::warning("File does not exist.", ['file' => $realPath]);
-                return null;
-            }
-            // Ensure the file has a .php extension
-            $extension = strtolower(pathinfo($realPath, PATHINFO_EXTENSION));
-            if ($extension !== 'php') {
-                Log::warning("File does not have a .php extension.", ['file' => $realPath, 'extension' => $extension]);
-                return null;
-            }
-            return $realPath;
-        })->filter();
+        $merged = $filePaths->merge($folderFiles)->unique()->values();
 
-        $mergedFiles = $phpFiles->merge($individualFiles)->unique()->values();
-        Log::info("Collected PHP files.", ['count' => $mergedFiles->count()]);
-        return $mergedFiles;
+        Log::info("Collected PHP files.", ['count' => $merged->count()]);
+        return $merged;
     }
 
     /**
-     * Parse a single PHP file into an AST, using the parser + any visitors desired.
-     *
-     * @param string          $filePath
-     * @param NodeVisitor[]   $visitors  Additional visitors you want to run on this parse.
-     * @param bool            $useCache  If true, attempt to load and store AST in CodeAnalysis model.
-     * @return array          The raw AST array returned by PhpParser (not the visitors' data).
-     *
-     * @throws \PhpParser\Error|\Exception
+     * Parse a single file and return discovered items (classes, traits, functions).
      */
-    public function parseFile(string $filePath, array $visitors = [], bool $useCache = true): array
+    public function parseFileForItems(string $filePath, bool $useCache = false): array
     {
-        Log::info("Starting to parse file.", ['filePath' => $filePath]);
-        $filePath = $this->normalizePath($filePath);
+        // Use the same parser method but attach UnifiedAstVisitor
+        $visitor = new UnifiedAstVisitor();
+        $this->parseFile($filePath, [$visitor], $useCache);
+        return $visitor->getItems();
+    }
 
-        // Attempt to retrieve cached AST, if enabled
+    /**
+     * Parse a PHP file with optional visitors.
+     */
+    public function parseFile(
+        string $filePath,
+        array $visitors = [],
+        bool $useCache = false
+    ): array {
+        $filePath = realpath($filePath) ?: $filePath;
+
+        // If caching is desired
         if ($useCache) {
-            $existingAnalysis = CodeAnalysis::where('file_path', $filePath)->first();
-            if ($existingAnalysis) {
+            $cached = CodeAnalysis::where('file_path', $filePath)->first();
+            if ($cached && !empty($cached->ast)) {
                 Log::info("Found cached AST for file.", ['filePath' => $filePath]);
-                return json_decode($existingAnalysis->ast, true) ?? [];
+                return json_decode($cached->ast, true) ?? [];
             }
         }
 
-        // Set context for file parsing
-        Context::add('file_path', $filePath);
+        // Read code
+        $code = File::get($filePath);
 
-        // Read source code
-        try {
-            $code = File::get($filePath);
-        } catch (\Exception $e) {
-            Log::error("Failed to read file.", ['filePath' => $filePath, 'error' => $e->getMessage()]);
-            Context::forget('file_path');
-            throw $e;
-        }
-
-        $parser = $this->createParser();
-        try {
-            $ast = $parser->parse($code);
-        } catch (\PhpParser\Error $e) {
-            Log::error("Failed to parse AST for file.", ['filePath' => $filePath, 'error' => $e->getMessage()]);
-            Context::forget('file_path');
-            throw $e;
-        }
-
-        if ($ast === null) {
-            Log::error("AST parsing returned null.", ['filePath' => $filePath]);
-            Context::forget('file_path');
+        // Parse
+        $parser = (new ParserFactory())->createForNewestSupportedVersion();
+        $ast = $parser->parse($code);
+        if (!$ast) {
             throw new \Exception("Failed to parse AST for file: {$filePath}");
         }
 
-        // If you have visitors, traverse the AST with them
+        // Traverse
         if (!empty($visitors)) {
-            $traverser = $this->createTraverser($visitors);
+            $traverser = new NodeTraverser();
+            foreach ($visitors as $v) {
+                // Let visitor know the current file
+                if (method_exists($v, 'setCurrentFile')) {
+                    $v->setCurrentFile($filePath);
+                }
+                $traverser->addVisitor($v);
+            }
             $traverser->traverse($ast);
         }
 
-        // Optionally store the AST in DB
+        // Optionally store the AST
         if ($useCache) {
-            try {
-                CodeAnalysis::updateOrCreate(
-                    [ 'file_path' => $filePath ],
-                    [ 'ast' => json_encode($ast) ]
-                );
-                Log::info("Stored AST in cache.", ['filePath' => $filePath]);
-            } catch (\Exception $e) {
-                Log::error("Failed to store AST in cache.", ['filePath' => $filePath, 'error' => $e->getMessage()]);
-            }
+            CodeAnalysis::updateOrCreate(
+                ['file_path' => $filePath],
+                ['ast' => json_encode($ast)]
+            );
         }
-
-        // Remove context after parsing
-        Context::forget('file_path');
 
         return $ast;
     }
 
     /**
-     * Recursively retrieve all .php files from a directory.
+     * Recursively get .php files from a directory.
      */
-    public function getPhpFiles(string $directory): array
+    protected function getPhpFiles(string $directory): Collection
     {
-        if (!is_dir($directory)) {
-            Log::warning("Directory does not exist.", ['directory' => $directory]);
-            return [];
+        $realDir = realpath($directory);
+        if (!$realDir || !is_dir($realDir)) {
+            Log::warning("Folder does not exist.", ['folder' => $directory]);
+            return collect();
         }
 
         $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($directory, \RecursiveDirectoryIterator::SKIP_DOTS)
+            new \RecursiveDirectoryIterator($realDir, \RecursiveDirectoryIterator::SKIP_DOTS)
         );
+
         $phpFiles = [];
         foreach ($iterator as $file) {
             if ($file->isFile() && strtolower($file->getExtension()) === 'php') {
-                $realPath = $file->getRealPath();
-                $phpFiles[] = $realPath;
+                $phpFiles[] = $file->getRealPath();
             }
         }
-        Log::info("Retrieved PHP files from directory.", ['directory' => $directory, 'count' => count($phpFiles)]);
-        return $phpFiles;
-    }
+        Log::info("Retrieved PHP files from directory.", [
+            'directory' => $realDir,
+            'count'     => count($phpFiles),
+        ]);
 
-    /**
-     * Normalize a path to absolute form if possible.
-     */
-    public function normalizePath(string $path): string
-    {
-        $normalizedPath = realpath($path) ?: $path;
-        return $normalizedPath;
-    }
-
-    /**
-     * Extract individual functions from a PHP file.
-     *
-     * @param string $filePath
-     * @return array An array of functions with 'name' and 'ast' keys.
-     */
-    public function getFunctionsFromFile(string $filePath): array
-    {
-        Log::info("Extracting functions from file.", ['filePath' => $filePath]);
-        try {
-            $ast = $this->parseFile($filePath);
-        } catch (\Exception $e) {
-            Log::error("Failed to parse file for function extraction.", ['filePath' => $filePath, 'error' => $e->getMessage()]);
-            return [];
-        }
-
-        $nodeFinder = new NodeFinder();
-        /** @var Function_[] $functionNodes */
-        $functionNodes = $nodeFinder->findInstanceOf($ast, Function_::class);
-
-        $functions = [];
-
-        foreach ($functionNodes as $func) {
-            $functions[] = [
-                'name' => $func->name->toString(),
-                'ast'  => $func,
-            ];
-        }
-
-        Log::info("Extracted functions from file.", ['filePath' => $filePath, 'function_count' => count($functions)]);
-        return $functions;
+        return collect($phpFiles);
     }
 }
