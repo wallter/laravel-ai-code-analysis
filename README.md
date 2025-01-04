@@ -18,11 +18,13 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
   - [Overview](#overview)
   - [Table of Contents](#table-of-contents)
   - [Usage TLDR;](#usage-tldr)
+    - [Running the UI \& Server](#running-the-ui--server)
   - [Features](#features)
     - [Code Parsing and Analysis](#code-parsing-and-analysis)
     - [Multi-Pass AI Analysis](#multi-pass-ai-analysis)
   - [Requirements](#requirements)
   - [Installation](#installation)
+  - [UI Setup](#ui-setup)
   - [Configuration](#configuration)
     - [AI Service Configuration](#ai-service-configuration)
       - [Parsing Configuration](#parsing-configuration)
@@ -33,6 +35,9 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
     - [Queued Analysis](#queued-analysis)
     - [Testing](#testing)
   - [Testing](#testing-1)
+  - [Screenshots](#screenshots)
+    - [Code Analysis Dashboard](#code-analysis-dashboard)
+    - [Documentation Generation](#documentation-generation)
   - [Contributing](#contributing)
   - [License](#license)
 
@@ -61,7 +66,7 @@ php artisan queue:work
 ```
 - Check console output
 
-### Running the Development Server
+### Running the UI & Server
 
 Start the Laravel development server to run the application locally:
 
@@ -358,19 +363,14 @@ The project includes (some unmaintained ... yes, got a bit lazy here) PHPUnit te
 
 ## Screenshots
 
-<!-- Add your screenshots below by replacing the placeholder paths with actual image paths -->
-
-### UI Overview
-
-![UI Overview](screenshots/ui-overview.png)
-
 ### Code Analysis Dashboard
 
-![Code Analysis Dashboard](screenshots/code-analysis-dashboard.png)
+![Code Analysis Dashboard](resources/images/github/code-analysis-dashboard.png)
 
 ### Documentation Generation
 
-![Documentation Generation](screenshots/documentation-generation.png)
+![Documentation Generation](resources/images/github/documentation-generation.png)
+![Documentation Generation](resources/images/github/documentation-generation2.png)
 
 ## Contributing
 
