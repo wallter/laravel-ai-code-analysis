@@ -2,194 +2,158 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\File;
-use App\Models\CodeAnalysis;
 use App\Services\Parsing\ParserService;
-use App\Services\AI\CodeAnalysisService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
 
 /**
- * AnalyzeCodeCommand extends the shared BaseCodeCommand, providing:
- *  --output-file   => JSON output destination
- *  --limit-class   => max # of files to analyze
- *  --limit-method  => max # of methods per class
- *
- * 1) Collects .php files from ParserService
- * 2) Optionally limits how many files we analyze
- * 3) Parses each file's AST and calls CodeAnalysisService->analyzeAst(...)
- * 4) Stores results in 'code_analyses' table
- * 5) Optionally writes results to JSON
+ * Example AnalyzeCodeCommand
+ * Extends BaseCodeCommand for shared options: --output-file, --limit-class, etc.
  */
 class AnalyzeCodeCommand extends BaseCodeCommand
 {
-    protected $signature = 'code:analyze
-        {--output-file= : Write JSON output to this file (appends .json if missing).}
-        {--limit-class= : Limit how many .php files we analyze.}
-        {--limit-method= : Limit how many methods per class get processed.}';
+    protected $signature = 'analyze:code
+        {--output-file= : Output .json file}
+        {--limit-class= : Limit how many class-like items to process}
+        {--limit-method= : Limit how many methods per class}';
 
-    protected $description = 'Analyze PHP files, gather AST, and apply multi-pass AI analysis.';
+    protected $description = 'Analyzes code by parsing files and optionally exporting JSON.';
 
-    public function __construct(
-        protected ParserService      $parserService,
-        protected CodeAnalysisService $codeAnalysisService
-    ) {
+    public function __construct(protected ParserService $parserService)
+    {
         parent::__construct();
     }
 
     /**
-     * Called by BaseCodeCommand::handle().
+     * The main logic, called by BaseCodeCommand->handle().
      */
     protected function executeCommand(): int
     {
-        $startTime = microtime(true);
+        // Collect .php files from config
+        $phpFiles = $this->parserService->collectPhpFiles();
+        $outputFile = $this->getOutputFile();
+        $limitClass = $this->getClassLimit();
+        $limitMethod = $this->getMethodLimit();
 
-        try {
-            $phpFiles   = $this->parserService->collectPhpFiles()->unique();
-            $outputFile = $this->getOutputFile();
-            $limitClass = $this->getClassLimit();
-            $limitMethod= $this->getMethodLimit();
+        Log::info('AnalyzeCodeCommand starting.', [
+            'file_count'   => $phpFiles->count(),
+            'limit_class'  => $limitClass,
+            'limit_method' => $limitMethod,
+            'output_file'  => $outputFile,
+        ]);
 
-            info('AnalyzeCodeCommand starting.', [
-                'file_count'   => $phpFiles->count(),
-                'limit_class'  => $limitClass,
-                'limit_method' => $limitMethod,
-                'output_file'  => $outputFile,
-            ]);
+        $this->info(sprintf(
+            "Found [%d] PHP files to analyze. limit-class=%d, limit-method=%d",
+            $phpFiles->count(),
+            $limitClass,
+            $limitMethod
+        ));
 
-            $this->info(sprintf(
-                "Discovered [%d] PHP files. limit-class=%d, limit-method=%d",
-                $phpFiles->count(),
-                $limitClass,
-                $limitMethod
-            ));
+        // Optionally limit how many files we process
+        if ($limitClass > 0 && $limitClass < $phpFiles->count()) {
+            $phpFiles = $phpFiles->take($limitClass);
+            $this->info("Applying limit-class: analyzing first {$limitClass} file(s).");
+        }
 
-            if ($limitClass > 0 && $limitClass < $phpFiles->count()) {
-                $phpFiles = $phpFiles->take($limitClass);
-                $this->info("Applying limit-class: analyzing only the first {$limitClass} file(s).");
-                Log::debug("limit-class in effect => truncated to {$limitClass} file(s).");
-            }
-            if ($phpFiles->isEmpty()) {
-                $this->warn('No .php files to analyze after applying limit-class.');
-                return 0;
-            }
-
-            $analysisResults = collect();
-            DB::beginTransaction();
-
-            // Setup progress bar
-            $bar = $this->output->createProgressBar($phpFiles->count());
-            $bar->start();
-
-            foreach ($phpFiles as $filePath) {
-                $bar->advance();
-                $this->lineIfVerbose("Analyzing file: [{$filePath}]");
-                info("Analyzing file: {$filePath}");
-
-                try {
-                    // The main multi-pass analysis
-                    $analysisData = $this->codeAnalysisService->analyzeAst($filePath, $limitMethod);
-
-                    // If the analysis came back empty or partial, warn
-                    if (empty($analysisData)) {
-                        $this->warn("No analysis data returned for [{$filePath}].");
-                        Log::warning("No analysis data produced for {$filePath}.");
-                    }
-
-                    $astData = $analysisData['ast_data']     ?? [];
-                    $aiResults = $analysisData['ai_results'] ?? [];
-
-                    // Persist in code_analyses DB table
-                    $codeAnalysis = CodeAnalysis::updateOrCreate(
-                        ['file_path' => $this->parserService->normalizePath($filePath)],
-                        [
-                            'ast'      => json_encode($astData, JSON_UNESCAPED_SLASHES),
-                            'analysis' => json_encode($aiResults, JSON_UNESCAPED_SLASHES),
-                        ]
-                    );
-
-                    if ($codeAnalysis->wasRecentlyCreated) {
-                        $codeAnalysis->ai_output = json_encode([], JSON_UNESCAPED_SLASHES);
-                        $codeAnalysis->current_pass = 0;
-                        $codeAnalysis->completed_passes = json_encode([], JSON_UNESCAPED_SLASHES);
-                        $codeAnalysis->save();
-                    }
-
-                    // For optional final JSON output
-                    if ($outputFile) {
-                        $analysisResults->put($filePath, $analysisData);
-                    }
-
-                    info("File [{$filePath}] analyzed successfully.");
-                } catch (\Throwable $e) {
-                    Log::error("Analysis failed for [{$filePath}]: {$e->getMessage()}", [
-                        'exception' => $e,
-                    ]);
-                    $this->error("Error analyzing file [{$filePath}]. Check logs for more info.");
-                }
-            }
-
-            $bar->finish();
-            $this->newLine();
-            DB::commit();
-
-            if ($outputFile) {
-                $this->exportResults($outputFile, $analysisResults->toArray());
-            }
-
-            $duration = round(microtime(true) - $startTime, 2);
-            $this->info("Analysis complete. Time: {$duration}s");
-            info("AnalyzeCodeCommand completed successfully.", ['duration' => $duration]);
+        if ($phpFiles->isEmpty()) {
+            $this->warn("No .php files found for analysis.");
             return 0;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            Log::error("AnalyzeCodeCommand encountered an error.", ['exception' => $th]);
-            $this->error("A fatal error occurred. Check logs for details.");
-            return 1;
         }
+
+        $bar = $this->output->createProgressBar($phpFiles->count());
+        $bar->start();
+
+        // Collect overall analysis
+        $allAnalysis = collect();
+
+        foreach ($phpFiles as $filePath) {
+            $this->info("Analyzing file: {$filePath}");
+
+            // Resolve path without `normalizePath()`
+            // Alternatively: `$fullPath = realpath($filePath) ?: $filePath;`
+            $fullPath = $filePath;
+
+            try {
+                // Example usage: parse and analyze AST
+                $analysisResults = $this->analyzeFile($fullPath, $limitMethod);
+
+                $allAnalysis->push([
+                    'file' => $fullPath,
+                    'analysis' => $analysisResults,
+                ]);
+
+            } catch (\Throwable $e) {
+                Log::error("Analysis failed for [{$fullPath}]: " . $e->getMessage());
+                $this->warn("Could not analyze [{$fullPath}]: " . $e->getMessage());
+            }
+            $bar->advance();
+        }
+
+        $bar->finish();
+        $this->newLine();
+
+        // Final output
+        $this->info("Analysis complete. Processed {$allAnalysis->count()} file(s).");
+
+        if ($outputFile) {
+            $this->exportAnalysis($allAnalysis, $outputFile);
+        }
+
+        return 0;
     }
 
     /**
-     * Logs a line only if verbose mode is enabled.
+     * Illustrative example of analyzing a single file using ParserService & limitMethod.
      */
-    protected function lineIfVerbose(string $message): void
+    protected function analyzeFile(string $filePath, int $limitMethod): array
     {
-        if ($this->output->isVerbose()) {
-            $this->line($message);
+        // 1) Parse to get raw AST (or parseFileForItems if you have that method)
+        $ast = $this->parserService->parseFile($filePath);
+        if (empty($ast)) {
+            return ['error' => 'Empty AST'];
         }
+
+        // 2) Optionally do your unified visitor approach or direct analysis
+        $items = $this->parserService->parseFileForItems($filePath, false);
+
+        // 3) Apply method limit if needed
+        $analysis = [];
+        foreach ($items as $item) {
+            if (in_array($item['type'], ['Class', 'Trait', 'Interface'], true)) {
+                $methods = $item['details']['methods'] ?? [];
+                if ($limitMethod > 0 && count($methods) > $limitMethod) {
+                    $methods = array_slice($methods, 0, $limitMethod);
+                }
+                $analysis[] = [
+                    'type'       => $item['type'],
+                    'name'       => $item['name'],
+                    'namespace'  => $item['namespace'] ?? '',
+                    'methodCount'=> count($methods),
+                ];
+            } else {
+                // type === 'Function', etc.
+                $analysis[] = [
+                    'type' => $item['type'],
+                    'name' => $item['name'],
+                ];
+            }
+        }
+
+        return $analysis;
     }
 
     /**
-     * Export the final analysis results to JSON.
+     * Saves results to a .json file.
      */
-    protected function exportResults(string $filePath, array $data): void
+    protected function exportAnalysis(Collection $allAnalysis, string $outputFile): void
     {
-        try {
-            // Ensure .json extension
-            if (!str_ends_with(strtolower($filePath), '.json')) {
-                $filePath .= '.json';
-            }
-
-            $jsonData = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-            if ($jsonData === false) {
-                throw new \RuntimeException('Failed to JSON encode analysis results.');
-            }
-
-            $dir = dirname($filePath);
-            if (!File::isDirectory($dir)) {
-                File::makeDirectory($dir, 0775, true, true);
-            }
-
-            File::put($filePath, $jsonData);
-
-            $this->info("Analysis results saved to [{$filePath}]");
-            Log::debug("Analysis results exported to [{$filePath}]", [
-                'analysisResultsCount' => count($data),
-            ]);
-        } catch (\Throwable $e) {
-            Log::error("Could not export results to [{$filePath}]: " . $e->getMessage());
-            $this->error("Failed to export JSON to [{$filePath}]. See logs for details.");
+        $json = json_encode($allAnalysis->toArray(), JSON_PRETTY_PRINT);
+        if (!$json) {
+            $this->warn("Failed to encode analysis to JSON: " . json_last_error_msg());
+            return;
         }
+        @mkdir(dirname($outputFile), 0777, true);
+        file_put_contents($outputFile, $json);
+        $this->info("Analysis written to [{$outputFile}].");
     }
 }

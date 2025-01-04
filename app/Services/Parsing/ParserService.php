@@ -101,6 +101,14 @@ class ParserService
     }
 
     /**
+     * Convert a path to an absolute path if possible.
+     */
+    public function normalizePath(string $path): string
+    {
+        return realpath($path) ?: $path;
+    }
+
+    /**
      * Recursively get .php files from a directory.
      */
     protected function getPhpFiles(string $directory): Collection

@@ -3,326 +3,184 @@
 namespace App\Services\AI;
 
 use App\Models\CodeAnalysis;
+use App\Models\AIResult;
 use App\Services\Parsing\ParserService;
 use App\Services\Parsing\UnifiedAstVisitor;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
-use PhpParser\NodeTraverser;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Context;
+use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
-use Exception;
 
 /**
  * CodeAnalysisService
- *
- * Gathers AST-based data, raw code, and applies multi-pass AI analysis.
- * Summarizes or refactors code as needed. 
+ *  - Parses files into AST
+ *  - Runs multi-pass AI analysis
+ *  - Stores each pass result in AIResult
  */
 class CodeAnalysisService
 {
     public function __construct(
-        protected OpenAIService  $openAIService,
-        protected ParserService  $parserService
-    ) {}
+        protected OpenAIService $openAIService,
+        protected ParserService $parserService
+    ) {
+    }
 
     /**
-     * Process the next AI pass for a given CodeAnalysis record.
-     *
-     * @param CodeAnalysis $codeAnalysis
-     * @param bool $dryRun
-     * @return void
+     * Run multi-pass analysis on a CodeAnalysis, storing each pass in AIResult.
      */
-    public function processNextPass(CodeAnalysis $codeAnalysis, bool $dryRun = false): void
+    public function runAnalysis(CodeAnalysis $codeAnalysis, bool $dryRun = false): void
     {
-        // Ensure 'completed_passes' is an array
-        $completedPasses = $codeAnalysis->completed_passes ?? [];
-        if (!is_array($completedPasses)) {
-            $completedPasses = json_decode($completedPasses, true) ?? [];
+        // 1) Determine passes we haven't completed
+        $completed = $codeAnalysis->completed_passes ?? [];
+        if (!is_array($completed)) {
+            $completed = json_decode($completed, true) ?? [];
         }
 
-
-        $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
-        $passOrderCount = count($passOrder);
-        $multiPasses = config('ai.operations.multi_pass_analysis', []);
-
-        // Determine the next pass to execute
-        $nextPass = null;
-        foreach ($passOrder as $passName) {
-            if (!in_array($passName, $completedPasses)) {
-                $nextPass = $passName;
-                break;
+        $allPasses   = config('ai.operations.multi_pass_analysis.pass_order', []);
+        $passDetails = config('ai.operations.multi_pass_analysis', []);
+        foreach ($allPasses as $passName) {
+            if (!in_array($passName, $completed, true)) {
+                $this->processPass($codeAnalysis, $passName, $passDetails, $dryRun);
             }
         }
+    }
 
-        if (!$nextPass) {
-            info("All passes completed for [{$codeAnalysis->file_path}].");
-            return;
-        }
-
-        $passConfig = $multiPasses[$nextPass] ?? null;
+    /**
+     * Processes a single pass (doc_generation, performance_analysis, etc.).
+     */
+    protected function processPass(CodeAnalysis $codeAnalysis, string $passName, array $passDetails, bool $dryRun): void
+    {
+        $passConfig = $passDetails[$passName] ?? null;
         if (!$passConfig) {
-            Log::error("Pass [{$nextPass}] not defined in configuration.");
+            Log::warning("Pass [{$passName}] has no config.");
             return;
         }
 
         try {
-            Context::add('pass_name', $nextPass);
+            Context::add('pass_name', $passName);
             Context::add('file_path', $codeAnalysis->file_path);
 
-            // Build the prompt based on the pass type
+            // Build prompt from AST + raw code
             $prompt = $this->buildPrompt(
-                json_decode($codeAnalysis->ast, true),
-                $this->retrieveRawCode($codeAnalysis->file_path),
-                $passConfig['type'],
-                $passConfig
+                astData: $codeAnalysis->ast ?? [],
+                rawCode: $this->getRawCode($codeAnalysis->file_path),
+                passType: $passConfig['type'] ?? 'both',
+                passCfg: $passConfig
             );
 
-            // Perform the AI operation
-            $responseText = $this->openAIService->performOperation($passConfig['operation'], [
-                'prompt'      => $prompt,
-                'max_tokens'  => $passConfig['max_tokens'] ?? 1024,
-                'temperature' => $passConfig['temperature'] ?? 0.5,
+            if ($dryRun) {
+                Log::info("[DRY-RUN] Skipping AI call for [{$passName}]");
+                return;
+            }
+
+            // Actually call AI
+            $responseText = $this->openAIService->performOperation(
+                $passConfig['operation'] ?? 'code_analysis',
+                [
+                    'prompt'      => $prompt,
+                    'max_tokens'  => $passConfig['max_tokens']  ?? 1500,
+                    'temperature' => $passConfig['temperature'] ?? 0.5,
+                ]
+            );
+
+            // Store in AIResult
+            AIResult::create([
+                'code_analysis_id' => $codeAnalysis->id,
+                'pass_name'        => $passName,
+                'prompt_text'      => $prompt,
+                'response_text'    => $responseText,
             ]);
 
-            if (!$dryRun) {
-                // Append the response to ai_output
-                $aiOutput = json_decode($codeAnalysis->ai_output, true) ?? [];
-                $aiOutput[$nextPass] = $responseText;
-                $codeAnalysis->ai_output = json_encode($aiOutput, JSON_UNESCAPED_SLASHES);
+            // Update passes
+            $completed = (array) ($codeAnalysis->completed_passes ?? []);
+            $completed[] = $passName;
+            $codeAnalysis->completed_passes = array_values($completed);
+            $codeAnalysis->current_pass += 1;
+            $codeAnalysis->save();
 
-                // Update completed_passes and current_pass
-                $completedPasses[] = $nextPass;
-                $codeAnalysis->completed_passes = $completedPasses;
-                $codeAnalysis->current_pass += 1;
-
-                $codeAnalysis->save();
-
-                Log::info("Pass [{$nextPass}] completed for [{$codeAnalysis->file_path}].");
-                
-                // Remove context after successful operation
-                Context::forget('pass_name');
-                Context::forget('file_path');
-            } else {
-                // Remove context in dry-run
-                Context::forget('pass_name');
-                Context::forget('file_path');
-                Log::info("Dry-run: Would append pass [{$nextPass}] to ai_output and completed_passes for [{$codeAnalysis->file_path}].");
-            }
+            Log::info("Pass [{$passName}] completed for [{$codeAnalysis->file_path}]");
         } catch (\Throwable $e) {
-            Log::error("Failed to perform pass [{$nextPass}] for [{$codeAnalysis->file_path}]: {$e->getMessage()}", ['exception' => $e]);
+            Log::error("Failed pass [{$passName}] for [{$codeAnalysis->file_path}]: " . $e->getMessage());
+        } finally {
+            Context::forget('pass_name');
+            Context::forget('file_path');
         }
     }
 
     /**
-     * Build the prompt for the AI based on the pass configuration.
-     *
-     * @param array $astData
-     * @param string $rawCode
-     * @param string $type
-     * @param array $passConfig
-     * @return string
+     * Optionally parse a single file if not already in DB, or re-parse if needed.
      */
-    // parseFile is your ParserService method that runs the AST parse
-    public function analyzeAst(string $filePath, int $limitMethod): array
+    public function analyzeFile(string $filePath, bool $reparse = false): CodeAnalysis
     {
-        $ast = $this->parserService->parseFile($filePath);
-        if (empty($ast)) {
-            return [];
+        $analysis = CodeAnalysis::firstOrCreate(
+            ['file_path' => $filePath],
+            ['ast' => [], 'analysis' => []]
+        );
+
+        if ($reparse || empty($analysis->ast)) {
+            $ast = $this->parserService->parseFile($filePath);
+            $analysis->ast = $ast;
+            $analysis->analysis = $this->buildAstSummary($filePath, $ast);
+            $analysis->save();
         }
-
-        // Now use your single visitor
-        $visitor = new UnifiedAstVisitor();
-        $visitor->setCurrentFile($filePath);
-
-        $traverser = new \PhpParser\NodeTraverser();
-        $traverser->addVisitor(new NameResolver()); // optional
-        $traverser->addVisitor($visitor);
-        $traverser->traverse($ast);
-
-        // The "items" contain both classes + methods + free-floating functions
-        $items = $visitor->getItems();
-
-        // Summarize AST quickly:
-        $astData = $this->buildSummary($items, $limitMethod);
-
-        // Raw code for AI passes
-        $rawCode = $this->retrieveRawCode($filePath);
-
-        // Perform multi-pass
-        $multiPassResults = $this->performMultiPassAnalysis($astData, $rawCode);
-
-        return [
-            'ast_data'   => $astData,
-            'ai_results' => $multiPassResults,
-        ];
-    }
-
-    /**
-     * Retrieve raw code from the file system.
-     *
-     * @param string $filePath
-     * @return string
-     */
-    protected function retrieveRawCode(string $filePath): string
-    {
-        try {
-            return File::get($filePath);
-        } catch (\Exception $ex) {
-            Log::warning("Could not read raw code from [{$filePath}]: " . $ex->getMessage());
-            return '';
-        }
-    }
-
-    /**
-     * A shorter summary—just a count, plus classes & functions with docblock data.
-     */
-    protected function buildSummary(array $items, int $limitMethod): array
-    {
-        $classes   = array_filter($items, fn($it) => $it['type'] === 'Class');
-        $functions = array_filter($items, fn($it) => $it['type'] === 'Function');
-
-        $methodCount = 0;
-        $classData = [];
-        foreach ($classes as $cls) {
-            $allMethods = $cls['details']['methods'] ?? [];
-            if ($limitMethod > 0 && \count($allMethods) > $limitMethod) {
-                $allMethods = \array_slice($allMethods, 0, $limitMethod);
-            }
-            $methodCount += \count($allMethods);
-
-            $classData[] = [
-                'name'        => $cls['name'],
-                'namespace'   => $cls['namespace'] ?? '',
-                'annotations' => $cls['annotations'] ?? [],
-                'description' => $cls['details']['description'] ?? '',
-                'methods'     => $allMethods,
-            ];
-        }
-
-        return [
-            'class_count'    => \count($classData),
-            'function_count' => \count($functions),
-            'method_count'   => $methodCount,
-            'classes'        => array_values($classData),
-            'functions'      => array_values($functions),
-        ];
-    }
-
-    /**
-     * Pass the AST to visitors, respecting $limitMethod for methods.
-     */
-    protected function collectAstData(array $ast, int $limitMethod): array
-    {
-        Log::debug("Collecting AST data with limitMethod={$limitMethod}");
-
-        // Example of using a combined visitor that collects classes & functions
-        $classVisitor    = new \App\Services\Parsing\FunctionAndClassVisitor();
-        $functionVisitor = new \App\Services\Parsing\FunctionVisitor();
-
-        $traverser = new NodeTraverser();
-        $traverser->addVisitor(new NameResolver());
-        $traverser->addVisitor($classVisitor);
-        $traverser->addVisitor($functionVisitor);
-        $traverser->traverse($ast);
-
-        $classes   = collect($classVisitor->getClasses());
-        $functions = collect($functionVisitor->getFunctions());
-
-        if ($classes->isEmpty() && $functions->isEmpty()) {
-            Log::debug("AST contained no classes or functions. Possibly an empty file or pure statements.");
-        }
-
-        $analysis = [
-            'class_count'    => $classes->count(),
-            'function_count' => $functions->count(),
-            'method_count'   => 0,
-            'classes'        => [],
-            'functions'      => [],
-        ];
-
-        // Build the 'classes' array, applying limitMethod if needed
-        $analysis['classes'] = $classes->map(function ($cls) use ($limitMethod, &$analysis) {
-            $methods = Arr::get($cls, 'details.methods', []);
-            if ($limitMethod > 0 && count($methods) > $limitMethod) {
-                $methods = array_slice($methods, 0, $limitMethod);
-            }
-            $analysis['method_count'] += count($methods);
-
-            return [
-                'name'    => Arr::get($cls, 'name', ''),
-                'methods' => $methods,
-            ];
-        })->values()->all();
-
-        // Store function data (if your FunctionVisitor collects free-floating functions)
-        $analysis['functions'] = $functions->values()->all();
-
-        Log::debug("Collected classes={$analysis['class_count']}, free-functions={$analysis['function_count']}, methods={$analysis['method_count']}");
 
         return $analysis;
     }
 
     /**
-     * Repeatedly calls OpenAI with different prompts from config('ai.operations.multi_pass_analysis').
-     * Merges each pass result into a final array.
+     * Summarize AST items for clarity, storing in 'analysis' field if desired.
      */
-    protected function performMultiPassAnalysis(array $astData, string $rawCode): array
+    protected function buildAstSummary(string $filePath, array $ast): array
     {
-        // This will hold each pass result keyed by passName, e.g. 'doc_generation', 'refactor_suggestions', etc.
-        $results = [];
+        // Use UnifiedAstVisitor to discover items
+        $visitor = new UnifiedAstVisitor();
+        $visitor->setCurrentFile($filePath);
 
-        // Retrieve passes from config
-        $multiPasses = config('ai.operations.multi_pass_analysis.multi_pass_analysis', []);
+        $traverser = new NodeTraverser();
+        $traverser->addVisitor(new NameResolver());
+        $traverser->addVisitor($visitor);
+        $traverser->traverse($ast);
 
-        // For each pass (e.g. doc_generation, refactor_suggestions, etc.)
-        foreach ($multiPasses as $passName => $passCfg) {
-            try {
-                // Build a final prompt for this pass
-                $prompt = $this->buildPrompt($astData, $rawCode, $passCfg['type'], $passCfg);
+        $items = $visitor->getItems();
+        $classes   = array_filter($items, fn($i) => in_array($i['type'], ['Class','Trait','Interface']));
+        $functions = array_filter($items, fn($i) => $i['type'] === 'Function');
 
-                // Send to OpenAI (or your AI provider) for analysis
-                $responseText = $this->openAIService->performOperation($passCfg['operation'], [
-                    'prompt'      => $prompt,
-                    'max_tokens'  => $passCfg['max_tokens']  ?? 1024,
-                    'temperature' => $passCfg['temperature'] ?? 0.5,
-                    // Possibly override system message, etc.
-                ]);
-
-                // Store the raw text directly under the pass name
-                $results[$passName] = $responseText;
-            } catch (\Throwable $e) {
-                Log::error("Pass [{$passName}] failed: " . $e->getMessage(), ['exception' => $e]);
-                $results[$passName] = "(Error: {$e->getMessage()})";
-            }
-        }
-
-        return $results;
+        return [
+            'class_count'    => count($classes),
+            'function_count' => count($functions),
+            'items'          => array_values($items),
+        ];
     }
 
     /**
-     * Builds a pass-specific prompt using the pass config plus either AST data, raw code, or both.
+     * Builds a final AI prompt using pass config (AST vs raw vs both).
      */
-    protected function buildPrompt(
-        array  $astData,
-        string $rawCode,
-        string $type,
-        array  $passCfg
-    ): string {
-        // Use a base prompt from config or fallback
-        $basePrompt = Arr::get($passCfg, 'prompt', 'Analyze the code and provide insights:');
+    protected function buildPrompt(array $astData, string $rawCode, string $passType, array $passCfg): string
+    {
+        $basePrompt = $passCfg['prompt'] ?? 'Analyze the code:';
         $prompt = $basePrompt;
 
-        if ($type === 'ast' || $type === 'both') {
+        if ($passType === 'ast' || $passType === 'both') {
             $prompt .= "\n\nAST Data:\n";
             $prompt .= json_encode($astData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         }
-        if ($type === 'raw' || $type === 'both') {
+        if ($passType === 'raw' || $passType === 'both') {
             $prompt .= "\n\nRaw Code:\n" . $rawCode;
         }
 
-        $prompt .= "\n\nPlease respond with thorough, structured insights.\n";
+        $prompt .= "\n\nPlease provide structured, concise insights.";
         return $prompt;
+    }
+
+    protected function getRawCode(string $filePath): string
+    {
+        try {
+            return File::get($filePath);
+        } catch (\Exception $e) {
+            Log::warning("Could not read code from [{$filePath}]: " . $e->getMessage());
+            return '';
+        }
     }
 }
