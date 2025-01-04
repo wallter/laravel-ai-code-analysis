@@ -35,6 +35,9 @@ class GenerateTestsCommand extends Command
 
     public function handle()
     {
+        // Output a warning that this command is experimental
+        $this->warn('WARNING: The generate:tests command is experimental.');
+
         // 1) Grab default paths from Laravel config
         $paths = config('parsing.files', []);
 
