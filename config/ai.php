@@ -13,7 +13,6 @@ return [
     |
     */
 
-    // 1. API Credentials
     'openai_api_key' => env('OPENAI_API_KEY'),
 
     /*
@@ -127,10 +126,8 @@ return [
                 'style_convention_review',
                 'performance_analysis',
                 'dependency_review',
-                // 'refactor_suggestions',
             ],
 
-            // 2. Pass Definitions
             'doc_generation' => [
                 'operation'    => 'code_analysis',
                 'type'         => 'both', // Options: 'ast', 'raw', 'both'
@@ -202,23 +199,6 @@ return [
                     "Provide your insights in a concise and actionable format."
                 ]),
             ],
-
-            // 'refactor_suggestions' => [
-            //     'operation'    => 'code_improvements',
-            //     'type'         => 'raw',
-            //     'max_tokens'   => 1800,
-            //     'temperature'  => 0.6,
-            //     'prompt'       => implode("\n", [
-            //         "You are a senior PHP engineer analyzing the raw code. Provide actionable refactoring suggestions:",
-            //         "- Focus on structural changes (class splitting, design patterns)",
-            //         "- Emphasize SOLID principles, especially SRP",
-            //         "- Discuss how to reduce duplication, enhance naming clarity, and improve maintainability",
-            //         "Write your suggestions in a concise list or short paragraphs."
-            //     ]),
-            //     // Optional: Override system message or add additional parameters
-            // ],
-
-            // Define additional passes following the same structure...
 
         ],
     ],

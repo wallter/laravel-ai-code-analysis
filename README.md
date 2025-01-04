@@ -1,43 +1,67 @@
 # Laravel AI Code Analysis Project
-
-![Laravel Logo](https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-  - [Artisan Commands](#artisan-commands)
-- [Logging](#logging)
-- [Testing](#testing)
-- [Contributing](#contributing)
-- [License](#license)
+- [Laravel AI Code Analysis Project](#laravel-ai-code-analysis-project)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Usage TLDR;](#usage-tldr)
+  - [Features](#features)
+    - [Code Parsing and Analysis](#code-parsing-and-analysis)
+    - [Multi-Pass AI Analysis](#multi-pass-ai-analysis)
+  - [Requirements](#requirements)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
+    - [AI Service Configuration](#ai-service-configuration)
+    - [Parsing Configuration](#parsing-configuration)
+  - [Usage](#usage)
+    - [Artisan Commands](#artisan-commands)
+  - [Testing](#testing)
+  - [Contributing](#contributing)
+  - [License](#license)
 
 ## Overview
 
 This Laravel-based project leverages advanced AI capabilities to perform multi-pass code analysis, documentation generation, and refactoring suggestions. Designed to enhance code quality and maintainability, the system automatically analyzes PHP files, generates comprehensive documentation, and provides actionable refactoring advice using OpenAI's powerful language models.
 
+## Usage TLDR;
+```bash
+php artisan migrate:fresh   
+php artisan parse:files --output-file=docs/parse_all.json --verbose
+php artisan code:analyze --output-file=docs/analyze_all.json --verbose
+```
+
 ## Features
 
-- **Multi-Pass AI Analysis**
-  - **Documentation Generation:** Automatically creates concise and clear documentation from AST data and raw code.
-  - **Refactoring Suggestions:** Provides actionable recommendations to improve code structure, adherence to SOLID principles, and maintainability.
-  - **AST Insights:** Offers insights based on Abstract Syntax Tree (AST) data to understand code structure and relationships.
+### Code Parsing and Analysis
+- **Comprehensive Parsing:** Analyzes PHP files to extract detailed information about classes, methods, functions, traits, and annotations, providing a holistic view of the codebase.
+- **Abstract Syntax Tree (AST) Insights:** Captures detailed AST data, including node types, attributes, and structural relationships, enabling advanced analysis of code structure and behavior.
+- **Granular Metadata:** Extracts metadata such as namespaces, file paths, line numbers, and method parameters to facilitate in-depth understanding and precise debugging.
+- **Persistent Tracking:** Stores parsed data in a database, allowing for historical tracking, cross-referencing, and analysis over time.
+- **Supports Advanced Use Cases:** Enables scenarios like dependency mapping, identifying code smells, and generating tailored documentation or refactoring suggestions based on rich structural insights.
 
-- **Code Parsing and Analysis**
-  - Collects and parses PHP files to extract classes, methods, functions, and annotations.
-  - Stores analysis results in the database for persistent tracking.
+### Multi-Pass AI Analysis
+  - **Documentation Generation:** Automatically creates concise, structured documentation from both AST data and raw code. Summarizes class purposes, key methods, parameters, and usage context with clarity.
+  - **Refactoring Suggestions:** Offers actionable recommendations to improve code structure, maintainability, and adherence to SOLID principles, with a focus on reducing duplication and enhancing clarity.
+  - **Functionality Analysis:** Evaluates the code for functional correctness, identifies edge cases, and highlights performance bottlenecks. Provides suggestions for enhancing scalability, reliability, and testability.
+  - **Style & Convention Review:** Ensures adherence to PSR standards and highlights inconsistencies in formatting, naming conventions, and documentation. Recommends improvements for readability and consistency.
+  - **Performance Analysis:** Identifies inefficiencies like redundant operations or excessive memory usage. Suggests optimizations such as caching, algorithmic improvements, or asynchronous processing.
+  - **Dependency Review:** Analyzes external dependencies for compatibility, security risks, and outdated packages. Recommends updates and alternatives for deprecated or inefficient libraries.
+  - **AST Insights:** Provides insights into the code structure and relationships using Abstract Syntax Tree (AST) data, helping to understand and navigate the codebase effectively.
+
+***Future Enhancements**:* Multi-pass analysis will include dependent passes that reuse data for scoring recommendations, consolidating documentation, and producing detailed summaries.
+
 
 - **Artisan Commands**
-  - **`code:analyze`:** Analyzes PHP files, gathers AST data, and applies AI-driven multi-pass analysis.
   - **`parse:files`:** Parses configured files/directories to list discovered classes and functions.
-  - **`generate:tests`:** Generates PHPUnit test skeletons for discovered classes and methods.
+  - **`code:analyze`:** Analyzes PHP files, gathers AST data, and applies AI-driven multi-pass analysis.
   - **`passes:process`:** Processes AI analysis passes with options for dry-run and verbosity.
-  - **`db:backup`:** Backs up the SQLite database.
-  - **`db:backup:restore`:** Restores the SQLite database from a backup file.
+
+  - (experimental) **`generate:tests`:** Generates PHPUnit test skeletons for discovered classes and methods.
+  - Database utilities:
+    - **`db:backup`:** Backs up the SQLite database.
+    - **`db:backup:restore`:** Restores the SQLite database from a backup file.
 
 - **Database Management**
   - Utilizes SQLite for simplicity and ease of use.
@@ -163,7 +187,7 @@ The AI capabilities are configured in `config/ai.php`. This file defines the AI 
 
 - **Analysis Limits**
 
-  Set limits to control the scope of analysis.
+  Set global limits to control the scope of analysis inside the `config/ai.php` configuration. Each of the `parse:files` and `code:analyze` commands offers options (`--limit-class=1 --limit-method=1`) to allow for fine graned testing and calibration of AI prompts. 
 
   ```php
   'analysis_limits' => [
@@ -172,23 +196,9 @@ The AI capabilities are configured in `config/ai.php`. This file defines the AI 
   ],
   ```
 
-### Logging Configuration
+### Parsing Configuration
 
-Detailed logging is set up in `config/logging.php`. AI operations utilize a dedicated log channel for better traceability.
-
-- **AI Operations Log Channel**
-
-  Add the following to define a dedicated channel:
-
-  ```php
-  'ai_operations' => [
-      'driver' => 'single',
-      'path' => storage_path('logs/ai_operations.log'),
-      'level' => env('LOG_AI_LEVEL', 'debug'),
-      'replace_placeholders' => true,
-      'tap' => [App\Logging\CustomizeAIFormatter::class],
-  ],
-  ```
+Parsing configuration is set up in `config/parsing.php`. This configuration determines what files or folders to (recursively) find and parse php files in—kicked off by the ParseFilesCommand (`php artisan parse:files --output-file=docs/parse_all.json --verbose`) while parsing is handled by `app/Services/Parsing/ParserService.php`.
 
 ## Usage
 
@@ -274,23 +284,9 @@ The project provides several Artisan commands to perform various tasks.
 
    - `--path=`: Specify the backup file to restore from.
 
-## Logging
-
-The project utilizes Laravel's Context facade to provide rich, contextual logging information. AI operations are logged separately in the `ai_operations.log` file located in the `storage/logs` directory.
-
-### Log Levels
-
-- **INFO:** General operational messages.
-- **DEBUG:** Detailed debugging information.
-- **ERROR:** Errors encountered during operations.
-
-### Contextual Information
-
-Contextual data such as `file_path`, `current_pass`, and `pass_order` are automatically included in log entries to facilitate easier debugging and traceability.
-
 ## Testing
 
-The project includes PHPUnit tests to ensure the reliability of its features.
+The project includes (some unmaintained ... yes, got a bit lazy here) PHPUnit tests to ensure the reliability of its features.
 
 1. **Run Tests**
 
@@ -342,4 +338,6 @@ Contributions are welcome! Please follow these steps to contribute:
 
 ## License
 
-This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-sourced software licensed under the [Apache License 2.0](https://github.com/IQAndreas/markdown-licenses/blob/master/apache-v2.0.md).
+
+You may use, modify, and distribute this software under the terms of the Apache License. For more details, see the [LICENSE](LICENSE) file included in this repository.

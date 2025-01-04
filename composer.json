@@ -1,10 +1,26 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "wallter/laravel-ai-code-analysis",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
-    "license": "MIT",
+    "description": "A Laravel-based code analysis library that leverages AI to provide multi-pass analysis, including documentation generation, refactoring suggestions, functionality assessments, and style reviews. Designed to enhance code quality and maintainability using OpenAI's GPT models.",
+    "keywords": [
+        "laravel",
+        "php",
+        "ai",
+        "code analysis",
+        "documentation",
+        "refactoring",
+        "ast",
+        "multi-pass analysis",
+        "openai"
+    ],
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Tyler Wall (Github: wallter)",
+            "email": "tyler.r.wall@gmail.com"
+        }
+    ],
     "require": {
         "php": "^8.2",
         "laravel/framework": "^11.31",
