@@ -82,12 +82,12 @@ class ParserService
      *
      * @param string          $filePath
      * @param NodeVisitor[]   $visitors  Additional visitors you want to run on this parse.
-     * @param int|null        $parsedItemId The ID of the ParsedItem to associate with CodeAnalysis.
+     * @param int             $parsedItemId The ID of the ParsedItem to associate with CodeAnalysis.
      * @return array          The raw AST array returned by PhpParser (not the visitors' data).
      *
      * @throws \PhpParser\Error|\Exception
      */
-    public function parseFile(string $filePath, array $visitors = [], ?int $parsedItemId = null): array
+    public function parseFile(string $filePath, array $visitors = [], int $parsedItemId): array
     {
         $filePath = $this->normalizePath($filePath);
 
@@ -162,12 +162,13 @@ class ParserService
      * Extract individual functions from a PHP file.
      *
      * @param string $filePath
+     * @param int    $parsedItemId
      * @return array An array of functions with 'name' and 'ast' keys.
      */
-    public function getFunctionsFromFile(string $filePath): array
+    public function getFunctionsFromFile(string $filePath, int $parsedItemId): array
     {
         try {
-            $ast = $this->parseFile($filePath, parsedItemId: null); // parsedItemId is now required
+            $ast = $this->parseFile($filePath, [], $parsedItemId);
 
             $nodeFinder = new NodeFinder();
             /** @var Function_[] $functionNodes */
@@ -184,7 +185,7 @@ class ParserService
 
             return $functions;
         } catch (\Exception $e) {
-           Log::error("Failed to extract functions from {$filePath}", ['exception' => $e]);
+            Log::error("Failed to extract functions from {$filePath}", ['exception' => $e]);
             return [];
         }
     }
