@@ -1,11 +1,16 @@
 # Laravel AI Code Analysis Project
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
+
+## Overview
+
+This Laravel-based project leverages advanced AI to deliver comprehensive multi-pass code analysis, combining automated documentation generation, refactoring suggestions, and functionality assessments. By integrating OpenAI’s language models with PHP Abstract Syntax Tree (AST) analysis via nikic/php-parser, the system iteratively analyzes PHP codebases, transforming raw code into actionable insights. It documents systems, enhances maintainability, optimizes performance, and ensures adherence to best practices, empowering developers to create cleaner, more efficient, and robust code.
+
 ## Table of Contents
 
 - [Laravel AI Code Analysis Project](#laravel-ai-code-analysis-project)
-  - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
+  - [Table of Contents](#table-of-contents)
   - [Usage TLDR;](#usage-tldr)
   - [Features](#features)
     - [Code Parsing and Analysis](#code-parsing-and-analysis)
@@ -21,16 +26,18 @@
   - [Contributing](#contributing)
   - [License](#license)
 
-## Overview
-
-This Laravel-based project leverages advanced AI capabilities to perform multi-pass code analysis, documentation generation, and refactoring suggestions. Designed to enhance code quality and maintainability, the system automatically analyzes PHP files, generates comprehensive documentation, and provides actionable refactoring advice using OpenAI's powerful language models.
-
 ## Usage TLDR;
 ```bash
+# configure your .env `OPENAI_API_KEY` and model
+
+# Update config/parsing.php to point to your files, folders, or repo (not recommended for large repos/directories)
+composer install
 php artisan migrate:fresh   
 php artisan parse:files --output-file=docs/parse_all.json --verbose
 php artisan code:analyze --output-file=docs/analyze_all.json --verbose
 ```
+- Check console output
+- Monitor Laravel logs `storage/logs/laravel.log` for detailed output
 
 ## Features
 
@@ -119,7 +126,7 @@ php artisan code:analyze --output-file=docs/analyze_all.json --verbose
 
 ### AI Service Configuration
 
-The AI capabilities are configured in `config/ai.php`. This file defines the AI operations, multi-pass analysis settings, and default model configurations.
+The AI capabilities are configured in `config/ai.php`. This file defines the AI operations, multi-pass analysis settings, and default model configurations. Configure via `.env`.
 
 - **API Credentials**
 
@@ -314,7 +321,7 @@ Contributions are welcome! Please follow these steps to contribute:
 
 4. **Run Tests**
 
-   Ensure all tests pass before submitting.
+   Ensure all tests pass before submitting. (Do any tests pass ¯\_(ツ)_/¯)
 
    ```bash
    php artisan test

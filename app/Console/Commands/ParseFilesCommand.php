@@ -71,7 +71,7 @@ class ParseFilesCommand extends BaseCodeCommand
                     'file_path' => $filePath,
                 ],
                 [
-                    'line_number'           => 0, // Changed from null to 0
+                    'line_number'           => 0,
                     'details'               => [],
                     'annotations'           => [],
                     'attributes'            => [],
@@ -84,7 +84,7 @@ class ParseFilesCommand extends BaseCodeCommand
                 $ast = $this->parserService->parseFile(
                     filePath: $filePath,
                     visitors: [$visitor],
-                    parsedItemId: $parsedItem->id // Pass the parsed_item_id
+                    parsedItemId: $parsedItem->id
                 );
 
                 if ($this->isVerbose()) {
