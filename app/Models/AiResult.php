@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AiResult extends Model
 {
@@ -12,7 +11,6 @@ class AiResult extends Model
 
     protected $fillable = [
         'parsed_item_id',
-        'code_analysis_id',
         'analysis',
     ];
 
@@ -21,17 +19,9 @@ class AiResult extends Model
     ];
 
     /**
-     * Get the CodeAnalysis that owns the AiResult.
+     * Define the relationship to ParsedItem.
      */
-    public function codeAnalysis(): BelongsTo
-    {
-        return $this->belongsTo(CodeAnalysis::class);
-    }
-
-    /**
-     * Get the ParsedItem that owns the AiResult.
-     */
-    public function parsedItem(): BelongsTo
+    public function parsedItem()
     {
         return $this->belongsTo(ParsedItem::class);
     }

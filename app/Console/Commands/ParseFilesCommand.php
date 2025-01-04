@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\File;
 use App\Services\Parsing\ParserService;
 use App\Services\Parsing\FunctionAndClassVisitor;
 use App\Models\ParsedItem;
-use App\Models\CodeAnalysis; // Ensure this model is imported if not already
 
 /**
  * Parses PHP files and outputs discovered classes & functions.
@@ -52,6 +51,7 @@ class ParseFilesCommand extends BaseCodeCommand
 
         $this->info("Found {$phpFiles->count()} files to parse.");
 
+        // We'll parse them all with a single visitor in a loop
         $visitor = new FunctionAndClassVisitor();
         $parsedItems = collect();
 
@@ -63,28 +63,13 @@ class ParseFilesCommand extends BaseCodeCommand
                 $this->info("Parsing file: {$filePath}");
             }
 
-            // Create ParsedItem for the file
-            $parsedItem = ParsedItem::updateOrCreate(
-                [
-                    'type'      => 'File',
-                    'name'      => basename($filePath),
-                    'file_path' => $filePath,
-                ],
-                [
-                    'line_number'           => 0,
-                    'details'               => [],
-                    'annotations'           => [],
-                    'attributes'            => [],
-                    'fully_qualified_name'  => null,
-                ]
-            );
+            $visitor->setCurrentFile($filePath);
 
             try {
-                // Provide the parsedItem ID to associate CodeAnalysis later
-                $ast = $this->parserService->parseFile(
+                // Provide the visitor each time
+                $this->parserService->parseFile(
                     filePath: $filePath,
-                    visitors: [$visitor],
-                    parsedItemId: $parsedItem->id
+                    visitors: [$visitor]
                 );
 
                 if ($this->isVerbose()) {
@@ -93,7 +78,7 @@ class ParseFilesCommand extends BaseCodeCommand
             } catch (\Throwable $e) {
                 $this->warn("Could not parse {$filePath}: {$e->getMessage()}");
                 if ($this->isVerbose()) {
-                    $this->error("Error details: " . $e->getMessage());
+                    $this->error("Error details:", ['exception' => $e]);
                 }
             }
 
@@ -152,7 +137,7 @@ class ParseFilesCommand extends BaseCodeCommand
         if ($this->isVerbose()) {
             $this->info("Storing parsed items in the database.");
         }
-        $items->each(function ($item) use ($parsedItem) { // Associate items with the parsedItem
+        $items->each(function ($item) {
             ParsedItem::updateOrCreate(
                 [
                     'type'      => $item['type'],
@@ -160,7 +145,7 @@ class ParseFilesCommand extends BaseCodeCommand
                     'file_path' => $item['file'],
                 ],
                 [
-                    'line_number'           => $item['line'] ?? 0, // Changed from null to 0
+                    'line_number'           => $item['line'] ?? null,
                     'details'               => $item['details'] ?? [],
                     'annotations'           => $item['annotations'] ?? [],
                     'attributes'            => $item['attributes'] ?? [],
