@@ -75,16 +75,16 @@ php artisan passes:process --verbose
   - **`parse:files`:** Parses configured files/directories to list discovered classes and functions.
   - **`code:analyze`:** Analyzes PHP files, gathers AST data, and applies AI-driven multi-pass analysis.
   - **`passes:process`:** Processes AI analysis passes with options for dry-run and verbosity.
-
-  - (experimental) **`generate:tests`:** Generates PHPUnit test skeletons for discovered classes and methods.
-  - Database utilities:
-    - **`db:backup`:** Backs up the SQLite database.
-    - **`db:backup:restore`:** Restores the SQLite database from a backup file.
-
+  
+    - (experimental) **`generate:tests`:** Generates PHPUnit test skeletons for discovered classes and methods.
+    - Database utilities:
+      - **`db:backup`:** Backs up the SQLite database.
+      - **`db:backup:restore`:** Restores the SQLite database from a backup file.
+  
 - **Database Management**
   - Utilizes SQLite for simplicity and ease of use.
   - Provides migration files to set up necessary database tables.
-
+  
 - **Logging with Contextual Information**
   - Implements detailed logging using Laravel's Context facade for enhanced traceability and debugging.
 
@@ -216,11 +216,78 @@ The AI capabilities are configured in `config/ai.php`. This file defines the AI 
 
 ### Parsing Configuration
 
-Parsing configuration is set up in `config/parsing.php`. This configuration determines what files or folders to (recursively) find and parse php files in—kicked off by the ParseFilesCommand (`php artisan parse:files --output-file=docs/parse_all.json --verbose`) while parsing is handled by `app/Services/Parsing/ParserService.php`.
+Parsing configuration is set up in `config/parsing.php`. This configuration determines what files or folders to (recursively) find and parse PHP files in—kicked off by the ParseFilesCommand (`php artisan parse:files --output-file=docs/parse_all.json --verbose`) while parsing is handled by `app/Services/Parsing/ParserService.php`.
 
 ## Usage
 
-{{insert_usage}}
+### Artisan Commands
+1. **Parse Files**
+
+   ```bash
+   php artisan parse:files --output-file=docs/parse_all.json --verbose
+   ```
+   - **Description:** Collects PHP files, stores discovered items (classes, functions) in the DB (via ParsedItem or similar).
+
+2. **Analyze Files (Multi-Pass)**
+
+   ```bash
+   php artisan analyze:files --output-file=docs/analyze_all.json --verbose
+   ```
+   - **Description:** 
+     - Creates or updates a CodeAnalysis record for each file.
+     - Queues AI passes if using the new asynchronous approach.
+
+3. **Process Passes**
+
+   ```bash
+   php artisan passes:process
+   ```
+   - **Description:** 
+     - Finds any CodeAnalysis needing further passes and dispatches them to the queue.
+     - Use `--dry-run` to test logic without storing AI results, `--verbose` for extra logs.
+
+4. **Generate Tests (experimental)**
+
+   ```bash
+   php artisan generate:tests
+   ```
+   - **Description:** Creates or updates test files for discovered classes & methods (in progress).
+
+5. **DB Backup / Restore**
+
+   ```bash
+   php artisan db:backup
+   php artisan db:backup:restore
+   ```
+   - **Description:** Backup or restore the SQLite DB as needed.
+
+### Token & Cost Tracking
+- **OpenAIService** captures usage stats (`prompt_tokens`, `completion_tokens`, `total_tokens`) per request.
+- **AIResult** stores the usage in `metadata->usage`.
+- If desired, you can compute a cost estimate in USD by applying your own rate (e.g., $0.002 per 1K tokens).
+
+*(See `ProcessAnalysisPassJob` or your service logic for examples.)*
+
+### Queued Analysis
+- **Multi-pass analysis** (e.g., doc generation, performance, style, etc.) is queued via `ProcessAnalysisPassJob`.
+  - This prevents blocking the main process and improves reliability (retries on fail).
+- **Ensure you have a queue worker running:**
+
+  ```bash
+  php artisan queue:work
+  ```
+
+- **Once completed, results are in `ai_results` table.**
+
+### Testing
+- **Run Tests:**
+
+  ```bash
+  php artisan test
+  ```
+
+- **Coverage:** Some tests focus on AST parsing or command execution.
+- **CI:** Integrate into GitHub Actions for continuous testing.
 
 ## Testing
 
@@ -252,7 +319,7 @@ Contributions are welcome! Please follow these steps to contribute:
 
 4. **Run Tests**
 
-   Ensure all tests pass before submitting. (Do any tests pass ¯\\_(ツ)_/¯)
+   Ensure all tests pass before submitting. (Do any tests pass ¯\_(ツ)_/¯)
 
    ```bash
    php artisan test
