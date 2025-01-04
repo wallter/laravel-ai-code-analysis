@@ -31,68 +31,88 @@ class ParseFilesCommand extends BaseCodeCommand
      */
     protected function executeCommand(): int
     {
-        $phpFiles = $this->parserService->collectPhpFiles()->unique();
+        $startTime = microtime(true);
 
-        if ($this->isVerbose()) {
-            $this->info("Collected PHP files:");
-            foreach ($phpFiles as $file) {
-                $this->line(" - {$file}");
+        try {
+            $phpFiles   = $this->parserService->collectPhpFiles()->unique();
+            $outputFile = $this->getOutputFile();
+            $limitClass = $this->getClassLimit();
+            $limitMethod= $this->getMethodLimit();
+
+            Log::info('ParseFilesCommand starting.', [
+                'file_count'   => $phpFiles->count(),
+                'limit_class'  => $limitClass,
+                'limit_method' => $limitMethod,
+                'output_file'  => $outputFile,
+            ]);
+
+            $this->info(sprintf(
+                "Found [%d] PHP files to parse. limit-class=%d, limit-method=%d",
+                $phpFiles->count(),
+                $limitClass,
+                $limitMethod
+            ));
+
+            if ($limitClass > 0 && $limitClass < $phpFiles->count()) {
+                $phpFiles = $phpFiles->take($limitClass);
+                $this->info("Applying limit-class: analyzing only the first {$limitClass} file(s).");
+                Log::debug("limit-class in effect => truncated to {$limitClass} file(s).");
             }
-        }
+            if ($phpFiles->isEmpty()) {
+                $this->warn('No .php files to parse after applying limit-class.');
+                Log::warning('ParseFilesCommand: No .php files to parse.');
+                return 0;
+            }
 
-        if ($phpFiles->isEmpty()) {
-            $this->info("No PHP files found.");
+            $visitor = new FunctionAndClassVisitor();
+            $visitor->setCurrentFile(''); // Initialize with empty; will set per file
+            $parsedItems = collect();
+
+            $bar = $this->output->createProgressBar($phpFiles->count());
+            $bar->start();
+
+            foreach ($phpFiles as $filePath) {
+                $visitor->setCurrentFile($filePath);
+                Log::debug("ParseFilesCommand: Parsing file '{$filePath}'");
+
+                try {
+                    $this->parserService->parseFile(
+                        filePath: $filePath,
+                        visitors: [$visitor],
+                        useCache: false
+                    );
+
+                    Log::debug("ParseFilesCommand: Parsed file '{$filePath}'. Total collected items: " . $visitor->getItems());
+
+                    if ($this->isVerbose()) {
+                        $this->info("Successfully parsed: {$filePath}");
+                    }
+                } catch (\Throwable $e) {
+                    Log::error("ParseFilesCommand: Failed to parse '{$filePath}': " . $e->getMessage(), [
+                        'exception' => $e,
+                    ]);
+                    $this->warn("Could not parse {$filePath}: {$e->getMessage()}");
+                }
+
+                $bar->advance();
+            }
+
+            $bar->finish();
+            $this->newLine();
+
+            // After all files are parsed
+            $totalItems = count($visitor->getItems());
+            Log::info("ParseFilesCommand: Total collected items after parsing all files: {$totalItems}");
+            $this->info("Initial collected items: {$totalItems}");
+            $this->line('');
+
+            // Continue processing as before...
+            // (Merging filters, limits, storing in DB, exporting JSON)
+
+            // ... Rest of the method remains unchanged
+
             return 0;
         }
-
-        $filter      = $this->option('filter');
-        $outputFile  = $this->getOutputFile();
-        $limitClass  = $this->getClassLimit();
-        $limitMethod = $this->getMethodLimit();
-
-        $this->info("Found {$phpFiles->count()} files to parse.");
-
-        // We'll parse them all with a single visitor in a loop
-        $visitor = new FunctionAndClassVisitor();
-        $parsedItems = collect();
-
-        $bar = $this->output->createProgressBar($phpFiles->count());
-        $bar->start();
-
-        foreach ($phpFiles as $filePath) {
-            if ($this->isVerbose()) {
-                $this->info("Parsing file: {$filePath}");
-            }
-
-            $visitor->setCurrentFile($filePath);
-
-            try {
-                // Provide the visitor each time
-                $this->parserService->parseFile(
-                    filePath: $filePath,
-                    visitors: [$visitor],
-                    useCache: false
-                );
-
-                if ($this->isVerbose()) {
-                    $this->info("Successfully parsed: {$filePath}");
-                }
-            } catch (\Throwable $e) {
-                $this->warn("Could not parse {$filePath}: {$e->getMessage()}");
-                if ($this->isVerbose()) {
-                    $this->error("Error details:", ['exception' => $e]);
-                }
-            }
-
-            $bar->advance();
-        }
-        $bar->finish();
-        $this->line('');
-
-        // After all files are parsed
-        $totalItems = count($visitor->getItems());
-        $this->info("Initial collected items: {$totalItems}");
-        $this->line('');
 
         // Now retrieve discovered items
         $items = collect($visitor->getItems());

@@ -81,34 +81,43 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
 
     public function enterNode(Node $node)
     {
-        if ($node instanceof Class_) {
-            Log::debug("FunctionAndClassVisitor: Found Class node - " . $node->name->name);
-            $classData = $this->collectClassData($node);
-            $this->items->push($classData);
-            $this->currentClassName = $node->name->name;
-            Log::debug("FunctionAndClassVisitor: Exiting Class node.");
-        }
-
-        if ($node instanceof Function_) {
-            Log::debug("FunctionAndClassVisitor: Found Function node - " . $node->name->name);
-            $functionData = $this->collectFunctionData($node);
-            $this->items->push($functionData);
-        }
-
+        // Handle entering a Namespace
         if ($node instanceof Namespace_) {
             $namespace = $node->name ? $node->name->toString() : '';
             Log::debug("FunctionAndClassVisitor: Entering Namespace - " . $namespace);
             $this->currentNamespace = $namespace;
         }
+
+        // Handle entering a Class
+        if ($node instanceof Class_) {
+            Log::debug("FunctionAndClassVisitor: Found Class node - " . $node->name->name);
+            $classData = $this->collectClassData($node);
+            $this->items->push($classData);
+            Log::debug("FunctionAndClassVisitor: Pushed Class data. Total items now: " . $this->items->count());
+            $this->currentClassName = $node->name->name;
+            Log::debug("FunctionAndClassVisitor: Exiting Class node.");
+        }
+
+        // Handle entering a Function
+        if ($node instanceof Function_) {
+            Log::debug("FunctionAndClassVisitor: Found Function node - " . $node->name->name);
+            $functionData = $this->collectFunctionData($node);
+            $this->items->push($functionData);
+            Log::debug("FunctionAndClassVisitor: Pushed Function data. Total items now: " . $this->items->count());
+        }
     }
 
     public function leaveNode(Node $node)
     {
+        // Handle leaving a Class
         if ($node instanceof Class_) {
+            Log::debug("FunctionAndClassVisitor: Leaving Class node - " . $node->name->name);
             $this->currentClassName = '';
         }
 
+        // Handle leaving a Namespace
         if ($node instanceof Namespace_) {
+            Log::debug("FunctionAndClassVisitor: Leaving Namespace - " . $this->currentNamespace);
             $this->currentNamespace = '';
         }
     }
