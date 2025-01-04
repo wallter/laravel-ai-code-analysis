@@ -3,11 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Models\CodeAnalysis;
-use App\Models\CodeAnalysis;
+use App\Models\ParsedItem;
 use App\Services\Parsing\ParserService;
 use App\Services\AI\CodeAnalysisService;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 
 /**
