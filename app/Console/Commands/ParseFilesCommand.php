@@ -69,7 +69,8 @@ class ParseFilesCommand extends BaseCodeCommand
                 // Provide the visitor each time
                 $this->parserService->parseFile(
                     filePath: $filePath,
-                    visitors: [$visitor]
+                    visitors: [$visitor],
+                    useCache: false
                 );
 
                 if ($this->isVerbose()) {

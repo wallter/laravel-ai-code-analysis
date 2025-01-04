@@ -16,9 +16,6 @@ return new class extends Migration
         Schema::create('code_analyses', function (Blueprint $table) {
             $table->id();
             $table->string('file_path')->unique();
-            $table->foreignId('parsed_item_id')
-                  ->constrained('parsed_items')
-                  ->onDelete('cascade');
             $table->json('ast');
             $table->json('analysis');
             $table->text('ai_output')->nullable();

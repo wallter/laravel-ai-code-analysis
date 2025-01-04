@@ -2,12 +2,13 @@
 
 namespace App\Console\Commands;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 use App\Models\CodeAnalysis;
-use App\Models\ParsedItem;
 use App\Services\Parsing\ParserService;
 use App\Services\AI\CodeAnalysisService;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Collection;
 
 /**
  * AnalyzeCodeCommand extends the shared BaseCodeCommand, providing:
@@ -42,68 +43,111 @@ class AnalyzeCodeCommand extends BaseCodeCommand
      */
     protected function executeCommand(): int
     {
-        $parsedItems = ParsedItem::all();
+        $startTime = microtime(true);
 
-        if ($parsedItems->isEmpty()) {
-            $this->info("No parsed items found for analysis.");
+        try {
+            $phpFiles   = $this->parserService->collectPhpFiles()->unique();
+            $outputFile = $this->getOutputFile();
+            $limitClass = $this->getClassLimit();
+            $limitMethod= $this->getMethodLimit();
+
+            info('AnalyzeCodeCommand starting.', [
+                'file_count'   => $phpFiles->count(),
+                'limit_class'  => $limitClass,
+                'limit_method' => $limitMethod,
+                'output_file'  => $outputFile,
+            ]);
+
+            $this->info(sprintf(
+                "Discovered [%d] PHP files. limit-class=%d, limit-method=%d",
+                $phpFiles->count(),
+                $limitClass,
+                $limitMethod
+            ));
+
+            if ($limitClass > 0 && $limitClass < $phpFiles->count()) {
+                $phpFiles = $phpFiles->take($limitClass);
+                $this->info("Applying limit-class: analyzing only the first {$limitClass} file(s).");
+                Log::debug("limit-class in effect => truncated to {$limitClass} file(s).");
+            }
+            if ($phpFiles->isEmpty()) {
+                $this->warn('No .php files to analyze after applying limit-class.');
+                return 0;
+            }
+
+            $analysisResults = collect();
+            DB::beginTransaction();
+
+            // Setup progress bar
+            $bar = $this->output->createProgressBar($phpFiles->count());
+            $bar->start();
+
+            foreach ($phpFiles as $filePath) {
+                $bar->advance();
+                $this->lineIfVerbose("Analyzing file: [{$filePath}]");
+                info("Analyzing file: {$filePath}");
+
+                try {
+                    // The main multi-pass analysis
+                    $analysisData = $this->codeAnalysisService->analyzeAst($filePath, $limitMethod);
+
+                    // If the analysis came back empty or partial, warn
+                    if (empty($analysisData)) {
+                        $this->warn("No analysis data returned for [{$filePath}].");
+                        Log::warning("No analysis data produced for {$filePath}.");
+                    }
+
+                    $astData = $analysisData['ast_data']     ?? [];
+                    $aiResults = $analysisData['ai_results'] ?? [];
+
+                    // Persist in code_analyses DB table
+                    $codeAnalysis = CodeAnalysis::updateOrCreate(
+                        ['file_path' => $this->parserService->normalizePath($filePath)],
+                        [
+                            'ast'      => json_encode($astData, JSON_UNESCAPED_SLASHES),
+                            'analysis' => json_encode($aiResults, JSON_UNESCAPED_SLASHES),
+                        ]
+                    );
+
+                    if ($codeAnalysis->wasRecentlyCreated) {
+                        $codeAnalysis->ai_output = json_encode([], JSON_UNESCAPED_SLASHES);
+                        $codeAnalysis->current_pass = 0;
+                        $codeAnalysis->completed_passes = json_encode([], JSON_UNESCAPED_SLASHES);
+                        $codeAnalysis->save();
+                    }
+
+                    // For optional final JSON output
+                    if ($outputFile) {
+                        $analysisResults->put($filePath, $analysisData);
+                    }
+
+                    info("File [{$filePath}] analyzed successfully.");
+                } catch (\Throwable $e) {
+                    Log::error("Analysis failed for [{$filePath}]: {$e->getMessage()}", [
+                        'exception' => $e,
+                    ]);
+                    $this->error("Error analyzing file [{$filePath}]. Check logs for more info.");
+                }
+            }
+
+            $bar->finish();
+            $this->newLine();
+            DB::commit();
+
+            if ($outputFile) {
+                $this->exportResults($outputFile, $analysisResults->toArray());
+            }
+
+            $duration = round(microtime(true) - $startTime, 2);
+            $this->info("Analysis complete. Time: {$duration}s");
+            info("AnalyzeCodeCommand completed successfully.", ['duration' => $duration]);
             return 0;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("AnalyzeCodeCommand encountered an error.", ['exception' => $th]);
+            $this->error("A fatal error occurred. Check logs for details.");
+            return 1;
         }
-
-        if ($this->isVerbose()) {
-            $this->info("Analyzing {$parsedItems->count()} parsed items.");
-        }
-
-        $bar = $this->output->createProgressBar($parsedItems->count());
-        $bar->start();
-
-        foreach ($parsedItems as $item) {
-            if ($this->isVerbose()) {
-                $this->info("Analyzing item: {$item->name}");
-            }
-
-            try {
-                // Perform AI analysis using CodeAnalysisService
-                $analysis = $this->codeAnalysisService->analyzeAst($item->file_path, $this->getMethodLimit());
-
-                // Store the analysis result using the relationship
-                $item->codeAnalysis()->updateOrCreate([], [
-                    'file_path'        => $item->file_path,
-                    'ast'              => $analysis['ast_data'] ?? [],
-                    'analysis'         => $analysis['ai_results'] ?? [],
-                    'ai_output'        => null, // Initialize or set as needed
-                    'current_pass'     => 0,    // Initialize or set as needed
-                    'completed_passes' => [],   // Initialize or set as needed
-                ]);
-
-                if ($this->isVerbose()) {
-                    $this->info("Analysis completed for: {$item->name}");
-                }
-            } catch (\Exception $e) {
-                $this->warn("Failed to analyze {$item->name}: {$e->getMessage()}");
-                if ($this->isVerbose()) {
-                    $this->error("Error details: " . $e->getTraceAsString());
-                }
-            }
-
-            $bar->advance();
-        }
-
-        $bar->finish();
-        $this->newLine();
-
-        // Export AI analysis results to JSON if requested
-        $outputFile = $this->getOutputFile();
-        if ($outputFile) {
-            if ($this->isVerbose()) {
-                $this->info("Exporting AI analysis results to JSON file: {$outputFile}");
-            }
-            $codeAnalyses = CodeAnalysis::with('parsedItem')->get()->toArray();
-            $this->exportJson($codeAnalyses, $outputFile);
-        }
-
-        $this->info("Code analysis results saved to [{$outputFile}]");
-        $this->info("Analysis complete.");
-        return 0;
     }
 
     /**
@@ -144,7 +188,7 @@ class AnalyzeCodeCommand extends BaseCodeCommand
                 'analysisResultsCount' => count($data),
             ]);
         } catch (\Throwable $e) {
-           Log::error("Could not export results to [{$filePath}]: " . $e->getMessage());
+            Log::error("Could not export results to [{$filePath}]: " . $e->getMessage());
             $this->error("Failed to export JSON to [{$filePath}]. See logs for details.");
         }
     }

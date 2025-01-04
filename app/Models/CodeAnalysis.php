@@ -13,9 +13,9 @@ class CodeAnalysis extends Model
         'file_path',
         'ast',
         'analysis',
-        'ai_output',
-        'current_pass',
-        'completed_passes',
+        'ai_output', // Add this line
+        'current_pass',      // Added
+        'completed_passes',  // Added
     ];
     protected $casts = [
         'ast' => 'array',
@@ -23,14 +23,4 @@ class CodeAnalysis extends Model
         'ai_output' => 'array',
         'completed_passes' => 'array',
     ];
-    
-    /**
-     * Define the inverse relationship to ParsedItem.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function parsedItem()
-    {
-        return $this->belongsTo(ParsedItem::class);
-    }
 }

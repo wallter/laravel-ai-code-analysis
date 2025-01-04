@@ -22,7 +22,6 @@ class ParsedItem extends Model
         'operation_summary',
         'called_methods',
         'ast',
-        'fully_qualified_name',
     ];
 
     protected $casts = [
@@ -33,22 +32,4 @@ class ParsedItem extends Model
         'ast'         => 'array',
         'called_methods' => 'array',
     ];
-
-    /**
-     * Define the one-to-one relationship with CodeAnalysis.
-     */
-    public function aiResult()
-    {
-        return $this->hasOne(AiResult::class);
-    }
-
-    /**
-     * Define the one-to-one relationship with CodeAnalysis.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-     */
-    public function codeAnalysis()
-    {
-        return $this->hasOne(CodeAnalysis::class);
-    }
 }
