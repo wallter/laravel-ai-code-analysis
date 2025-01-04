@@ -11,11 +11,11 @@ use Illuminate\Support\Collection;
  * Example command to parse files, store them in code_analyses,
  * then run multi-pass AI, storing each pass in ai_results.
  */
-class AnalyzeFilesCommand extends BaseCodeCommand
+class AnalyzeFilesCommand extends FilesCommand
 {
     protected $signature = 'analyze:files
         {--output-file= : Export to .json}
-        {--limit-class= : (Unused in this example, but provided by BaseCodeCommand)}
+        {--limit-class= : (Unused in this example, but provided by FilesCommand)}
         {--limit-method= : (Unused in this example, but provided)}
         {--dry-run : Skip saving AI results to DB.}';
 

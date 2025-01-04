@@ -86,6 +86,9 @@
             <!-- Site Title -->
             <div class="text-xl font-semibold dark:text-gray-100">
                 Laravel AI Code Analysis
+                <small class="text-sm text-gray-400 dark:text-gray-400">
+                    by Tyler Wall
+                </small>
             </div>
 
             <!-- Theme Toggle (Outline Button) -->
