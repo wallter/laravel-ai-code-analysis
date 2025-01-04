@@ -22,3 +22,9 @@ yarn-error.log
 /.vscode
 /.zed
 .aider*
+
+# Testing data
+resources/access-app
+
+# json log output
+docs/*.json

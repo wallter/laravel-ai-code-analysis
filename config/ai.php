@@ -75,7 +75,7 @@ return [
             'prompt'        => '',
         ],
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | Multi-Pass Analysis Configuration
     |--------------------------------------------------------------------------
@@ -86,49 +86,49 @@ return [
     |
     */
 
-    'multi_pass_analysis' => [
+        'multi_pass_analysis' => [
 
-        // Define the order in which passes should be executed
-        'pass_order' => [
-            'doc_generation',
-            'refactor_suggestions',
-            // Add additional pass names here in desired execution order
+            // Define the order in which passes should be executed
+            'pass_order' => [
+                'doc_generation',
+                'refactor_suggestions',
+                // Add additional pass names here in desired execution order
+            ],
+
+            // 2. Pass Definitions
+            'doc_generation' => [
+                'operation'    => 'code_analysis',
+                'type'         => 'both', // Options: 'ast', 'raw', 'both'
+                'max_tokens'   => 1000,
+                'temperature'  => 0.3,
+                'prompt'       => implode("\n", [
+                    "You are a concise documentation generator for a PHP codebase.",
+                    "Create a short but clear doc from the AST data + raw code:",
+                    "- Summarize only essential info: class or trait's purpose, key methods, parameters, usage context.",
+                    "- Mention custom annotations (@url, etc.), but keep it under ~200 words.",
+                    "Be succinct and well-structured."
+                ]),
+                // Optional: Override system message or add additional parameters
+            ],
+
+            'refactor_suggestions' => [
+                'operation'    => 'code_improvements',
+                'type'         => 'raw',
+                'max_tokens'   => 1800,
+                'temperature'  => 0.6,
+                'prompt'       => implode("\n", [
+                    "You are a senior PHP engineer analyzing the raw code. Provide actionable refactoring suggestions:",
+                    "- Focus on structural changes (class splitting, design patterns)",
+                    "- Emphasize SOLID principles, especially SRP",
+                    "- Discuss how to reduce duplication, enhance naming clarity, and improve maintainability",
+                    "Write your suggestions in a concise list or short paragraphs."
+                ]),
+                // Optional: Override system message or add additional parameters
+            ],
+
+            // Define additional passes following the same structure...
+
         ],
-
-        // 2. Pass Definitions
-        'doc_generation' => [
-            'operation'    => 'code_analysis',
-            'type'         => 'both', // Options: 'ast', 'raw', 'both'
-            'max_tokens'   => 1000,
-            'temperature'  => 0.3,
-            'prompt'       => implode("\n", [
-                "You are a concise documentation generator for a PHP codebase.",
-                "Create a short but clear doc from the AST data + raw code:",
-                "- Summarize only essential info: class or trait's purpose, key methods, parameters, usage context.",
-                "- Mention custom annotations (@url, etc.), but keep it under ~200 words.",
-                "Be succinct and well-structured."
-            ]),
-            // Optional: Override system message or add additional parameters
-        ],
-
-        'refactor_suggestions' => [
-            'operation'    => 'code_improvements',
-            'type'         => 'raw',
-            'max_tokens'   => 1800,
-            'temperature'  => 0.6,
-            'prompt'       => implode("\n", [
-                "You are a senior PHP engineer analyzing the raw code. Provide actionable refactoring suggestions:",
-                "- Focus on structural changes (class splitting, design patterns)",
-                "- Emphasize SOLID principles, especially SRP",
-                "- Discuss how to reduce duplication, enhance naming clarity, and improve maintainability",
-                "Write your suggestions in a concise list or short paragraphs."
-            ]),
-            // Optional: Override system message or add additional parameters
-        ],
-
-        // Define additional passes following the same structure...
-
-    ],
 
         'code_improvements' => [
             'model'         => 'gpt-4o-mini',
@@ -154,40 +154,20 @@ return [
             'system_message' => 'You are an expert in code security analysis, focusing on vulnerabilities.',
             'prompt'        => '',
         ],
-
+        
         /*
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | Analysis Limits (not used directly by the service, but by commands)
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
+        |
+        | Settings to limit the scope of analysis, such as the maximum number of
+        | classes or methods to analyze per file. A value of 0 means no limit.
+        |
         */
+
         'analysis_limits' => [
-            'limit_class'  => env('ANALYSIS_LIMIT_CLASS', 0),
-            'limit_method' => env('ANALYSIS_LIMIT_METHOD', 0),
+            'limit_class'  => env('ANALYSIS_LIMIT_CLASS', 0),  // 0 = no limit
+            'limit_method' => env('ANALYSIS_LIMIT_METHOD', 0), // 0 = no limit
         ],
-
-        /*
-        |--------------------------------------------------------------------------
-        | Multi-Pass Analysis
-        |--------------------------------------------------------------------------
-        |
-        | Each pass references an existing operation (like "code_analysis" or
-        | "code_improvements"), plus a "type" (e.g. 'ast', 'raw', 'both') and
-        | optionally a custom prompt or system_message override.
-        |
-        */
-    /*
-    |--------------------------------------------------------------------------
-    | Analysis Limits
-    |--------------------------------------------------------------------------
-    |
-    | Settings to limit the scope of analysis, such as the maximum number of
-    | classes or methods to analyze per file. A value of 0 means no limit.
-    |
-    */
-
-    'analysis_limits' => [
-        'limit_class'  => env('ANALYSIS_LIMIT_CLASS', 0),  // 0 = no limit
-        'limit_method' => env('ANALYSIS_LIMIT_METHOD', 0), // 0 = no limit
-    ],
     ],
 ];
