@@ -66,4 +66,14 @@ abstract class BaseCodeCommand extends Command
     {
         return (int) ($this->option('limit-method') ?: 0);
     }
+
+    /**
+     * Determine if the command is running in verbose mode.
+     *
+     * @return bool
+     */
+    protected function isVerbose(): bool
+    {
+        return $this->getOutput()->isVerbose();
+    }
 }
