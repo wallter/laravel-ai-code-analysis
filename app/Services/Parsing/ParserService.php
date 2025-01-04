@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
 use PhpParser\Node\Stmt\Function_;
-use Psr\Log\LoggerInterface;
 use PhpParser\Node;
 use Illuminate\Support\Facades\Context;
 
@@ -22,11 +21,15 @@ use Illuminate\Support\Facades\Context;
  */
 class ParserService
 {
-    private LoggerInterface $logger;
+    private Collection $items;
+    private Collection $warnings;
+    private SplObjectStorage $processedNodes;
 
-    public function __construct(LoggerInterface $logger)
+    public function __construct()
     {
-        $this->logger = $logger;
+        $this->items = collect();
+        $this->warnings = collect();
+        $this->processedNodes = new SplObjectStorage();
     }
 
     /**
@@ -54,7 +57,7 @@ class ParserService
      */
     public function collectPhpFiles(): Collection
     {
-        $this->logger->info('Starting collection of PHP files.');
+        Log::info('Starting collection of PHP files.');
 
         $filesConfig   = config('parsing.files', []);
         $foldersConfig = config('parsing.folders', []);
@@ -67,7 +70,7 @@ class ParserService
             ->map(function ($folderPath) {
                 $realPath = $this->normalizePath($folderPath);
                 if (!is_dir($realPath)) {
-                    $this->logger->warning('Invalid directory path.', ['path' => $realPath]);
+                    Log::warning('Invalid directory path.', ['path' => $realPath]);
                     return collect([]);
                 }
                 return collect($this->getPhpFiles($realPath));
@@ -78,9 +81,8 @@ class ParserService
         $individualFiles = $filePaths->map(function ($filePath) {
             $realPath = $this->normalizePath($filePath);
             if (!file_exists($realPath)) {
-                $this->logger->warning('File does not exist.', ['file' => $realPath]);
+                Log::warning('File does not exist.', ['file' => $realPath]);
                 return null;
-                $this->logger->debug('Found PHP file.', ['file' => $file->getRealPath()]);
             }
             // Ensure the file has a .php extension
             return (strtolower(pathinfo($realPath, PATHINFO_EXTENSION)) === 'php') ? $realPath : null;
@@ -89,7 +91,7 @@ class ParserService
         $collectedFiles = $phpFiles->merge($individualFiles)->unique()->values();
 
         $count = $collectedFiles->count();
-        $this->logger->info('Collected PHP files.', ['count' => $count, 'files' => $collectedFiles]);
+        Log::info('Collected PHP files.', ['count' => $count, 'files' => $collectedFiles]);
 
         return $collectedFiles;
     }
@@ -108,13 +110,13 @@ class ParserService
     {
         $filePath = $this->normalizePath($filePath);
 
-        $this->logger->info('Starting to parse file.', ['file' => $filePath]);
+        Log::info('Starting to parse file.', ['file' => $filePath]);
 
         // Attempt to retrieve cached AST, if enabled
         if ($useCache) {
             $existingAnalysis = CodeAnalysis::where('file_path', $filePath)->first();
             if ($existingAnalysis) {
-                $this->logger->info('Using cached AST.', ['file' => $filePath]);
+                Log::info('Using cached AST.', ['file' => $filePath]);
                 return json_decode($existingAnalysis->ast, true) ?? [];
             }
         }
@@ -122,38 +124,44 @@ class ParserService
         // Set context for file parsing
         Context::add('file_path', $filePath);
 
-        // Read source code
-        $code = File::get($filePath);
-        $parser = $this->createParser();
-        $ast = $parser->parse($code);
+        try {
+            // Read source code
+            $code = File::get($filePath);
+            $parser = $this->createParser();
+            $ast = $parser->parse($code);
 
-        if ($ast === null) {
-            $this->logger->error('Error parsing file.', [
+            if ($ast === null) {
+                throw new \Exception("Failed to parse AST for file: {$filePath}");
+            }
+
+            // If you have visitors, traverse the AST with them
+            if (!empty($visitors)) {
+                $traverser = $this->createTraverser($visitors);
+                // The final result from traverse() is often the transformed AST, but we discard in this example.
+                $traverser->traverse($ast);
+            }
+
+            // Optionally store the AST in DB
+            if ($useCache) {
+                CodeAnalysis::updateOrCreate(
+                    [ 'file_path' => $filePath ],
+                    [ 'ast' => json_encode($ast) ]
+                );
+                Log::info('Stored AST in database.', ['file' => $filePath]);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Error parsing file.', [
                 'file' => $filePath,
                 'error' => $e->getMessage(),
             ]);
             throw $e;
         }
 
-        // If you have visitors, traverse the AST with them
-        if (!empty($visitors)) {
-            $traverser = $this->createTraverser($visitors);
-            // The final result from traverse() is often the transformed AST, but we discard in this example.
-            $traverser->traverse($ast);
-        }
-
-        // Optionally store the AST in DB
-        if ($useCache) {
-            CodeAnalysis::updateOrCreate(
-                [ 'file_path' => $filePath ],
-                [ 'ast' => json_encode($ast) ]
-            );
-        }
-
         // Remove context after parsing
         Context::forget('file_path');
 
-        $this->logger->info('Successfully parsed file.', ['file' => $filePath]);
+        Log::info('Successfully parsed file.', ['file' => $filePath]);
 
         return $ast;
     }
@@ -164,11 +172,7 @@ class ParserService
     public function getPhpFiles(string $directory): array
     {
         if (!is_dir($directory)) {
-            $this->logger->warning('Directory does not exist.', ['directory' => $directory]);
-            $this->logger->error("Failed to extract functions from file.", [
-                'file' => $filePath,
-                'error' => $e->getMessage(),
-            ]);
+            Log::warning('Directory does not exist.', ['directory' => $directory]);
             return [];
         }
 
@@ -179,6 +183,7 @@ class ParserService
         foreach ($iterator as $file) {
             if ($file->isFile() && strtolower($file->getExtension()) === 'php') {
                 $phpFiles[] = $file->getRealPath();
+                Log::debug('Found PHP file.', ['file' => $file->getRealPath()]);
             }
         }
         return $phpFiles;
@@ -217,11 +222,14 @@ class ParserService
             }
 
             $count = count($functions);
-            $this->logger->info('Extracted functions from file.', ['file' => $filePath, 'function_count' => $count]);
+            Log::info('Extracted functions from file.', ['file' => $filePath, 'function_count' => $count]);
 
             return $functions;
         } catch (\Exception $e) {
-            Log::error("Failed to extract functions from {$filePath}", ['exception' => $e]);
+            Log::error("Failed to extract functions from file.", [
+                'file' => $filePath,
+                'error' => $e->getMessage(),
+            ]);
             return [];
         }
     }
