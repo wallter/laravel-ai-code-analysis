@@ -2,10 +2,7 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\File;
-use App\Models\CodeAnalysis;
+use App\Models\AiResult;
 use App\Services\Parsing\ParserService;
 use App\Services\AI\CodeAnalysisService;
 use Illuminate\Support\Collection;
@@ -43,7 +40,64 @@ class AnalyzeCodeCommand extends BaseCodeCommand
      */
     protected function executeCommand(): int
     {
-        $startTime = microtime(true);
+        $parsedItems = ParsedItem::all();
+
+        if ($parsedItems->isEmpty()) {
+            $this->info("No parsed items found for analysis.");
+            return 0;
+        }
+
+        if ($this->isVerbose()) {
+            $this->info("Analyzing {$parsedItems->count()} parsed items.");
+        }
+
+        $bar = $this->output->createProgressBar($parsedItems->count());
+        $bar->start();
+
+        foreach ($parsedItems as $item) {
+            if ($this->isVerbose()) {
+                $this->info("Analyzing item: {$item->name}");
+            }
+
+            try {
+                // Perform AI analysis using CodeAnalysisService
+                $analysis = $this->codeAnalysisService->analyzeAst($item->file_path, $this->getMethodLimit());
+
+                // Store the analysis result in the ai_results table
+                AiResult::updateOrCreate(
+                    ['parsed_item_id' => $item->id],
+                    ['analysis' => $analysis]
+                );
+
+                if ($this->isVerbose()) {
+                    $this->info("Analysis completed for: {$item->name}");
+                }
+            } catch (\Exception $e) {
+                $this->warn("Failed to analyze {$item->name}: {$e->getMessage()}");
+                if ($this->isVerbose()) {
+                    $this->error("Error details: " . $e->getTraceAsString());
+                }
+            }
+
+            $bar->advance();
+        }
+
+        $bar->finish();
+        $this->newLine();
+
+        // Export AI analysis results to JSON if requested
+        $outputFile = $this->getOutputFile();
+        if ($outputFile) {
+            if ($this->isVerbose()) {
+                $this->info("Exporting AI analysis results to JSON file: {$outputFile}");
+            }
+            $aiResults = AiResult::with('parsedItem')->get()->toArray();
+            $this->exportJson($aiResults, $outputFile);
+        }
+
+        $this->info("Analysis results saved to [{$outputFile}]");
+        $this->info("Analysis complete.");
+        return 0;
 
         try {
             $phpFiles   = $this->parserService->collectPhpFiles()->unique();

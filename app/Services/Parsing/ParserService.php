@@ -128,7 +128,7 @@ class ParserService
         // Remove context after parsing
         Context::forget('file_path');
 
-        return $ast;
+        return json_decode(json_encode($ast), true); // Ensure AST is returned as an associative array
     }
 
     /**

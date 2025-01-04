@@ -22,6 +22,7 @@ class ParsedItem extends Model
         'operation_summary',
         'called_methods',
         'ast',
+        'fully_qualified_name',
     ];
 
     protected $casts = [
@@ -32,4 +33,11 @@ class ParsedItem extends Model
         'ast'         => 'array',
         'called_methods' => 'array',
     ];
+    /**
+     * Define the relationship to AiResult.
+     */
+    public function aiResult()
+    {
+        return $this->hasOne(AiResult::class);
+    }
 }
