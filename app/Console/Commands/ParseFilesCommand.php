@@ -31,6 +31,7 @@ class ParseFilesCommand extends BaseCodeCommand
     protected function executeCommand(): int
     {
         $phpFiles = $this->parserService->collectPhpFiles()->unique();
+        
         if ($phpFiles->isEmpty()) {
             $this->info("No PHP files found.");
             return 0;
