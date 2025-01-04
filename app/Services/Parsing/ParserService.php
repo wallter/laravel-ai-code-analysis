@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
 use PhpParser\Node\Stmt\Function_;
+use Psr\Log\LoggerInterface;
 use PhpParser\Node;
 use Illuminate\Support\Facades\Context;
 
@@ -21,6 +22,13 @@ use Illuminate\Support\Facades\Context;
  */
 class ParserService
 {
+    private LoggerInterface $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     /**
      * Create a new PHP parser instance using the newest supported version.
      */
@@ -46,6 +54,8 @@ class ParserService
      */
     public function collectPhpFiles(): Collection
     {
+        $this->logger->info('Starting collection of PHP files.');
+
         $filesConfig   = config('parsing.files', []);
         $foldersConfig = config('parsing.folders', []);
         
@@ -57,6 +67,7 @@ class ParserService
             ->map(function ($folderPath) {
                 $realPath = $this->normalizePath($folderPath);
                 if (!is_dir($realPath)) {
+                    $this->logger->warning('Invalid directory path.', ['path' => $realPath]);
                     return collect([]);
                 }
                 return collect($this->getPhpFiles($realPath));
@@ -67,13 +78,20 @@ class ParserService
         $individualFiles = $filePaths->map(function ($filePath) {
             $realPath = $this->normalizePath($filePath);
             if (!file_exists($realPath)) {
+                $this->logger->warning('File does not exist.', ['file' => $realPath]);
                 return null;
+                $this->logger->debug('Found PHP file.', ['file' => $file->getRealPath()]);
             }
             // Ensure the file has a .php extension
             return (strtolower(pathinfo($realPath, PATHINFO_EXTENSION)) === 'php') ? $realPath : null;
         })->filter();
 
-        return $phpFiles->merge($individualFiles)->unique()->values();
+        $collectedFiles = $phpFiles->merge($individualFiles)->unique()->values();
+
+        $count = $collectedFiles->count();
+        $this->logger->info('Collected PHP files.', ['count' => $count, 'files' => $collectedFiles]);
+
+        return $collectedFiles;
     }
 
     /**
@@ -90,10 +108,13 @@ class ParserService
     {
         $filePath = $this->normalizePath($filePath);
 
+        $this->logger->info('Starting to parse file.', ['file' => $filePath]);
+
         // Attempt to retrieve cached AST, if enabled
         if ($useCache) {
             $existingAnalysis = CodeAnalysis::where('file_path', $filePath)->first();
             if ($existingAnalysis) {
+                $this->logger->info('Using cached AST.', ['file' => $filePath]);
                 return json_decode($existingAnalysis->ast, true) ?? [];
             }
         }
@@ -107,7 +128,11 @@ class ParserService
         $ast = $parser->parse($code);
 
         if ($ast === null) {
-            throw new \Exception("Failed to parse AST for file: {$filePath}");
+            $this->logger->error('Error parsing file.', [
+                'file' => $filePath,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
         }
 
         // If you have visitors, traverse the AST with them
@@ -128,6 +153,8 @@ class ParserService
         // Remove context after parsing
         Context::forget('file_path');
 
+        $this->logger->info('Successfully parsed file.', ['file' => $filePath]);
+
         return $ast;
     }
 
@@ -137,6 +164,11 @@ class ParserService
     public function getPhpFiles(string $directory): array
     {
         if (!is_dir($directory)) {
+            $this->logger->warning('Directory does not exist.', ['directory' => $directory]);
+            $this->logger->error("Failed to extract functions from file.", [
+                'file' => $filePath,
+                'error' => $e->getMessage(),
+            ]);
             return [];
         }
 
@@ -183,6 +215,9 @@ class ParserService
                     'ast'  => $func,
                 ];
             }
+
+            $count = count($functions);
+            $this->logger->info('Extracted functions from file.', ['file' => $filePath, 'function_count' => $count]);
 
             return $functions;
         } catch (\Exception $e) {
