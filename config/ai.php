@@ -51,19 +51,6 @@ return [
     |  - prompt (fallback text if user doesn't supply one)
     |
     */
-    /*
-    |--------------------------------------------------------------------------
-    | AI Operations
-    |--------------------------------------------------------------------------
-    |
-    | Define each AI operation your application will utilize. Each operation
-    | can inherit default settings or override them as needed.
-    |
-    | Available Drivers:
-    | - 'chat': For chat-based models like ChatGPT.
-    | - 'completion': For standard completion models.
-    |
-    */
 
     'operations' => [
 
@@ -73,61 +60,6 @@ return [
             'temperature'   => env('CODE_ANALYSIS_TEMPERATURE', 0.4),
             'system_message' => 'You are an assistant that generates comprehensive documentation from AST data. Focus on describing classes, methods, parameters, and the usage context.',
             'prompt'        => '',
-        ],
-
-        /*
-    |--------------------------------------------------------------------------
-    | Multi-Pass Analysis Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Configure the multi-pass analysis system, defining the order of passes
-    | and each pass's specific configuration by referencing the operations
-    | defined above.
-    |
-    */
-
-        'multi_pass_analysis' => [
-
-            // Define the order in which passes should be executed
-            'pass_order' => [
-                'doc_generation',
-                'refactor_suggestions',
-                // Add additional pass names here in desired execution order
-            ],
-
-            // 2. Pass Definitions
-            'doc_generation' => [
-                'operation'    => 'code_analysis',
-                'type'         => 'both', // Options: 'ast', 'raw', 'both'
-                'max_tokens'   => 1000,
-                'temperature'  => 0.3,
-                'prompt'       => implode("\n", [
-                    "You are a concise documentation generator for a PHP codebase.",
-                    "Create a short but clear doc from the AST data + raw code:",
-                    "- Summarize only essential info: class or trait's purpose, key methods, parameters, usage context.",
-                    "- Mention custom annotations (@url, etc.), but keep it under ~200 words.",
-                    "Be succinct and well-structured."
-                ]),
-                // Optional: Override system message or add additional parameters
-            ],
-
-            'refactor_suggestions' => [
-                'operation'    => 'code_improvements',
-                'type'         => 'raw',
-                'max_tokens'   => 1800,
-                'temperature'  => 0.6,
-                'prompt'       => implode("\n", [
-                    "You are a senior PHP engineer analyzing the raw code. Provide actionable refactoring suggestions:",
-                    "- Focus on structural changes (class splitting, design patterns)",
-                    "- Emphasize SOLID principles, especially SRP",
-                    "- Discuss how to reduce duplication, enhance naming clarity, and improve maintainability",
-                    "Write your suggestions in a concise list or short paragraphs."
-                ]),
-                // Optional: Override system message or add additional parameters
-            ],
-
-            // Define additional passes following the same structure...
-
         ],
 
         'code_improvements' => [
@@ -168,6 +100,126 @@ return [
         'analysis_limits' => [
             'limit_class'  => env('ANALYSIS_LIMIT_CLASS', 0),  // 0 = no limit
             'limit_method' => env('ANALYSIS_LIMIT_METHOD', 0), // 0 = no limit
+        ],
+
+        /*
+        |--------------------------------------------------------------------------
+        | Multi-Pass Analysis Configuration
+        |--------------------------------------------------------------------------
+        |
+        | Configure the multi-pass analysis system, defining the order of passes
+        | and each pass's specific configuration by referencing the operations
+        | defined above.
+        |
+        */
+
+        'multi_pass_analysis' => [
+
+            /**
+             * Define the order in which passes should be executed 
+             * this (while technically redundant explicitly configures 
+             * ordering of analysis passes rather than relying on the 
+             * order of the array keys.
+             */
+            'pass_order' => [
+                'doc_generation',
+                'functional_analysis',
+                'style_convention_review',
+                'performance_analysis',
+                'dependency_review',
+                // 'refactor_suggestions',
+            ],
+
+            // 2. Pass Definitions
+            'doc_generation' => [
+                'operation'    => 'code_analysis',
+                'type'         => 'both', // Options: 'ast', 'raw', 'both'
+                'max_tokens'   => 1000,
+                'temperature'  => 0.3,
+                'prompt'       => implode("\n", [
+                    "You are a concise documentation generator for a PHP codebase.",
+                    "Create a short but clear doc from the AST data + raw code:",
+                    "- Summarize only essential info: class or trait's purpose, key methods, parameters, usage context.",
+                    "- Mention custom annotations (@url, etc.)",
+                    "Be succinct and well-structured and keep it under ~200 words"
+                ]),
+                // Optional: Override system message or add additional parameters
+            ],
+
+            'functional_analysis' => [
+                'operation'    => 'code_analysis',
+                'type'         => 'both',
+                'max_tokens'   => 2000,
+                'temperature'  => 0.7,
+                'prompt'       => implode("\n", [
+                    "You are a senior software engineer conducting a functionality analysis of the provided code.",
+                    "- Evaluate the code for adherence to functional requirements and expected behavior.",
+                    "- Highlight any edge cases or scenarios that may break the functionality.",
+                    "- Identify performance bottlenecks and suggest optimizations.",
+                    "- Provide clear feedback on how to enhance reliability, scalability, and testability.",
+                    "Write your analysis in concise bullet points or short, structured paragraphs."
+                ]),
+            ],
+
+            'style_convention_review' => [
+                'operation'    => 'code_analysis',
+                'type'         => 'raw',
+                'max_tokens'   => 1500,
+                'temperature'  => 0.3,
+                'prompt'       => implode("\n", [
+                    "You are a code style reviewer analyzing the provided PHP code.",
+                    "- Ensure adherence to PSR (PHP Standards Recommendations) or other applicable coding standards.",
+                    "- Highlight inconsistencies in formatting, naming conventions, and documentation.",
+                    "- Suggest improvements for better readability and consistency.",
+                    "Provide feedback in concise bullet points."
+                ]),
+            ],
+
+            'performance_analysis' => [
+                'operation'    => 'code_analysis',
+                'type'         => 'both',
+                'max_tokens'   => 2000,
+                'temperature'  => 0.5,
+                'prompt'       => implode("\n", [
+                    "You are a performance optimization expert analyzing the provided code.",
+                    "- Identify inefficient loops, redundant operations, or excessive memory usage.",
+                    "- Suggest optimizations, such as caching, algorithmic improvements, or code restructuring.",
+                    "- Highlight areas that could benefit from asynchronous processing or parallelism.",
+                    "Write your suggestions in concise bullet points or short paragraphs."
+                ]),
+            ],
+
+            'dependency_review' => [
+                'operation'    => 'code_analysis',
+                'type'         => 'raw',
+                'max_tokens'   => 1500,
+                'temperature'  => 0.4,
+                'prompt'       => implode("\n", [
+                    "You are a dependency auditor reviewing the provided codebase.",
+                    "- Evaluate and note external dependencies and compatibility with the PHP (8.1) version and frameworks used.",
+                    "- Highlight outdated or insecure dependencies and recommend updates.",
+                    "- Suggest alternatives for deprecated or inefficient libraries.",
+                    "Provide your insights in a concise and actionable format."
+                ]),
+            ],
+
+            // 'refactor_suggestions' => [
+            //     'operation'    => 'code_improvements',
+            //     'type'         => 'raw',
+            //     'max_tokens'   => 1800,
+            //     'temperature'  => 0.6,
+            //     'prompt'       => implode("\n", [
+            //         "You are a senior PHP engineer analyzing the raw code. Provide actionable refactoring suggestions:",
+            //         "- Focus on structural changes (class splitting, design patterns)",
+            //         "- Emphasize SOLID principles, especially SRP",
+            //         "- Discuss how to reduce duplication, enhance naming clarity, and improve maintainability",
+            //         "Write your suggestions in a concise list or short paragraphs."
+            //     ]),
+            //     // Optional: Override system message or add additional parameters
+            // ],
+
+            // Define additional passes following the same structure...
+
         ],
     ],
 ];

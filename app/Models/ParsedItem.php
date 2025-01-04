@@ -33,10 +33,6 @@ class ParsedItem extends Model
         'ast'         => 'array',
         'called_methods' => 'array',
     ];
-    
-    /**
-     * Define the relationship to AiResult.
-     */
 
     /**
      * Define the one-to-one relationship with CodeAnalysis.

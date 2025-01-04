@@ -23,6 +23,7 @@ class CodeAnalysis extends Model
         'ai_output' => 'array',
         'completed_passes' => 'array',
     ];
+    
     /**
      * Define the inverse relationship to ParsedItem.
      *
