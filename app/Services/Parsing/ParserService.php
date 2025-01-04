@@ -69,7 +69,8 @@ class ParserService
             if (!file_exists($realPath)) {
                 return null;
             }
-            return $realPath;
+            // Ensure the file has a .php extension
+            return (strtolower(pathinfo($realPath, PATHINFO_EXTENSION)) === 'php') ? $realPath : null;
         })->filter();
 
         return $phpFiles->merge($individualFiles)->unique()->values();
