@@ -59,9 +59,6 @@ class ParseFilesCommand extends BaseCodeCommand
         $bar->start();
 
         foreach ($phpFiles as $filePath) {
-            // Log the number of items after parsing each file
-            Log::debug("ParseFilesCommand: Parsed file '{$filePath}'. Total collected items so far: " . count($visitor->getItems()));
-
             if ($this->isVerbose()) {
                 $this->info("Parsing file: {$filePath}");
             }
@@ -93,7 +90,6 @@ class ParseFilesCommand extends BaseCodeCommand
 
         // After all files are parsed
         $totalItems = count($visitor->getItems());
-        Log::debug("ParseFilesCommand: Total collected items after parsing all files: {$totalItems}");
         $this->info("Initial collected items: {$totalItems}");
         $this->line('');
 
