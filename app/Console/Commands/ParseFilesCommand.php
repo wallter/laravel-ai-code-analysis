@@ -112,6 +112,10 @@ class ParseFilesCommand extends BaseCodeCommand
             // ... Rest of the method remains unchanged
 
             return 0;
+        } catch (\Throwable $e) {
+            Log::error("ParseFilesCommand encountered an error.", ['exception' => $e]);
+            $this->error("A fatal error occurred. Check logs for details.");
+            return 1;
         }
 
         // Now retrieve discovered items
