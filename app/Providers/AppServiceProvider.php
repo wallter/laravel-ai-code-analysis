@@ -25,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(CodeAnalysisService::class, function ($app) {
             return new CodeAnalysisService(
+                $app->make(OpenAIService::class),
                 $app->make(ParserService::class)
             );
         });
