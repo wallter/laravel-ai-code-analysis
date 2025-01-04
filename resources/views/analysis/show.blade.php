@@ -7,13 +7,15 @@
   <div class="flex items-center justify-between">
     <div>
       <h2 class="text-2xl font-bold leading-tight">Analysis Details</h2>
-      <p class="text-sm text-gray-500 mt-1">
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
         Viewing AI results for: <span class="font-semibold">{{ $analysis->file_path }}</span>
       </p>
     </div>
     <a
       href="{{ route('analysis.index') }}"
-      class="inline-block bg-gray-100 border border-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-200 transition"
+      class="inline-block bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 
+             text-gray-700 dark:text-gray-200 px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 
+             transition-colors"
     >
       &larr; Back to List
     </a>
@@ -21,11 +23,12 @@
 </div>
 
 <!-- Analysis summary card -->
-<div class="bg-white border border-gray-200 p-5 rounded shadow-sm mb-8">
-  <h3 class="text-lg font-semibold mb-2">
+<div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 
+            p-5 rounded shadow-sm mb-8 transition-colors">
+  <h3 class="text-lg font-semibold mb-2 dark:text-gray-100">
     Code Analysis Summary
   </h3>
-  <div class="text-sm text-gray-700 space-y-1">
+  <div class="text-sm text-gray-700 dark:text-gray-200 space-y-1">
     <p>
       <strong>Current Pass:</strong>
       {{ $analysis->current_pass }}
@@ -35,7 +38,7 @@
       @if(!empty($analysis->completed_passes))
         {{ implode(', ', (array) $analysis->completed_passes) }}
       @else
-        <span class="text-gray-400">None</span>
+        <span class="text-gray-400 dark:text-gray-500">None</span>
       @endif
     </p>
     @if(isset($totalCost))
@@ -50,7 +53,7 @@
 </div>
 
 @if($analysis->aiResults->isEmpty())
-  <p class="text-gray-600 mb-8">
+  <p class="text-gray-600 dark:text-gray-300 mb-8">
     No AI results yet. The passes may still be in the queue or incomplete.
   </p>
 @else
@@ -74,26 +77,28 @@
       @foreach($analysis->aiResults as $result)
         @php
           $passCost = $result->metadata['cost_estimate_usd'] ?? 0;
-          $highlight = $passCost > 0.01;  // Adjust threshold if desired
+          $highlight = $passCost > 0.01;
           $rawMarkdown = $result->response_text ?? '';
         @endphp
 
         <!-- Each pass item -->
         <div
           x-data="{ localOpen: false, viewRaw: false }"
-          class="bg-white border border-gray-200 rounded shadow-sm"
+          class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 
+                 rounded shadow-sm transition-colors"
         >
           <!-- Pass Header -->
           <div
-            class="flex items-center justify-between px-4 py-3 cursor-pointer select-none hover:bg-gray-50 transition"
+            class="flex items-center justify-between px-4 py-3 cursor-pointer select-none 
+                   hover:bg-gray-50 dark:hover:bg-gray-700 transition"
             @click="localOpen = !localOpen"
           >
             <!-- Title & Timestamp -->
             <div>
-              <h4 class="text-base font-semibold">
-                Pass: <span class="text-indigo-600">{{ $result->pass_name }}</span>
+              <h4 class="text-base font-semibold dark:text-gray-100">
+                Pass: <span class="text-indigo-600 dark:text-indigo-400">{{ $result->pass_name }}</span>
               </h4>
-              <span class="text-xs text-gray-500">
+              <span class="text-xs text-gray-500 dark:text-gray-400">
                 Created: {{ $result->created_at->format('Y-m-d H:i') }}
               </span>
             </div>
@@ -109,7 +114,7 @@
                 </span>
               @endif
               <svg
-                class="w-5 h-5 text-gray-600 transform transition-transform duration-200"
+                class="w-5 h-5 text-gray-600 dark:text-gray-300 transform transition-transform duration-200"
                 :class="{ 'rotate-180': expandAll || localOpen }"
                 fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
@@ -124,16 +129,18 @@
             </div>
           </div>
 
-          <!-- Collapsible content: open if either expandAll or localOpen is true -->
+          <!-- Collapsible content: open if expandAll or localOpen is true -->
           <div
-            class="px-4 py-3 border-t border-gray-100"
+            class="px-4 py-3 border-t border-gray-100 dark:border-gray-700"
             x-show="expandAll || localOpen"
             x-transition
           >
             <!-- Toggle: "Rendered" or "Raw" view -->
             <div class="text-right mb-2">
               <button
-                class="text-sm px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 transition"
+                class="text-sm px-2 py-1 bg-gray-200 dark:bg-gray-600 
+                       dark:text-gray-100 rounded hover:bg-gray-300 
+                       dark:hover:bg-gray-500 transition"
                 @click.stop="viewRaw = !viewRaw"
               >
                 <span x-show="!viewRaw">Show Raw</span>
@@ -143,16 +150,17 @@
 
             <!-- Distinct container for Markdown vs Raw -->
             <div x-show="!viewRaw" x-transition>
-              <div class="bg-gray-50 p-4 rounded shadow mt-2">
-                <div class="prose prose-indigo">
-                    {!! \Illuminate\Support\Str::markdown($rawMarkdown) !!}
+              <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded shadow mt-2 transition-colors">
+                <div class="prose prose-indigo max-w-none dark:prose-invert">
+                  <!-- If you want dark mode for typography plugin, you'd do `dark:prose-invert`. -->
+                  {!! \Illuminate\Support\Str::markdown($rawMarkdown) !!}
                 </div>
               </div>
             </div>
 
             <div x-show="viewRaw" x-transition>
-              <div class="bg-gray-50 p-4 rounded shadow mt-2">
-                <pre class="text-xs leading-relaxed whitespace-pre-wrap">
+              <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded shadow mt-2 transition-colors">
+                <pre class="text-xs leading-relaxed whitespace-pre-wrap text-gray-800 dark:text-gray-100">
                   <code class="language-md">
 {{ $rawMarkdown }}
                   </code>
@@ -162,7 +170,8 @@
 
             <!-- Token usage if available -->
             @if(!empty($result->metadata['usage']))
-              <div class="text-sm text-gray-700 mt-4 border-t border-gray-200 pt-2">
+              <div class="text-sm text-gray-700 dark:text-gray-200 mt-4 border-t 
+                          border-gray-200 dark:border-gray-600 pt-2 transition-colors">
                 <p class="mb-1 font-semibold">OpenAI Token Usage:</p>
                 <ul class="list-disc list-inside space-y-1">
                   <li>Prompt: {{ $result->metadata['usage']['prompt_tokens'] ?? 0 }}</li>
@@ -171,7 +180,6 @@
                 </ul>
               </div>
             @endif
-
           </div>
         </div>
       @endforeach
