@@ -31,7 +31,14 @@ class ParseFilesCommand extends BaseCodeCommand
     protected function executeCommand(): int
     {
         $phpFiles = $this->parserService->collectPhpFiles()->unique();
-        
+
+        if ($this->isVerbose()) {
+            $this->info("Collected PHP files:");
+            foreach ($phpFiles as $file) {
+                $this->line(" - {$file}");
+            }
+        }
+
         if ($phpFiles->isEmpty()) {
             $this->info("No PHP files found.");
             return 0;
@@ -52,6 +59,10 @@ class ParseFilesCommand extends BaseCodeCommand
         $bar->start();
 
         foreach ($phpFiles as $filePath) {
+            if ($this->isVerbose()) {
+                $this->info("Parsing file: {$filePath}");
+            }
+
             $visitor->setCurrentFile($filePath);
 
             try {
@@ -61,8 +72,15 @@ class ParseFilesCommand extends BaseCodeCommand
                     visitors: [$visitor],
                     useCache: false
                 );
+
+                if ($this->isVerbose()) {
+                    $this->info("Successfully parsed: {$filePath}");
+                }
             } catch (\Throwable $e) {
                 $this->warn("Could not parse {$filePath}: {$e->getMessage()}");
+                if ($this->isVerbose()) {
+                    $this->error("Error details:", ['exception' => $e]);
+                }
             }
 
             $bar->advance();
@@ -73,28 +91,53 @@ class ParseFilesCommand extends BaseCodeCommand
         // Now retrieve discovered items
         $items = collect($visitor->getItems());
 
+        if ($this->isVerbose()) {
+            $this->info("Initial collected items: {$items->count()}");
+        }
+
         // Optionally apply limit-class and limit-method, filter, etc.
         if ($limitClass > 0) {
+            if ($this->isVerbose()) {
+                $this->info("Applying class limit: {$limitClass}");
+            }
             // This example: limit how many "Class" items are in the final set
             $classItems = $items->where('type', 'Class')->take($limitClass);
             $otherItems = $items->where('type', '!=', 'Class');
             $items = $otherItems->merge($classItems);
+            if ($this->isVerbose()) {
+                $this->info("After applying class limit: {$items->count()} items");
+            }
         }
 
         if ($limitMethod > 0) {
+            if ($this->isVerbose()) {
+                $this->info("Applying method limit: {$limitMethod}");
+            }
             $items = $items->map(function ($item) use ($limitMethod) {
                 if ($item['type'] === 'Class' && !empty($item['details']['methods'])) {
                     $item['details']['methods'] = array_slice($item['details']['methods'], 0, $limitMethod);
                 }
                 return $item;
             });
+            if ($this->isVerbose()) {
+                $this->info("After applying method limit.");
+            }
         }
 
         if ($filter) {
+            if ($this->isVerbose()) {
+                $this->info("Applying filter: '{$filter}'");
+            }
             $items = $items->filter(fn ($item) => stripos($item['name'], $filter) !== false);
+            if ($this->isVerbose()) {
+                $this->info("After applying filter: {$items->count()} items");
+            }
         }
 
         // Example storing in DB
+        if ($this->isVerbose()) {
+            $this->info("Storing parsed items in the database.");
+        }
         $items->each(function ($item) {
             ParsedItem::updateOrCreate(
                 [
@@ -116,8 +159,14 @@ class ParseFilesCommand extends BaseCodeCommand
 
         // Output to .json if requested
         if ($outputFile) {
+            if ($this->isVerbose()) {
+                $this->info("Exporting parsed items to JSON file: {$outputFile}");
+            }
             $this->exportJson($items->values()->toArray(), $outputFile);
         } else {
+            if ($this->isVerbose()) {
+                $this->info("Displaying parsed items in table format.");
+            }
             $this->displayTable($items->all());
         }
 
@@ -129,6 +178,9 @@ class ParseFilesCommand extends BaseCodeCommand
         $json = json_encode($items, JSON_PRETTY_PRINT);
         if (!$json) {
             $this->warn("Failed to encode to JSON.");
+            if ($this->isVerbose()) {
+                $this->warn("JSON encoding errors: " . json_last_error_msg());
+            }
             return;
         }
         @mkdir(dirname($filePath), 0777, true);
