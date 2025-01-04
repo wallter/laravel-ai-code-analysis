@@ -8,6 +8,14 @@ use App\Services\AI\CodeAnalysisService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Context;
 
+/**
+ * Class PassesProcessCommand
+ *
+ * This command processes AI passes for each CodeAnalysis record that has incomplete passes.
+ * It handles both dry-run and actual execution modes, providing detailed logging and user feedback.
+ *
+ * @package App\Console\Commands
+ */
 class PassesProcessCommand extends Command
 {
     protected $signature = 'passes:process
@@ -21,6 +29,14 @@ class PassesProcessCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * Execute the console command.
+     *
+     * Determines which CodeAnalysis records require further AI passes and processes them accordingly.
+     * Supports both dry-run and actual processing modes, with optional verbose output for debugging.
+     *
+     * @return int Exit status code.
+     */
     public function handle(): int
     {
         // 1) Determine if we’re running in dry-run mode
