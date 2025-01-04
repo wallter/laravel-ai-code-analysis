@@ -1,10 +1,16 @@
 # Laravel AI Code Analysis Project
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-
 ## Overview
 
-This Laravel-based project leverages advanced AI to deliver comprehensive multi-pass code analysis, combining automated documentation generation, refactoring suggestions, and functionality assessments. By integrating OpenAI’s language models with PHP Abstract Syntax Tree (AST) analysis via nikic/php-parser, the system iteratively analyzes PHP codebases, transforming raw code into actionable insights. It documents systems, enhances maintainability, optimizes performance, and ensures adherence to best practices, empowering developers to create cleaner, more efficient, and robust code.
+This Laravel-based project uses **OpenAI’s language models** in tandem with **PHP Abstract Syntax Tree (AST) analysis** (via [nikic/php-parser](https://github.com/nikic/PHP-Parser)) to deliver a **comprehensive multi-pass code analysis**. It iteratively inspects PHP codebases, generating:
+
+- **Automated Documentation** from raw code + AST data + previous AI Analysis "Passes"
+- **Refactoring Suggestions** for clarity and adherence to best practices
+- **Functionality Assessments** focusing on performance and maintainability
+
+By leveraging **queued** AI operations, **token usage** tracking, and other advanced features, developers can **enhance maintainability**, **optimize performance**, and **ensure** cleaner, more efficient code (see `config/ai.php`).
+
 
 ## Table of Contents
 
