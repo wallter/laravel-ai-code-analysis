@@ -9,6 +9,7 @@ use PhpParser\Parser;
 use PhpParser\NodeVisitor;
 use PhpParser\NodeFinder;
 use App\Models\CodeAnalysis;
+use App\Models\ParsedItem;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
@@ -81,21 +82,19 @@ class ParserService
      *
      * @param string          $filePath
      * @param NodeVisitor[]   $visitors  Additional visitors you want to run on this parse.
+     * @param int|null        $parsedItemId The ID of the ParsedItem to associate with CodeAnalysis.
      * @return array          The raw AST array returned by PhpParser (not the visitors' data).
      *
      * @throws \PhpParser\Error|\Exception
      */
-    public function parseFile(string $filePath, array $visitors = []): array
+    public function parseFile(string $filePath, array $visitors = [], ?int $parsedItemId = null): array
     {
         $filePath = $this->normalizePath($filePath);
 
-        $existingAnalysis = CodeAnalysis::where('file_path', $filePath)->first();
-        if ($existingAnalysis) {
-            Log::info("Using cached CodeAnalysis AST for file: {$filePath}");
-            return json_decode($existingAnalysis->ast, true) ?? [];
+        // Ensure parsedItemId is provided
+        if (!$parsedItemId) {
+            throw new \Exception("parsedItemId is required to create CodeAnalysis.");
         }
-
-        Log::info("No cached CodeAnalysis AST found for file: {$filePath}");
 
         // Set context for file parsing
         Context::add('file_path', $filePath);
@@ -112,13 +111,16 @@ class ParserService
         // If you have visitors, traverse the AST with them
         if (!empty($visitors)) {
             $traverser = $this->createTraverser($visitors);
-            // The final result from traverse() is often the transformed AST, but we discard in this example.
             $traverser->traverse($ast);
         }
 
+        // Create or update CodeAnalysis with the associated parsed_item_id
         CodeAnalysis::updateOrCreate(
             [ 'file_path' => $filePath ],
-            [ 'ast' => json_encode($ast) ]
+            [
+                'ast' => json_encode($ast),
+                'parsed_item_id' => $parsedItemId,
+            ]
         );
 
         // Remove context after parsing
@@ -165,7 +167,7 @@ class ParserService
     public function getFunctionsFromFile(string $filePath): array
     {
         try {
-            $ast = $this->parseFile($filePath);
+            $ast = $this->parseFile($filePath, parsedItemId: null); // parsedItemId is now required
 
             $nodeFinder = new NodeFinder();
             /** @var Function_[] $functionNodes */

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\File;
 use App\Services\Parsing\ParserService;
 use App\Services\Parsing\FunctionAndClassVisitor;
 use App\Models\ParsedItem;
+use App\Models\CodeAnalysis; // Ensure this model is imported if not already
 
 /**
  * Parses PHP files and outputs discovered classes & functions.
@@ -51,7 +52,6 @@ class ParseFilesCommand extends BaseCodeCommand
 
         $this->info("Found {$phpFiles->count()} files to parse.");
 
-        // We'll parse them all with a single visitor in a loop
         $visitor = new FunctionAndClassVisitor();
         $parsedItems = collect();
 
@@ -63,13 +63,28 @@ class ParseFilesCommand extends BaseCodeCommand
                 $this->info("Parsing file: {$filePath}");
             }
 
-            $visitor->setCurrentFile($filePath);
+            // Create ParsedItem for the file
+            $parsedItem = ParsedItem::updateOrCreate(
+                [
+                    'type'      => 'File',
+                    'name'      => basename($filePath),
+                    'file_path' => $filePath,
+                ],
+                [
+                    'line_number'           => null,
+                    'details'               => [],
+                    'annotations'           => [],
+                    'attributes'            => [],
+                    'fully_qualified_name'  => null,
+                ]
+            );
 
             try {
-                // Provide the visitor each time
-                $this->parserService->parseFile(
+                // Provide the parsedItem ID to associate CodeAnalysis later
+                $ast = $this->parserService->parseFile(
                     filePath: $filePath,
-                    visitors: [$visitor]
+                    visitors: [$visitor],
+                    parsedItemId: $parsedItem->id // Pass the parsed_item_id
                 );
 
                 if ($this->isVerbose()) {
@@ -78,7 +93,6 @@ class ParseFilesCommand extends BaseCodeCommand
             } catch (\Throwable $e) {
                 $this->warn("Could not parse {$filePath}: {$e->getMessage()}");
                 if ($this->isVerbose()) {
-                    // Removed the second argument to prevent TypeError
                     $this->error("Error details: " . $e->getMessage());
                 }
             }
@@ -138,7 +152,7 @@ class ParseFilesCommand extends BaseCodeCommand
         if ($this->isVerbose()) {
             $this->info("Storing parsed items in the database.");
         }
-        $items->each(function ($item) {
+        $items->each(function ($item) use ($parsedItem) { // Associate items with the parsedItem
             ParsedItem::updateOrCreate(
                 [
                     'type'      => $item['type'],
