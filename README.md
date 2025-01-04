@@ -27,3 +27,83 @@ This Laravel-based project leverages **advanced AI** to deliver comprehensive mu
 
 ## Usage TLDR
 
+1. **Set up your `.env` with `OPENAI_API_KEY`, choose model**
+
+    ```bash
+    cp .env.example .env
+    php artisan key:generate
+    ```
+
+2. **Migrate DB**
+
+    ```bash
+    php artisan migrate
+    ```
+
+3. **Set your file/folder scanning in `config/parsing.php`**
+
+    **Start the queue if you want asynchronous passes:**
+
+    ```bash
+    php artisan queue:work
+    ```
+
+4. **Parse code, store results:**
+
+    ```bash
+    php artisan parse:files --output-file=docs/parse_all.json --verbose
+    ```
+
+5. **Analyze code, queue AI passes:**
+
+    ```bash
+    php artisan analyze:files --output-file=docs/analyze_all.json --verbose
+    ```
+
+6. **Process additional passes if needed:**
+
+    ```bash
+    php artisan passes:process --verbose
+    ```
+
+## Features
+
+### Code Parsing and Analysis
+
+...
+
+## Requirements
+
+...
+
+## Installation
+
+...
+
+## Configuration
+
+### AI Service Configuration
+
+...
+
+### Parsing Configuration
+
+...
+
+## Usage
+
+### Artisan Commands
+
+...
+
+## Testing
+
+...
+
+## Contributing
+
+...
+
+## License
+
+...
