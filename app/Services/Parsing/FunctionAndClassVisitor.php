@@ -109,20 +109,6 @@ class FunctionAndClassVisitor extends NodeVisitorAbstract
         }
 
         if ($node instanceof Namespace_) {
-            Log::debug("FunctionAndClassVisitor: Leaving Namespace - " . $this->currentNamespace);
-            $namespace = $node->name ? $node->name->toString() : '';
-            Log::debug("FunctionAndClassVisitor: Current Namespace - " . $namespace);
-            $this->currentNamespace = $namespace;
-        }
-    }
-
-    public function leaveNode(Node $node)
-    {
-        if ($node instanceof Class_) {
-            $this->currentClassName = '';
-        }
-
-        if ($node instanceof Namespace_) {
             $this->currentNamespace = '';
         }
     }
