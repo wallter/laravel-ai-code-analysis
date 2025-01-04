@@ -3,9 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Models\AiResult;
+use App\Models\CodeAnalysis;
 use App\Services\Parsing\ParserService;
 use App\Services\AI\CodeAnalysisService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * AnalyzeCodeCommand extends the shared BaseCodeCommand, providing:
@@ -177,7 +180,7 @@ class AnalyzeCodeCommand extends BaseCodeCommand
 
                     info("File [{$filePath}] analyzed successfully.");
                 } catch (\Throwable $e) {
-                    error("Analysis failed for [{$filePath}]: {$e->getMessage()}", [
+                   Log::error("Analysis failed for [{$filePath}]: {$e->getMessage()}", [
                         'exception' => $e,
                     ]);
                     $this->error("Error analyzing file [{$filePath}]. Check logs for more info.");
@@ -198,7 +201,7 @@ class AnalyzeCodeCommand extends BaseCodeCommand
             return 0;
         } catch (\Throwable $th) {
             DB::rollBack();
-            error("AnalyzeCodeCommand encountered an error.", ['exception' => $th]);
+           Log::error("AnalyzeCodeCommand encountered an error.", ['exception' => $th]);
             $this->error("A fatal error occurred. Check logs for details.");
             return 1;
         }
@@ -242,7 +245,7 @@ class AnalyzeCodeCommand extends BaseCodeCommand
                 'analysisResultsCount' => count($data),
             ]);
         } catch (\Throwable $e) {
-            error("Could not export results to [{$filePath}]: " . $e->getMessage());
+           Log::error("Could not export results to [{$filePath}]: " . $e->getMessage());
             $this->error("Failed to export JSON to [{$filePath}]. See logs for details.");
         }
     }
