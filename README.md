@@ -11,14 +11,13 @@ This Laravel-based project uses **OpenAI’s language models** in tandem with **
 
 By leveraging **queued** AI operations, **token usage** tracking, and other advanced features, developers can **enhance maintainability**, **optimize performance**, and **ensure** cleaner, more efficient code (see `config/ai.php`).
 
-
 ## Table of Contents
 
 - [Laravel AI Code Analysis Project](#laravel-ai-code-analysis-project)
   - [Overview](#overview)
   - [Table of Contents](#table-of-contents)
   - [Usage TLDR;](#usage-tldr)
-    - [Running the UI \& Server](#running-the-ui--server)
+    - [Running the UI & Server](#running-the-ui--server)
   - [Features](#features)
     - [Code Parsing and Analysis](#code-parsing-and-analysis)
     - [Multi-Pass AI Analysis](#multi-pass-ai-analysis)
@@ -31,7 +30,7 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
     - [Parsing Configuration](#parsing-configuration-1)
   - [Usage](#usage)
     - [Artisan Commands](#artisan-commands)
-    - [Token \& Cost Tracking](#token--cost-tracking)
+    - [Token & Cost Tracking](#token--cost-tracking)
     - [Queued Analysis](#queued-analysis)
     - [Testing](#testing)
   - [Testing](#testing-1)
@@ -40,6 +39,7 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
     - [Documentation Generation](#documentation-generation)
   - [Contributing](#contributing)
   - [License](#license)
+  - [Author](#author)
 
 ## Usage TLDR;
 ```bash
@@ -102,7 +102,7 @@ The server will start at [http://localhost:8000](http://localhost:8000) by defau
   - **`parse:files`:** Parses configured files/directories to list discovered classes and functions.
   - **`code:analyze`:** Analyzes PHP files, gathers AST data, and applies AI-driven multi-pass analysis.
   - **`passes:process`:** Processes AI analysis passes with options for dry-run and verbosity.
-  
+    
     - (experimental) **`generate:tests`:** Generates PHPUnit test skeletons for discovered classes and methods.
     - Database utilities:
       - **`db:backup`:** Backs up the SQLite database.
@@ -135,7 +135,7 @@ The server will start at [http://localhost:8000](http://localhost:8000) by defau
 2. **Install Dependencies**
 
    ```bash
-   composer install
+       composer install
    ```
 
 3. **Set Up Environment Variables**
@@ -415,3 +415,10 @@ Contributions are welcome! Please follow these steps to contribute:
 This project is open-sourced software licensed under the [Apache License 2.0](https://github.com/IQAndreas/markdown-licenses/blob/master/apache-v2.0.md).
 
 You may use, modify, and distribute this software under the terms of the Apache License. For more details, see the [LICENSE](LICENSE) file included in this repository.
+
+## Author
+
+**Tyler Wall**
+
+Created the Laravel AI Code Analysis Project to enhance code maintainability and performance through AI-driven insights.
+
