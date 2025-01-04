@@ -133,7 +133,7 @@ class CodeAnalysisService
     // parseFile is your ParserService method that runs the AST parse
     public function analyzeAst(string $filePath, int $limitMethod): array
     {
-        $ast = $this->parserService->parseFile($filePath);
+        $ast = $this->parserService->parseFile($filePath, [], $codeAnalysis->parsed_item_id);
         if (empty($ast)) {
             return [];
         }
