@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class AddParsedItemIdToCodeAnalysesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,18 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('code_analyses', function (Blueprint $table) {
-            $table->id();
-            $table->string('file_path')->unique();
+        Schema::table('code_analyses', function (Blueprint $table) {
             $table->foreignId('parsed_item_id')
+                  ->after('file_path')
                   ->constrained('parsed_items')
                   ->onDelete('cascade');
-            $table->json('ast');
-            $table->json('analysis');
-            $table->text('ai_output')->nullable();
-            $table->integer('current_pass')->default(0);
-            $table->json('completed_passes')->nullable();
-            $table->timestamps();
         });
     }
 
@@ -35,6 +28,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('code_analyses');
+        Schema::table('code_analyses', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('parsed_item_id');
+        });
     }
-};
+}

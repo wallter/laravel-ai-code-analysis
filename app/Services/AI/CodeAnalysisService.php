@@ -22,6 +22,12 @@ use Exception;
  */
 class CodeAnalysisService
 {
+    /**
+     * Constructor now expects OpenAIService first, then ParserService.
+     *
+     * @param OpenAIService $openAIService
+     * @param ParserService $parserService
+     */
     public function __construct(
         protected OpenAIService  $openAIService,
         protected ParserService  $parserService

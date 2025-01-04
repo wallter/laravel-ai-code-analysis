@@ -37,8 +37,22 @@ class ParsedItem extends Model
     /**
      * Define the relationship to AiResult.
      */
+
+    /**
+     * Define the one-to-one relationship with CodeAnalysis.
+     */
     public function aiResult()
     {
         return $this->hasOne(AiResult::class);
+    }
+
+    /**
+     * Define the one-to-one relationship with CodeAnalysis.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function codeAnalysis()
+    {
+        return $this->hasOne(CodeAnalysis::class);
     }
 }
