@@ -82,7 +82,7 @@ class ParseFilesCommand extends BaseCodeCommand
                         useCache: false
                     );
 
-                    Log::debug("ParseFilesCommand: Parsed file '{$filePath}'. Total collected items: " . $visitor->getItems());
+                    // Log::debug("ParseFilesCommand: Parsed file '{$filePath}'. Total collected items: " . $visitor->getItems());
 
                     if ($this->isVerbose()) {
                         $this->info("Successfully parsed: {$filePath}");

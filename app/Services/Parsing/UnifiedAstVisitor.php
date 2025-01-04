@@ -11,10 +11,7 @@ use PhpParser\Node\Stmt\Namespace_;
 use Illuminate\Support\Collection;
 
 /**
- * UnifiedAstVisitor
- *  - Collects classes (and methods) + free-floating functions
- *  - Extracts docblock short descriptions & annotations (e.g. @url).
- *  - Minimizes duplication by doing it all in one pass.
+ * Gathers classes (with methods) and free-floating functions in a single pass.
  */
 class UnifiedAstVisitor extends NodeVisitorAbstract
 {
@@ -45,36 +42,34 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
             $docInfo    = $this->extractDocInfo($node);
             $methods    = $this->collectMethods($node);
 
-            $item = [
-                'type'      => 'Class',
-                'name'      => $className,
-                'namespace' => $this->currentNamespace,
-                'annotations' => $docInfo['annotations'],
-                'description' => $docInfo['shortDescription'],
-                'details'   => [
-                    'methods' => $methods,
-                ],
-                'file'      => $this->currentFile,
-                'line'      => $node->getStartLine(),
-            ];
-            $this->items->push($item);
+            $this->items->push([
+                'type'       => 'Class',
+                'name'       => $className,
+                'namespace'  => $this->currentNamespace,
+                'annotations'=> $docInfo['annotations'],
+                'description'=> $docInfo['shortDescription'],
+                'details'    => ['methods' => $methods],
+                'file'       => $this->currentFile,
+                'line'       => $node->getStartLine(),
+            ]);
         }
 
-        // Collect free-floating functions (not in a class)
+        // Collect free-floating functions
         if ($node instanceof Function_) {
             $docInfo = $this->extractDocInfo($node);
-            $item = [
-                'type'    => 'Function',
-                'name'    => $node->name->name,
-                'annotations' => $docInfo['annotations'],
-                'details' => [
-                    'params'       => $this->collectFunctionParams($node),
-                    'description'  => $docInfo['shortDescription'],
+            $params  = $this->collectFunctionParams($node);
+            
+            $this->items->push([
+                'type'       => 'Function',
+                'name'       => $node->name->name,
+                'annotations'=> $docInfo['annotations'],
+                'details'    => [
+                    'params'      => $params,
+                    'description' => $docInfo['shortDescription'],
                 ],
-                'file'    => $this->currentFile,
-                'line'    => $node->getStartLine(),
-            ];
-            $this->items->push($item);
+                'file'       => $this->currentFile,
+                'line'       => $node->getStartLine(),
+            ]);
         }
     }
 
@@ -94,34 +89,27 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
     // PRIVATE/PROTECTED HELPER METHODS
     // -----------------------------------------------------
 
-    /**
-     * Extract docblock info (short description, annotations) for any Node with a doc comment.
-     */
     protected function extractDocInfo(Node $node): array
     {
         $docComment = $node->getDocComment();
         if (!$docComment) {
-            return [
-                'shortDescription' => '',
-                'annotations'      => [],
-            ];
+            return ['shortDescription' => '', 'annotations' => []];
         }
+        // Example: parse docblock if desired
         return DocblockParser::parseDocblock($docComment->getText());
     }
 
-    /**
-     * Collect method info from a ClassLike node.
-     */
     protected function collectMethods(ClassLike $node): array
     {
         $methods = [];
         foreach ($node->getMethods() as $method) {
-            $mDoc  = $this->extractDocInfo($method);
+            $mDoc   = $this->extractDocInfo($method);
+            $params = $this->collectMethodParams($method);
             $methods[] = [
                 'name'        => $method->name->name,
                 'description' => $mDoc['shortDescription'],
                 'annotations' => $mDoc['annotations'],
-                'params'      => $this->collectMethodParams($method),
+                'params'      => $params,
                 'line'        => $method->getStartLine(),
             ];
         }
@@ -132,11 +120,9 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
     {
         $params = [];
         foreach ($method->params as $p) {
-            $pName = '$' . $p->var->name;
-            $pType = $p->type ? $this->typeToString($p->type) : 'mixed';
             $params[] = [
-                'name' => $pName,
-                'type' => $pType,
+                'name' => '$'.$p->var->name,
+                'type' => $p->type ? $this->typeToString($p->type) : 'mixed',
             ];
         }
         return $params;
@@ -146,33 +132,25 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
     {
         $params = [];
         foreach ($function->params as $p) {
-            $pName = '$' . $p->var->name;
-            $pType = $p->type ? $this->typeToString($p->type) : 'mixed';
             $params[] = [
-                'name' => $pName,
-                'type' => $pType,
+                'name' => '$'.$p->var->name,
+                'type' => $p->type ? $this->typeToString($p->type) : 'mixed',
             ];
         }
         return $params;
     }
 
-    /**
-     * Convert type nodes (nullable, union, or simple) to strings.
-     */
     protected function typeToString($typeNode): string
     {
         if ($typeNode instanceof Node\Identifier) {
             return $typeNode->name;
-        }
-        if ($typeNode instanceof Node\NullableType) {
+        } elseif ($typeNode instanceof Node\NullableType) {
             return '?' . $this->typeToString($typeNode->type);
-        }
-        if ($typeNode instanceof Node\UnionType) {
+        } elseif ($typeNode instanceof Node\UnionType) {
             return implode('|', array_map([$this, 'typeToString'], $typeNode->types));
-        }
-        if ($typeNode instanceof Node\Name) {
+        } elseif ($typeNode instanceof Node\Name) {
             return $typeNode->toString();
-        }
+        } 
         return 'mixed';
     }
 }
