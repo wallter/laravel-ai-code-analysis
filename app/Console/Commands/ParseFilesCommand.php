@@ -71,7 +71,7 @@ class ParseFilesCommand extends BaseCodeCommand
                     'file_path' => $filePath,
                 ],
                 [
-                    'line_number'           => null,
+                    'line_number'           => 0, // Changed from null to 0
                     'details'               => [],
                     'annotations'           => [],
                     'attributes'            => [],
@@ -160,7 +160,7 @@ class ParseFilesCommand extends BaseCodeCommand
                     'file_path' => $item['file'],
                 ],
                 [
-                    'line_number'           => $item['line'] ?? null,
+                    'line_number'           => $item['line'] ?? 0, // Changed from null to 0
                     'details'               => $item['details'] ?? [],
                     'annotations'           => $item['annotations'] ?? [],
                     'attributes'            => $item['attributes'] ?? [],
