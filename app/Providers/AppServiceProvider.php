@@ -29,9 +29,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(AiderUpgradeCommand::class, function ($app) {
             return new AiderUpgradeCommand();
         });
-    $this->app->singleton(AiderService::class, function ($app) {
-        return new AiderService();
-    });
+        $this->app->singleton(AiderService::class, function ($app) {
+            return new AiderService();
+        });
 
     public function boot(): void
     {
