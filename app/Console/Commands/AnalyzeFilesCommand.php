@@ -26,7 +26,14 @@ class AnalyzeFilesCommand extends FilesCommand
         parent::__construct();
     }
 
-    protected function executeCommand(): int
+    /**
+     * Execute the console command.
+     *
+     * Processes AI passes for CodeAnalysis records, handling both dry-run and actual execution modes.
+     *
+     * @return int Exit status code.
+     */
+    public function handle(): int
     {
         $outputFile = $this->getOutputFile();
         $dryRun     = (bool) $this->option('dry-run');
