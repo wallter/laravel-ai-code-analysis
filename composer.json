@@ -32,7 +32,7 @@
         "driftingly/rector-laravel": "^2.0",
         "fakerphp/faker": "^1.23",
         "laravel/pail": "^1.1",
-        "laravel/pint": "^1.13",
+        "laravel/pint": "^1.19",
         "laravel/sail": "^1.26",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.1",
@@ -54,6 +54,8 @@
         "app": "./run_all_commands.sh",
         "rector": "vendor/bin/rector -c rector.php",
         "phpdoc": "docker run --rm -v $(pwd):/data phpdoc/phpdoc:3 && open resources/phpdoc/index.html",
+        "pint": "/vendor/bin/pint --repair",
+        "lint": "composer run pint && composer run phpdoc",
 
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

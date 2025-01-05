@@ -11,6 +11,7 @@
 3. Documentation
    - Provide short phpdoc blocks (brief descriptions, tags).
    - Explain the "why" rather than the "what" in comments.
+   - Inline comments should be reduced in favor of more descriptive method names or breaking down complex logic into smaller methods.
    - Keep READMEs in directories/namespaces for key concepts.
 
 4. Testing

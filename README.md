@@ -45,6 +45,9 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
 
 ## Usage TLDR;
 ```bash
+composer install
+npm install
+
 # 1) Set up your .env with OPENAI_API_KEY, choose model
 cp .env.example .env
 php artisan key:generate
@@ -138,6 +141,7 @@ The server will start at [http://localhost:8000](http://localhost:8000) by defau
 
    ```bash
        composer install
+       npm install
    ```
 
 3. **Set Up Environment Variables**

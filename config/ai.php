@@ -25,10 +25,11 @@ return [
             'model'         => 'gpt-4o-mini',
             'max_tokens'    => 1000,
             'temperature'   => 0.3,
-            'system_message' => 'You generate concise PHP documentation from code and AST.',
+            'system_message' => 'You generate concise PHP documentation from code and AST to compliment phpdoc documentation.',
             'prompt'        => implode("\n", [
                 "Create short but clear docs from the AST data + raw code:",
                 "- Summarize the purpose, methods, parameters, usage context.",
+                "- Avoid documenting __construct/getter/setter/etc functions.",
                 "Mention custom annotations, like @url.",
                 "Limit to ~200 words max."
             ]),
