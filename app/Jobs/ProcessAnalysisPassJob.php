@@ -6,7 +6,7 @@ use App\Models\AIResult;
 use App\Models\AIScore;
 use App\Models\CodeAnalysis;
 use App\Services\AI\OpenAIService;
-use App\Services\AI\AiderService;
+use App\Services\AI\AiderServiceInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -31,7 +31,7 @@ class ProcessAnalysisPassJob implements ShouldQueue
         protected string $passName,
         protected bool $dryRun = false
     ) {
-        $this->aiderService = app(AiderService::class);
+        $this->aiderService = app(AiderServiceInterface::class);
         // You could store pass config or other data here if needed
     }
 

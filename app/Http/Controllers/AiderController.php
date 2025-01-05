@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Services\AI\AiderService;
+use App\Services\AI\AiderServiceInterface;
 
 class AiderController extends Controller
 {
-    public function __construct(protected AiderService $aiderService)
+    public function __construct(protected AiderServiceInterface $aiderService)
     {
         //
     }

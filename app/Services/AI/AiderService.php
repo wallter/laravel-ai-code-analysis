@@ -5,7 +5,7 @@ namespace App\Services\AI;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class AiderService
+class AiderService implements AiderServiceInterface
 {
     protected string $apiKey;
     protected string $endpoint;
