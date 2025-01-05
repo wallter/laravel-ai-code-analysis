@@ -130,7 +130,7 @@ class ProcessAnalysisPassJob extends Command
                     $this->comment("[DRY-RUN] => Would have completed passes for [{$analysis->file_path}]: " 
                         . implode(', ', $completeList));
                 } else {
-                    $this->info("Passes now completed for [{$analysis->file_path}]: " 
+                    $this->option('verbose') && $this->info("Passes now completed for [{$analysis->file_path}]: " 
                         . implode(', ', $completeList));
                     Log::info("Completed passes => " . json_encode($completeList));
                 }
