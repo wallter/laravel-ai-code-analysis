@@ -1,7 +1,7 @@
 # Laravel AI Code Analysis Project
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue?style=for-the-badge)](LICENSE)
-[![GitHub](https://img.shields.io/badge/GitHub-wallter-black?style=for-the-badge&logo=github&logoColor=white)](https://github.com/wallter)
+[![GitHub](https://img.shields.io/badge/Author-wallter-black?style=for-the-badge&logo=github&logoColor=white)](https://github.com/wallter)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Tyler.R.Wall-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/tylerrwall/)
 
 ## Overview

@@ -48,7 +48,7 @@
             <th class="px-4 py-2 text-sm font-semibold">Actions</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+        <tbody class="active-first-view divide-y divide-gray-200 dark:divide-gray-700 text-sm">
           @foreach ($analyses as $analysis)
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
               <td class="px-4 py-2">

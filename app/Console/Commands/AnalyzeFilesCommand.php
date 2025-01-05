@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Services\AI\CodeAnalysisService;
-use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Throwable;

@@ -60,7 +60,44 @@
             margin-top: 2rem;
             margin-bottom: 2rem;
          }
+
+         .prose :where(pre) {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #111; /* Dark background to enhance glow visibility */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .glow-container {
+            padding: 2em;
+            border-radius: 1em;
+            background: #222; 
+            color: white;
+            text-align: center;
+            box-shadow: 
+                0 0 20px rgba(255, 255, 255, 0.2),    /* Outer light glow */
+                inset 0 0 20px rgba(255, 255, 255, 0.1); /* Subtle inner glow */
+
+            animation: glowPulse 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glowPulse {
+            0% {
+                box-shadow: 
+                    0 0 20px rgba(255, 255, 255, 0.2),
+                    inset 0 0 20px rgba(255, 255, 255, 0.1);
+            }
+            100% {
+                box-shadow: 
+                    0 0 60px rgba(255, 255, 255, 0.7),
+                    inset 0 0 30px rgba(255, 255, 255, 0.2);
+            }
+        }
     </style>
+    
 </head>
 
 <!-- 

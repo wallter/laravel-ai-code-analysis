@@ -21,6 +21,14 @@
             href="{{ route('analysis.index') }}"
             class="inline-block bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 
                    text-gray-700 dark:text-gray-200 px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 
+                   transition-colors sm:hidden"
+        >
+            &larr; Back
+        </a>
+        <a 
+            href="{{ route('analysis.index') }}"
+            class="hidden sm:inline-block bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 
+                   text-gray-700 dark:text-gray-200 px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 
                    transition-colors"
         >
             &larr; Back to List
