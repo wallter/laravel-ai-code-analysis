@@ -40,12 +40,5 @@ class AppServiceProvider extends ServiceProvider
                 AiderUpgradeCommand::class,
             ]);
         }
-
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        //
     }
 }
