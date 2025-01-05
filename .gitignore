@@ -29,3 +29,6 @@ resources/access-app
 
 # json log output
 docs/*.json
+
+# phpdoc
+/build

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<phpdoc>    
+<phpdoc>
+    <title>Laravel AI Code Analysis by Tyler Wall</title>
+    
     <files>
         <directory>app</directory>
         <directory>database</directory>
@@ -8,8 +10,4 @@
         <directory>tests</directory>
         <directory>config</directory>
     </files>
-    
-    <templates>
-        <template name="clean" engine="cleanhtml" output="docs/html" />
-    </templates>
 </phpdoc>
