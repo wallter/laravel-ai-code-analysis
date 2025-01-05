@@ -9,6 +9,7 @@ return [
         'max_tokens' => env('AI_DEFAULT_MAX_TOKENS', 500),
         'temperature' => env('AI_DEFAULT_TEMPERATURE', 0.5),
         'system_message' => 'You are a helpful AI assistant.',
+    ],
 
     /*
     |--------------------------------------------------------------------------
