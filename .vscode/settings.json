@@ -1,51 +1,65 @@
 {
-    /** terminal settings **/
+    /** Terminal Settings **/
     "terminal.integrated.defaultProfile.osx": "zsh",
     "terminal.integrated.fontFamily": "monospace",
 
     /** AI Colored/Themed Green **/
     "workbench.colorCustomizations": {
-        "debugToolBar.background": "#1e4d2b",  // Dark green for the debug toolbar background
-        "editor.stackFrameHighlightBackground": "#1e4d2b",  // Dark green highlight for stack frames in the editor
-        "titleBar.activeBackground": "#234d36",  // Primary dark green for the active title bar background
-        "titleBar.activeForeground": "#e0f2e9",  // Light green for text on the active title bar
+        // Debug Toolbar
+        "debugToolBar.background": "#1e4d2b", // Dark green for the debug toolbar background
+
+        // Editor
+        "editor.stackFrameHighlightBackground": "#1e4d2b", // Dark green highlight for stack frames in the editor
+
+        // Title Bar
+        "titleBar.activeBackground": "#234d36", // Primary dark green for the active title bar background
+        "titleBar.activeForeground": "#e0f2e9", // Light green for text on the active title bar
         "titleBar.inactiveBackground": "#1c4030", // Slightly darker green for the inactive title bar background
         "titleBar.inactiveForeground": "#e0f2e9", // Light green for text on the inactive title bar
-        "titleBar.border": "#234d36",  // Primary dark green for the title bar border
-        "activityBar.background": "#234d36",  // Primary dark green for the activity bar background
-        "activityBar.foreground": "#d1e8d1",  // Light green for icons/text on the activity bar
-        "activityBar.inactiveForeground": "#a3c9a3", // Slightly darker green for inactive icons to match the active color
+        "titleBar.border": "#234d36", // Primary dark green for the title bar border
+
+        // Activity Bar
+        "activityBar.background": "#234d36", // Primary dark green for the activity bar background
+        "activityBar.foreground": "#d1e8d1", // Light green for icons/text on the activity bar
+        "activityBar.inactiveForeground": "#a3c9a3", // Slightly darker green for inactive icons
         "activityBar.inactiveBackground": "#1c403099", // Slightly transparent darker green for inactive activity bar background
-        "activityBar.border": "#234d36",  // Primary dark green for the activity bar border
-        "activityBarBadge.background": "#4caf50",  // Green color for the activity bar badge background
-        "activityBarBadge.foreground": "#e0f2e9",  // Light green for text on the activity bar badge
-        "activityBar.activeBorder": "#4caf50",  // Green color for the active border on the activity bar
-        "statusBar.background": "#234d36",  // Primary dark green for the status bar background
-        "statusBar.foreground": "#e0f2e9",  // Light green for text on the status bar
-        "statusBar.noFolderBackground": "#234d36", // Primary dark green for status bar when no folder is open
-        "statusBar.noFolderForeground": "#e0f2e9", // Light green for text on the status bar when no folder is open
-        "statusBarItem.remoteBackground": "#388e3c",  // Darker green for remote status bar item background
-        "statusBarItem.remoteForeground": "#e0f2e9",  // Light green for text on remote status bar item
-        "statusBar.border": "#234d36",  // Primary dark green for the status bar border
-        "button.background": "#4caf50",  // Green color for primary action buttons
-        "button.foreground": "#e0f2e9",  // Light green for text on primary action buttons
-        "button.hoverBackground": "#388e3c",  // Darker green for the hover effect on buttons
-        "window.titleBarStyle": "native"  // Use the native title bar style
+        "activityBar.border": "#234d36", // Primary dark green for the activity bar border
+        "activityBarBadge.background": "#4caf50", // Green for activity bar badge background
+        "activityBarBadge.foreground": "#e0f2e9", // Light green for activity bar badge text
+        "activityBar.activeBorder": "#4caf50", // Green for active border on the activity bar
+
+        // Status Bar
+        "statusBar.background": "#234d36", // Primary dark green for the status bar background
+        "statusBar.foreground": "#e0f2e9", // Light green for text on the status bar
+        "statusBar.noFolderBackground": "#234d36", // Dark green when no folder is open
+        "statusBar.noFolderForeground": "#e0f2e9", // Light green text when no folder is open
+        "statusBarItem.remoteBackground": "#388e3c", // Darker green for remote status bar items
+        "statusBarItem.remoteForeground": "#e0f2e9", // Light green for remote status bar item text
+        "statusBar.border": "#234d36", // Primary dark green for the status bar border
+
+        // Buttons
+        "button.background": "#4caf50", // Green for primary action buttons
+        "button.foreground": "#e0f2e9", // Light green for button text
+        "button.hoverBackground": "#388e3c", // Darker green for button hover effect
+
+        // Window
+        "window.titleBarStyle": "native" // Use the native title bar style
     },
 
+    // Window Title Configuration
     "window.title": "${activeFolderShort}/${activeEditorShort}${separator}${remoteName}",
     "window.titleSeparator": " - ",
 
-    /** PHP-CS-FIXER settings **/
+    /** PHP-CS-FIXER Settings **/
 
     // Set PHP CS Fixer as the default formatter for PHP files
-    // It will avoid conflict with other formatters like prettier etc.
+    // This avoids conflicts with other formatters like Prettier
     "[php]": {
         "editor.defaultFormatter": "junstyle.php-cs-fixer",
         "editor.formatOnSave": true
     },
 
-    // extension settings
+    // PHP-CS-FIXER Extension Settings
     "php-cs-fixer.executablePath": "${workspaceFolder}/php-cs-fixer.phar",
     "php-cs-fixer.onsave": true,
     "php-cs-fixer.config": ".php-cs-fixer.php"
