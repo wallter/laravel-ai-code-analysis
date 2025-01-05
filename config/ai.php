@@ -10,10 +10,37 @@ return [
         'temperature' => env('AI_DEFAULT_TEMPERATURE', 0.5),
         'system_message' => 'You are a helpful AI assistant.',
 
-    'passes' => [
+    /*
+    |--------------------------------------------------------------------------
+    | OpenAI Models Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Define each OpenAI model with its specific configurations. This allows for
+    | assigning different models to various AI passes based on their strengths.
+    |
+    */
+    'models' => [
+        'gpt-4' => [
+            'model_name' => env('OPENAI_MODEL_GPT4', 'gpt-4'),
+            'max_tokens' => env('OPENAI_MODEL_GPT4_MAX_TOKENS', 2000),
+            'temperature' => env('OPENAI_MODEL_GPT4_TEMPERATURE', 0.3),
+        ],
+
+        'gpt-3.5-turbo' => [
+            'model_name' => env('OPENAI_MODEL_GPT35_TURBO', 'gpt-3.5-turbo'),
+            'max_tokens' => env('OPENAI_MODEL_GPT35_TURBO_MAX_TOKENS', 1500),
+            'temperature' => env('OPENAI_MODEL_GPT35_TURBO_TEMPERATURE', 0.4),
+        ],
+
+        'code-davinci-002' => [
+            'model_name' => env('OPENAI_MODEL_CODE_DAVINCI_002', 'code-davinci-002'),
+            'max_tokens' => env('OPENAI_MODEL_CODE_DAVINCI_002_MAX_TOKENS', 2500),
+            'temperature' => env('OPENAI_MODEL_CODE_DAVINCI_002_TEMPERATURE', 0.2),
+        ],
+    ],
         'doc_generation' => [
             'operation_identifier' => 'doc_generation',
-            'model' => env('AI_DOC_GENERATION_MODEL', 'gpt-4o-mini'),
+            'model' => 'code-davinci-002', // Referencing the model key
             'max_tokens' => env('AI_DOC_GENERATION_MAX_TOKENS', 1200),
             'temperature' => env('AI_DOC_GENERATION_TEMPERATURE', 0.25),
             'type' => 'both',
@@ -30,7 +57,7 @@ return [
 
         'functional_analysis' => [
             'operation_identifier' => 'functional_analysis',
-            'model' => env('AI_FUNCTIONAL_ANALYSIS_MODEL', 'gpt-4o-mini'),
+            'model' => 'gpt-4', // Referencing the model key
             'max_tokens' => env('AI_FUNCTIONAL_ANALYSIS_MAX_TOKENS', 2500),
             'temperature' => env('AI_FUNCTIONAL_ANALYSIS_TEMPERATURE', 0.65),
             'type' => 'both',
@@ -43,7 +70,7 @@ return [
 
         'style_convention' => [
             'operation_identifier' => 'style_convention',
-            'model' => env('AI_STYLE_CONVENTION_MODEL', 'gpt-4o-mini'),
+            'model' => 'gpt-3.5-turbo', // Referencing the model key
             'max_tokens' => env('AI_STYLE_CONVENTION_MAX_TOKENS', 1800),
             'temperature' => env('AI_STYLE_CONVENTION_TEMPERATURE', 0.28),
             'type' => 'raw',
@@ -56,7 +83,7 @@ return [
 
         'consolidation_pass' => [
             'operation_identifier' => 'consolidation_pass',
-            'model' => env('AI_CONSOLIDATION_PASS_MODEL', 'gpt-4o-mini'),
+            'model' => 'gpt-4', // Referencing the model key
             'max_tokens' => env('AI_CONSOLIDATION_PASS_MAX_TOKENS', 2500),
             'temperature' => env('AI_CONSOLIDATION_PASS_TEMPERATURE', 0.4),
             'type' => 'previous',
@@ -70,7 +97,7 @@ return [
 
         'scoring_pass' => [
             'operation_identifier' => 'scoring',
-            'model' => env('AI_SCORING_PASS_MODEL', 'gpt-4o-mini'),
+            'model' => 'gpt-4', // Referencing the model key
             'max_tokens' => env('AI_SCORING_PASS_MAX_TOKENS', 500),
             'temperature' => env('AI_SCORING_PASS_TEMPERATURE', 0.3),
             'type' => 'previous',
