@@ -31,6 +31,16 @@ class CodeAnalysis extends Model
         return $this->hasMany(AIResult::class);
     }
 
+    /**
+     * Get the AI scores associated with this code analysis.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function aiScores()
+    {
+        return $this->hasMany(AIScore::class);
+    }
+
     protected function casts(): array
     {
         return [
