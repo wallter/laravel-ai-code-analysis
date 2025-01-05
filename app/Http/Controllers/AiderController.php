@@ -4,34 +4,24 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
+use App\Services\AI\AiderService;
 
 class AiderController extends Controller
 {
-    /**
-     * Handle a request to interact with Aider.
-     *
-     * @param  Request  $request
-     * @return \Illuminate\Http\Response
-     */
+    public function __construct(protected AiderService $aiderService)
+    {
+        //
+    }
     public function interact(Request $request)
     {
         $data = $request->all();
 
-        // Send data to Aider API
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . config('services.aider.api_key'),
-            'Accept' => 'application/json',
-        ])->post(config('services.aider.endpoint') . '/interact', [
-            'data' => $data,
-        ]);
-
-        if ($response->failed()) {
-            Log::error('AiderController: Aider API request failed.', ['response' => $response->body()]);
-            return response()->json(['error' => 'Aider API request failed.'], 500);
+        try {
+            $result = $this->aiderService->interact($data);
+        } catch (\Exception $e) {
+            Log::error('AiderController: Interaction with Aider failed.', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Aider interaction failed.'], 500);
         }
-
-        $result = $response->json();
 
         return response()->json(['result' => $result]);
     }

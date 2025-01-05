@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\AI\CodeAnalysisService;
+use App\Services\AI\AiderService;
 use App\Services\AI\OpenAIService;
 use App\Services\Parsing\ParserService;
 use App\Console\Commands\AiderUpgradeCommand;
@@ -28,7 +29,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(AiderUpgradeCommand::class, function ($app) {
             return new AiderUpgradeCommand();
         });
-    }
+    $this->app->singleton(AiderService::class, function ($app) {
+        return new AiderService();
+    });
 
     public function boot(): void
     {
