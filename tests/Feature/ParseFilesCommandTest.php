@@ -19,7 +19,7 @@ class ParseFilesCommandTest extends TestCase
         $testFilePath = base_path('app/Services/Parsing/ParserService.php');
 
         // When: we mock the config and run the parse:files command
-        Config::set('parsing.files', [$testFilePath]);
+        Config::set('services.parsing.files', [$testFilePath]);
         Artisan::call('parse:files');
 
         // Then: the parsed_items table should have at least one row

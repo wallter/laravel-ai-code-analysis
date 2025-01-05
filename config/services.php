@@ -7,10 +7,8 @@ return [
     | Third Party Services
     |--------------------------------------------------------------------------
     |
-    | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
+    | This file is for storing the credentials for third party services.
+    | It provides a conventional location for this type of information.
     |
     */
 
@@ -41,8 +39,13 @@ return [
         'temperature' => env('OPENAI_TEMPERATURE', 0.2),
         'max_tokens' => env('OPENAI_MAX_TOKENS', 1024),
     ],
+
     'aider' => [
         'api_key' => env('AIDER_API_KEY'),
         'endpoint' => env('AIDER_ENDPOINT', 'https://api.aider.com'),
+    ],
+
+    'parsing' => [
+        'files' => [],
     ],
 ];
