@@ -48,19 +48,5 @@
 
     // Window Title Configuration
     "window.title": "${activeFolderShort}/${activeEditorShort}${separator}${remoteName}",
-    "window.titleSeparator": " - ",
-
-    /** PHP-CS-FIXER Settings **/
-
-    // Set PHP CS Fixer as the default formatter for PHP files
-    // This avoids conflicts with other formatters like Prettier
-    "[php]": {
-        "editor.defaultFormatter": "junstyle.php-cs-fixer",
-        "editor.formatOnSave": true
-    },
-
-    // PHP-CS-FIXER Extension Settings
-    "php-cs-fixer.executablePath": "${workspaceFolder}/php-cs-fixer.phar",
-    "php-cs-fixer.onsave": true,
-    "php-cs-fixer.config": ".php-cs-fixer.php"
+    "window.titleSeparator": " - "
 }
