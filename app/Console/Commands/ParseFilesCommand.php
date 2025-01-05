@@ -82,7 +82,7 @@ class ParseFilesCommand extends Command
         // Apply optional method limit
         if ($limitMethod > 0) {
             $collectedItems = $collectedItems->map(function ($item) use ($limitMethod) {
-                if (in_array($item->type, ['Class','Trait','Interface'], true) && !empty($item->details['methods'])) {
+                if (property_exists($item, 'type') && in_array($item->type, ['Class','Trait','Interface'], true) && !empty($item->details['methods'])) {
                     $item->details['methods'] = array_slice($item->details['methods'], 0, $limitMethod);
                 }
                 return $item;
@@ -121,25 +121,25 @@ class ParseFilesCommand extends Command
 
     protected function displayTable(Collection $items)
     {
-        $this->table(
-            ['Type', 'Name', 'Methods/Params', 'File', 'Line'],
-            $items->map(function ($item) {
-                if (in_array($item->type, ['Class','Trait','Interface'], true)) {
-                    // Show methods
-                    $methodsStr = collect($item->details['methods'] ?? [])
-                        ->pluck('name')
-                        ->implode(', ');
-                    return [
-                        $item->type,
-                        $item->name,
-                        $methodsStr,
-                        $item->file,
-                        $item->line,
-                    ];
-                }
+        $tableData = $items->map(function ($item) {
+            if (property_exists($item, 'type') && in_array($item->type, ['Class','Trait','Interface'], true)) {
+                // Show methods
+                $methodsStr = collect($item->details['methods'] ?? [])
+                    ->pluck('name')
+                    ->implode(', ');
+                return [
+                    $item->type,
+                    $item->name,
+                    $methodsStr,
+                    $item->file,
+                    $item->line,
+                ];
+            }
+
+            if (property_exists($item, 'type') && in_array($item->type, ['Function'], true)) {
                 // Show function params
                 $paramsStr = collect($item->details['params'] ?? [])
-                    ->map(fn($p) => $p['type'].' '.$p['name'])
+                    ->map(fn($p) => ($p['type'] ?? 'mixed'). ' ' . $p['name'])
                     ->implode(', ');
                 return [
                     $item->type,
@@ -148,7 +148,23 @@ class ParseFilesCommand extends Command
                     $item->file,
                     $item->line,
                 ];
-            })->toArray()
+            }
+
+            // Handle items without 'type'
+            return [
+                'Unknown',
+                $item->name ?? 'N/A',
+                'N/A',
+                $item->file ?? 'N/A',
+                $item->line ?? 'N/A',
+            ];
+        })->filter(function ($row) {
+            return $row[0] !== 'Unknown'; // Optionally skip unknown items
+        })->toArray();
+
+        $this->table(
+            ['Type', 'Name', 'Methods/Params', 'File', 'Line'],
+            $tableData
         );
     }
 }
