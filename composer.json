@@ -51,7 +51,8 @@
         }
     },
     "scripts": {
-        "rector": "vendor/bin/rector process",
+        "rector": "vendor/bin/rector -c phpdoc.xml",
+        "phpDocumentor": "php phpDocumentor.phar run -d . -t docs/api",
 
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

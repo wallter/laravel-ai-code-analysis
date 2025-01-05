@@ -1,5 +1,8 @@
 # Laravel AI Code Analysis Project
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue?style=for-the-badge)](LICENSE)
+[![GitHub](https://img.shields.io/badge/GitHub-wallter-black?style=for-the-badge&logo=github&logoColor=white)](https://github.com/wallter)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Tyler%20R.%20Wall-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/tylerrwall/)
 
 ## Overview
 
@@ -17,7 +20,7 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
   - [Overview](#overview)
   - [Table of Contents](#table-of-contents)
   - [Usage TLDR;](#usage-tldr)
-    - [Running the UI & Server](#running-the-ui--server)
+    - [Running the UI \& Server](#running-the-ui--server)
   - [Features](#features)
     - [Code Parsing and Analysis](#code-parsing-and-analysis)
     - [Multi-Pass AI Analysis](#multi-pass-ai-analysis)
@@ -30,7 +33,7 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
     - [Parsing Configuration](#parsing-configuration-1)
   - [Usage](#usage)
     - [Artisan Commands](#artisan-commands)
-    - [Token & Cost Tracking](#token--cost-tracking)
+    - [Token \& Cost Tracking](#token--cost-tracking)
     - [Queued Analysis](#queued-analysis)
     - [Testing](#testing)
   - [Testing](#testing-1)
@@ -39,7 +42,6 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
     - [Documentation Generation](#documentation-generation)
   - [Contributing](#contributing)
   - [License](#license)
-  - [Author](#author)
 
 ## Usage TLDR;
 ```bash
@@ -415,10 +417,4 @@ Contributions are welcome! Please follow these steps to contribute:
 This project is open-sourced software licensed under the [Apache License 2.0](https://github.com/IQAndreas/markdown-licenses/blob/master/apache-v2.0.md).
 
 You may use, modify, and distribute this software under the terms of the Apache License. For more details, see the [LICENSE](LICENSE) file included in this repository.
-
-## Author
-
-**Tyler Wall**
-
-Created the Laravel AI Code Analysis Project to enhance code maintainability and performance through AI-driven insights.
 
