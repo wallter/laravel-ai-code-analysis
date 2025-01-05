@@ -11,7 +11,7 @@ use App\Services\Parsing\ParserService;
 /**
  * Example command that parses PHP files (including traits).
  */
-class ParseFilesCommand extends Command
+class ParseFilesCommand extends FilesCommand
 {
     protected $signature = 'parse:files
         {--filter= : Filter by item name}

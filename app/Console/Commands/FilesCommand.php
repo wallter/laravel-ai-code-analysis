@@ -18,13 +18,6 @@ abstract class FilesCommand extends Command
 
     protected $description = 'Base command providing common arguments.';
 
-    public function handle(): int
-    {
-        return $this->executeCommand();
-    }
-
-    abstract protected function executeCommand(): int;
-
     protected function getOutputFile(): ?string
     {
         $file = $this->option('output-file');
