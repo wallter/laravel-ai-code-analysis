@@ -7,7 +7,7 @@ use RectorLaravel\Set\LaravelLevelSetList;
 use RectorLaravel\Set\LaravelSetList;
 
 return RectorConfig::configure()
-    ->paths([
+    ->withPaths([
         __DIR__ . '/app',
         __DIR__ . '/routes',
         __DIR__ . '/config',
@@ -16,7 +16,7 @@ return RectorConfig::configure()
         __DIR__ . '/tests',
         __DIR__ . '/public',
     ])
-    ->skip([
+    ->withSkip([
         __DIR__ . '/storage',
         __DIR__ . '/bootstrap/cache',
         __DIR__ . '/vendor',
