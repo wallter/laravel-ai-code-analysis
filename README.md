@@ -4,10 +4,6 @@
 [![GitHub](https://img.shields.io/badge/GitHub-wallter-black?style=for-the-badge&logo=github&logoColor=white)](https://github.com/wallter)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Tyler.R.Wall-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/tylerrwall/)
 
-<div align="center">
-  <img src="resources/images/github/logo.png" alt="Project Banner" style="max-height: 250px;">
-</div>
-
 ## Overview
 
 This Laravel-based project uses **OpenAI’s language models** in tandem with **PHP Abstract Syntax Tree (AST) analysis** (via [nikic/php-parser](https://github.com/nikic/PHP-Parser)) to deliver a **comprehensive multi-pass code analysis**. It iteratively inspects PHP codebases, generating:
