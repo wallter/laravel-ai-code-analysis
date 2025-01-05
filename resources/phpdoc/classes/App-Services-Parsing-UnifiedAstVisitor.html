@@ -105,26 +105,6 @@
                 <a href="packages/App-Console.html" class="">Console</a>
                 
             </li>
-                    <li>
-                <a href="packages/App-Facades.html" class="">Facades</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Http.html" class="">Http</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Jobs.html" class="">Jobs</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Models.html" class="">Models</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Services.html" class="">Services</a>
-                
-            </li>
             </ul>
 
                         </section>
@@ -161,9 +141,7 @@
             <div class="phpdocumentor-element__package">
             in package
             <ul class="phpdocumentor-breadcrumbs">
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App.html">App</a></li>
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App-Services.html">Services</a></li>
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App-Services-Parsing.html">Parsing</a></li>
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
                             </ul>
         </div>
     
@@ -178,15 +156,14 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/UnifiedAstVisitor.php"><a href="files/services-parsing-unifiedastvisitor.html"><abbr title="Services/Parsing/UnifiedAstVisitor.php">UnifiedAstVisitor.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">25</span>
+    <span class="phpdocumentor-element-found-in__line">17</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">Unified AST Visitor.</p>
+            <p class="phpdocumentor-summary">Single-pass visitor collecting classes (traits, interfaces) and free-floating functions.</p>
 
 
-    <section class="phpdocumentor-description"><p>Traverses the Abstract Syntax Tree (AST) to collect information about classes, traits,
-interfaces, and free-standing functions. Extracts doc-blocks, methods, parameters, and other details.</p>
+    <section class="phpdocumentor-description"><p>Captures docblocks, methods, parameters, etc.</p>
 </section>
 
 
@@ -246,12 +223,11 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
-<dd>Constructor for UnifiedAstVisitor.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/App-Services-Parsing-UnifiedAstVisitor.html#method_enterNode">enterNode()</a>
     <span>
-                                &nbsp;: void    </span>
+                                &nbsp;: mixed    </span>
 </dt>
 <dd>Called when entering a node in the AST.</dd>
 
@@ -260,21 +236,21 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
-<dd>Retrieve all collected parsed items.</dd>
+<dd>Returns an array of all collected items (classes, traits, interfaces, functions).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/App-Services-Parsing-UnifiedAstVisitor.html#method_leaveNode">leaveNode()</a>
     <span>
-                                &nbsp;: void    </span>
+                                &nbsp;: mixed    </span>
 </dt>
-<dd>Called when leaving a node in the AST.</dd>
+<dd>Called when leaving a node.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/App-Services-Parsing-UnifiedAstVisitor.html#method_setCurrentFile">setCurrentFile()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Set the current file being parsed.</dd>
+<dd>Set the current file being parsed; used for referencing in output.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/App-Services-Parsing-UnifiedAstVisitor.html#method_collectFunctionParams">collectFunctionParams()</a>
@@ -309,7 +285,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <span>
                                 &nbsp;: string    </span>
 </dt>
-<dd>Determine the type of a ClassLike node.</dd>
+<dd>Distinguish if a node is a Class, Trait, or Interface.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/App-Services-Parsing-UnifiedAstVisitor.html#method_typeToString">typeToString()</a>
@@ -348,7 +324,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/UnifiedAstVisitor.php"><a href="files/services-parsing-unifiedastvisitor.html"><abbr title="Services/Parsing/UnifiedAstVisitor.php">UnifiedAstVisitor.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">34</span>
+    <span class="phpdocumentor-element-found-in__line">20</span>
 
     </aside>
 
@@ -361,9 +337,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
      = <span class="phpdocumentor-signature__default-value">null</span></code>
 
     
-        <section class="phpdocumentor-description"><p>The path of the current file being parsed.</p>
-</section>
-
+    
     
 
     
@@ -386,7 +360,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/UnifiedAstVisitor.php"><a href="files/services-parsing-unifiedastvisitor.html"><abbr title="Services/Parsing/UnifiedAstVisitor.php">UnifiedAstVisitor.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">38</span>
+    <span class="phpdocumentor-element-found-in__line">21</span>
 
     </aside>
 
@@ -399,9 +373,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
      = <span class="phpdocumentor-signature__default-value">null</span></code>
 
     
-        <section class="phpdocumentor-description"><p>The current namespace context during AST traversal.</p>
-</section>
-
+    
     
 
     
@@ -424,7 +396,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/UnifiedAstVisitor.php"><a href="files/services-parsing-unifiedastvisitor.html"><abbr title="Services/Parsing/UnifiedAstVisitor.php">UnifiedAstVisitor.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">30</span>
+    <span class="phpdocumentor-element-found-in__line">19</span>
 
     </aside>
 
@@ -437,9 +409,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     </code>
 
     
-        <section class="phpdocumentor-description"><p>A collection of parsed items collected during AST traversal.</p>
-</section>
-
+    
     
 
     
@@ -467,12 +437,11 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/UnifiedAstVisitor.php"><a href="files/services-parsing-unifiedastvisitor.html"><abbr title="Services/Parsing/UnifiedAstVisitor.php">UnifiedAstVisitor.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">45</span>
+    <span class="phpdocumentor-element-found-in__line">23</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Constructor for UnifiedAstVisitor.</p>
-
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
                     <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
@@ -480,9 +449,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Initializes the collection for storing parsed items.</p>
-</section>
-
+    
     
     
 
@@ -504,7 +471,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/UnifiedAstVisitor.php"><a href="files/services-parsing-unifiedastvisitor.html"><abbr title="Services/Parsing/UnifiedAstVisitor.php">UnifiedAstVisitor.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">75</span>
+    <span class="phpdocumentor-element-found-in__line">39</span>
 
     </aside>
 
@@ -512,14 +479,12 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">enterNode</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type"><abbr title="\PhpParser\Node">Node</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$node</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">enterNode</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type"><abbr title="\PhpParser\Node">Node</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$node</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Identifies and collects information about namespaces, classes, traits, interfaces, and functions.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -527,9 +492,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
                 : <span class="phpdocumentor-signature__argument__return-type"><abbr title="\PhpParser\Node">Node</abbr></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The current AST node being entered.</p>
-</section>
-
+                
             </dd>
             </dl>
 
@@ -553,11 +516,11 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/UnifiedAstVisitor.php"><a href="files/services-parsing-unifiedastvisitor.html"><abbr title="Services/Parsing/UnifiedAstVisitor.php">UnifiedAstVisitor.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">150</span>
+    <span class="phpdocumentor-element-found-in__line">101</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Retrieve all collected parsed items.</p>
+        <p class="phpdocumentor-summary">Returns an array of all collected items (classes, traits, interfaces, functions).</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -575,10 +538,6 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>An array of all parsed items collected during AST traversal.</p>
-</section>
-
             </section>
 
 </article>
@@ -596,22 +555,20 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/UnifiedAstVisitor.php"><a href="files/services-parsing-unifiedastvisitor.html"><abbr title="Services/Parsing/UnifiedAstVisitor.php">UnifiedAstVisitor.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">134</span>
+    <span class="phpdocumentor-element-found-in__line">90</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Called when leaving a node in the AST.</p>
+        <p class="phpdocumentor-summary">Called when leaving a node.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">leaveNode</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type"><abbr title="\PhpParser\Node">Node</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$node</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">leaveNode</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type"><abbr title="\PhpParser\Node">Node</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$node</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Resets the current namespace context when exiting a namespace node.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -619,9 +576,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
                 : <span class="phpdocumentor-signature__argument__return-type"><abbr title="\PhpParser\Node">Node</abbr></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The current AST node being exited.</p>
-</section>
-
+                
             </dd>
             </dl>
 
@@ -645,11 +600,11 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/UnifiedAstVisitor.php"><a href="files/services-parsing-unifiedastvisitor.html"><abbr title="Services/Parsing/UnifiedAstVisitor.php">UnifiedAstVisitor.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">59</span>
+    <span class="phpdocumentor-element-found-in__line">31</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Set the current file being parsed.</p>
+        <p class="phpdocumentor-summary">Set the current file being parsed; used for referencing in output.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -666,9 +621,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
                 : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The file path of the currently parsed PHP file.</p>
-</section>
-
+                
             </dd>
             </dl>
 
@@ -692,7 +645,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/UnifiedAstVisitor.php"><a href="files/services-parsing-unifiedastvisitor.html"><abbr title="Services/Parsing/UnifiedAstVisitor.php">UnifiedAstVisitor.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">224</span>
+    <span class="phpdocumentor-element-found-in__line">167</span>
 
     </aside>
 
@@ -741,7 +694,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/UnifiedAstVisitor.php"><a href="files/services-parsing-unifiedastvisitor.html"><abbr title="Services/Parsing/UnifiedAstVisitor.php">UnifiedAstVisitor.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">209</span>
+    <span class="phpdocumentor-element-found-in__line">152</span>
 
     </aside>
 
@@ -790,7 +743,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/UnifiedAstVisitor.php"><a href="files/services-parsing-unifiedastvisitor.html"><abbr title="Services/Parsing/UnifiedAstVisitor.php">UnifiedAstVisitor.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">188</span>
+    <span class="phpdocumentor-element-found-in__line">131</span>
 
     </aside>
 
@@ -839,7 +792,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/UnifiedAstVisitor.php"><a href="files/services-parsing-unifiedastvisitor.html"><abbr title="Services/Parsing/UnifiedAstVisitor.php">UnifiedAstVisitor.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">259</span>
+    <span class="phpdocumentor-element-found-in__line">202</span>
 
     </aside>
 
@@ -888,11 +841,11 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/UnifiedAstVisitor.php"><a href="files/services-parsing-unifiedastvisitor.html"><abbr title="Services/Parsing/UnifiedAstVisitor.php">UnifiedAstVisitor.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">170</span>
+    <span class="phpdocumentor-element-found-in__line">113</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Determine the type of a ClassLike node.</p>
+        <p class="phpdocumentor-summary">Distinguish if a node is a Class, Trait, or Interface.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
@@ -901,9 +854,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Identifies whether the node represents a Class, Trait, or Interface.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -911,9 +862,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
                 : <span class="phpdocumentor-signature__argument__return-type"><abbr title="\PhpParser\Node\Stmt\ClassLike">ClassLike</abbr></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The ClassLike node to evaluate.</p>
-</section>
-
+                
             </dd>
             </dl>
 
@@ -924,10 +873,6 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">string</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>The type of the ClassLike node (&quot;Class&quot;, &quot;Trait&quot;, or &quot;Interface&quot;).</p>
-</section>
-
             </section>
 
 </article>
@@ -945,7 +890,7 @@ interfaces, and free-standing functions. Extracts doc-blocks, methods, parameter
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/UnifiedAstVisitor.php"><a href="files/services-parsing-unifiedastvisitor.html"><abbr title="Services/Parsing/UnifiedAstVisitor.php">UnifiedAstVisitor.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">239</span>
+    <span class="phpdocumentor-element-found-in__line">182</span>
 
     </aside>
 

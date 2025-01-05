@@ -105,26 +105,6 @@
                 <a href="packages/App-Console.html" class="">Console</a>
                 
             </li>
-                    <li>
-                <a href="packages/App-Facades.html" class="">Facades</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Http.html" class="">Http</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Jobs.html" class="">Jobs</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Models.html" class="">Models</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Services.html" class="">Services</a>
-                
-            </li>
             </ul>
 
                         </section>
@@ -166,7 +146,11 @@
 
     </h4>
     <dl class="phpdocumentor-table-of-contents">
-                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Providers-AppServiceProvider.html"><abbr title="\App\Providers\AppServiceProvider">AppServiceProvider</abbr></a></dt>    </dl>
+                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Console-Commands-AnalyzeFilesCommand.html"><abbr title="\App\Console\Commands\AnalyzeFilesCommand">AnalyzeFilesCommand</abbr></a></dt><dd>Example command to parse files, store them in code_analyses,
+then run multi-pass AI, storing each pass in ai_results.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Console-Commands-Db-DbBackupCommand.html"><abbr title="\App\Console\Commands\Db\DbBackupCommand">DbBackupCommand</abbr></a></dt>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Console-Commands-Db-DbRestoreCommand.html"><abbr title="\App\Console\Commands\Db\DbRestoreCommand">DbRestoreCommand</abbr></a></dt>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Console-Commands-FilesCommand.html"><abbr title="\App\Console\Commands\FilesCommand">FilesCommand</abbr></a></dt><dd>FilesCommand
+ - Provides shared options: --output-file, --limit-class, --limit-method
+ - Many commands can extend this for consistent option handling</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Console-Commands-ParseFilesCommand.html"><abbr title="\App\Console\Commands\ParseFilesCommand">ParseFilesCommand</abbr></a></dt><dd>Example command that parses PHP files (including traits).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Facades-OpenAI.html"><abbr title="\App\Facades\OpenAI">OpenAI</abbr></a></dt>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Http-Controllers-AnalysisController.html"><abbr title="\App\Http\Controllers\AnalysisController">AnalysisController</abbr></a></dt>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Http-Controllers-Controller.html"><abbr title="\App\Http\Controllers\Controller">Controller</abbr></a></dt>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Jobs-ProcessAnalysisPassJob.html"><abbr title="\App\Jobs\ProcessAnalysisPassJob">ProcessAnalysisPassJob</abbr></a></dt>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Models-AIResult.html"><abbr title="\App\Models\AIResult">AIResult</abbr></a></dt>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Models-CodeAnalysis.html"><abbr title="\App\Models\CodeAnalysis">CodeAnalysis</abbr></a></dt>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Models-ParsedItem.html"><abbr title="\App\Models\ParsedItem">ParsedItem</abbr></a></dt>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Models-User.html"><abbr title="\App\Models\User">User</abbr></a></dt>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Providers-AppServiceProvider.html"><abbr title="\App\Providers\AppServiceProvider">AppServiceProvider</abbr></a></dt>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Services-AI-CodeAnalysisService.html"><abbr title="\App\Services\AI\CodeAnalysisService">CodeAnalysisService</abbr></a></dt><dd>Manages AST parsing + multi-pass AI for code analysis in an async manner.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Services-AI-OpenAIService.html"><abbr title="\App\Services\AI\OpenAIService">OpenAIService</abbr></a></dt><dd>Handles calls to the OpenAI API via chat() endpoints,
+capturing token usage in $this-&gt;lastUsage.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Services-Parsing-DocblockParser.html"><abbr title="\App\Services\Parsing\DocblockParser">DocblockParser</abbr></a></dt><dd>DocblockParser</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Services-Parsing-ParserService.html"><abbr title="\App\Services\Parsing\ParserService">ParserService</abbr></a></dt><dd>Provides file collection and single-visitor parsing.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/App-Services-Parsing-UnifiedAstVisitor.html"><abbr title="\App\Services\Parsing\UnifiedAstVisitor">UnifiedAstVisitor</abbr></a></dt><dd>Single-pass visitor collecting classes (traits, interfaces) and free-floating functions.</dd>    </dl>
 
 
 

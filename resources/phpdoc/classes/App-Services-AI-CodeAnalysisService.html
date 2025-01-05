@@ -105,26 +105,6 @@
                 <a href="packages/App-Console.html" class="">Console</a>
                 
             </li>
-                    <li>
-                <a href="packages/App-Facades.html" class="">Facades</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Http.html" class="">Http</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Jobs.html" class="">Jobs</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Models.html" class="">Models</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Services.html" class="">Services</a>
-                
-            </li>
             </ul>
 
                         </section>
@@ -158,9 +138,7 @@
             <div class="phpdocumentor-element__package">
             in package
             <ul class="phpdocumentor-breadcrumbs">
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App.html">App</a></li>
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App-Services.html">Services</a></li>
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App-Services-AI.html">AI</a></li>
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
                             </ul>
         </div>
     
@@ -175,16 +153,13 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/AI/CodeAnalysisService.php"><a href="files/services-ai-codeanalysisservice.html"><abbr title="Services/AI/CodeAnalysisService.php">CodeAnalysisService.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">26</span>
+    <span class="phpdocumentor-element-found-in__line">18</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">Code Analysis Service.</p>
+            <p class="phpdocumentor-summary">Manages AST parsing + multi-pass AI for code analysis in an async manner.</p>
 
 
-    <section class="phpdocumentor-description"><p>Manages Abstract Syntax Tree (AST) parsing and orchestrates multi-pass AI analysis
-for PHP code files in an asynchronous manner.</p>
-</section>
 
 
 
@@ -237,49 +212,46 @@ for PHP code files in an asynchronous manner.</p>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
-<dd>Constructor for CodeAnalysisService.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/App-Services-AI-CodeAnalysisService.html#method_analyzeFile">analyzeFile()</a>
     <span>
                                 &nbsp;: <a href="classes/App-Models-CodeAnalysis.html"><abbr title="\App\Models\CodeAnalysis">CodeAnalysis</abbr></a>    </span>
 </dt>
-<dd>Create or retrieve a CodeAnalysis record for a given file.</dd>
+<dd>Create or reuse a CodeAnalysis for the specified file.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/App-Services-AI-CodeAnalysisService.html#method_buildPromptForPass">buildPromptForPass()</a>
     <span>
                                 &nbsp;: string    </span>
 </dt>
-<dd>Construct the prompt text for a specific AI analysis pass.</dd>
+<dd>Build a prompt for a specific pass (used by ProcessAnalysisPassJob).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/App-Services-AI-CodeAnalysisService.html#method_getParserService">getParserService()</a>
     <span>
                                 &nbsp;: <a href="classes/App-Services-Parsing-ParserService.html"><abbr title="\App\Services\Parsing\ParserService">ParserService</abbr></a>    </span>
 </dt>
-<dd>Retrieve the ParserService instance.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/App-Services-AI-CodeAnalysisService.html#method_runAnalysis">runAnalysis()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Queue missing AI analysis passes for a CodeAnalysis record.</dd>
+<dd>Instead of synchronous calls, we now queue each missing pass.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/App-Services-AI-CodeAnalysisService.html#method_buildAstSummary">buildAstSummary()</a>
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
-<dd>Generate a summary of the AST by visiting its nodes.</dd>
+<dd>Summarize AST by scanning it with UnifiedAstVisitor.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/App-Services-AI-CodeAnalysisService.html#method_getRawCode">getRawCode()</a>
     <span>
                                 &nbsp;: string    </span>
 </dt>
-<dd>Retrieve the raw PHP code from a given file path.</dd>
 
     </dl>
 
@@ -311,7 +283,7 @@ for PHP code files in an asynchronous manner.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/AI/CodeAnalysisService.php"><a href="files/services-ai-codeanalysisservice.html"><abbr title="Services/AI/CodeAnalysisService.php">CodeAnalysisService.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">37</span>
+    <span class="phpdocumentor-element-found-in__line">21</span>
 
     </aside>
 
@@ -347,7 +319,7 @@ for PHP code files in an asynchronous manner.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/AI/CodeAnalysisService.php"><a href="files/services-ai-codeanalysisservice.html"><abbr title="Services/AI/CodeAnalysisService.php">CodeAnalysisService.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">38</span>
+    <span class="phpdocumentor-element-found-in__line">22</span>
 
     </aside>
 
@@ -388,12 +360,11 @@ for PHP code files in an asynchronous manner.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/AI/CodeAnalysisService.php"><a href="files/services-ai-codeanalysisservice.html"><abbr title="Services/AI/CodeAnalysisService.php">CodeAnalysisService.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">36</span>
+    <span class="phpdocumentor-element-found-in__line">20</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Constructor for CodeAnalysisService.</p>
-
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
                     <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type"><a href="classes/App-Services-AI-OpenAIService.html"><abbr title="\App\Services\AI\OpenAIService">OpenAIService</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$openAIService</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type"><a href="classes/App-Services-Parsing-ParserService.html"><abbr title="\App\Services\Parsing\ParserService">ParserService</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$parserService</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
@@ -401,9 +372,7 @@ for PHP code files in an asynchronous manner.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Injects the OpenAIService and ParserService dependencies.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -411,18 +380,14 @@ for PHP code files in an asynchronous manner.</p>
                 : <span class="phpdocumentor-signature__argument__return-type"><a href="classes/App-Services-AI-OpenAIService.html"><abbr title="\App\Services\AI\OpenAIService">OpenAIService</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Service to interact with OpenAI's API.</p>
-</section>
-
+                
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$parserService</span>
                 : <span class="phpdocumentor-signature__argument__return-type"><a href="classes/App-Services-Parsing-ParserService.html"><abbr title="\App\Services\Parsing\ParserService">ParserService</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Service for parsing PHP files.</p>
-</section>
-
+                
             </dd>
             </dl>
 
@@ -446,11 +411,11 @@ for PHP code files in an asynchronous manner.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/AI/CodeAnalysisService.php"><a href="files/services-ai-codeanalysisservice.html"><abbr title="Services/AI/CodeAnalysisService.php">CodeAnalysisService.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">65</span>
+    <span class="phpdocumentor-element-found-in__line">35</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Create or retrieve a CodeAnalysis record for a given file.</p>
+        <p class="phpdocumentor-summary">Create or reuse a CodeAnalysis for the specified file.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -459,7 +424,7 @@ for PHP code files in an asynchronous manner.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Parses the file to generate its AST and analysis summary if necessary.</p>
+        <section class="phpdocumentor-description"><p>Optionally re-parse if $reparse is true.</p>
 </section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
@@ -469,18 +434,14 @@ for PHP code files in an asynchronous manner.</p>
                 : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The path to the PHP file to analyze.</p>
-</section>
-
+                
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$reparse</span>
                 : <span class="phpdocumentor-signature__argument__return-type">bool</span>
                  = <span class="phpdocumentor-signature__argument__default-value">false</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Whether to force re-parsing of the file.</p>
-</section>
-
+                
             </dd>
             </dl>
 
@@ -491,10 +452,6 @@ for PHP code files in an asynchronous manner.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/App-Models-CodeAnalysis.html"><abbr title="\App\Models\CodeAnalysis">CodeAnalysis</abbr></a></span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>The CodeAnalysis model instance.</p>
-</section>
-
             </section>
 
 </article>
@@ -512,11 +469,11 @@ for PHP code files in an asynchronous manner.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/AI/CodeAnalysisService.php"><a href="files/services-ai-codeanalysisservice.html"><abbr title="Services/AI/CodeAnalysisService.php">CodeAnalysisService.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">165</span>
+    <span class="phpdocumentor-element-found-in__line">108</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Construct the prompt text for a specific AI analysis pass.</p>
+        <p class="phpdocumentor-summary">Build a prompt for a specific pass (used by ProcessAnalysisPassJob).</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -525,9 +482,7 @@ for PHP code files in an asynchronous manner.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Combines base prompts, AST data, raw code, and previous analysis results based on pass type.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -535,18 +490,14 @@ for PHP code files in an asynchronous manner.</p>
                 : <span class="phpdocumentor-signature__argument__return-type"><a href="classes/App-Models-CodeAnalysis.html"><abbr title="\App\Models\CodeAnalysis">CodeAnalysis</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The CodeAnalysis record for which the prompt is built.</p>
-</section>
-
+                
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$passName</span>
                 : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The name of the AI pass.</p>
-</section>
-
+                
             </dd>
             </dl>
 
@@ -557,10 +508,6 @@ for PHP code files in an asynchronous manner.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">string</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>The constructed prompt text.</p>
-</section>
-
             </section>
 
 </article>
@@ -578,12 +525,11 @@ for PHP code files in an asynchronous manner.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/AI/CodeAnalysisService.php"><a href="files/services-ai-codeanalysisservice.html"><abbr title="Services/AI/CodeAnalysisService.php">CodeAnalysisService.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">47</span>
+    <span class="phpdocumentor-element-found-in__line">26</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Retrieve the ParserService instance.</p>
-
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
                     <span class="phpdocumentor-signature__name">getParserService</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/App-Services-Parsing-ParserService.html"><abbr title="\App\Services\Parsing\ParserService">ParserService</abbr></a></span></code>
@@ -600,10 +546,6 @@ for PHP code files in an asynchronous manner.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/App-Services-Parsing-ParserService.html"><abbr title="\App\Services\Parsing\ParserService">ParserService</abbr></a></span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>The parser service used for AST parsing.</p>
-</section>
-
             </section>
 
 </article>
@@ -621,11 +563,11 @@ for PHP code files in an asynchronous manner.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/AI/CodeAnalysisService.php"><a href="files/services-ai-codeanalysisservice.html"><abbr title="Services/AI/CodeAnalysisService.php">CodeAnalysisService.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">131</span>
+    <span class="phpdocumentor-element-found-in__line">83</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Queue missing AI analysis passes for a CodeAnalysis record.</p>
+        <p class="phpdocumentor-summary">Instead of synchronous calls, we now queue each missing pass.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -634,9 +576,7 @@ for PHP code files in an asynchronous manner.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Identifies which AI passes have not been completed and dispatches jobs to process them.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -644,18 +584,14 @@ for PHP code files in an asynchronous manner.</p>
                 : <span class="phpdocumentor-signature__argument__return-type"><a href="classes/App-Models-CodeAnalysis.html"><abbr title="\App\Models\CodeAnalysis">CodeAnalysis</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The CodeAnalysis record to process.</p>
-</section>
-
+                
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$dryRun</span>
                 : <span class="phpdocumentor-signature__argument__return-type">bool</span>
                  = <span class="phpdocumentor-signature__argument__default-value">false</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Whether to simulate the job dispatch without actual execution.</p>
-</section>
-
+                
             </dd>
             </dl>
 
@@ -679,11 +615,11 @@ for PHP code files in an asynchronous manner.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/AI/CodeAnalysisService.php"><a href="files/services-ai-codeanalysisservice.html"><abbr title="Services/AI/CodeAnalysisService.php">CodeAnalysisService.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">97</span>
+    <span class="phpdocumentor-element-found-in__line">58</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Generate a summary of the AST by visiting its nodes.</p>
+        <p class="phpdocumentor-summary">Summarize AST by scanning it with UnifiedAstVisitor.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
@@ -692,9 +628,7 @@ for PHP code files in an asynchronous manner.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Scans the AST to count classes, traits, interfaces, and functions, and collects detailed items.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -702,18 +636,14 @@ for PHP code files in an asynchronous manner.</p>
                 : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The path to the PHP file being analyzed.</p>
-</section>
-
+                
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$ast</span>
                 : <span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The abstract syntax tree of the PHP file.</p>
-</section>
-
+                
             </dd>
             </dl>
 
@@ -724,10 +654,6 @@ for PHP code files in an asynchronous manner.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>The summary of the AST, including counts and detailed items.</p>
-</section>
-
             </section>
 
 </article>
@@ -745,12 +671,11 @@ for PHP code files in an asynchronous manner.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/AI/CodeAnalysisService.php"><a href="files/services-ai-codeanalysisservice.html"><abbr title="Services/AI/CodeAnalysisService.php">CodeAnalysisService.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">209</span>
+    <span class="phpdocumentor-element-found-in__line">144</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Retrieve the raw PHP code from a given file path.</p>
-
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
                     <span class="phpdocumentor-signature__name">getRawCode</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$filePath</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
@@ -758,9 +683,7 @@ for PHP code files in an asynchronous manner.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Attempts to read the file content and logs a warning if unsuccessful.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -768,9 +691,7 @@ for PHP code files in an asynchronous manner.</p>
                 : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The path to the PHP file.</p>
-</section>
-
+                
             </dd>
             </dl>
 
@@ -781,10 +702,6 @@ for PHP code files in an asynchronous manner.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">string</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>The raw PHP code as a string, or an empty string if reading fails.</p>
-</section>
-
             </section>
 
 </article>

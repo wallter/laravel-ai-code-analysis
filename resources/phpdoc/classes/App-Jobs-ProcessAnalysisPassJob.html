@@ -105,26 +105,6 @@
                 <a href="packages/App-Console.html" class="">Console</a>
                 
             </li>
-                    <li>
-                <a href="packages/App-Facades.html" class="">Facades</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Http.html" class="">Http</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Jobs.html" class="">Jobs</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Models.html" class="">Models</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Services.html" class="">Services</a>
-                
-            </li>
             </ul>
 
                         </section>
@@ -157,8 +137,7 @@
             <div class="phpdocumentor-element__package">
             in package
             <ul class="phpdocumentor-breadcrumbs">
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App.html">App</a></li>
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App-Jobs.html">Jobs</a></li>
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
                             </ul>
         </div>
     
@@ -179,17 +158,12 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Jobs/ProcessAnalysisPassJob.php"><a href="files/jobs-processanalysispassjob.html"><abbr title="Jobs/ProcessAnalysisPassJob.php">ProcessAnalysisPassJob.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">24</span>
+    <span class="phpdocumentor-element-found-in__line">15</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">Process Analysis Pass Job.</p>
+        
 
-
-    <section class="phpdocumentor-description"><p>Handles the processing of individual AI passes for a given CodeAnalysis record.
-This job interacts with the OpenAIService to perform the required analysis pass
-and stores the results accordingly.</p>
-</section>
 
 
 
@@ -261,7 +235,7 @@ and stores the results accordingly.</p>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Execute the job.</dd>
+<dd>The job handle method. This is where the AI pass is executed.</dd>
 
     </dl>
 
@@ -293,7 +267,7 @@ and stores the results accordingly.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Jobs/ProcessAnalysisPassJob.php"><a href="files/jobs-processanalysispassjob.html"><abbr title="Jobs/ProcessAnalysisPassJob.php">ProcessAnalysisPassJob.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">29</span>
+    <span class="phpdocumentor-element-found-in__line">20</span>
 
     </aside>
 
@@ -329,7 +303,7 @@ and stores the results accordingly.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Jobs/ProcessAnalysisPassJob.php"><a href="files/jobs-processanalysispassjob.html"><abbr title="Jobs/ProcessAnalysisPassJob.php">ProcessAnalysisPassJob.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">31</span>
+    <span class="phpdocumentor-element-found-in__line">22</span>
 
     </aside>
 
@@ -365,7 +339,7 @@ and stores the results accordingly.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Jobs/ProcessAnalysisPassJob.php"><a href="files/jobs-processanalysispassjob.html"><abbr title="Jobs/ProcessAnalysisPassJob.php">ProcessAnalysisPassJob.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">30</span>
+    <span class="phpdocumentor-element-found-in__line">21</span>
 
     </aside>
 
@@ -406,7 +380,7 @@ and stores the results accordingly.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Jobs/ProcessAnalysisPassJob.php"><a href="files/jobs-processanalysispassjob.html"><abbr title="Jobs/ProcessAnalysisPassJob.php">ProcessAnalysisPassJob.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">28</span>
+    <span class="phpdocumentor-element-found-in__line">19</span>
 
     </aside>
 
@@ -464,11 +438,11 @@ and stores the results accordingly.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Jobs/ProcessAnalysisPassJob.php"><a href="files/jobs-processanalysispassjob.html"><abbr title="Jobs/ProcessAnalysisPassJob.php">ProcessAnalysisPassJob.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">51</span>
+    <span class="phpdocumentor-element-found-in__line">30</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Execute the job.</p>
+        <p class="phpdocumentor-summary">The job handle method. This is where the AI pass is executed.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -477,11 +451,7 @@ and stores the results accordingly.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Processes an AI pass for a specific CodeAnalysis record by building the appropriate
-prompt, interacting with the OpenAI API, storing the AI result, and updating the
-analysis status.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -489,30 +459,11 @@ analysis status.</p>
                 : <span class="phpdocumentor-signature__argument__return-type"><a href="classes/App-Services-AI-OpenAIService.html"><abbr title="\App\Services\AI\OpenAIService">OpenAIService</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The service to interact with OpenAI's API.</p>
-</section>
-
+                
             </dd>
             </dl>
 
     
-    <h5 class="phpdocumentor-tag-list__heading" id="tags">
-        Tags
-        <a href="classes/App-Jobs-ProcessAnalysisPassJob.html#method_handle#tags" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h5>
-    <dl class="phpdocumentor-tag-list">
-                                    <dt class="phpdocumentor-tag-list__entry">
-                    <span class="phpdocumentor-tag__name">throws</span>
-                </dt>
-                <dd class="phpdocumentor-tag-list__definition">
-                                                                <span class="phpdocumentor-tag-link"><abbr title="\Exception">Exception</abbr></span>
-                                                            
-                                                 <section class="phpdocumentor-description"><p>If the AI operation fails or response is invalid.</p>
-</section>
-
-                                    </dd>
-                                            </dl>
 
     
 

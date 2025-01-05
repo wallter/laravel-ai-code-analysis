@@ -105,26 +105,6 @@
                 <a href="packages/App-Console.html" class="">Console</a>
                 
             </li>
-                    <li>
-                <a href="packages/App-Facades.html" class="">Facades</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Http.html" class="">Http</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Jobs.html" class="">Jobs</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Models.html" class="">Models</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Services.html" class="">Services</a>
-                
-            </li>
             </ul>
 
                         </section>
@@ -158,9 +138,7 @@
             <div class="phpdocumentor-element__package">
             in package
             <ul class="phpdocumentor-breadcrumbs">
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App.html">App</a></li>
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App-Services.html">Services</a></li>
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App-Services-Parsing.html">Parsing</a></li>
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
                             </ul>
         </div>
     
@@ -175,16 +153,13 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/ParserService.php"><a href="files/services-parsing-parserservice.html"><abbr title="Services/Parsing/ParserService.php">ParserService.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">24</span>
+    <span class="phpdocumentor-element-found-in__line">16</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">Parser Service.</p>
+            <p class="phpdocumentor-summary">Provides file collection and single-visitor parsing.</p>
 
 
-    <section class="phpdocumentor-description"><p>Provides functionality to collect PHP files and parse them into Abstract Syntax Trees (AST).
-Supports traversing ASTs with custom visitors and caching parsed results.</p>
-</section>
 
 
 
@@ -218,21 +193,21 @@ Supports traversing ASTs with custom visitors and caching parsed results.</p>
     <span>
                                 &nbsp;: <abbr title="\Illuminate\Support\Collection">Collection</abbr>    </span>
 </dt>
-<dd>Collect all PHP files based on configuration settings.</dd>
+<dd>Collect .php files from config(&#039;parsing.files&#039;) + config(&#039;parsing.folders&#039;)</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/App-Services-Parsing-ParserService.html#method_parseFile">parseFile()</a>
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
-<dd>Parse a single PHP file into its Abstract Syntax Tree (AST).</dd>
+<dd>Parse a single PHP file with optional visitors, and return the raw AST array.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/App-Services-Parsing-ParserService.html#method_getPhpFiles">getPhpFiles()</a>
     <span>
                                 &nbsp;: <abbr title="\Illuminate\Support\Collection">Collection</abbr>    </span>
 </dt>
-<dd>Recursively retrieve all PHP files within a specified directory.</dd>
+<dd>Recursively get .php files from a directory.</dd>
 
     </dl>
 
@@ -262,11 +237,11 @@ Supports traversing ASTs with custom visitors and caching parsed results.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/ParserService.php"><a href="files/services-parsing-parserservice.html"><abbr title="Services/Parsing/ParserService.php">ParserService.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">37</span>
+    <span class="phpdocumentor-element-found-in__line">21</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Collect all PHP files based on configuration settings.</p>
+        <p class="phpdocumentor-summary">Collect .php files from config(&#039;parsing.files&#039;) + config(&#039;parsing.folders&#039;)</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -275,10 +250,7 @@ Supports traversing ASTs with custom visitors and caching parsed results.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Gathers PHP files from specified individual file paths and directories as defined
-in the configuration, ensuring uniqueness and validity of file paths.</p>
-</section>
-
+    
     
     
 
@@ -287,10 +259,6 @@ in the configuration, ensuring uniqueness and validity of file paths.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><abbr title="\Illuminate\Support\Collection">Collection</abbr></span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>A collection of absolute paths to PHP files.</p>
-</section>
-
             </section>
 
 </article>
@@ -308,11 +276,11 @@ in the configuration, ensuring uniqueness and validity of file paths.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/ParserService.php"><a href="files/services-parsing-parserservice.html"><abbr title="Services/Parsing/ParserService.php">ParserService.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">66</span>
+    <span class="phpdocumentor-element-found-in__line">39</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Parse a single PHP file into its Abstract Syntax Tree (AST).</p>
+        <p class="phpdocumentor-summary">Parse a single PHP file with optional visitors, and return the raw AST array.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -321,8 +289,7 @@ in the configuration, ensuring uniqueness and validity of file paths.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Reads the PHP file content, parses it into an AST, optionally traverses it with provided visitors,
-and caches the AST in the database if caching is enabled.</p>
+        <section class="phpdocumentor-description"><p>If $useCache is true, we check code_analyses table first.</p>
 </section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
@@ -332,27 +299,21 @@ and caches the AST in the database if caching is enabled.</p>
                 : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The path to the PHP file to parse.</p>
-</section>
-
+                
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$visitors</span>
                 : <span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;</span>
                  = <span class="phpdocumentor-signature__argument__default-value">[]</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>An array of AST visitors to traverse the AST with.</p>
-</section>
-
+                
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$useCache</span>
                 : <span class="phpdocumentor-signature__argument__return-type">bool</span>
                  = <span class="phpdocumentor-signature__argument__default-value">false</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Whether to cache the AST in the database.</p>
-</section>
-
+                
             </dd>
             </dl>
 
@@ -363,10 +324,6 @@ and caches the AST in the database if caching is enabled.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>The parsed AST as an array.</p>
-</section>
-
             </section>
 
 </article>
@@ -384,11 +341,11 @@ and caches the AST in the database if caching is enabled.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/ParserService.php"><a href="files/services-parsing-parserservice.html"><abbr title="Services/Parsing/ParserService.php">ParserService.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">140</span>
+    <span class="phpdocumentor-element-found-in__line">105</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Recursively retrieve all PHP files within a specified directory.</p>
+        <p class="phpdocumentor-summary">Recursively get .php files from a directory.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
@@ -397,9 +354,7 @@ and caches the AST in the database if caching is enabled.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Traverses the directory and its subdirectories to find files with a .php extension.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -407,9 +362,7 @@ and caches the AST in the database if caching is enabled.</p>
                 : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The directory path to search for PHP files.</p>
-</section>
-
+                
             </dd>
             </dl>
 
@@ -420,10 +373,6 @@ and caches the AST in the database if caching is enabled.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><abbr title="\Illuminate\Support\Collection">Collection</abbr></span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>A collection of absolute paths to PHP files.</p>
-</section>
-
             </section>
 
 </article>

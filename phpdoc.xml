@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<phpdocumentor
-        configVersion="3"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns="https://www.phpdoc.org">
->
+<phpdocumentor configVersion="3.0">
     <title>Laravel AI Code Analysis</title>
+
     <paths>
         <output>resources/phpdoc</output>
     </paths>
@@ -12,7 +9,6 @@
     <version number="0.1">
         <api>
             <source dsn="app">
-
             </source>
         </api>
     </version>

@@ -105,26 +105,6 @@
                 <a href="packages/App-Console.html" class="">Console</a>
                 
             </li>
-                    <li>
-                <a href="packages/App-Facades.html" class="">Facades</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Http.html" class="">Http</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Jobs.html" class="">Jobs</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Models.html" class="">Models</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Services.html" class="">Services</a>
-                
-            </li>
             </ul>
 
                         </section>
@@ -161,9 +141,7 @@
             <div class="phpdocumentor-element__package">
             in package
             <ul class="phpdocumentor-breadcrumbs">
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App.html">App</a></li>
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App-Http.html">Http</a></li>
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App-Http-Controllers.html">Controllers</a></li>
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
                             </ul>
         </div>
     
@@ -178,16 +156,12 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Http/Controllers/AnalysisController.php"><a href="files/http-controllers-analysiscontroller.html"><abbr title="Http/Controllers/AnalysisController.php">AnalysisController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">18</span>
+    <span class="phpdocumentor-element-found-in__line">10</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">Analysis Controller.</p>
+        
 
-
-    <section class="phpdocumentor-description"><p>Handles HTTP requests related to code analysis, including listing analyses, showing details,
-and triggering new analyses on specified files or directories.</p>
-</section>
 
 
 
@@ -238,23 +212,23 @@ and triggering new analyses on specified files or directories.</p>
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/App-Http-Controllers-AnalysisController.html#method_analyze">analyze()</a>
     <span>
-                                &nbsp;: <abbr title="\Illuminate\Http\RedirectResponse">RedirectResponse</abbr>    </span>
+                                &nbsp;: mixed    </span>
 </dt>
-<dd>Trigger the parsing and queued AI passes for a specified file or directory path.</dd>
+<dd>Trigger the parse + queued AI passes for a single file or folder path.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/App-Http-Controllers-AnalysisController.html#method_index">index()</a>
     <span>
-                                &nbsp;: <abbr title="\Illuminate\View\View">View</abbr>    </span>
+                                &nbsp;: mixed    </span>
 </dt>
 <dd>Display a listing of all CodeAnalysis records.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/App-Http-Controllers-AnalysisController.html#method_show">show()</a>
     <span>
-                                &nbsp;: <abbr title="\Illuminate\View\View">View</abbr>    </span>
+                                &nbsp;: mixed    </span>
 </dt>
-<dd>Show details for a specific CodeAnalysis record.</dd>
+<dd>Show details (including AI results) for a single CodeAnalysis record.</dd>
 
     </dl>
 
@@ -286,7 +260,7 @@ and triggering new analyses on specified files or directories.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Http/Controllers/AnalysisController.php"><a href="files/http-controllers-analysiscontroller.html"><abbr title="Http/Controllers/AnalysisController.php">AnalysisController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">20</span>
+    <span class="phpdocumentor-element-found-in__line">12</span>
 
     </aside>
 
@@ -327,7 +301,7 @@ and triggering new analyses on specified files or directories.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Http/Controllers/AnalysisController.php"><a href="files/http-controllers-analysiscontroller.html"><abbr title="Http/Controllers/AnalysisController.php">AnalysisController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">20</span>
+    <span class="phpdocumentor-element-found-in__line">12</span>
 
     </aside>
 
@@ -371,22 +345,21 @@ and triggering new analyses on specified files or directories.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Http/Controllers/AnalysisController.php"><a href="files/http-controllers-analysiscontroller.html"><abbr title="Http/Controllers/AnalysisController.php">AnalysisController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">90</span>
+    <span class="phpdocumentor-element-found-in__line">53</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Trigger the parsing and queued AI passes for a specified file or directory path.</p>
+        <p class="phpdocumentor-summary">Trigger the parse + queued AI passes for a single file or folder path.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">analyze</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type"><abbr title="\Illuminate\Http\Request">Request</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$request</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Illuminate\Http\RedirectResponse">RedirectResponse</abbr></span></code>
+                    <span class="phpdocumentor-signature__name">analyze</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type"><abbr title="\Illuminate\Http\Request">Request</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$request</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Accepts a file or folder path from the request, initiates analysis by creating or updating
-a CodeAnalysis record, and queues the multi-pass AI analysis. Redirects back with a status
-message upon success or returns with errors if the analysis fails.</p>
+        <section class="phpdocumentor-description"><p>Example form submission:</p>
+<form action="{{ route('analysis.analyze') }}" method="POST">
 </section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
@@ -396,25 +369,33 @@ message upon success or returns with errors if the analysis fails.</p>
                 : <span class="phpdocumentor-signature__argument__return-type"><abbr title="\Illuminate\Http\Request">Request</abbr></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The incoming HTTP request containing the filePath.</p>
-</section>
-
+                
             </dd>
             </dl>
 
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/App-Http-Controllers-AnalysisController.html#method_analyze#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">csrf</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                
+                                                 <section class="phpdocumentor-description"><input name="filePath" />
+  <button type="submit">Analyze</button>
+</form>
+</section>
+
+                                    </dd>
+                                            </dl>
 
     
 
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type"><abbr title="\Illuminate\Http\RedirectResponse">RedirectResponse</abbr></span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>Redirect response to the analysis index with status or error messages.</p>
-</section>
-
-            </section>
-
+    
 </article>
                     <article
         class="phpdocumentor-element
@@ -430,7 +411,7 @@ message upon success or returns with errors if the analysis fails.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Http/Controllers/AnalysisController.php"><a href="files/http-controllers-analysiscontroller.html"><abbr title="Http/Controllers/AnalysisController.php">AnalysisController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">36</span>
+    <span class="phpdocumentor-element-found-in__line">20</span>
 
     </aside>
 
@@ -438,29 +419,18 @@ message upon success or returns with errors if the analysis fails.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">index</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Illuminate\View\View">View</abbr></span></code>
+                    <span class="phpdocumentor-signature__name">index</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Retrieves all code analyses along with their associated AI results and passes the data
-to the analysis index view for rendering.</p>
-</section>
-
+    
     
     
 
     
 
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type"><abbr title="\Illuminate\View\View">View</abbr></span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>The analysis index view with all CodeAnalysis records.</p>
-</section>
-
-            </section>
-
+    
 </article>
                     <article
         class="phpdocumentor-element
@@ -476,23 +446,20 @@ to the analysis index view for rendering.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Http/Controllers/AnalysisController.php"><a href="files/http-controllers-analysiscontroller.html"><abbr title="Http/Controllers/AnalysisController.php">AnalysisController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">58</span>
+    <span class="phpdocumentor-element-found-in__line">31</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Show details for a specific CodeAnalysis record.</p>
+        <p class="phpdocumentor-summary">Show details (including AI results) for a single CodeAnalysis record.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">show</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$id</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Illuminate\View\View">View</abbr></span></code>
+                    <span class="phpdocumentor-signature__name">show</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$id</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Retrieves a single CodeAnalysis record by its ID, including all associated AI results,
-calculates the total cost estimate, and passes the data to the analysis show view.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -500,42 +467,15 @@ calculates the total cost estimate, and passes the data to the analysis show vie
                 : <span class="phpdocumentor-signature__argument__return-type">int</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The ID of the CodeAnalysis record to display.</p>
-</section>
-
+                
             </dd>
             </dl>
 
     
-    <h5 class="phpdocumentor-tag-list__heading" id="tags">
-        Tags
-        <a href="classes/App-Http-Controllers-AnalysisController.html#method_show#tags" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h5>
-    <dl class="phpdocumentor-tag-list">
-                                    <dt class="phpdocumentor-tag-list__entry">
-                    <span class="phpdocumentor-tag__name">throws</span>
-                </dt>
-                <dd class="phpdocumentor-tag-list__definition">
-                                                                <span class="phpdocumentor-tag-link"><abbr title="\Illuminate\Database\Eloquent\ModelNotFoundException">ModelNotFoundException</abbr></span>
-                                                            
-                                                 <section class="phpdocumentor-description"><p>If the record is not found.</p>
-</section>
-
-                                    </dd>
-                                            </dl>
 
     
 
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type"><abbr title="\Illuminate\View\View">View</abbr></span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>The analysis show view with the specified CodeAnalysis record.</p>
-</section>
-
-            </section>
-
+    
 </article>
             </section>
 

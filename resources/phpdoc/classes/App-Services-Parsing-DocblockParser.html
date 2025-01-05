@@ -105,26 +105,6 @@
                 <a href="packages/App-Console.html" class="">Console</a>
                 
             </li>
-                    <li>
-                <a href="packages/App-Facades.html" class="">Facades</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Http.html" class="">Http</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Jobs.html" class="">Jobs</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Models.html" class="">Models</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Services.html" class="">Services</a>
-                
-            </li>
             </ul>
 
                         </section>
@@ -158,9 +138,7 @@
             <div class="phpdocumentor-element__package">
             in package
             <ul class="phpdocumentor-breadcrumbs">
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App.html">App</a></li>
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App-Services.html">Services</a></li>
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App-Services-Parsing.html">Parsing</a></li>
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
                             </ul>
         </div>
     
@@ -175,15 +153,18 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/DocblockParser.php"><a href="files/services-parsing-docblockparser.html"><abbr title="Services/Parsing/DocblockParser.php">DocblockParser.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">21</span>
+    <span class="phpdocumentor-element-found-in__line">13</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">DocBlock Parser.</p>
+            <p class="phpdocumentor-summary">DocblockParser</p>
 
 
-    <section class="phpdocumentor-description"><p>Parses DocBlocks to extract summaries, descriptions, and annotations.
-Supports extracting structured information from PHPDoc comments.</p>
+    <section class="phpdocumentor-description"><p>Extracts:</p>
+<ul>
+<li>shortDescription: lines before first blank line</li>
+<li>annotations: grouped by tag name (e.g. param, throws, return, url, etc.)</li>
+</ul>
 </section>
 
 
@@ -218,7 +199,6 @@ Supports extracting structured information from PHPDoc comments.</p>
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
-<dd>Parse a DocBlock to extract summary, description, and annotations.</dd>
 
     </dl>
 
@@ -248,12 +228,11 @@ Supports extracting structured information from PHPDoc comments.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Services/Parsing/DocblockParser.php"><a href="files/services-parsing-docblockparser.html"><abbr title="Services/Parsing/DocblockParser.php">DocblockParser.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">32</span>
+    <span class="phpdocumentor-element-found-in__line">15</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Parse a DocBlock to extract summary, description, and annotations.</p>
-
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
             <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">parseDocblock</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$docblock</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
@@ -261,10 +240,7 @@ Supports extracting structured information from PHPDoc comments.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Processes the raw DocBlock text, separating short descriptions, extended descriptions,
-and various annotations such as @param, @return, and @throws.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -272,9 +248,7 @@ and various annotations such as @param, @return, and @throws.</p>
                 : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The raw DocBlock comment text.</p>
-</section>
-
+                
             </dd>
             </dl>
 
@@ -285,10 +259,6 @@ and various annotations such as @param, @return, and @throws.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>An associative array containing 'shortDescription' and 'annotations'.</p>
-</section>
-
             </section>
 
 </article>

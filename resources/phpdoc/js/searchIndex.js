@@ -3,32 +3,32 @@ Search.appendIndex(
                 {
             "fqsen": "\\App\\Console\\Commands\\AnalyzeFilesCommand",
             "name": "AnalyzeFilesCommand",
-            "summary": "AnalyzeFilesCommand.",
+            "summary": "Example\u0020command\u0020to\u0020parse\u0020files,\u0020store\u0020them\u0020in\u0020code_analyses,\nthen\u0020run\u0020multi\u002Dpass\u0020AI,\u0020storing\u0020each\u0020pass\u0020in\u0020ai_results.",
             "url": "classes/App-Console-Commands-AnalyzeFilesCommand.html"
         },                {
             "fqsen": "\\App\\Console\\Commands\\AnalyzeFilesCommand\u003A\u003A__construct\u0028\u0029",
             "name": "__construct",
-            "summary": "Constructor\u0020for\u0020AnalyzeFilesCommand.",
+            "summary": "",
             "url": "classes/App-Console-Commands-AnalyzeFilesCommand.html#method___construct"
         },                {
             "fqsen": "\\App\\Console\\Commands\\AnalyzeFilesCommand\u003A\u003AexecuteCommand\u0028\u0029",
             "name": "executeCommand",
-            "summary": "Execute\u0020the\u0020console\u0020command.",
+            "summary": "",
             "url": "classes/App-Console-Commands-AnalyzeFilesCommand.html#method_executeCommand"
         },                {
             "fqsen": "\\App\\Console\\Commands\\AnalyzeFilesCommand\u003A\u003AexportToJson\u0028\u0029",
             "name": "exportToJson",
-            "summary": "Export\u0020analysis\u0020results\u0020to\u0020a\u0020JSON\u0020file.",
+            "summary": "",
             "url": "classes/App-Console-Commands-AnalyzeFilesCommand.html#method_exportToJson"
         },                {
             "fqsen": "\\App\\Console\\Commands\\AnalyzeFilesCommand\u003A\u003A\u0024signature",
             "name": "signature",
-            "summary": "The\u0020name\u0020and\u0020signature\u0020of\u0020the\u0020console\u0020command.",
+            "summary": "",
             "url": "classes/App-Console-Commands-AnalyzeFilesCommand.html#property_signature"
         },                {
             "fqsen": "\\App\\Console\\Commands\\AnalyzeFilesCommand\u003A\u003A\u0024description",
             "name": "description",
-            "summary": "The\u0020console\u0020command\u0020description.",
+            "summary": "",
             "url": "classes/App-Console-Commands-AnalyzeFilesCommand.html#property_description"
         },                {
             "fqsen": "\\App\\Console\\Commands\\AnalyzeFilesCommand\u003A\u003A\u0024analysisService",
@@ -38,7 +38,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\App\\Console\\Commands\\Db\\DbBackupCommand",
             "name": "DbBackupCommand",
-            "summary": "DbBackupCommand.",
+            "summary": "",
             "url": "classes/App-Console-Commands-Db-DbBackupCommand.html"
         },                {
             "fqsen": "\\App\\Console\\Commands\\Db\\DbBackupCommand\u003A\u003Ahandle\u0028\u0029",
@@ -58,7 +58,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\App\\Console\\Commands\\Db\\DbRestoreCommand",
             "name": "DbRestoreCommand",
-            "summary": "DbRestoreCommand.",
+            "summary": "",
             "url": "classes/App-Console-Commands-Db-DbRestoreCommand.html"
         },                {
             "fqsen": "\\App\\Console\\Commands\\Db\\DbRestoreCommand\u003A\u003Ahandle\u0028\u0029",
@@ -81,144 +81,79 @@ Search.appendIndex(
             "summary": "The\u0020console\u0020command\u0020description.",
             "url": "classes/App-Console-Commands-Db-DbRestoreCommand.html#property_description"
         },                {
-            "fqsen": "\\App\\Console\\Commands\\Experimental\\GenerateTestsCommand",
-            "name": "GenerateTestsCommand",
-            "summary": "ExperimentalGenerateTestsCommand.",
-            "url": "classes/App-Console-Commands-Experimental-GenerateTestsCommand.html"
-        },                {
-            "fqsen": "\\App\\Console\\Commands\\Experimental\\GenerateTestsCommand\u003A\u003A__construct\u0028\u0029",
-            "name": "__construct",
-            "summary": "Constructor\u0020for\u0020ExperimentalGenerateTestsCommand.",
-            "url": "classes/App-Console-Commands-Experimental-GenerateTestsCommand.html#method___construct"
-        },                {
-            "fqsen": "\\App\\Console\\Commands\\Experimental\\GenerateTestsCommand\u003A\u003Ahandle\u0028\u0029",
-            "name": "handle",
-            "summary": "Execute\u0020the\u0020console\u0020command.",
-            "url": "classes/App-Console-Commands-Experimental-GenerateTestsCommand.html#method_handle"
-        },                {
-            "fqsen": "\\App\\Console\\Commands\\Experimental\\GenerateTestsCommand\u003A\u003AparseOneFile\u0028\u0029",
-            "name": "parseOneFile",
-            "summary": "Common\u0020logic\u0020to\u0020parse\u0020a\u0020single\u0020file\u0020with\u0020parser\/traverser\/visitor.",
-            "url": "classes/App-Console-Commands-Experimental-GenerateTestsCommand.html#method_parseOneFile"
-        },                {
-            "fqsen": "\\App\\Console\\Commands\\Experimental\\GenerateTestsCommand\u003A\u003AgetPhpFiles\u0028\u0029",
-            "name": "getPhpFiles",
-            "summary": "Recursively\u0020retrieve\u0020PHP\u0020files\u0020in\u0020a\u0020directory.",
-            "url": "classes/App-Console-Commands-Experimental-GenerateTestsCommand.html#method_getPhpFiles"
-        },                {
-            "fqsen": "\\App\\Console\\Commands\\Experimental\\GenerateTestsCommand\u003A\u003AnormalizePath\u0028\u0029",
-            "name": "normalizePath",
-            "summary": "Convert\u0020a\u0020relative\u0020path\u0020to\u0020absolute\u0020if\u0020necessary.",
-            "url": "classes/App-Console-Commands-Experimental-GenerateTestsCommand.html#method_normalizePath"
-        },                {
-            "fqsen": "\\App\\Console\\Commands\\Experimental\\GenerateTestsCommand\u003A\u003AisAbsolutePath\u0028\u0029",
-            "name": "isAbsolutePath",
-            "summary": "Determines\u0020if\u0020a\u0020given\u0020path\u0020is\u0020absolute.",
-            "url": "classes/App-Console-Commands-Experimental-GenerateTestsCommand.html#method_isAbsolutePath"
-        },                {
-            "fqsen": "\\App\\Console\\Commands\\Experimental\\GenerateTestsCommand\u003A\u003AgenerateTestClass\u0028\u0029",
-            "name": "generateTestClass",
-            "summary": "Generate\u0020or\u0020update\u0020a\u0020PHPUnit\u0020test\u0020class\u0020for\u0020the\u0020discovered\u0020class\u0020info.",
-            "url": "classes/App-Console-Commands-Experimental-GenerateTestsCommand.html#method_generateTestClass"
-        },                {
-            "fqsen": "\\App\\Console\\Commands\\Experimental\\GenerateTestsCommand\u003A\u003AcreateNewTestFile\u0028\u0029",
-            "name": "createNewTestFile",
-            "summary": "Creates\u0020a\u0020new\u0020PHPUnit\u0020test\u0020file\u0020with\u0020a\u0020basic\u0020template.",
-            "url": "classes/App-Console-Commands-Experimental-GenerateTestsCommand.html#method_createNewTestFile"
-        },                {
-            "fqsen": "\\App\\Console\\Commands\\Experimental\\GenerateTestsCommand\u003A\u003AappendMissingMethods\u0028\u0029",
-            "name": "appendMissingMethods",
-            "summary": "Appends\u0020missing\u0020test\u0020methods\u0020to\u0020an\u0020existing\u0020test\u0020file.",
-            "url": "classes/App-Console-Commands-Experimental-GenerateTestsCommand.html#method_appendMissingMethods"
-        },                {
-            "fqsen": "\\App\\Console\\Commands\\Experimental\\GenerateTestsCommand\u003A\u003A\u0024signature",
-            "name": "signature",
-            "summary": "The\u0020name\u0020and\u0020signature\u0020of\u0020the\u0020console\u0020command.",
-            "url": "classes/App-Console-Commands-Experimental-GenerateTestsCommand.html#property_signature"
-        },                {
-            "fqsen": "\\App\\Console\\Commands\\Experimental\\GenerateTestsCommand\u003A\u003A\u0024description",
-            "name": "description",
-            "summary": "The\u0020console\u0020command\u0020description.",
-            "url": "classes/App-Console-Commands-Experimental-GenerateTestsCommand.html#property_description"
-        },                {
-            "fqsen": "\\App\\Console\\Commands\\Experimental\\GenerateTestsCommand\u003A\u003A\u0024parserService",
-            "name": "parserService",
-            "summary": "",
-            "url": "classes/App-Console-Commands-Experimental-GenerateTestsCommand.html#property_parserService"
-        },                {
             "fqsen": "\\App\\Console\\Commands\\FilesCommand",
             "name": "FilesCommand",
-            "summary": "FilesCommand.",
+            "summary": "FilesCommand\n\u0020\u002D\u0020Provides\u0020shared\u0020options\u003A\u0020\u002D\u002Doutput\u002Dfile,\u0020\u002D\u002Dlimit\u002Dclass,\u0020\u002D\u002Dlimit\u002Dmethod\n\u0020\u002D\u0020Many\u0020commands\u0020can\u0020extend\u0020this\u0020for\u0020consistent\u0020option\u0020handling",
             "url": "classes/App-Console-Commands-FilesCommand.html"
         },                {
             "fqsen": "\\App\\Console\\Commands\\FilesCommand\u003A\u003Ahandle\u0028\u0029",
             "name": "handle",
-            "summary": "Handle\u0020the\u0020incoming\u0020console\u0020command.",
+            "summary": "",
             "url": "classes/App-Console-Commands-FilesCommand.html#method_handle"
         },                {
             "fqsen": "\\App\\Console\\Commands\\FilesCommand\u003A\u003AexecuteCommand\u0028\u0029",
             "name": "executeCommand",
-            "summary": "Execute\u0020the\u0020command\u0020logic.",
+            "summary": "",
             "url": "classes/App-Console-Commands-FilesCommand.html#method_executeCommand"
         },                {
             "fqsen": "\\App\\Console\\Commands\\FilesCommand\u003A\u003AgetOutputFile\u0028\u0029",
             "name": "getOutputFile",
-            "summary": "Retrieve\u0020and\u0020normalize\u0020the\u0020output\u0020file\u0020path.",
+            "summary": "",
             "url": "classes/App-Console-Commands-FilesCommand.html#method_getOutputFile"
         },                {
             "fqsen": "\\App\\Console\\Commands\\FilesCommand\u003A\u003AgetClassLimit\u0028\u0029",
             "name": "getClassLimit",
-            "summary": "Retrieve\u0020the\u0020class\u0020limit\u0020option.",
+            "summary": "",
             "url": "classes/App-Console-Commands-FilesCommand.html#method_getClassLimit"
         },                {
             "fqsen": "\\App\\Console\\Commands\\FilesCommand\u003A\u003AgetMethodLimit\u0028\u0029",
             "name": "getMethodLimit",
-            "summary": "Retrieve\u0020the\u0020method\u0020limit\u0020option.",
+            "summary": "",
             "url": "classes/App-Console-Commands-FilesCommand.html#method_getMethodLimit"
         },                {
             "fqsen": "\\App\\Console\\Commands\\FilesCommand\u003A\u003A\u0024signature",
             "name": "signature",
-            "summary": "The\u0020name\u0020and\u0020signature\u0020of\u0020the\u0020console\u0020command.",
+            "summary": "",
             "url": "classes/App-Console-Commands-FilesCommand.html#property_signature"
         },                {
             "fqsen": "\\App\\Console\\Commands\\FilesCommand\u003A\u003A\u0024description",
             "name": "description",
-            "summary": "The\u0020console\u0020command\u0020description.",
+            "summary": "",
             "url": "classes/App-Console-Commands-FilesCommand.html#property_description"
         },                {
             "fqsen": "\\App\\Console\\Commands\\ParseFilesCommand",
             "name": "ParseFilesCommand",
-            "summary": "ParseFilesCommand.",
+            "summary": "Example\u0020command\u0020that\u0020parses\u0020PHP\u0020files\u0020\u0028including\u0020traits\u0029.",
             "url": "classes/App-Console-Commands-ParseFilesCommand.html"
         },                {
             "fqsen": "\\App\\Console\\Commands\\ParseFilesCommand\u003A\u003A__construct\u0028\u0029",
             "name": "__construct",
-            "summary": "Constructor\u0020for\u0020ParseFilesCommand.",
+            "summary": "",
             "url": "classes/App-Console-Commands-ParseFilesCommand.html#method___construct"
         },                {
             "fqsen": "\\App\\Console\\Commands\\ParseFilesCommand\u003A\u003Ahandle\u0028\u0029",
             "name": "handle",
-            "summary": "Handle\u0020the\u0020incoming\u0020console\u0020command.",
+            "summary": "",
             "url": "classes/App-Console-Commands-ParseFilesCommand.html#method_handle"
         },                {
             "fqsen": "\\App\\Console\\Commands\\ParseFilesCommand\u003A\u003AexportJson\u0028\u0029",
             "name": "exportJson",
-            "summary": "Export\u0020collected\u0020items\u0020to\u0020a\u0020JSON\u0020file.",
+            "summary": "",
             "url": "classes/App-Console-Commands-ParseFilesCommand.html#method_exportJson"
         },                {
             "fqsen": "\\App\\Console\\Commands\\ParseFilesCommand\u003A\u003AdisplayTable\u0028\u0029",
             "name": "displayTable",
-            "summary": "Display\u0020the\u0020collected\u0020items\u0020in\u0020a\u0020table\u0020format.",
+            "summary": "",
             "url": "classes/App-Console-Commands-ParseFilesCommand.html#method_displayTable"
         },                {
             "fqsen": "\\App\\Console\\Commands\\ParseFilesCommand\u003A\u003A\u0024signature",
             "name": "signature",
-            "summary": "The\u0020name\u0020and\u0020signature\u0020of\u0020the\u0020console\u0020command.",
+            "summary": "",
             "url": "classes/App-Console-Commands-ParseFilesCommand.html#property_signature"
         },                {
             "fqsen": "\\App\\Console\\Commands\\ParseFilesCommand\u003A\u003A\u0024description",
             "name": "description",
-            "summary": "The\u0020console\u0020command\u0020description.",
+            "summary": "",
             "url": "classes/App-Console-Commands-ParseFilesCommand.html#property_description"
         },                {
             "fqsen": "\\App\\Console\\Commands\\ParseFilesCommand\u003A\u003A\u0024parserService",
@@ -288,7 +223,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\App\\Facades\\OpenAI",
             "name": "OpenAI",
-            "summary": "OpenAI\u0020Facade.",
+            "summary": "",
             "url": "classes/App-Facades-OpenAI.html"
         },                {
             "fqsen": "\\App\\Facades\\OpenAI\u003A\u003AgetFacadeAccessor\u0028\u0029",
@@ -298,7 +233,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\App\\Http\\Controllers\\AnalysisController",
             "name": "AnalysisController",
-            "summary": "Analysis\u0020Controller.",
+            "summary": "",
             "url": "classes/App-Http-Controllers-AnalysisController.html"
         },                {
             "fqsen": "\\App\\Http\\Controllers\\AnalysisController\u003A\u003A__construct\u0028\u0029",
@@ -313,12 +248,12 @@ Search.appendIndex(
         },                {
             "fqsen": "\\App\\Http\\Controllers\\AnalysisController\u003A\u003Ashow\u0028\u0029",
             "name": "show",
-            "summary": "Show\u0020details\u0020for\u0020a\u0020specific\u0020CodeAnalysis\u0020record.",
+            "summary": "Show\u0020details\u0020\u0028including\u0020AI\u0020results\u0029\u0020for\u0020a\u0020single\u0020CodeAnalysis\u0020record.",
             "url": "classes/App-Http-Controllers-AnalysisController.html#method_show"
         },                {
             "fqsen": "\\App\\Http\\Controllers\\AnalysisController\u003A\u003Aanalyze\u0028\u0029",
             "name": "analyze",
-            "summary": "Trigger\u0020the\u0020parsing\u0020and\u0020queued\u0020AI\u0020passes\u0020for\u0020a\u0020specified\u0020file\u0020or\u0020directory\u0020path.",
+            "summary": "Trigger\u0020the\u0020parse\u0020\u002B\u0020queued\u0020AI\u0020passes\u0020for\u0020a\u0020single\u0020file\u0020or\u0020folder\u0020path.",
             "url": "classes/App-Http-Controllers-AnalysisController.html#method_analyze"
         },                {
             "fqsen": "\\App\\Http\\Controllers\\AnalysisController\u003A\u003A\u0024codeAnalysisService",
@@ -328,12 +263,12 @@ Search.appendIndex(
         },                {
             "fqsen": "\\App\\Http\\Controllers\\Controller",
             "name": "Controller",
-            "summary": "Base\u0020Controller.",
+            "summary": "",
             "url": "classes/App-Http-Controllers-Controller.html"
         },                {
             "fqsen": "\\App\\Jobs\\ProcessAnalysisPassJob",
             "name": "ProcessAnalysisPassJob",
-            "summary": "Process\u0020Analysis\u0020Pass\u0020Job.",
+            "summary": "",
             "url": "classes/App-Jobs-ProcessAnalysisPassJob.html"
         },                {
             "fqsen": "\\App\\Jobs\\ProcessAnalysisPassJob\u003A\u003A__construct\u0028\u0029",
@@ -343,7 +278,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\App\\Jobs\\ProcessAnalysisPassJob\u003A\u003Ahandle\u0028\u0029",
             "name": "handle",
-            "summary": "Execute\u0020the\u0020job.",
+            "summary": "The\u0020job\u0020handle\u0020method.\u0020This\u0020is\u0020where\u0020the\u0020AI\u0020pass\u0020is\u0020executed.",
             "url": "classes/App-Jobs-ProcessAnalysisPassJob.html#method_handle"
         },                {
             "fqsen": "\\App\\Jobs\\ProcessAnalysisPassJob\u003A\u003A\u0024codeAnalysisId",
@@ -363,13 +298,18 @@ Search.appendIndex(
         },                {
             "fqsen": "\\App\\Models\\AIResult",
             "name": "AIResult",
-            "summary": "AI\u0020Result\u0020Model.",
+            "summary": "",
             "url": "classes/App-Models-AIResult.html"
         },                {
             "fqsen": "\\App\\Models\\AIResult\u003A\u003AcodeAnalysis\u0028\u0029",
             "name": "codeAnalysis",
             "summary": "",
             "url": "classes/App-Models-AIResult.html#method_codeAnalysis"
+        },                {
+            "fqsen": "\\App\\Models\\AIResult\u003A\u003Acasts\u0028\u0029",
+            "name": "casts",
+            "summary": "",
+            "url": "classes/App-Models-AIResult.html#method_casts"
         },                {
             "fqsen": "\\App\\Models\\AIResult\u003A\u003A\u0024table",
             "name": "table",
@@ -378,17 +318,12 @@ Search.appendIndex(
         },                {
             "fqsen": "\\App\\Models\\AIResult\u003A\u003A\u0024fillable",
             "name": "fillable",
-            "summary": "The\u0020attributes\u0020that\u0020are\u0020mass\u0020assignable.",
+            "summary": "",
             "url": "classes/App-Models-AIResult.html#property_fillable"
-        },                {
-            "fqsen": "\\App\\Models\\AIResult\u003A\u003A\u0024casts",
-            "name": "casts",
-            "summary": "The\u0020attributes\u0020that\u0020should\u0020be\u0020cast.",
-            "url": "classes/App-Models-AIResult.html#property_casts"
         },                {
             "fqsen": "\\App\\Models\\CodeAnalysis",
             "name": "CodeAnalysis",
-            "summary": "Code\u0020Analysis\u0020Model.",
+            "summary": "",
             "url": "classes/App-Models-CodeAnalysis.html"
         },                {
             "fqsen": "\\App\\Models\\CodeAnalysis\u003A\u003AaiResults\u0028\u0029",
@@ -396,35 +331,40 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/App-Models-CodeAnalysis.html#method_aiResults"
         },                {
+            "fqsen": "\\App\\Models\\CodeAnalysis\u003A\u003Acasts\u0028\u0029",
+            "name": "casts",
+            "summary": "",
+            "url": "classes/App-Models-CodeAnalysis.html#method_casts"
+        },                {
             "fqsen": "\\App\\Models\\CodeAnalysis\u003A\u003A\u0024fillable",
             "name": "fillable",
-            "summary": "The\u0020attributes\u0020that\u0020are\u0020mass\u0020assignable.",
+            "summary": "",
             "url": "classes/App-Models-CodeAnalysis.html#property_fillable"
-        },                {
-            "fqsen": "\\App\\Models\\CodeAnalysis\u003A\u003A\u0024casts",
-            "name": "casts",
-            "summary": "The\u0020attributes\u0020that\u0020should\u0020be\u0020cast.",
-            "url": "classes/App-Models-CodeAnalysis.html#property_casts"
         },                {
             "fqsen": "\\App\\Models\\ParsedItem",
             "name": "ParsedItem",
-            "summary": "Parsed\u0020Item\u0020Model.",
+            "summary": "",
             "url": "classes/App-Models-ParsedItem.html"
+        },                {
+            "fqsen": "\\App\\Models\\ParsedItem\u003A\u003Acasts\u0028\u0029",
+            "name": "casts",
+            "summary": "",
+            "url": "classes/App-Models-ParsedItem.html#method_casts"
         },                {
             "fqsen": "\\App\\Models\\ParsedItem\u003A\u003A\u0024fillable",
             "name": "fillable",
-            "summary": "The\u0020attributes\u0020that\u0020are\u0020mass\u0020assignable.",
+            "summary": "",
             "url": "classes/App-Models-ParsedItem.html#property_fillable"
-        },                {
-            "fqsen": "\\App\\Models\\ParsedItem\u003A\u003A\u0024casts",
-            "name": "casts",
-            "summary": "The\u0020attributes\u0020that\u0020should\u0020be\u0020cast.",
-            "url": "classes/App-Models-ParsedItem.html#property_casts"
         },                {
             "fqsen": "\\App\\Models\\User",
             "name": "User",
-            "summary": "User\u0020Model.",
+            "summary": "",
             "url": "classes/App-Models-User.html"
+        },                {
+            "fqsen": "\\App\\Models\\User\u003A\u003Acasts\u0028\u0029",
+            "name": "casts",
+            "summary": "Get\u0020the\u0020attributes\u0020that\u0020should\u0020be\u0020cast.",
+            "url": "classes/App-Models-User.html#method_casts"
         },                {
             "fqsen": "\\App\\Models\\User\u003A\u003A\u0024fillable",
             "name": "fillable",
@@ -435,11 +375,6 @@ Search.appendIndex(
             "name": "hidden",
             "summary": "The\u0020attributes\u0020that\u0020should\u0020be\u0020hidden\u0020for\u0020serialization.",
             "url": "classes/App-Models-User.html#property_hidden"
-        },                {
-            "fqsen": "\\App\\Models\\User\u003A\u003A\u0024casts",
-            "name": "casts",
-            "summary": "The\u0020attributes\u0020that\u0020should\u0020be\u0020cast.",
-            "url": "classes/App-Models-User.html#property_casts"
         },                {
             "fqsen": "\\App\\Providers\\AppServiceProvider",
             "name": "AppServiceProvider",
@@ -458,42 +393,42 @@ Search.appendIndex(
         },                {
             "fqsen": "\\App\\Services\\AI\\CodeAnalysisService",
             "name": "CodeAnalysisService",
-            "summary": "Code\u0020Analysis\u0020Service.",
+            "summary": "Manages\u0020AST\u0020parsing\u0020\u002B\u0020multi\u002Dpass\u0020AI\u0020for\u0020code\u0020analysis\u0020in\u0020an\u0020async\u0020manner.",
             "url": "classes/App-Services-AI-CodeAnalysisService.html"
         },                {
             "fqsen": "\\App\\Services\\AI\\CodeAnalysisService\u003A\u003A__construct\u0028\u0029",
             "name": "__construct",
-            "summary": "Constructor\u0020for\u0020CodeAnalysisService.",
+            "summary": "",
             "url": "classes/App-Services-AI-CodeAnalysisService.html#method___construct"
         },                {
             "fqsen": "\\App\\Services\\AI\\CodeAnalysisService\u003A\u003AgetParserService\u0028\u0029",
             "name": "getParserService",
-            "summary": "Retrieve\u0020the\u0020ParserService\u0020instance.",
+            "summary": "",
             "url": "classes/App-Services-AI-CodeAnalysisService.html#method_getParserService"
         },                {
             "fqsen": "\\App\\Services\\AI\\CodeAnalysisService\u003A\u003AanalyzeFile\u0028\u0029",
             "name": "analyzeFile",
-            "summary": "Create\u0020or\u0020retrieve\u0020a\u0020CodeAnalysis\u0020record\u0020for\u0020a\u0020given\u0020file.",
+            "summary": "Create\u0020or\u0020reuse\u0020a\u0020CodeAnalysis\u0020for\u0020the\u0020specified\u0020file.",
             "url": "classes/App-Services-AI-CodeAnalysisService.html#method_analyzeFile"
         },                {
             "fqsen": "\\App\\Services\\AI\\CodeAnalysisService\u003A\u003AbuildAstSummary\u0028\u0029",
             "name": "buildAstSummary",
-            "summary": "Generate\u0020a\u0020summary\u0020of\u0020the\u0020AST\u0020by\u0020visiting\u0020its\u0020nodes.",
+            "summary": "Summarize\u0020AST\u0020by\u0020scanning\u0020it\u0020with\u0020UnifiedAstVisitor.",
             "url": "classes/App-Services-AI-CodeAnalysisService.html#method_buildAstSummary"
         },                {
             "fqsen": "\\App\\Services\\AI\\CodeAnalysisService\u003A\u003ArunAnalysis\u0028\u0029",
             "name": "runAnalysis",
-            "summary": "Queue\u0020missing\u0020AI\u0020analysis\u0020passes\u0020for\u0020a\u0020CodeAnalysis\u0020record.",
+            "summary": "Instead\u0020of\u0020synchronous\u0020calls,\u0020we\u0020now\u0020queue\u0020each\u0020missing\u0020pass.",
             "url": "classes/App-Services-AI-CodeAnalysisService.html#method_runAnalysis"
         },                {
             "fqsen": "\\App\\Services\\AI\\CodeAnalysisService\u003A\u003AbuildPromptForPass\u0028\u0029",
             "name": "buildPromptForPass",
-            "summary": "Construct\u0020the\u0020prompt\u0020text\u0020for\u0020a\u0020specific\u0020AI\u0020analysis\u0020pass.",
+            "summary": "Build\u0020a\u0020prompt\u0020for\u0020a\u0020specific\u0020pass\u0020\u0028used\u0020by\u0020ProcessAnalysisPassJob\u0029.",
             "url": "classes/App-Services-AI-CodeAnalysisService.html#method_buildPromptForPass"
         },                {
             "fqsen": "\\App\\Services\\AI\\CodeAnalysisService\u003A\u003AgetRawCode\u0028\u0029",
             "name": "getRawCode",
-            "summary": "Retrieve\u0020the\u0020raw\u0020PHP\u0020code\u0020from\u0020a\u0020given\u0020file\u0020path.",
+            "summary": "",
             "url": "classes/App-Services-AI-CodeAnalysisService.html#method_getRawCode"
         },                {
             "fqsen": "\\App\\Services\\AI\\CodeAnalysisService\u003A\u003A\u0024openAIService",
@@ -508,17 +443,17 @@ Search.appendIndex(
         },                {
             "fqsen": "\\App\\Services\\AI\\OpenAIService",
             "name": "OpenAIService",
-            "summary": "OpenAI\u0020Service.",
+            "summary": "Handles\u0020calls\u0020to\u0020the\u0020OpenAI\u0020API\u0020via\u0020chat\u0028\u0029\u0020endpoints,\ncapturing\u0020token\u0020usage\u0020in\u0020\u0024this\u002D\u003ElastUsage.",
             "url": "classes/App-Services-AI-OpenAIService.html"
         },                {
             "fqsen": "\\App\\Services\\AI\\OpenAIService\u003A\u003AgetLastUsage\u0028\u0029",
             "name": "getLastUsage",
-            "summary": "Retrieve\u0020the\u0020usage\u0020data\u0020from\u0020the\u0020last\u0020OpenAI\u0020API\u0020request.",
+            "summary": "",
             "url": "classes/App-Services-AI-OpenAIService.html#method_getLastUsage"
         },                {
             "fqsen": "\\App\\Services\\AI\\OpenAIService\u003A\u003AperformOperation\u0028\u0029",
             "name": "performOperation",
-            "summary": "Execute\u0020a\u0020specified\u0020AI\u0020operation\u0020using\u0020OpenAI\u0027s\u0020API.",
+            "summary": "",
             "url": "classes/App-Services-AI-OpenAIService.html#method_performOperation"
         },                {
             "fqsen": "\\App\\Services\\AI\\OpenAIService\u003A\u003A\u0024lastUsage",
@@ -528,47 +463,47 @@ Search.appendIndex(
         },                {
             "fqsen": "\\App\\Services\\Parsing\\DocblockParser",
             "name": "DocblockParser",
-            "summary": "DocBlock\u0020Parser.",
+            "summary": "DocblockParser",
             "url": "classes/App-Services-Parsing-DocblockParser.html"
         },                {
             "fqsen": "\\App\\Services\\Parsing\\DocblockParser\u003A\u003AparseDocblock\u0028\u0029",
             "name": "parseDocblock",
-            "summary": "Parse\u0020a\u0020DocBlock\u0020to\u0020extract\u0020summary,\u0020description,\u0020and\u0020annotations.",
+            "summary": "",
             "url": "classes/App-Services-Parsing-DocblockParser.html#method_parseDocblock"
         },                {
             "fqsen": "\\App\\Services\\Parsing\\ParserService",
             "name": "ParserService",
-            "summary": "Parser\u0020Service.",
+            "summary": "Provides\u0020file\u0020collection\u0020and\u0020single\u002Dvisitor\u0020parsing.",
             "url": "classes/App-Services-Parsing-ParserService.html"
         },                {
             "fqsen": "\\App\\Services\\Parsing\\ParserService\u003A\u003AcollectPhpFiles\u0028\u0029",
             "name": "collectPhpFiles",
-            "summary": "Collect\u0020all\u0020PHP\u0020files\u0020based\u0020on\u0020configuration\u0020settings.",
+            "summary": "Collect\u0020.php\u0020files\u0020from\u0020config\u0028\u0027parsing.files\u0027\u0029\u0020\u002B\u0020config\u0028\u0027parsing.folders\u0027\u0029",
             "url": "classes/App-Services-Parsing-ParserService.html#method_collectPhpFiles"
         },                {
             "fqsen": "\\App\\Services\\Parsing\\ParserService\u003A\u003AparseFile\u0028\u0029",
             "name": "parseFile",
-            "summary": "Parse\u0020a\u0020single\u0020PHP\u0020file\u0020into\u0020its\u0020Abstract\u0020Syntax\u0020Tree\u0020\u0028AST\u0029.",
+            "summary": "Parse\u0020a\u0020single\u0020PHP\u0020file\u0020with\u0020optional\u0020visitors,\u0020and\u0020return\u0020the\u0020raw\u0020AST\u0020array.",
             "url": "classes/App-Services-Parsing-ParserService.html#method_parseFile"
         },                {
             "fqsen": "\\App\\Services\\Parsing\\ParserService\u003A\u003AgetPhpFiles\u0028\u0029",
             "name": "getPhpFiles",
-            "summary": "Recursively\u0020retrieve\u0020all\u0020PHP\u0020files\u0020within\u0020a\u0020specified\u0020directory.",
+            "summary": "Recursively\u0020get\u0020.php\u0020files\u0020from\u0020a\u0020directory.",
             "url": "classes/App-Services-Parsing-ParserService.html#method_getPhpFiles"
         },                {
             "fqsen": "\\App\\Services\\Parsing\\UnifiedAstVisitor",
             "name": "UnifiedAstVisitor",
-            "summary": "Unified\u0020AST\u0020Visitor.",
+            "summary": "Single\u002Dpass\u0020visitor\u0020collecting\u0020classes\u0020\u0028traits,\u0020interfaces\u0029\u0020and\u0020free\u002Dfloating\u0020functions.",
             "url": "classes/App-Services-Parsing-UnifiedAstVisitor.html"
         },                {
             "fqsen": "\\App\\Services\\Parsing\\UnifiedAstVisitor\u003A\u003A__construct\u0028\u0029",
             "name": "__construct",
-            "summary": "Constructor\u0020for\u0020UnifiedAstVisitor.",
+            "summary": "",
             "url": "classes/App-Services-Parsing-UnifiedAstVisitor.html#method___construct"
         },                {
             "fqsen": "\\App\\Services\\Parsing\\UnifiedAstVisitor\u003A\u003AsetCurrentFile\u0028\u0029",
             "name": "setCurrentFile",
-            "summary": "Set\u0020the\u0020current\u0020file\u0020being\u0020parsed.",
+            "summary": "Set\u0020the\u0020current\u0020file\u0020being\u0020parsed\u003B\u0020used\u0020for\u0020referencing\u0020in\u0020output.",
             "url": "classes/App-Services-Parsing-UnifiedAstVisitor.html#method_setCurrentFile"
         },                {
             "fqsen": "\\App\\Services\\Parsing\\UnifiedAstVisitor\u003A\u003AenterNode\u0028\u0029",
@@ -578,17 +513,17 @@ Search.appendIndex(
         },                {
             "fqsen": "\\App\\Services\\Parsing\\UnifiedAstVisitor\u003A\u003AleaveNode\u0028\u0029",
             "name": "leaveNode",
-            "summary": "Called\u0020when\u0020leaving\u0020a\u0020node\u0020in\u0020the\u0020AST.",
+            "summary": "Called\u0020when\u0020leaving\u0020a\u0020node.",
             "url": "classes/App-Services-Parsing-UnifiedAstVisitor.html#method_leaveNode"
         },                {
             "fqsen": "\\App\\Services\\Parsing\\UnifiedAstVisitor\u003A\u003AgetItems\u0028\u0029",
             "name": "getItems",
-            "summary": "Retrieve\u0020all\u0020collected\u0020parsed\u0020items.",
+            "summary": "Returns\u0020an\u0020array\u0020of\u0020all\u0020collected\u0020items\u0020\u0028classes,\u0020traits,\u0020interfaces,\u0020functions\u0029.",
             "url": "classes/App-Services-Parsing-UnifiedAstVisitor.html#method_getItems"
         },                {
             "fqsen": "\\App\\Services\\Parsing\\UnifiedAstVisitor\u003A\u003AresolveClassLikeType\u0028\u0029",
             "name": "resolveClassLikeType",
-            "summary": "Determine\u0020the\u0020type\u0020of\u0020a\u0020ClassLike\u0020node.",
+            "summary": "Distinguish\u0020if\u0020a\u0020node\u0020is\u0020a\u0020Class,\u0020Trait,\u0020or\u0020Interface.",
             "url": "classes/App-Services-Parsing-UnifiedAstVisitor.html#method_resolveClassLikeType"
         },                {
             "fqsen": "\\App\\Services\\Parsing\\UnifiedAstVisitor\u003A\u003AcollectMethods\u0028\u0029",
@@ -655,11 +590,6 @@ Search.appendIndex(
             "name": "Db",
             "summary": "",
             "url": "namespaces/app-console-commands-db.html"
-        },                {
-            "fqsen": "\\App\\Console\\Commands\\Experimental",
-            "name": "Experimental",
-            "summary": "",
-            "url": "namespaces/app-console-commands-experimental.html"
         },                {
             "fqsen": "\\App\\Facades",
             "name": "Facades",

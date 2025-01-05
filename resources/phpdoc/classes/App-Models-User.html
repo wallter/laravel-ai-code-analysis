@@ -105,26 +105,6 @@
                 <a href="packages/App-Console.html" class="">Console</a>
                 
             </li>
-                    <li>
-                <a href="packages/App-Facades.html" class="">Facades</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Http.html" class="">Http</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Jobs.html" class="">Jobs</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Models.html" class="">Models</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Services.html" class="">Services</a>
-                
-            </li>
             </ul>
 
                         </section>
@@ -160,8 +140,7 @@
             <div class="phpdocumentor-element__package">
             in package
             <ul class="phpdocumentor-breadcrumbs">
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App.html">App</a></li>
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App-Models.html">Models</a></li>
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
                             </ul>
         </div>
     
@@ -179,16 +158,12 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Models/User.php"><a href="files/models-user.html"><abbr title="Models/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">18</span>
+    <span class="phpdocumentor-element-found-in__line">10</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">User Model.</p>
+        
 
-
-    <section class="phpdocumentor-description"><p>Represents an authenticated user within the application, including their personal details,
-authentication credentials, and related metadata.</p>
-</section>
 
 
 
@@ -217,13 +192,6 @@ authentication credentials, and related metadata.</p>
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -property -protected">
-    <a class="" href="classes/App-Models-User.html#property_casts">$casts</a>
-    <span>
-                        &nbsp;: array&lt;string, string&gt;            </span>
-</dt>
-<dd>The attributes that should be cast.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -property -protected">
     <a class="" href="classes/App-Models-User.html#property_fillable">$fillable</a>
     <span>
                         &nbsp;: array&lt;int, string&gt;            </span>
@@ -239,6 +207,20 @@ authentication credentials, and related metadata.</p>
 
     </dl>
 
+<h4 id="toc-methods">
+    Methods
+    <a href="classes/App-Models-User.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -method -protected">
+    <a class="" href="classes/App-Models-User.html#method_casts">casts()</a>
+    <span>
+                                &nbsp;: array&lt;string, string&gt;    </span>
+</dt>
+<dd>Get the attributes that should be cast.</dd>
+
+    </dl>
 
 
 
@@ -258,43 +240,6 @@ authentication credentials, and related metadata.</p>
             -protected
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="property_casts">
-        $casts
-        <a href="classes/App-Models-User.html#property_casts" class="headerlink"><i class="fas fa-link"></i></a>
-
-        <span class="phpdocumentor-element__modifiers">
-                                </span>
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="Models/User.php"><a href="files/models-user.html"><abbr title="Models/User.php">User.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">49</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">The attributes that should be cast.</p>
-
-    
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">array&lt;string, string&gt;</span>
-    <span class="phpdocumentor-signature__name">$casts</span>
-     = <span class="phpdocumentor-signature__default-value">[&#039;email_verified_at&#039; =&gt; &#039;datetime&#039;, &#039;password&#039; =&gt; &#039;hashed&#039;]</span></code>
-
-    
-    
-    
-
-    
-
-</article>
-                    <article
-        class="
-            phpdocumentor-element
-            -property
-            -protected
-                                                        "
->
     <h4 class="phpdocumentor-element__name" id="property_fillable">
         $fillable
         <a href="classes/App-Models-User.html#property_fillable" class="headerlink"><i class="fas fa-link"></i></a>
@@ -305,7 +250,7 @@ authentication credentials, and related metadata.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Models/User.php"><a href="files/models-user.html"><abbr title="Models/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">28</span>
+    <span class="phpdocumentor-element-found-in__line">20</span>
 
     </aside>
 
@@ -342,7 +287,7 @@ authentication credentials, and related metadata.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Models/User.php"><a href="files/models-user.html"><abbr title="Models/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">39</span>
+    <span class="phpdocumentor-element-found-in__line">31</span>
 
     </aside>
 
@@ -364,7 +309,53 @@ authentication credentials, and related metadata.</p>
 </article>
             </section>
 
-        
+            <section class="phpdocumentor-methods">
+        <h3 class="phpdocumentor-elements__header" id="methods">
+            Methods
+            <a href="classes/App-Models-User.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -protected
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_casts">
+        casts()
+        <a href="classes/App-Models-User.html#method_casts" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="Models/User.php"><a href="files/models-user.html"><abbr title="Models/User.php">User.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">41</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Get the attributes that should be cast.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">protected</span>
+                    <span class="phpdocumentor-signature__name">casts</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string, string&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+    
+
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;string, string&gt;</span>
+            </section>
+
+</article>
+            </section>
+
         <div class="phpdocumentor-modal" id="source-view">
     <div class="phpdocumentor-modal-bg" data-exit-button></div>
     <div class="phpdocumentor-modal-container">
@@ -469,18 +460,24 @@ authentication credentials, and related metadata.</p>
             <li>
                 <ul class="phpdocumentor-list -clean">
                                                             <li><a href="classes/App-Models-User.html#toc-properties">Properties</a></li>
-                                                        </ul>
+                                                            <li><a href="classes/App-Models-User.html#toc-methods">Methods</a></li>
+                                    </ul>
             </li>
             
                             <li class="phpdocumentor-on-this-page-section__title">Properties</li>
                 <li>
                     <ul class="phpdocumentor-list -clean">
-                                                    <li class=""><a href="classes/App-Models-User.html#property_casts">$casts</a></li>
                                                     <li class=""><a href="classes/App-Models-User.html#property_fillable">$fillable</a></li>
                                                     <li class=""><a href="classes/App-Models-User.html#property_hidden">$hidden</a></li>
                                             </ul>
                 </li>
             
+                        <li class="phpdocumentor-on-this-page-section__title">Methods</li>
+            <li>
+                <ul class="phpdocumentor-list -clean">
+                                            <li class=""><a href="classes/App-Models-User.html#method_casts">casts()</a></li>
+                                    </ul>
+            </li>
                     </ul>
     </section>
 

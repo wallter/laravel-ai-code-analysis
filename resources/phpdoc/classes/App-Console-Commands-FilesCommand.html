@@ -105,26 +105,6 @@
                 <a href="packages/App-Console.html" class="">Console</a>
                 
             </li>
-                    <li>
-                <a href="packages/App-Facades.html" class="">Facades</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Http.html" class="">Http</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Jobs.html" class="">Jobs</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Models.html" class="">Models</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Services.html" class="">Services</a>
-                
-            </li>
             </ul>
 
                         </section>
@@ -161,9 +141,7 @@
             <div class="phpdocumentor-element__package">
             in package
             <ul class="phpdocumentor-breadcrumbs">
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App.html">App</a></li>
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App-Console.html">Console</a></li>
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App-Console-Commands.html">Commands</a></li>
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
                             </ul>
         </div>
     
@@ -180,16 +158,15 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Console/Commands/FilesCommand.php"><a href="files/console-commands-filescommand.html"><abbr title="Console/Commands/FilesCommand.php">FilesCommand.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">15</span>
+    <span class="phpdocumentor-element-found-in__line">12</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">FilesCommand.</p>
+            <p class="phpdocumentor-summary">FilesCommand
+ - Provides shared options: --output-file, --limit-class, --limit-method
+ - Many commands can extend this for consistent option handling</p>
 
 
-    <section class="phpdocumentor-description"><p>Provides shared options: --output-file, --limit-class, --limit-method.
-Many commands can extend this for consistent option handling.</p>
-</section>
 
 
 
@@ -220,16 +197,14 @@ Many commands can extend this for consistent option handling.</p>
             <dt class="phpdocumentor-table-of-contents__entry -property -protected">
     <a class="" href="classes/App-Console-Commands-FilesCommand.html#property_description">$description</a>
     <span>
-                        &nbsp;: string            </span>
+                        &nbsp;: mixed            </span>
 </dt>
-<dd>The console command description.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -protected">
     <a class="" href="classes/App-Console-Commands-FilesCommand.html#property_signature">$signature</a>
     <span>
-                        &nbsp;: string            </span>
+                        &nbsp;: mixed            </span>
 </dt>
-<dd>The name and signature of the console command.</dd>
 
     </dl>
 
@@ -244,35 +219,30 @@ Many commands can extend this for consistent option handling.</p>
     <span>
                                 &nbsp;: int    </span>
 </dt>
-<dd>Handle the incoming console command.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/App-Console-Commands-FilesCommand.html#method_executeCommand">executeCommand()</a>
     <span>
                                 &nbsp;: int    </span>
 </dt>
-<dd>Execute the command logic.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/App-Console-Commands-FilesCommand.html#method_getClassLimit">getClassLimit()</a>
     <span>
                                 &nbsp;: int    </span>
 </dt>
-<dd>Retrieve the class limit option.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/App-Console-Commands-FilesCommand.html#method_getMethodLimit">getMethodLimit()</a>
     <span>
                                 &nbsp;: int    </span>
 </dt>
-<dd>Retrieve the method limit option.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/App-Console-Commands-FilesCommand.html#method_getOutputFile">getOutputFile()</a>
     <span>
                                 &nbsp;: string|null    </span>
 </dt>
-<dd>Retrieve and normalize the output file path.</dd>
 
     </dl>
 
@@ -304,16 +274,15 @@ Many commands can extend this for consistent option handling.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Console/Commands/FilesCommand.php"><a href="files/console-commands-filescommand.html"><abbr title="Console/Commands/FilesCommand.php">FilesCommand.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">32</span>
+    <span class="phpdocumentor-element-found-in__line">19</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">The console command description.</p>
-
+    
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">string</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
     <span class="phpdocumentor-signature__name">$description</span>
      = <span class="phpdocumentor-signature__default-value">&#039;Base command providing common arguments.&#039;</span></code>
 
@@ -341,16 +310,15 @@ Many commands can extend this for consistent option handling.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Console/Commands/FilesCommand.php"><a href="files/console-commands-filescommand.html"><abbr title="Console/Commands/FilesCommand.php">FilesCommand.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">22</span>
+    <span class="phpdocumentor-element-found-in__line">14</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">The name and signature of the console command.</p>
-
+    
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">string</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
     <span class="phpdocumentor-signature__name">$signature</span>
      = <span class="phpdocumentor-signature__default-value">&#039;code:base
         {--output-file=}
@@ -386,12 +354,11 @@ Many commands can extend this for consistent option handling.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Console/Commands/FilesCommand.php"><a href="files/console-commands-filescommand.html"><abbr title="Console/Commands/FilesCommand.php">FilesCommand.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">41</span>
+    <span class="phpdocumentor-element-found-in__line">21</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Handle the incoming console command.</p>
-
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
                     <span class="phpdocumentor-signature__name">handle</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
@@ -399,9 +366,7 @@ Many commands can extend this for consistent option handling.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Delegates execution to the concrete executeCommand method.</p>
-</section>
-
+    
     
     
 
@@ -410,10 +375,6 @@ Many commands can extend this for consistent option handling.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">int</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>Exit status code.</p>
-</section>
-
             </section>
 
 </article>
@@ -431,12 +392,11 @@ Many commands can extend this for consistent option handling.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Console/Commands/FilesCommand.php"><a href="files/console-commands-filescommand.html"><abbr title="Console/Commands/FilesCommand.php">FilesCommand.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">53</span>
+    <span class="phpdocumentor-element-found-in__line">26</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Execute the command logic.</p>
-
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
     <span class="phpdocumentor-signature__abstract">abstract</span>                <span class="phpdocumentor-signature__name">executeCommand</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
@@ -444,9 +404,7 @@ Many commands can extend this for consistent option handling.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Must be implemented by concrete command classes.</p>
-</section>
-
+    
     
     
 
@@ -455,10 +413,6 @@ Many commands can extend this for consistent option handling.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">int</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>Exit status code.</p>
-</section>
-
             </section>
 
 </article>
@@ -476,12 +430,11 @@ Many commands can extend this for consistent option handling.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Console/Commands/FilesCommand.php"><a href="files/console-commands-filescommand.html"><abbr title="Console/Commands/FilesCommand.php">FilesCommand.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">74</span>
+    <span class="phpdocumentor-element-found-in__line">37</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Retrieve the class limit option.</p>
-
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
                     <span class="phpdocumentor-signature__name">getClassLimit</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
@@ -498,10 +451,6 @@ Many commands can extend this for consistent option handling.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">int</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>The maximum number of classes to process.</p>
-</section>
-
             </section>
 
 </article>
@@ -519,12 +468,11 @@ Many commands can extend this for consistent option handling.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Console/Commands/FilesCommand.php"><a href="files/console-commands-filescommand.html"><abbr title="Console/Commands/FilesCommand.php">FilesCommand.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">84</span>
+    <span class="phpdocumentor-element-found-in__line">42</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Retrieve the method limit option.</p>
-
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
                     <span class="phpdocumentor-signature__name">getMethodLimit</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
@@ -541,10 +489,6 @@ Many commands can extend this for consistent option handling.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">int</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>The maximum number of methods to process per class.</p>
-</section>
-
             </section>
 
 </article>
@@ -562,12 +506,11 @@ Many commands can extend this for consistent option handling.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Console/Commands/FilesCommand.php"><a href="files/console-commands-filescommand.html"><abbr title="Console/Commands/FilesCommand.php">FilesCommand.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">60</span>
+    <span class="phpdocumentor-element-found-in__line">28</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Retrieve and normalize the output file path.</p>
-
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
                     <span class="phpdocumentor-signature__name">getOutputFile</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string|null</span></code>
@@ -584,10 +527,6 @@ Many commands can extend this for consistent option handling.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">string|null</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>The normalized output file path, or null if not provided.</p>
-</section>
-
             </section>
 
 </article>

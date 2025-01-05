@@ -105,26 +105,6 @@
                 <a href="packages/App-Console.html" class="">Console</a>
                 
             </li>
-                    <li>
-                <a href="packages/App-Facades.html" class="">Facades</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Http.html" class="">Http</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Jobs.html" class="">Jobs</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Models.html" class="">Models</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Services.html" class="">Services</a>
-                
-            </li>
             </ul>
 
                         </section>
@@ -160,8 +140,7 @@
             <div class="phpdocumentor-element__package">
             in package
             <ul class="phpdocumentor-breadcrumbs">
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App.html">App</a></li>
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App-Models.html">Models</a></li>
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
                             </ul>
         </div>
     
@@ -179,16 +158,12 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Models/CodeAnalysis.php"><a href="files/models-codeanalysis.html"><abbr title="Models/CodeAnalysis.php">CodeAnalysis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">16</span>
+    <span class="phpdocumentor-element-found-in__line">8</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">Code Analysis Model.</p>
+        
 
-
-    <section class="phpdocumentor-description"><p>Represents the analysis of a specific PHP file, including its abstract syntax tree (AST),
-analysis summaries, current processing pass, and completed passes.</p>
-</section>
 
 
 
@@ -217,18 +192,10 @@ analysis summaries, current processing pass, and completed passes.</p>
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -property -protected">
-    <a class="" href="classes/App-Models-CodeAnalysis.html#property_casts">$casts</a>
-    <span>
-                        &nbsp;: array&lt;string, string&gt;            </span>
-</dt>
-<dd>The attributes that should be cast.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -property -protected">
     <a class="" href="classes/App-Models-CodeAnalysis.html#property_fillable">$fillable</a>
     <span>
-                        &nbsp;: array&lt;int, string&gt;            </span>
+                        &nbsp;: mixed            </span>
 </dt>
-<dd>The attributes that are mass assignable.</dd>
 
     </dl>
 
@@ -242,6 +209,12 @@ analysis summaries, current processing pass, and completed passes.</p>
     <a class="" href="classes/App-Models-CodeAnalysis.html#method_aiResults">aiResults()</a>
     <span>
                                 &nbsp;: mixed    </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -protected">
+    <a class="" href="classes/App-Models-CodeAnalysis.html#method_casts">casts()</a>
+    <span>
+                                &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
 
     </dl>
@@ -264,43 +237,6 @@ analysis summaries, current processing pass, and completed passes.</p>
             -protected
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="property_casts">
-        $casts
-        <a href="classes/App-Models-CodeAnalysis.html#property_casts" class="headerlink"><i class="fas fa-link"></i></a>
-
-        <span class="phpdocumentor-element__modifiers">
-                                </span>
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="Models/CodeAnalysis.php"><a href="files/models-codeanalysis.html"><abbr title="Models/CodeAnalysis.php">CodeAnalysis.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">39</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">The attributes that should be cast.</p>
-
-    
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">array&lt;string, string&gt;</span>
-    <span class="phpdocumentor-signature__name">$casts</span>
-     = <span class="phpdocumentor-signature__default-value">[&#039;ast&#039; =&gt; &#039;array&#039;, &#039;analysis&#039; =&gt; &#039;array&#039;, &#039;ai_output&#039; =&gt; &#039;array&#039;, &#039;completed_passes&#039; =&gt; &#039;array&#039;]</span></code>
-
-    
-    
-    
-
-    
-
-</article>
-                    <article
-        class="
-            phpdocumentor-element
-            -property
-            -protected
-                                                        "
->
     <h4 class="phpdocumentor-element__name" id="property_fillable">
         $fillable
         <a href="classes/App-Models-CodeAnalysis.html#property_fillable" class="headerlink"><i class="fas fa-link"></i></a>
@@ -311,18 +247,26 @@ analysis summaries, current processing pass, and completed passes.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Models/CodeAnalysis.php"><a href="files/models-codeanalysis.html"><abbr title="Models/CodeAnalysis.php">CodeAnalysis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">25</span>
+    <span class="phpdocumentor-element-found-in__line">12</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">The attributes that are mass assignable.</p>
-
+    
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">array&lt;int, string&gt;</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
     <span class="phpdocumentor-signature__name">$fillable</span>
-     = <span class="phpdocumentor-signature__default-value">[&#039;file_path&#039;, &#039;ast&#039;, &#039;analysis&#039;, &#039;ai_output&#039;, &#039;current_pass&#039;, &#039;completed_passes&#039;]</span></code>
+     = <span class="phpdocumentor-signature__default-value">[
+    &#039;file_path&#039;,
+    &#039;ast&#039;,
+    &#039;analysis&#039;,
+    &#039;ai_output&#039;,
+    // Add this line
+    &#039;current_pass&#039;,
+    // Added
+    &#039;completed_passes&#039;,
+]</span></code>
 
     
     
@@ -353,7 +297,7 @@ analysis summaries, current processing pass, and completed passes.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Models/CodeAnalysis.php"><a href="files/models-codeanalysis.html"><abbr title="Models/CodeAnalysis.php">CodeAnalysis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">46</span>
+    <span class="phpdocumentor-element-found-in__line">21</span>
 
     </aside>
 
@@ -372,6 +316,44 @@ analysis summaries, current processing pass, and completed passes.</p>
     
 
     
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -protected
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_casts">
+        casts()
+        <a href="classes/App-Models-CodeAnalysis.html#method_casts" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="Models/CodeAnalysis.php"><a href="files/models-codeanalysis.html"><abbr title="Models/CodeAnalysis.php">CodeAnalysis.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">25</span>
+
+    </aside>
+
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">protected</span>
+                    <span class="phpdocumentor-signature__name">casts</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+    
+
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span>
+            </section>
+
 </article>
             </section>
 
@@ -486,7 +468,6 @@ analysis summaries, current processing pass, and completed passes.</p>
                             <li class="phpdocumentor-on-this-page-section__title">Properties</li>
                 <li>
                     <ul class="phpdocumentor-list -clean">
-                                                    <li class=""><a href="classes/App-Models-CodeAnalysis.html#property_casts">$casts</a></li>
                                                     <li class=""><a href="classes/App-Models-CodeAnalysis.html#property_fillable">$fillable</a></li>
                                             </ul>
                 </li>
@@ -495,6 +476,7 @@ analysis summaries, current processing pass, and completed passes.</p>
             <li>
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/App-Models-CodeAnalysis.html#method_aiResults">aiResults()</a></li>
+                                            <li class=""><a href="classes/App-Models-CodeAnalysis.html#method_casts">casts()</a></li>
                                     </ul>
             </li>
                     </ul>

@@ -105,26 +105,6 @@
                 <a href="packages/App-Console.html" class="">Console</a>
                 
             </li>
-                    <li>
-                <a href="packages/App-Facades.html" class="">Facades</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Http.html" class="">Http</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Jobs.html" class="">Jobs</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Models.html" class="">Models</a>
-                
-            </li>
-                    <li>
-                <a href="packages/App-Services.html" class="">Services</a>
-                
-            </li>
             </ul>
 
                         </section>
@@ -161,9 +141,7 @@
             <div class="phpdocumentor-element__package">
             in package
             <ul class="phpdocumentor-breadcrumbs">
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App.html">App</a></li>
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App-Console.html">Console</a></li>
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/App-Console-Commands.html">Commands</a></li>
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
                             </ul>
         </div>
     
@@ -178,15 +156,13 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Console/Commands/ParseFilesCommand.php"><a href="files/console-commands-parsefilescommand.html"><abbr title="Console/Commands/ParseFilesCommand.php">ParseFilesCommand.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">18</span>
+    <span class="phpdocumentor-element-found-in__line">14</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">ParseFilesCommand.</p>
+            <p class="phpdocumentor-summary">Example command that parses PHP files (including traits).</p>
 
 
-    <section class="phpdocumentor-description"><p>Parses PHP files and outputs discovered classes, traits, functions, etc.</p>
-</section>
 
 
 
@@ -217,9 +193,8 @@
             <dt class="phpdocumentor-table-of-contents__entry -property -protected">
     <a class="" href="classes/App-Console-Commands-ParseFilesCommand.html#property_description">$description</a>
     <span>
-                        &nbsp;: string            </span>
+                        &nbsp;: mixed            </span>
 </dt>
-<dd>The console command description.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -protected">
     <a class="" href="classes/App-Console-Commands-ParseFilesCommand.html#property_parserService">$parserService</a>
@@ -230,9 +205,8 @@
             <dt class="phpdocumentor-table-of-contents__entry -property -protected">
     <a class="" href="classes/App-Console-Commands-ParseFilesCommand.html#property_signature">$signature</a>
     <span>
-                        &nbsp;: string            </span>
+                        &nbsp;: mixed            </span>
 </dt>
-<dd>The name and signature of the console command.</dd>
 
     </dl>
 
@@ -247,28 +221,24 @@
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
-<dd>Constructor for ParseFilesCommand.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/App-Console-Commands-ParseFilesCommand.html#method_handle">handle()</a>
     <span>
                                 &nbsp;: int    </span>
 </dt>
-<dd>Handle the incoming console command.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/App-Console-Commands-ParseFilesCommand.html#method_displayTable">displayTable()</a>
     <span>
-                                &nbsp;: void    </span>
+                                &nbsp;: mixed    </span>
 </dt>
-<dd>Display the collected items in a table format.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/App-Console-Commands-ParseFilesCommand.html#method_exportJson">exportJson()</a>
     <span>
-                                &nbsp;: void    </span>
+                                &nbsp;: mixed    </span>
 </dt>
-<dd>Export collected items to a JSON file.</dd>
 
     </dl>
 
@@ -300,16 +270,15 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Console/Commands/ParseFilesCommand.php"><a href="files/console-commands-parsefilescommand.html"><abbr title="Console/Commands/ParseFilesCommand.php">ParseFilesCommand.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">36</span>
+    <span class="phpdocumentor-element-found-in__line">22</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">The console command description.</p>
-
+    
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">string</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
     <span class="phpdocumentor-signature__name">$description</span>
      = <span class="phpdocumentor-signature__default-value">&#039;Parse PHP files and output discovered classes, traits, functions.&#039;</span></code>
 
@@ -337,7 +306,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Console/Commands/ParseFilesCommand.php"><a href="files/console-commands-parsefilescommand.html"><abbr title="Console/Commands/ParseFilesCommand.php">ParseFilesCommand.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">46</span>
+    <span class="phpdocumentor-element-found-in__line">24</span>
 
     </aside>
 
@@ -373,16 +342,15 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Console/Commands/ParseFilesCommand.php"><a href="files/console-commands-parsefilescommand.html"><abbr title="Console/Commands/ParseFilesCommand.php">ParseFilesCommand.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">25</span>
+    <span class="phpdocumentor-element-found-in__line">16</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">The name and signature of the console command.</p>
-
+    
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">string</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
     <span class="phpdocumentor-signature__name">$signature</span>
      = <span class="phpdocumentor-signature__default-value">&#039;parse:files
         {--filter= : Filter by item name}
@@ -419,12 +387,11 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Console/Commands/ParseFilesCommand.php"><a href="files/console-commands-parsefilescommand.html"><abbr title="Console/Commands/ParseFilesCommand.php">ParseFilesCommand.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">45</span>
+    <span class="phpdocumentor-element-found-in__line">24</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Constructor for ParseFilesCommand.</p>
-
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
                     <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type"><a href="classes/App-Services-Parsing-ParserService.html"><abbr title="\App\Services\Parsing\ParserService">ParserService</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$parserService</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
@@ -432,9 +399,7 @@
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Injects the ParserService dependency.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -442,9 +407,7 @@
                 : <span class="phpdocumentor-signature__argument__return-type"><a href="classes/App-Services-Parsing-ParserService.html"><abbr title="\App\Services\Parsing\ParserService">ParserService</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Service for parsing PHP files.</p>
-</section>
-
+                
             </dd>
             </dl>
 
@@ -468,12 +431,11 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Console/Commands/ParseFilesCommand.php"><a href="files/console-commands-parsefilescommand.html"><abbr title="Console/Commands/ParseFilesCommand.php">ParseFilesCommand.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">58</span>
+    <span class="phpdocumentor-element-found-in__line">29</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Handle the incoming console command.</p>
-
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
                     <span class="phpdocumentor-signature__name">handle</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
@@ -481,9 +443,7 @@
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Collects PHP files, parses them, applies optional filters and limits, and outputs the results.</p>
-</section>
-
+    
     
     
 
@@ -492,10 +452,6 @@
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">int</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>Exit status code.</p>
-</section>
-
             </section>
 
 </article>
@@ -513,15 +469,14 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Console/Commands/ParseFilesCommand.php"><a href="files/console-commands-parsefilescommand.html"><abbr title="Console/Commands/ParseFilesCommand.php">ParseFilesCommand.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">164</span>
+    <span class="phpdocumentor-element-found-in__line">122</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Display the collected items in a table format.</p>
-
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-                    <span class="phpdocumentor-signature__name">displayTable</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type"><abbr title="\Illuminate\Support\Collection">Collection</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$items</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">displayTable</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type"><abbr title="\Illuminate\Support\Collection">Collection</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$items</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -534,9 +489,7 @@
                 : <span class="phpdocumentor-signature__argument__return-type"><abbr title="\Illuminate\Support\Collection">Collection</abbr></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The collection of items to display.</p>
-</section>
-
+                
             </dd>
             </dl>
 
@@ -560,15 +513,14 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="Console/Commands/ParseFilesCommand.php"><a href="files/console-commands-parsefilescommand.html"><abbr title="Console/Commands/ParseFilesCommand.php">ParseFilesCommand.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">146</span>
+    <span class="phpdocumentor-element-found-in__line">110</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Export collected items to a JSON file.</p>
-
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-                    <span class="phpdocumentor-signature__name">exportJson</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type"><abbr title="\Illuminate\Support\Collection">Collection</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$items</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$filePath</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">exportJson</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type"><abbr title="\Illuminate\Support\Collection">Collection</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$items</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$filePath</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -581,18 +533,14 @@
                 : <span class="phpdocumentor-signature__argument__return-type"><abbr title="\Illuminate\Support\Collection">Collection</abbr></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The collection of items to export.</p>
-</section>
-
+                
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$filePath</span>
                 : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The file path where the JSON will be saved.</p>
-</section>
-
+                
             </dd>
             </dl>
 
