@@ -128,5 +128,4 @@ return [
             'scoring_pass',
         ],
     ],
-    ],
 ];
