@@ -35,6 +35,7 @@ class AIResult extends Model
     {
         return [
             'metadata' => 'array',
+            'response_text' => 'array', // If you plan to store JSON responses as arrays
         ];
     }
 }

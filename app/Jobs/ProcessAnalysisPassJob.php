@@ -57,9 +57,9 @@ class ProcessAnalysisPassJob implements ShouldQueue
         }
 
         // 2) Retrieve pass config
-        $allPassConfigs = config('ai.operations.multi_pass_analysis', []);
-        $config = $allPassConfigs[$this->passName] ?? null;
-        if (! $config) {
+        $passConfigs = config('ai.passes', []);
+        $cfg = $passConfigs[$this->passName] ?? null;
+        if (! $cfg) {
             Log::warning("ProcessAnalysisPassJob: No config for pass [{$this->passName}]. Skipping.");
 
             return;
@@ -74,13 +74,14 @@ class ProcessAnalysisPassJob implements ShouldQueue
 
         // 4) Build prompt
         Log::info("ProcessAnalysisPassJob: Building prompt for pass [{$this->passName}].");
-        $prompt = app(\App\Services\AI\CodeAnalysisService::class)->buildPromptForPass($analysis, $this->passName);
+        $codeAnalysisService = app(\App\Services\AI\CodeAnalysisService::class);
+        $prompt = $codeAnalysisService->buildPromptForPass($analysis, $this->passName);
 
         // 5) Perform AI call
         try {
             Log::info("ProcessAnalysisPassJob: Calling OpenAI for pass [{$this->passName}] on [{$analysis->file_path}].");
             $responseData = $openAIService->performOperation(
-                operationIdentifier: $config['operation'] ?? 'code_analysis',
+                operationIdentifier: $cfg['operation_identifier'] ?? 'code_analysis',
                 params: [
                     'prompt' => $prompt,
                     'max_tokens' => $config['max_tokens'] ?? 1500,

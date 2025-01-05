@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('code_analysis_id')->constrained()->onDelete('cascade');
             $table->string('operation');
             $table->float('score');
+            $table->text('summary'); // To store the AI-provided summary
             $table->timestamps();
         });
     }

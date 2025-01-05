@@ -109,7 +109,12 @@ class OpenAIService
             }
 
             return trim((string) $content);
-        } catch (\Throwable $throwable) {
+        } catch (\JsonException $je) {
+            Log::error("OpenAIService: JSON error => " . $je->getMessage(), [
+                'exception' => $je,
+                'operation' => $operationIdentifier,
+            ]);
+            throw $je;
             Log::error("OpenAI request failed [{$operationIdentifier}]: ".$throwable->getMessage(), [
                 'exception' => $throwable,
             ]);

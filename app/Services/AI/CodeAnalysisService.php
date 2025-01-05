@@ -156,8 +156,12 @@ class CodeAnalysisService
     public function buildPromptForPass(CodeAnalysis $analysis, string $passName): string
     {
         // 1) Get the pass config
-        $allPassConfigs = config('ai.operations.multi_pass_analysis', []);
+        $allPassConfigs = config('ai.passes', []);
         $cfg = $allPassConfigs[$passName] ?? null;
+        if (!$cfg) {
+            Log::error("buildPromptForPass: No configuration found for pass '{$passName}'.");
+            return "Invalid pass name.";
+        }
 
         $passType = $cfg['type'] ?? 'both';
         $base = $cfg['prompt'] ?? 'Analyze the following code:';
@@ -225,7 +229,7 @@ class CodeAnalysisService
         }
 
         $responseData = $latestScoringResult->response_text;
-        $scoresData = json_decode($responseData, true);
+        $scoresData = json_decode($responseData, true, 512, JSON_THROW_ON_ERROR);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             Log::error("computeAndStoreScores: JSON decode error for CodeAnalysis ID {$analysis->id}: " . json_last_error_msg());
@@ -271,7 +275,7 @@ class CodeAnalysisService
             ],
         ];
 
-        AIScore::insert($aiScores);
+        $analysis->aiScores()->insert($aiScores);
 
         Log::info("CodeAnalysisService: Scores computed for [{$analysis->file_path}].", $scoresData);
     }
