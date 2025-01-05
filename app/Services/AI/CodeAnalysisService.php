@@ -229,10 +229,10 @@ class CodeAnalysisService
         }
 
         $responseData = $latestScoringResult->response_text;
-        $scoresData = json_decode($responseData, true, 512, JSON_THROW_ON_ERROR);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            Log::error("computeAndStoreScores: JSON decode error for CodeAnalysis ID {$analysis->id}: " . json_last_error_msg());
+        try {
+            $scoresData = json_decode($responseData, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $je) {
+            Log::error("computeAndStoreScores: JSON decode error for CodeAnalysis ID {$analysis->id}: " . $je->getMessage());
             return;
         }
 
