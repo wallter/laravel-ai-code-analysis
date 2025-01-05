@@ -51,7 +51,7 @@
         }
     },
     "scripts": {
-        "rector": "vendor/bin/rector -c phpdoc.xml",
+        "rector": "vendor/bin/rector -c rector.php",
         "phpdoc": "docker run --rm -v $(pwd):/data phpdoc/phpdoc:3 && open resources/phpdoc/index.html",
 
         "post-autoload-dump": [

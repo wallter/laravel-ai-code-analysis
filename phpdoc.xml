@@ -1,13 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
-<phpdoc>
-    <title>Laravel AI Code Analysis by Tyler Wall</title>
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdocumentor
+        configVersion="3"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="https://www.phpdoc.org">
+>
+    <title>Laravel AI Code Analysis</title>
+    <paths>
+        <output>resources/phpdoc</output>
+    </paths>
     
-    <files>
-        <directory>app</directory>
-        <directory>database</directory>
-        <directory>resources</directory>
-        <directory>routes</directory>
-        <directory>tests</directory>
-        <directory>config</directory>
-    </files>
-</phpdoc>
+    <version number="0.1">
+        <api>
+            <source dsn="app">
+
+            </source>
+        </api>
+    </version>
+</phpdocumentor>
