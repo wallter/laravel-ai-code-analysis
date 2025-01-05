@@ -48,8 +48,7 @@
 
     // Window Title Configuration
     "window.title": "${activeFolderShort}/${activeEditorShort}${separator}${remoteName}",
-    "window.titleSeparator": " - "
-}
+    "window.titleSeparator": " - ",
 
     // Selection Highlight Border
     "editor.selectionHighlightBorder": "#4caf50", // Adds a green border to selection highlights
