@@ -49,10 +49,10 @@
     // Window Title Configuration
     "window.title": "${activeFolderShort}/${activeEditorShort}${separator}${remoteName}",
     "window.titleSeparator": " - "
-},
+}
 
 /** Enhanced UI Elements **/
-"workbench.colorCustomizations": {
+    "workbench.colorCustomizations": {
     // Selection Highlight Border
     "editor.selectionHighlightBorder": "#4caf50", // Adds a green border to selection highlights
 
@@ -105,5 +105,5 @@
     "panel.border": "#4caf50", // Green border around panels
 
     // Panel Title Active Border
-    "panelTitle.activeBorder": "#4caf50", // Green border for active panel titles
+    "panelTitle.activeBorder": "#4caf50" // Green border for active panel titles
 }
