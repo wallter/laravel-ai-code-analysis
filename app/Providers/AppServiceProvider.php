@@ -14,12 +14,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(ParserService::class, function ($app) {
-            return new ParserService();
-        });
-
         $this->app->singleton(OpenAIService::class, function ($app) {
             return new OpenAIService();
+        });
+        
+        $this->app->singleton(ParserService::class, function ($app) {
+            return new ParserService();
         });
 
         $this->app->singleton(CodeAnalysisService::class, function ($app) {
