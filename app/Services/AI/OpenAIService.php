@@ -17,11 +17,26 @@ class OpenAIService
 {
     protected ?array $lastUsage = null;
 
+    /**
+     * Get the last usage metrics from the OpenAI API.
+     *
+     * @return array|null The usage metrics or null if not set.
+     */
     public function getLastUsage(): ?array
     {
         return $this->lastUsage;
     }
 
+    /**
+     * Perform an OpenAI operation based on the provided identifier and parameters.
+     *
+     * @param string $operationIdentifier The identifier for the OpenAI operation.
+     * @param array $params The parameters for the OpenAI operation.
+     * @return string The response content from OpenAI.
+     *
+     * @throws InvalidArgumentException If the operation identifier is invalid.
+     * @throws Exception If the OpenAI response does not contain content.
+     */
     public function performOperation(string $operationIdentifier, array $params = []): string
     {
         $opConfig = config("ai.operations.{$operationIdentifier}", []);
@@ -32,11 +47,11 @@ class OpenAIService
         }
 
         // Merge with defaults
-        $model         = $opConfig['model']         ?? config('ai.default.model');
-        $maxTokens     = $params['max_tokens']      ?? $opConfig['max_tokens']      ?? config('ai.default.max_tokens');
-        $temperature   = $params['temperature']     ?? $opConfig['temperature']     ?? config('ai.default.temperature');
+        $model = $opConfig['model'] ?? config('ai.default.model');
+        $maxTokens = $params['max_tokens'] ?? $opConfig['max_tokens'] ?? config('ai.default.max_tokens');
+        $temperature = $params['temperature'] ?? $opConfig['temperature'] ?? config('ai.default.temperature');
         $systemMessage = $opConfig['system_message'] ?? config('ai.default.system_message');
-        $promptText    = $params['prompt']          ?? $opConfig['prompt'];
+        $promptText = $params['prompt'] ?? $opConfig['prompt'];
 
         if (empty($promptText)) {
             $msg = "No prompt text provided for [{$operationIdentifier}].";
@@ -50,12 +65,12 @@ class OpenAIService
 
         // Prepare chat payload
         $payload = [
-            'model'       => $model,
-            'messages'    => [
+            'model' => $model,
+            'messages' => [
                 ['role' => 'system', 'content' => $systemMessage],
-                ['role' => 'user',   'content' => $promptText],
+                ['role' => 'user', 'content' => $promptText],
             ],
-            'max_tokens'  => $maxTokens,
+            'max_tokens' => $maxTokens,
             'temperature' => $temperature,
         ];
 
@@ -88,9 +103,9 @@ class OpenAIService
             $usage = $response['usage'] ?? null;
             if ($usage) {
                 $this->lastUsage = [
-                    'prompt_tokens'     => $usage['prompt_tokens']     ?? 0,
+                    'prompt_tokens' => $usage['prompt_tokens'] ?? 0,
                     'completion_tokens' => $usage['completion_tokens'] ?? 0,
-                    'total_tokens'      => $usage['total_tokens']      ?? 0,
+                    'total_tokens' => $usage['total_tokens'] ?? 0,
                 ];
             }
 

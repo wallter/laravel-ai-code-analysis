@@ -42,23 +42,21 @@ class ParseFilesCommand extends FilesCommand
     /**
      * Execute the console command.
      *
-     * Parses PHP files based on provided options and exports the results if specified.
-     *
      * @return int Exit status code.
      */
     public function handle(): int
     {
-        $phpFiles   = $this->parserService->collectPhpFiles();
+        $phpFiles = $this->parserService->collectPhpFiles();
         $outputFile = $this->option('output-file') ?: null;
         $limitClass = (int) $this->option('limit-class');
-        $limitMethod= (int) $this->option('limit-method');
-        $filter     = $this->option('filter') ?: '';
+        $limitMethod = (int) $this->option('limit-method');
+        $filter = $this->option('filter') ?: '';
 
         Log::info('ParseFilesCommand starting.', [
-            'file_count'   => $phpFiles->count(),
-            'limit_class'  => $limitClass,
+            'file_count' => $phpFiles->count(),
+            'limit_class' => $limitClass,
             'limit_method' => $limitMethod,
-            'output_file'  => $outputFile,
+            'output_file' => $outputFile,
         ]);
 
         $this->info(sprintf(

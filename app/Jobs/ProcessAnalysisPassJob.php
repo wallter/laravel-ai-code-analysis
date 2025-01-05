@@ -12,6 +12,12 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Handles the processing of AI passes for code analysis.
+ *
+ * This job retrieves the specified CodeAnalysis record, performs the designated AI pass,
+ * stores the results, and marks the pass as completed.
+ */
 class ProcessAnalysisPassJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -25,7 +31,10 @@ class ProcessAnalysisPassJob implements ShouldQueue
     }
 
     /**
-     * The job handle method. This is where the AI pass is executed.
+     * Execute the job.
+     *
+     * @param OpenAIService $openAIService The service handling OpenAI interactions.
+     * @return void
      */
     public function handle(OpenAIService $openAIService): void
     {
@@ -45,7 +54,7 @@ class ProcessAnalysisPassJob implements ShouldQueue
 
         // 2) Retrieve pass config
         $allPassConfigs = config('ai.operations.multi_pass_analysis', []);
-        $config         = $allPassConfigs[$this->passName] ?? null;
+        $config = $allPassConfigs[$this->passName] ?? null;
         if (!$config) {
             Log::warning("ProcessAnalysisPassJob: No config for pass [{$this->passName}]. Skipping.");
             return;
@@ -67,16 +76,14 @@ class ProcessAnalysisPassJob implements ShouldQueue
             $responseData = $openAIService->performOperation(
                 operationIdentifier: $config['operation'] ?? 'code_analysis',
                 params: [
-                    'prompt'      => $prompt,
-                    'max_tokens'  => $config['max_tokens']  ?? 1500,
+                    'prompt' => $prompt,
+                    'max_tokens' => $config['max_tokens'] ?? 1500,
                     'temperature' => $config['temperature'] ?? 0.5,
                 ]
             );
 
-            // 6) If we want token usage, parse usage from the response
-            //    We'll assume 'usage' is in the $openAIService->lastUsage or we can store it in $responseData
-            //    after we adapt OpenAIService (see below).
-            $usage    = $openAIService->getLastUsage(); // We'll add a getLastUsage() method
+            // 6) Extract usage
+            $usage = $openAIService->getLastUsage();
             $metadata = [];
             if (!empty($usage)) {
                 $metadata['usage'] = $usage;
@@ -89,10 +96,10 @@ class ProcessAnalysisPassJob implements ShouldQueue
             // 7) Create AIResult entry
             AIResult::create([
                 'code_analysis_id' => $analysis->id,
-                'pass_name'        => $this->passName,
-                'prompt_text'      => $prompt,
-                'response_text'    => $responseData,
-                'metadata'         => $metadata,
+                'pass_name' => $this->passName,
+                'prompt_text' => $prompt,
+                'response_text' => $responseData,
+                'metadata' => $metadata,
             ]);
 
             // 8) Mark pass as complete

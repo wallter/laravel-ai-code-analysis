@@ -7,8 +7,16 @@ use Illuminate\Support\Facades\Log;
 use App\Models\CodeAnalysis;
 use App\Services\AI\CodeAnalysisService;
 
+/**
+ * Controller handling analysis-related actions.
+ */
 class AnalysisController extends Controller
 {
+    /**
+     * Initialize the AnalysisController with necessary services.
+     *
+     * @param CodeAnalysisService $codeAnalysisService The service handling code analysis.
+     */
     public function __construct(protected CodeAnalysisService $codeAnalysisService)
     {
         // No auth or middleware needed, as requested.
@@ -16,6 +24,8 @@ class AnalysisController extends Controller
 
     /**
      * Display a listing of all CodeAnalysis records.
+     *
+     * @return \Illuminate\View\View The view displaying all analyses.
      */
     public function index()
     {
@@ -27,6 +37,9 @@ class AnalysisController extends Controller
 
     /**
      * Show details (including AI results) for a single CodeAnalysis record.
+     *
+     * @param int $id The ID of the CodeAnalysis record.
+     * @return \Illuminate\View\View The view displaying the analysis details.
      */
     public function show(int $id)
     {
@@ -49,6 +62,9 @@ class AnalysisController extends Controller
      *    <input name="filePath" />
      *    <button type="submit">Analyze</button>
      *  </form>
+     *
+     * @param \Illuminate\Http\Request $request The incoming HTTP request.
+     * @return \Illuminate\Http\RedirectResponse Redirects back with status or errors.
      */
     public function analyze(Request $request)
     {

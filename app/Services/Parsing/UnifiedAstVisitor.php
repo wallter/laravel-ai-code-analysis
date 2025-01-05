@@ -17,7 +17,7 @@ use Illuminate\Support\Collection;
 class UnifiedAstVisitor extends NodeVisitorAbstract
 {
     protected Collection $items;
-    protected ?string $currentFile      = null;
+    protected ?string $currentFile = null;
     protected ?string $currentNamespace = null;
 
     public function __construct()
@@ -36,7 +36,7 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
     /**
      * Called when entering a node in the AST.
      */
-    public function enterNode(Node $node)
+    public function enterNode(Node $node): ?Node
     {
         // Track namespace
         if ($node instanceof Namespace_) {
@@ -47,52 +47,56 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
 
         // Collect Class, Trait, or Interface
         if ($node instanceof ClassLike && $node->name !== null) {
-            $type    = $this->resolveClassLikeType($node);
+            $type = $this->resolveClassLikeType($node);
             $docInfo = $this->extractDocInfo($node);
             $methods = $this->collectMethods($node);
 
             $this->items->push([
-                'type'        => $type, // "Class", "Trait", or "Interface"
-                'name'        => $node->name->toString(),
-                'namespace'   => $this->currentNamespace,
+                'type' => $type, // "Class", "Trait", or "Interface"
+                'name' => $node->name->toString(),
+                'namespace' => $this->currentNamespace,
                 'annotations' => $docInfo['annotations'],
                 'description' => $docInfo['shortDescription'],
-                'details'     => [
+                'details' => [
                     'methods' => $methods,
                 ],
-                'file'        => $this->currentFile,
-                'line'        => $node->getStartLine(),
+                'file' => $this->currentFile,
+                'line' => $node->getStartLine(),
             ]);
         }
 
         // Collect free-floating functions
         if ($node instanceof Function_) {
             $docInfo = $this->extractDocInfo($node);
-            $params  = $this->collectFunctionParams($node);
+            $params = $this->collectFunctionParams($node);
 
             $this->items->push([
-                'type'        => 'Function',
-                'name'        => $node->name->toString(),
+                'type' => 'Function',
+                'name' => $node->name->toString(),
                 'annotations' => $docInfo['annotations'],
-                'details'     => [
-                    'params'      => $params,
+                'details' => [
+                    'params' => $params,
                     'description' => $docInfo['shortDescription'],
                 ],
-                'file'        => $this->currentFile,
-                'line'        => $node->getStartLine(),
+                'file' => $this->currentFile,
+                'line' => $node->getStartLine(),
             ]);
         }
+
+        return null;
     }
 
     /**
      * Called when leaving a node.
      */
-    public function leaveNode(Node $node)
+    public function leaveNode(Node $node): ?Node
     {
         // Reset namespace after leaving a Namespace_ node
         if ($node instanceof Namespace_) {
             $this->currentNamespace = null;
         }
+
+        return null;
     }
 
     /**
@@ -132,15 +136,15 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
     {
         $methods = [];
         foreach ($node->getMethods() as $method) {
-            $mDoc   = $this->extractDocInfo($method);
+            $mDoc = $this->extractDocInfo($method);
             $params = $this->collectMethodParams($method);
 
             $methods[] = [
-                'name'        => $method->name->toString(),
+                'name' => $method->name->toString(),
                 'description' => $mDoc['shortDescription'],
                 'annotations' => $mDoc['annotations'],
-                'params'      => $params,
-                'line'        => $method->getStartLine(),
+                'params' => $params,
+                'line' => $method->getStartLine(),
             ];
         }
         return $methods;
@@ -205,7 +209,7 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
         if (!$docComment) {
             return [
                 'shortDescription' => '',
-                'annotations'      => [],
+                'annotations' => [],
             ];
         }
 

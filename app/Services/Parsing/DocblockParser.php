@@ -8,10 +8,19 @@ namespace App\Services\Parsing;
  *
  * Extracts:
  *  - shortDescription: lines before first blank line
- *  - annotations: grouped by tag name (e.g. param, throws, return, url, etc.)
+ *  - annotations: grouped by tag name (e.g., param, throws, return, url, etc.)
  */
 class DocblockParser
 {
+    /**
+     * Parse a docblock string and extract the short description and annotations.
+     *
+     * @param string $docblock The docblock text to parse.
+     * @return array{
+     *     shortDescription: string,
+     *     annotations: array<string, mixed>
+     * } The parsed docblock information.
+     */
     public static function parseDocblock(string $docblock): array
     {
         // 1. Split lines, remove extra comment symbols
@@ -67,7 +76,7 @@ class DocblockParser
                 //  - first flush old buffer if it exists
                 $flushBuffer();
 
-                $tag   = $matches[1];
+                $tag = $matches[1];
                 $value = $matches[2];
 
                 // Check known patterns first
@@ -75,16 +84,16 @@ class DocblockParser
                     // @param <type> $<var> <desc...>
                     if (preg_match('/^([^\s]+)\s+\$([A-Za-z0-9_]+)\s*(.*)$/', $value, $m)) {
                         $type = $m[1];
-                        $var  = $m[2];
+                        $var = $m[2];
                         $desc = $m[3] ?? '';
                         $annotations['param'][] = [
                             'type' => $type,
-                            'var'  => $var,
+                            'var' => $var,
                             'desc' => $desc,
                         ];
                         // reset currentTag because param is fully handled on one line
-                        $currentTag   = null;
-                        $currentBuffer= '';
+                        $currentTag = null;
+                        $currentBuffer = '';
                         continue;
                     }
                 } elseif ($tag === 'return') {
@@ -95,8 +104,8 @@ class DocblockParser
                         $annotations['return'][] = $desc === ''
                             ? $type
                             : ($type . ' ' . $desc);
-                        $currentTag   = null;
-                        $currentBuffer= '';
+                        $currentTag = null;
+                        $currentBuffer = '';
                         continue;
                     }
                 } elseif ($tag === 'throws') {
@@ -106,8 +115,8 @@ class DocblockParser
                             'code' => $m[1],
                             'desc' => $m[2],
                         ];
-                        $currentTag   = null;
-                        $currentBuffer= '';
+                        $currentTag = null;
+                        $currentBuffer = '';
                         continue;
                     }
                     // Alternatively, check for a class-based exception
@@ -116,15 +125,15 @@ class DocblockParser
                             'type' => $m[1],
                             'desc' => $m[2],
                         ];
-                        $currentTag   = null;
-                        $currentBuffer= '';
+                        $currentTag = null;
+                        $currentBuffer = '';
                         continue;
                     }
                 }
 
                 // Otherwise treat as a general tag
-                $currentTag   = $tag;
-                $currentBuffer= $value;
+                $currentTag = $tag;
+                $currentBuffer = $value;
             } else {
                 // Not a new tag, so continuation of the existing tag
                 if ($currentTag) {
@@ -137,7 +146,7 @@ class DocblockParser
 
         return [
             'shortDescription' => $shortDescription,
-            'annotations'      => $annotations,
+            'annotations' => $annotations,
         ];
     }
 }

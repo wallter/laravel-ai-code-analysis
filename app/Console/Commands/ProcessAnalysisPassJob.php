@@ -55,7 +55,7 @@ class ProcessAnalysisPassJob extends Command
         Log::info("ProcessPassesCommand started.", ['dryRun' => $dryRun]);
 
         // 2) Retrieve the pass order from config
-        $passOrder      = config('ai.operations.multi_pass_analysis.pass_order', []);
+        $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
         $passOrderCount = count($passOrder);
 
         $this->info("Found [{$passOrderCount}] passes in pass_order: " . implode(', ', $passOrder));
@@ -79,9 +79,9 @@ class ProcessAnalysisPassJob extends Command
 
         // 4) Identify which analyses still have passes pending
         $pendingAnalyses = $allAnalyses->filter(function ($analysis) use ($passOrderCount) {
-            $completed      = (array) ($analysis->completed_passes ?? []);
-            $doneCount      = count($completed);
-            $hasMoreToDo    = $doneCount < $passOrderCount;
+            $completed = (array) ($analysis->completed_passes ?? []);
+            $doneCount = count($completed);
+            $hasMoreToDo = $doneCount < $passOrderCount;
 
             Log::debug("Check [{$analysis->file_path}]: doneCount={$doneCount}, currentPass={$analysis->current_pass}, hasMoreToDo=" . ($hasMoreToDo ? 'true' : 'false'));
             return $hasMoreToDo;
@@ -133,8 +133,8 @@ class ProcessAnalysisPassJob extends Command
 
                 // Collect final status for table display
                 $finalStatuses[] = [
-                    'file_path'      => $analysis->file_path,
-                    'current_pass'   => $analysis->current_pass,
+                    'file_path' => $analysis->file_path,
+                    'current_pass' => $analysis->current_pass,
                     'completed_pass' => implode(', ', $analysis->completed_passes ?? []),
                 ];
             } catch (\Throwable $e) {

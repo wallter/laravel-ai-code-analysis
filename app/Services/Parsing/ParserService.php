@@ -16,15 +16,17 @@ use Exception;
 class ParserService
 {
     /**
-     * Collect .php files from config('parsing.files') + config('parsing.folders')
+     * Collect .php files from config('parsing.files') + config('parsing.folders').
+     *
+     * @return Collection<string> A collection of PHP file paths.
      */
     public function collectPhpFiles(): Collection
     {
         Log::info("ParserService: collecting .php files via config('parsing.files','parsing.folders').");
-        $files   = config('parsing.files', []);
+        $files = config('parsing.files', []);
         $folders = config('parsing.folders', []);
 
-        $fileList   = collect($files)->map(fn($f) => realpath($f))->filter();
+        $fileList = collect($files)->map(fn($f) => realpath($f))->filter();
         $folderList = collect($folders)->flatMap(fn($dir) => $this->getPhpFiles($dir));
 
         $merged = $fileList->merge($folderList)->unique()->values();
@@ -35,6 +37,11 @@ class ParserService
     /**
      * Parse a single PHP file with optional visitors, and return the raw AST array.
      * If $useCache is true, we check code_analyses table first.
+     *
+     * @param string $filePath The path to the PHP file to parse.
+     * @param array $visitors Optional array of NodeVisitor instances.
+     * @param bool $useCache Whether to use cached AST from the database.
+     * @return array The parsed AST.
      */
     public function parseFile(string $filePath, array $visitors = [], bool $useCache = false): array
     {
@@ -101,6 +108,9 @@ class ParserService
 
     /**
      * Recursively get .php files from a directory.
+     *
+     * @param string $directory The directory path to search.
+     * @return Collection<string> A collection of PHP file paths.
      */
     protected function getPhpFiles(string $directory): Collection
     {
