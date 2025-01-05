@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<phpdoc>    
+    <files>
+        <directory>app</directory>
+        <directory>database</directory>
+        <directory>resources</directory>
+        <directory>routes</directory>
+        <directory>tests</directory>
+        <directory>config</directory>
+    </files>
+    
+    <templates>
+        <template name="clean" engine="cleanhtml" output="docs/html" />
+    </templates>
+</phpdoc>
