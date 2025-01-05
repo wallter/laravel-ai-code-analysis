@@ -19,8 +19,7 @@ use Illuminate\Support\Facades\Context;
 class PassesProcessCommand extends Command
 {
     protected $signature = 'passes:process
-        {--dry-run : Run without persisting changes}
-        {--verbose : Show extra debugging info in console output}';
+        {--dry-run : Run without persisting changes}';
 
     protected $description = 'Process the next AI pass for each CodeAnalysis record with incomplete passes.';
 
