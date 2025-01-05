@@ -9,23 +9,43 @@ use Illuminate\Support\Collection;
 use App\Services\Parsing\ParserService;
 
 /**
- * Example command that parses PHP files (including traits).
+ * Parse PHP files and output discovered classes, traits, and functions.
  */
 class ParseFilesCommand extends FilesCommand
 {
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
     protected $signature = 'parse:files
         {--filter= : Filter by item name}
         {--output-file= : Where to export JSON results}
         {--limit-class=0 : Limit how many "Class" or "Trait" items to keep}
         {--limit-method=0 : Limit how many methods per class/trait to keep}';
 
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
     protected $description = 'Parse PHP files and output discovered classes, traits, functions.';
 
+    /**
+     * @var ParserService
+     */
     public function __construct(protected ParserService $parserService)
     {
         parent::__construct();
     }
 
+    /**
+     * Execute the console command.
+     *
+     * Parses PHP files based on provided options and exports the results if specified.
+     *
+     * @return int Exit status code.
+     */
     public function handle(): int
     {
         $phpFiles   = $this->parserService->collectPhpFiles();
@@ -68,7 +88,9 @@ class ParseFilesCommand extends FilesCommand
                 $items = $this->parserService->parseFile($filePath);
                 $collectedItems = $collectedItems->merge($items);
 
-                $this->isVerbose() && $this->info("Successfully parsed: {$filePath}");
+                if ($this->isVerbose()) {
+                    $this->info("Successfully parsed: {$filePath}");
+                }
             } catch (\Throwable $e) {
                 Log::error("Parse error: {$filePath}", ['error' => $e->getMessage()]);
                 $this->warn("Could not parse {$filePath}: {$e->getMessage()}");
@@ -105,7 +127,14 @@ class ParseFilesCommand extends FilesCommand
         return 0;
     }
 
-    protected function exportJson(Collection $items, string $filePath)
+    /**
+     * Export collected items to a JSON file.
+     *
+     * @param Collection $items The collection of items to export.
+     * @param string $filePath The file path to export the JSON to.
+     * @return void
+     */
+    protected function exportJson(Collection $items, string $filePath): void
     {
         $json = json_encode($items->toArray(), JSON_PRETTY_PRINT);
         if (!$json) {

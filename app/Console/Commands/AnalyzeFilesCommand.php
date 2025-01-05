@@ -22,6 +22,9 @@ class AnalyzeFilesCommand extends FilesCommand
 
     protected $description = 'Collect .php files, parse them, run multi-pass AI.';
 
+    /**
+     * @var CodeAnalysisService
+     */
     public function __construct(protected CodeAnalysisService $analysisService)
     {
         parent::__construct();
@@ -59,7 +62,7 @@ class AnalyzeFilesCommand extends FilesCommand
     /**
      * Collect PHP files using the parser service.
      *
-     * @return Collection<string>
+     * @return Collection<string> The collection of PHP file paths.
      */
     protected function collectPhpFiles(): Collection
     {
@@ -73,9 +76,9 @@ class AnalyzeFilesCommand extends FilesCommand
     /**
      * Process each PHP file for analysis.
      *
-     * @param Collection<string> $phpFiles
-     * @param bool $dryRun
-     * @return Collection<array>
+     * @param Collection<string> $phpFiles The collection of PHP file paths.
+     * @param bool $dryRun Indicates if the run is a dry run.
+     * @return Collection<array> The collection of analysis results.
      */
     protected function processFiles(Collection $phpFiles, bool $dryRun): Collection
     {
@@ -113,8 +116,8 @@ class AnalyzeFilesCommand extends FilesCommand
     /**
      * Export analysis results to a JSON file.
      *
-     * @param array $data
-     * @param string $filePath
+     * @param array $data The analysis data to export.
+     * @param string $filePath The file path to export the JSON to.
      * @return void
      */
     protected function exportToJson(array $data, string $filePath): void

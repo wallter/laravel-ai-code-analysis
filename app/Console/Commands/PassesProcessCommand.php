@@ -9,20 +9,32 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Context;
 
 /**
- * Class PassesProcessCommand
+ * Processes AI passes for each CodeAnalysis record that has incomplete passes.
  *
- * This command processes AI passes for each CodeAnalysis record that has incomplete passes.
- * It handles both dry-run and actual execution modes, providing detailed logging and user feedback.
+ * This command handles both dry-run and actual execution modes, providing detailed logging and user feedback.
  *
  * @package App\Console\Commands
  */
 class PassesProcessCommand extends Command
 {
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
     protected $signature = 'passes:process
         {--dry-run : Run without persisting changes}';
 
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
     protected $description = 'Process the next AI pass for each CodeAnalysis record with incomplete passes.';
 
+    /**
+     * @var CodeAnalysisService
+     */
     public function __construct(protected CodeAnalysisService $analysisService)
     {
         parent::__construct();
@@ -97,12 +109,6 @@ class PassesProcessCommand extends Command
 
         // 6) Process each record needing passes
         foreach ($pendingAnalyses as $analysis) {
-            // Optional verbose info
-            if ($this->option('verbose')) {
-                $this->comment(">>> Starting passes for [{$analysis->file_path}]. Already completed: " 
-                    . implode(', ', $analysis->completed_passes ?? []));
-            }
-
             try {
                 // This runs all missing passes
                 $this->analysisService->runAnalysis($analysis, $dryRun);

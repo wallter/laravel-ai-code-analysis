@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\DB;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
+/**
+ * Run queued jobs in the background and show a progress bar.
+ */
 class QueueProgressCommand extends Command
 {
     /**
@@ -25,8 +28,10 @@ class QueueProgressCommand extends Command
 
     /**
      * Execute the console command.
+     *
+     * @return int Exit status code.
      */
-    public function handle()
+    public function handle(): int
     {
         // 1. Count total jobs queued.
         $totalJobs = DB::table('jobs')->count();

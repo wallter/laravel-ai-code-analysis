@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
 
+/**
+ * Backup the database to a specified path or default backup directory.
+ */
 class DbBackupCommand extends Command
 {
     /**
@@ -19,11 +22,15 @@ class DbBackupCommand extends Command
 
     /**
      * The console command description.
+     *
+     * @var string
      */
     protected $description = 'Backup the database to a specified path or default backup directory.';
 
     /**
      * Execute the console command.
+     *
+     * @return int Exit status code.
      */
     public function handle(): int
     {

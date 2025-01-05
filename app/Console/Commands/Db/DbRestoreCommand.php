@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
 
+/**
+ * Restore the database from a specified backup file or the most recent backup.
+ */
 class DbRestoreCommand extends Command
 {
     /**
@@ -19,11 +22,15 @@ class DbRestoreCommand extends Command
 
     /**
      * The console command description.
+     *
+     * @var string
      */
     protected $description = 'Restore the database from a specified backup file or the most recent backup if no path is provided.';
 
     /**
      * Execute the console command.
+     *
+     * @return int Exit status code.
      */
     public function handle(): int
     {
@@ -127,8 +134,8 @@ class DbRestoreCommand extends Command
     /**
      * Normalize a given path to its absolute form.
      *
-     * @param string $path
-     * @return string
+     * @param string $path The path to normalize.
+     * @return string The normalized absolute path.
      */
     protected function normalizePath(string $path): string
     {

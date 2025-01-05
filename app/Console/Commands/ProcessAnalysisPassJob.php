@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Context;
 
 /**
- * ProcessAnalysisPassJob.
- *
  * Handles the processing of individual AI passes for a given CodeAnalysis record.
  *
  * @package App\Console\Commands
@@ -34,11 +32,7 @@ class ProcessAnalysisPassJob extends Command
     protected $description = 'Process the next AI pass for each CodeAnalysis record with incomplete passes.';
 
     /**
-     * Constructor for ProcessAnalysisPassJob.
-     *
-     * Injects the CodeAnalysisService dependency.
-     *
-     * @param \App\Services\AI\CodeAnalysisService $analysisService Service to handle code analysis operations.
+     * @var CodeAnalysisService
      */
     public function __construct(
         protected CodeAnalysisService $analysisService
@@ -130,8 +124,10 @@ class ProcessAnalysisPassJob extends Command
                     $this->comment("[DRY-RUN] => Would have completed passes for [{$analysis->file_path}]: " 
                         . implode(', ', $completeList));
                 } else {
-                    $this->option('verbose') && $this->info("Passes now completed for [{$analysis->file_path}]: " 
-                        . implode(', ', $completeList));
+                    if ($this->option('verbose')) {
+                        $this->info("Passes now completed for [{$analysis->file_path}]: " 
+                            . implode(', ', $completeList));
+                    }
                     Log::info("Completed passes => " . json_encode($completeList));
                 }
 
