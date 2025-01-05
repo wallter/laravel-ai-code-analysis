@@ -23,12 +23,16 @@ yarn-error.log
 /.vscode
 /.zed
 .aider*
+.phpdoc*
 
 # Testing data
 resources/access-app
 
-# json log output
+# json log output (there's probably a better place for this)
 docs/*.json
 
-# phpdoc
+# phpdoc output
 /build
+
+# phpdoc data mount
+/data

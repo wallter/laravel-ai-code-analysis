@@ -52,7 +52,7 @@
     },
     "scripts": {
         "rector": "vendor/bin/rector -c phpdoc.xml",
-        "phpdoc": "php phpDocumentor.phar run -d . -t docs/api",
+        "phpdoc": "docker run --rm -v $(pwd):/data phpdoc/phpdoc:3 && open resources/phpdoc/index.html",
 
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

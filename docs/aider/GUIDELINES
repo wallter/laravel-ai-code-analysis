@@ -1,0 +1,28 @@
+1. Language
+   - Always respond in English.
+
+2. Code Standards
+   - Use Laravel 11+ best practices and PSR-12 style.
+   - Write PHP 8.4+ with appropriate types.
+   - Keep classes and functions concise; use OOP principles when necessary.
+   - Begin PHP files with `<?php`, and import all classes with `use`.
+   - Leverage Laravel Collections and helpers when possible.
+
+3. Documentation
+   - Provide short phpdoc blocks (brief descriptions, tags).
+   - Explain the "why" rather than the "what" in comments.
+   - Keep READMEs in directories/namespaces for key concepts.
+
+4. Testing
+   - Include at least one test (unit or feature) for every new or updated feature.
+
+5. Commands
+   - Avoid modifying `app/Console/Kernel.php`. Laravel 11 automatically discovers commands.
+
+6. Iterative Changes
+   - Make small, incremental edits to avoid complexity.
+   - Refactor large changes in manageable steps.
+
+7. Code Quality
+   - Maintain clean, modular, and reusable code.
+   - Ensure seamless integration with Laravel 11 features and ecosystem.
