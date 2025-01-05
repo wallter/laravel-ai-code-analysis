@@ -76,9 +76,7 @@ class OpenAIService
 
             // 2) Extract content
             $content = $response['choices'][0]['message']['content'] ?? null;
-            if (!$content) {
-                throw new Exception("No content in chat response from OpenAI");
-            }
+            throw_unless($content, new Exception("No content in chat response from OpenAI"));
 
             // 3) Extract usage
             // Usually looks like:

@@ -98,9 +98,7 @@ class GenerateTestsCommand extends Command
         try {
             $code = File::get($filePath);
             $ast  = $parser->parse($code);
-            if ($ast === null) {
-                throw new \Exception("Unable to parse AST for {$filePath}.");
-            }
+            throw_if($ast === null, new \Exception("Unable to parse AST for {$filePath}."));
             $visitor->setCurrentFile($filePath);
             $traverser->traverse($ast);
         } catch (Error $e) {
