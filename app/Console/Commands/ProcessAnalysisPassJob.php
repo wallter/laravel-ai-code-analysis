@@ -130,6 +130,7 @@ class ProcessAnalysisPassJob extends Command
                         $this->info("Passes now completed for [{$analysis->file_path}]: "
                             .implode(', ', $completeList));
                     }
+
                     Log::info('Completed passes => '.json_encode($completeList));
                 }
 

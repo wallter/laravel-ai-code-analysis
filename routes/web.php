@@ -4,9 +4,7 @@ use App\Http\Controllers\AnalysisController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect to the analysis index page by default
-Route::get('/', function () {
-    return redirect()->route('analysis.index');
-});
+Route::get('/', fn() => redirect()->route('analysis.index'));
 
 Route::get('/analysis', [AnalysisController::class, 'index'])->name('analysis.index');
 Route::get('/analysis/{id}', [AnalysisController::class, 'show'])->name('analysis.show');

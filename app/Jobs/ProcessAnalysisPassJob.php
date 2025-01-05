@@ -20,8 +20,10 @@ use Illuminate\Support\Facades\Log;
  */
 class ProcessAnalysisPassJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
     public function __construct(
         protected int $codeAnalysisId,
         protected string $passName,
@@ -71,7 +73,7 @@ class ProcessAnalysisPassJob implements ShouldQueue
 
         // 4) Build prompt
         Log::info("ProcessAnalysisPassJob: Building prompt for pass [{$this->passName}].");
-        $prompt = app('App\Services\AI\CodeAnalysisService')->buildPromptForPass($analysis, $this->passName);
+        $prompt = app(\App\Services\AI\CodeAnalysisService::class)->buildPromptForPass($analysis, $this->passName);
 
         // 5) Perform AI call
         try {
@@ -113,8 +115,8 @@ class ProcessAnalysisPassJob implements ShouldQueue
             $analysis->save();
 
             Log::info("ProcessAnalysisPassJob: Completed pass [{$this->passName}] for [{$analysis->file_path}].");
-        } catch (\Throwable $e) {
-            Log::error('ProcessAnalysisPassJob: Error => '.$e->getMessage(), ['exception' => $e]);
+        } catch (\Throwable $throwable) {
+            Log::error('ProcessAnalysisPassJob: Error => '.$throwable->getMessage(), ['exception' => $throwable]);
         }
     }
 }

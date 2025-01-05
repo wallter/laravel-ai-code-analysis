@@ -104,6 +104,7 @@ class AnalyzeFilesCommand extends FilesCommand
                 ]);
                 $this->warn("Could not analyze [{$filePath}]: ".$e->getMessage());
             }
+
             $bar->advance();
         }
 

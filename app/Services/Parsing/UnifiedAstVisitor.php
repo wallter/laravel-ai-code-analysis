@@ -122,12 +122,9 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
         if ($node instanceof \PhpParser\Node\Stmt\Interface_) {
             return 'Interface';
         }
+
         if ($node instanceof \PhpParser\Node\Stmt\Trait_) {
             return 'Trait';
-        }
-        if ($node instanceof \PhpParser\Node\Stmt\Class_) {
-            // Could further detect abstract/final classes if desired
-            return 'Class';
         }
 
         return 'Class'; // default fallback
@@ -195,12 +192,15 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
         if ($typeNode instanceof Node\Identifier) {
             return $typeNode->name;
         }
+
         if ($typeNode instanceof Node\NullableType) {
             return '?'.$this->typeToString($typeNode->type);
         }
+
         if ($typeNode instanceof Node\UnionType) {
             return implode('|', array_map([$this, 'typeToString'], $typeNode->types));
         }
+
         if ($typeNode instanceof Node\Name) {
             return $typeNode->toString();
         }

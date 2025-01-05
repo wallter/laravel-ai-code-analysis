@@ -147,6 +147,7 @@ class CodeAnalysisService
         if ($passType === 'ast' || $passType === 'both') {
             $prompt .= "\n\nAST Data:\n".json_encode($ast, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         }
+
         if ($passType === 'raw' || $passType === 'both') {
             $prompt .= "\n\nRaw Code:\n".$rawCode;
         }
@@ -161,9 +162,7 @@ class CodeAnalysisService
             $prompt .= $previousTexts;
         }
 
-        $prompt .= "\n\nRespond with structured insights.\n";
-
-        return $prompt;
+        return $prompt . "\n\nRespond with structured insights.\n";
     }
 
     /**
@@ -176,8 +175,8 @@ class CodeAnalysisService
     {
         try {
             return File::get($filePath);
-        } catch (\Exception $ex) {
-            Log::warning("Could not read file [{$filePath}]: ".$ex->getMessage());
+        } catch (\Exception $exception) {
+            Log::warning("Could not read file [{$filePath}]: ".$exception->getMessage());
 
             return '';
         }

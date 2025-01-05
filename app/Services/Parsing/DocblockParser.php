@@ -49,6 +49,7 @@ class DocblockParser
 
                 continue;
             }
+
             if (! $reachedBlankLine && ! str_starts_with($line, '@')) {
                 // Still in short description
                 $shortDescLines[] = $line;
@@ -70,6 +71,7 @@ class DocblockParser
             if ($currentTag && $currentBuffer !== '') {
                 $annotations[$currentTag][] = trim($currentBuffer);
             }
+
             $currentBuffer = '';
         };
 
@@ -125,6 +127,7 @@ class DocblockParser
 
                         continue;
                     }
+
                     // Alternatively, check for a class-based exception
                     if (preg_match('/^([A-Za-z0-9_\\\\]+)\s+(.*)$/', $value, $m)) {
                         $annotations['throws'][] = [
@@ -148,6 +151,7 @@ class DocblockParser
                 }
             }
         }
+
         // Flush any leftover buffer
         $flushBuffer();
 

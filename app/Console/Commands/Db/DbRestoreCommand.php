@@ -61,9 +61,7 @@ class DbRestoreCommand extends Command
             $backupFiles = File::files($backupDirectory);
 
             // Filter SQLite backup files
-            $sqliteBackups = collect($backupFiles)->filter(function ($file) {
-                return preg_match('/^backup_sqlite_\d{4}_\d{2}_\d{2}_\d{6}\.sqlite$/', $file->getFilename());
-            });
+            $sqliteBackups = collect($backupFiles)->filter(fn($file) => preg_match('/^backup_sqlite_\d{4}_\d{2}_\d{2}_\d{6}\.sqlite$/', (string) $file->getFilename()));
 
             if ($sqliteBackups->isEmpty()) {
                 $this->error("No SQLite backup files found in {$backupDirectory}.");
@@ -72,9 +70,7 @@ class DbRestoreCommand extends Command
             }
 
             // Sort backups by creation time descending to get the most recent
-            $mostRecentBackup = $sqliteBackups->sortByDesc(function ($file) {
-                return $file->getCTime();
-            })->first()->getRealPath();
+            $mostRecentBackup = $sqliteBackups->sortByDesc(fn($file) => $file->getCTime())->first()->getRealPath();
 
             $backupPath = $mostRecentBackup;
             $this->info("No backup path provided. Using the most recent backup: {$backupPath}");
@@ -104,13 +100,14 @@ class DbRestoreCommand extends Command
             $databasePath = $dbConfig['database'];
 
             // Ensure the directory for the database exists
-            $databaseDir = dirname($databasePath);
+            $databaseDir = dirname((string) $databasePath);
             if (! File::exists($databaseDir)) {
                 if (! File::makeDirectory($databaseDir, 0755, true)) {
                     $this->error("Failed to create database directory at {$databaseDir}.");
 
                     return 1;
                 }
+
                 $this->info("Created database directory at {$databaseDir}.");
             }
 
@@ -133,8 +130,8 @@ class DbRestoreCommand extends Command
             $this->info("Database restored successfully from {$backupPath} to {$databasePath}.");
 
             return 0;
-        } catch (\Exception $e) {
-            $this->error('Database restore failed: '.$e->getMessage());
+        } catch (\Exception $exception) {
+            $this->error('Database restore failed: '.$exception->getMessage());
 
             return 1;
         }

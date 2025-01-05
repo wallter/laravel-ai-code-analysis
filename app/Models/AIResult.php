@@ -22,10 +22,6 @@ class AIResult extends Model
         'metadata',
     ];
 
-    protected $casts = [
-        'metadata' => 'array',
-    ];
-
     /**
      * Get the CodeAnalysis instance associated with this AIResult.
      *
@@ -34,5 +30,11 @@ class AIResult extends Model
     public function codeAnalysis()
     {
         return $this->belongsTo(CodeAnalysis::class);
+    }
+    protected function casts(): array
+    {
+        return [
+            'metadata' => 'array',
+        ];
     }
 }

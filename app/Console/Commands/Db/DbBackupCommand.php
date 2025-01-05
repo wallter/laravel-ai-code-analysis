@@ -44,6 +44,7 @@ class DbBackupCommand extends Command
 
                 return 1;
             }
+
             $this->info("Created backup directory at {$backupPath}.");
         }
 
@@ -89,8 +90,8 @@ class DbBackupCommand extends Command
             $this->info("SQLite database backed up successfully to {$backupFilePath}.");
 
             return 0;
-        } catch (\Exception $e) {
-            $this->error('Database backup failed: '.$e->getMessage());
+        } catch (\Exception $exception) {
+            $this->error('Database backup failed: '.$exception->getMessage());
 
             return 1;
         }

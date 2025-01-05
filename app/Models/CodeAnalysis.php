@@ -21,13 +21,6 @@ class CodeAnalysis extends Model
         'completed_passes',  // Added
     ];
 
-    protected $casts = [
-        'ast' => 'array',
-        'analysis' => 'array',
-        'ai_output' => 'array',
-        'completed_passes' => 'array',
-    ];
-
     /**
      * Get the AI results associated with this code analysis.
      *
@@ -36,5 +29,14 @@ class CodeAnalysis extends Model
     public function aiResults()
     {
         return $this->hasMany(AIResult::class);
+    }
+    protected function casts(): array
+    {
+        return [
+            'ast' => 'array',
+            'analysis' => 'array',
+            'ai_output' => 'array',
+            'completed_passes' => 'array',
+        ];
     }
 }

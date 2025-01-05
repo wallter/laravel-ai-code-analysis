@@ -60,8 +60,8 @@ class ParserService
         // Read code
         try {
             $code = File::get($realPath);
-        } catch (\Throwable $ex) {
-            Log::error("ParserService: failed to read [{$realPath}]: ".$ex->getMessage());
+        } catch (\Throwable $throwable) {
+            Log::error("ParserService: failed to read [{$realPath}]: ".$throwable->getMessage());
 
             return [];
         }
@@ -76,8 +76,8 @@ class ParserService
 
                 return [];
             }
-        } catch (\Throwable $e) {
-            Log::error("ParserService: parse error [{$realPath}]: ".$e->getMessage());
+        } catch (\Throwable $throwable) {
+            Log::error("ParserService: parse error [{$realPath}]: ".$throwable->getMessage());
 
             return [];
         }
@@ -89,8 +89,10 @@ class ParserService
                 if (method_exists($v, 'setCurrentFile')) {
                     $v->setCurrentFile($realPath);
                 }
+
                 $traverser->addVisitor($v);
             }
+
             $traverser->traverse($ast);
         }
 
@@ -102,8 +104,8 @@ class ParserService
                     ['ast' => $ast]
                 );
                 Log::info("ParserService: Cached AST in DB for [{$realPath}].");
-            } catch (\Throwable $e) {
-                Log::error("ParserService: failed caching AST [{$realPath}]: ".$e->getMessage());
+            } catch (\Throwable $throwable) {
+                Log::error("ParserService: failed caching AST [{$realPath}]: ".$throwable->getMessage());
             }
         }
 
@@ -131,7 +133,7 @@ class ParserService
 
         $phpFiles = [];
         foreach ($iterator as $file) {
-            if ($file->isFile() && strtolower($file->getExtension()) === 'php') {
+            if ($file->isFile() && strtolower((string) $file->getExtension()) === 'php') {
                 $phpFiles[] = $file->getRealPath();
             }
         }

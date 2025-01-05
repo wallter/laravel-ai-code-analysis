@@ -29,9 +29,7 @@ class EnhanceDocsCommandTest extends TestCase
         $this->mock(DocEnhancer::class, function ($mock) use ($parsedItem) {
             $mock->shouldReceive('enhanceDescription')
                 ->once()
-                ->with(\Mockery::on(function ($arg) use ($parsedItem) {
-                    return $arg->id === $parsedItem->id;
-                }))
+                ->with(\Mockery::on(fn($arg) => $arg->id === $parsedItem->id))
                 ->andReturn('Enhanced description');
         });
 

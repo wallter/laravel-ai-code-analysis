@@ -94,6 +94,7 @@ class ParseFilesCommand extends FilesCommand
                 Log::error("Parse error: {$filePath}", ['error' => $e->getMessage()]);
                 $this->warn("Could not parse {$filePath}: {$e->getMessage()}");
             }
+
             $bar->advance();
         }
 
@@ -113,9 +114,7 @@ class ParseFilesCommand extends FilesCommand
 
         // Apply optional filter
         if ($filter !== '') {
-            $collectedItems = $collectedItems->filter(function ($item) use ($filter) {
-                return stripos($item->name, $filter) !== false;
-            });
+            $collectedItems = $collectedItems->filter(fn($item) => stripos($item->name, (string) $filter) !== false);
         }
 
         $this->info('Initial collected items: '.$collectedItems->count());
@@ -141,6 +140,7 @@ class ParseFilesCommand extends FilesCommand
 
             return;
         }
+
         @mkdir(dirname($filePath), 0777, true);
         File::put($filePath, $json);
         $this->info("Output written to {$filePath}");

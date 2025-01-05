@@ -108,12 +108,12 @@ class OpenAIService
                 ];
             }
 
-            return trim($content);
-        } catch (\Throwable $e) {
-            Log::error("OpenAI request failed [{$operationIdentifier}]: ".$e->getMessage(), [
-                'exception' => $e,
+            return trim((string) $content);
+        } catch (\Throwable $throwable) {
+            Log::error("OpenAI request failed [{$operationIdentifier}]: ".$throwable->getMessage(), [
+                'exception' => $throwable,
             ]);
-            throw $e;
+            throw $throwable;
         } finally {
             Context::forget('operation');
         }

@@ -46,9 +46,7 @@ class AnalysisController extends Controller
         $analysis = CodeAnalysis::with('aiResults')->findOrFail($id);
 
         // Summation of all cost_estimate_usd
-        $totalCost = $analysis->aiResults->sum(function ($result) {
-            return $result->metadata['cost_estimate_usd'] ?? 0;
-        });
+        $totalCost = $analysis->aiResults->sum(fn($result) => $result->metadata['cost_estimate_usd'] ?? 0);
 
         return view('analysis.show', compact('analysis', 'totalCost'));
     }
@@ -85,10 +83,10 @@ class AnalysisController extends Controller
 
             return redirect()->route('analysis.index')
                 ->with('status', "Queued analysis for: {$analysis->file_path}");
-        } catch (\Throwable $e) {
-            Log::error("AnalysisController: Failed to analyze [{$filePath}]", ['error' => $e->getMessage()]);
+        } catch (\Throwable $throwable) {
+            Log::error("AnalysisController: Failed to analyze [{$filePath}]", ['error' => $throwable->getMessage()]);
 
-            return back()->withErrors(['analysis' => "Failed to analyze [{$filePath}]: {$e->getMessage()}"]);
+            return back()->withErrors(['analysis' => "Failed to analyze [{$filePath}]: {$throwable->getMessage()}"]);
         }
     }
 }
