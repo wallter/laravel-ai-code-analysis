@@ -375,8 +375,9 @@ The project includes (some unmaintained ... yes, got a bit lazy here) PHPUnit te
 
 ### Documentation Generation
 
-![Documentation Generation](resources/images/github/documentation-generation.png)
-![Documentation Generation](resources/images/github/documentation-generation2.png)
+![File Analysis Collapsed](resources/images/github/documentation-generation.png)
+![File Analysis Summary Expanded](resources/images/github/documentation-generation2.png)
+![File Analysis Light Theme](resources/images/github/documentation-generation3.png)
 
 ## Contributing
 
@@ -394,10 +395,14 @@ Contributions are welcome! Please follow these steps to contribute:
 
 4. **Run Tests**
 
-   Ensure all tests pass before submitting. (Do any tests pass ¯\_(ツ)_/¯)
+   Ensure all tests pass before submitting.
 
    ```bash
-   php artisan test
+   # Run rector to optimize your code
+   composer rector
+
+   # Run Laravel Pint to format your code
+   composer pint
    ```
 
 5. **Commit Your Changes**
