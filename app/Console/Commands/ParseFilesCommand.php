@@ -82,8 +82,8 @@ class ParseFilesCommand extends Command
         // Apply optional method limit
         if ($limitMethod > 0) {
             $collectedItems = $collectedItems->map(function ($item) use ($limitMethod) {
-                if (in_array($item['type'], ['Class','Trait','Interface'], true) && !empty($item['details']['methods'])) {
-                    $item['details']['methods'] = array_slice($item['details']['methods'], 0, $limitMethod);
+                if (in_array($item->type, ['Class','Trait','Interface'], true) && !empty($item->details['methods'])) {
+                    $item->details['methods'] = array_slice($item->details['methods'], 0, $limitMethod);
                 }
                 return $item;
             });
@@ -92,7 +92,7 @@ class ParseFilesCommand extends Command
         // Apply optional filter
         if ($filter !== '') {
             $collectedItems = $collectedItems->filter(function ($item) use ($filter) {
-                return stripos($item['name'], $filter) !== false;
+                return stripos($item->name, $filter) !== false;
             });
         }
 
@@ -124,29 +124,29 @@ class ParseFilesCommand extends Command
         $this->table(
             ['Type', 'Name', 'Methods/Params', 'File', 'Line'],
             $items->map(function ($item) {
-                if (in_array($item['type'], ['Class','Trait','Interface'], true)) {
+                if (in_array($item->type, ['Class','Trait','Interface'], true)) {
                     // Show methods
-                    $methodsStr = collect($item['details']['methods'] ?? [])
+                    $methodsStr = collect($item->details['methods'] ?? [])
                         ->pluck('name')
                         ->implode(', ');
                     return [
-                        $item['type'],
-                        $item['name'],
+                        $item->type,
+                        $item->name,
                         $methodsStr,
-                        $item['file'],
-                        $item['line'],
+                        $item->file,
+                        $item->line,
                     ];
                 }
                 // Show function params
-                $paramsStr = collect($item['details']['params'] ?? [])
+                $paramsStr = collect($item->details['params'] ?? [])
                     ->map(fn($p) => $p['type'].' '.$p['name'])
                     ->implode(', ');
                 return [
-                    $item['type'],
-                    $item['name'],
+                    $item->type,
+                    $item->name,
                     $paramsStr,
-                    $item['file'],
-                    $item['line'],
+                    $item->file,
+                    $item->line,
                 ];
             })->toArray()
         );
