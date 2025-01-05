@@ -37,7 +37,6 @@ return [
             'max_tokens' => env('OPENAI_MODEL_CODE_DAVINCI_002_MAX_TOKENS', 2500),
             'temperature' => env('OPENAI_MODEL_CODE_DAVINCI_002_TEMPERATURE', 0.2),
         ],
-    ],
         'doc_generation' => [
             'operation_identifier' => 'doc_generation',
             'model' => 'code-davinci-002', // Referencing the model key
