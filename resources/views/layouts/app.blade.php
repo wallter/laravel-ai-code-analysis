@@ -60,9 +60,6 @@
             margin-top: 2rem;
             margin-bottom: 2rem;
          }
-         .prose :where(.prose > :first-child):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
-            font-size: 2em;
-         }
     </style>
 </head>
 
