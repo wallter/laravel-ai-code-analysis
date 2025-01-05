@@ -18,15 +18,17 @@ class CodeAnalysis extends Model
         'completed_passes',  // Added
     ];
 
-    protected $casts = [
-        'ast' => 'array',
-        'analysis' => 'array',
-        'ai_output' => 'array',
-        'completed_passes' => 'array',
-    ];
-
     public function aiResults()
     {
         return $this->hasMany(AIResult::class);
+    }
+    protected function casts(): array
+    {
+        return [
+            'ast' => 'array',
+            'analysis' => 'array',
+            'ai_output' => 'array',
+            'completed_passes' => 'array',
+        ];
     }
 }

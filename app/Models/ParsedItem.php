@@ -24,12 +24,15 @@ class ParsedItem extends Model
         'ast',
     ];
 
-    protected $casts = [
-        'annotations' => 'array',
-        'attributes'  => 'array',
-        'details'     => 'array',
-        'is_static'   => 'boolean',
-        'ast'         => 'array',
-        'called_methods' => 'array',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'annotations' => 'array',
+            'attributes'  => 'array',
+            'details'     => 'array',
+            'is_static'   => 'boolean',
+            'ast'         => 'array',
+            'called_methods' => 'array',
+        ];
+    }
 }

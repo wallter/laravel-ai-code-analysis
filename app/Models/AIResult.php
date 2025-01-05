@@ -19,12 +19,14 @@ class AIResult extends Model
         'metadata',
     ];
 
-    protected $casts = [
-        'metadata' => 'array',
-    ];
-
     public function codeAnalysis()
     {
         return $this->belongsTo(CodeAnalysis::class);
+    }
+    protected function casts(): array
+    {
+        return [
+            'metadata' => 'array',
+        ];
     }
 }
