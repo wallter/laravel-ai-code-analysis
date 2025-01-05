@@ -214,56 +214,66 @@ class CodeAnalysisService
      */
     public function computeAndStoreScores(CodeAnalysis $analysis): void
     {
-        $scores = [
-            'documentation_score' => 0,
-            'functionality_score' => 0,
-            'style_score' => 0,
-            'overall_score' => 0,
-        ];
+        $latestScoringResult = $analysis->aiResults()
+            ->where('pass_name', 'scoring_pass')
+            ->latest()
+            ->first();
 
-        $aiResults = $analysis->aiResults()
-            ->whereIn('pass_name', ['doc_generation', 'functional_analysis', 'style_convention'])
-            ->get();
+        if (!$latestScoringResult) {
+            Log::warning("computeAndStoreScores: No scoring_pass result found for CodeAnalysis ID {$analysis->id}.");
+            return;
+        }
 
-        foreach ($aiResults as $result) {
-            if ($result->pass_name === 'doc_generation') {
-                $scores['documentation_score'] = $this->extractScore($result->response_text, 'Documentation Score');
-            }
-            if ($result->pass_name === 'functional_analysis') {
-                $scores['functionality_score'] = $this->extractScore($result->response_text, 'Functionality Score');
-            }
-            if ($result->pass_name === 'style_convention') {
-                $scores['style_score'] = $this->extractScore($result->response_text, 'Style Score');
+        $responseData = $latestScoringResult->response_text;
+        $scoresData = json_decode($responseData, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            Log::error("computeAndStoreScores: JSON decode error for CodeAnalysis ID {$analysis->id}: " . json_last_error_msg());
+            return;
+        }
+
+        $requiredFields = ['documentation_score', 'functionality_score', 'style_score', 'overall_score', 'summary'];
+        foreach ($requiredFields as $field) {
+            if (!array_key_exists($field, $scoresData)) {
+                Log::error("computeAndStoreScores: Missing '{$field}' in AI response for CodeAnalysis ID {$analysis->id}.");
+                return;
             }
         }
 
-        $scores['overall_score'] = round((
-            $scores['documentation_score'] +
-            $scores['functionality_score'] +
-            $scores['style_score']
-        ) / 3, 2);
-
-        $operations = [
-            'documentation' => 'documentation_score',
-            'functionality' => 'functionality_score',
-            'style' => 'style_score',
-            'overall' => 'overall_score',
-        ];
-
-        $aiScores = [];
-        foreach ($operations as $operation => $key) {
-            $aiScores[] = [
+        $aiScores = [
+            [
                 'code_analysis_id' => $analysis->id,
-                'operation' => $operation,
-                'score' => $scores[$key],
+                'operation' => 'documentation',
+                'score' => (float) $scoresData['documentation_score'],
                 'created_at' => now(),
                 'updated_at' => now(),
-            ];
-        }
+            ],
+            [
+                'code_analysis_id' => $analysis->id,
+                'operation' => 'functionality',
+                'score' => (float) $scoresData['functionality_score'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'code_analysis_id' => $analysis->id,
+                'operation' => 'style',
+                'score' => (float) $scoresData['style_score'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'code_analysis_id' => $analysis->id,
+                'operation' => 'overall',
+                'score' => (float) $scoresData['overall_score'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ];
 
         AIScore::insert($aiScores);
 
-        Log::info("CodeAnalysisService: Scores computed for [{$analysis->file_path}].", $scores);
+        Log::info("CodeAnalysisService: Scores computed for [{$analysis->file_path}].", $scoresData);
     }
 
     /**
