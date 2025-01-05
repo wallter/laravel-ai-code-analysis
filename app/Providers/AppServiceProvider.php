@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
 use App\Services\Parsing\ParserService;
+use App\Console\Commands\AiderUpgradeCommand;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,7 +24,22 @@ class AppServiceProvider extends ServiceProvider
             $app->make(OpenAIService::class),
             $app->make(ParserService::class)
         ));
+        // Register AiderUpgradeCommand
+        $this->app->singleton(AiderUpgradeCommand::class, function ($app) {
+            return new AiderUpgradeCommand();
+        });
     }
+
+    public function boot(): void
+    {
+        // Existing boot logic...
+
+        // Register the command with Artisan
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                AiderUpgradeCommand::class,
+            ]);
+        }
 
     /**
      * Bootstrap any application services.

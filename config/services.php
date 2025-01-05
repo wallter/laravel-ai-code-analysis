@@ -41,4 +41,8 @@ return [
         'temperature' => env('OPENAI_TEMPERATURE', 0.2),
         'max_tokens' => env('OPENAI_MAX_TOKENS', 1024),
     ],
+    'aider' => [
+        'api_key' => env('AIDER_API_KEY'),
+        'endpoint' => env('AIDER_ENDPOINT', 'https://api.aider.com'),
+    ],
 ];
