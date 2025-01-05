@@ -35,7 +35,7 @@ class CodeAnalysisService
     public function getParserService(): ParserService
     {
         return $this->parserService;
-}
+    }
 
         // After all passes are dispatched, ensure scoring is processed
         if ($analysis->completed_passes && in_array('scoring_pass', $analysis->completed_passes, true)) {
