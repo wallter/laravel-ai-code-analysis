@@ -226,7 +226,6 @@ class CodeAnalysisService
             ->get();
 
         foreach ($aiResults as $result) {
-            // Example parsing of AI responses to extract scores
             if ($result->pass_name === 'doc_generation') {
                 $scores['documentation_score'] = $this->extractScore($result->response_text, 'Documentation Score');
             }
@@ -238,39 +237,32 @@ class CodeAnalysisService
             }
         }
 
-        // Calculate overall score as an average
         $scores['overall_score'] = round((
             $scores['documentation_score'] +
             $scores['functionality_score'] +
             $scores['style_score']
         ) / 3, 2);
 
-        // Store each score as an AIScore record
-        AIScore::create([
-            'code_analysis_id' => $analysis->id,
-            'operation' => 'documentation',
-            'score' => $scores['documentation_score'],
-        ]);
+        $operations = [
+            'documentation' => 'documentation_score',
+            'functionality' => 'functionality_score',
+            'style' => 'style_score',
+            'overall' => 'overall_score',
+        ];
 
-        AIScore::create([
-            'code_analysis_id' => $analysis->id,
-            'operation' => 'functionality',
-            'score' => $scores['functionality_score'],
-        ]);
+        $aiScores = [];
+        foreach ($operations as $operation => $key) {
+            $aiScores[] = [
+                'code_analysis_id' => $analysis->id,
+                'operation' => $operation,
+                'score' => $scores[$key],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
 
-        AIScore::create([
-            'code_analysis_id' => $analysis->id,
-            'operation' => 'style',
-            'score' => $scores['style_score'],
-        ]);
+        AIScore::insert($aiScores);
 
-        AIScore::create([
-            'code_analysis_id' => $analysis->id,
-            'operation' => 'overall',
-            'score' => $scores['overall_score'],
-        ]);
-
-        // Optionally, log the scores for debugging
         Log::info("CodeAnalysisService: Scores computed for [{$analysis->file_path}].", $scores);
     }
 
@@ -283,9 +275,11 @@ class CodeAnalysisService
      */
     protected function extractScore(string $responseText, string $scoreLabel): float
     {
-        // Implement parsing logic based on response format
-        // Placeholder implementation:
-        preg_match("/{$scoreLabel}: (\d+(\.\d+)?)/", $responseText, $matches);
-        return isset($matches[1]) ? (float) $matches[1] : 0.0;
+        if (preg_match("/{$scoreLabel}:\s*(\d+(\.\d+)?)/i", $responseText, $matches)) {
+            return (float) $matches[1];
+        }
+
+        Log::warning("extractScore: Unable to find '{$scoreLabel}' in response.");
+        return 0.0;
     }
 }
