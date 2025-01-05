@@ -68,7 +68,7 @@ class ParseFilesCommand extends FilesCommand
                 $items = $this->parserService->parseFile($filePath);
                 $collectedItems = $collectedItems->merge($items);
 
-                $this->info("Successfully parsed: {$filePath}");
+                $this->isVerbose() && $this->info("Successfully parsed: {$filePath}");
             } catch (\Throwable $e) {
                 Log::error("Parse error: {$filePath}", ['error' => $e->getMessage()]);
                 $this->warn("Could not parse {$filePath}: {$e->getMessage()}");

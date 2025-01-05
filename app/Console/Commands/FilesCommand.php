@@ -36,4 +36,9 @@ abstract class FilesCommand extends Command
     {
         return (int) ($this->option('limit-method') ?: 0);
     }
+
+    protected function isVerbose(): bool
+    {
+        return (bool) $this->output->isVerbose();
+    }
 }
