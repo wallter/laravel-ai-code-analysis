@@ -2,15 +2,14 @@
 
 namespace App\Services\AI;
 
+use App\Jobs\ProcessAnalysisPassJob;
 use App\Models\CodeAnalysis;
-use App\Models\AIResult;
 use App\Services\Parsing\ParserService;
 use App\Services\Parsing\UnifiedAstVisitor;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
-use App\Jobs\ProcessAnalysisPassJob;
 
 /**
  * Manages AST parsing and multi-pass AI for code analysis in an asynchronous manner.
@@ -20,14 +19,13 @@ class CodeAnalysisService
     /**
      * Initialize the CodeAnalysisService with necessary dependencies.
      *
-     * @param OpenAIService $openAIService The service handling OpenAI interactions.
-     * @param ParserService $parserService The service handling PHP file parsing.
+     * @param  OpenAIService  $openAIService  The service handling OpenAI interactions.
+     * @param  ParserService  $parserService  The service handling PHP file parsing.
      */
     public function __construct(
-        protected OpenAIService  $openAIService,
-        protected ParserService  $parserService
-    ) {
-    }
+        protected OpenAIService $openAIService,
+        protected ParserService $parserService
+    ) {}
 
     /**
      * Get the ParserService instance.
@@ -43,8 +41,8 @@ class CodeAnalysisService
      * Create or reuse a CodeAnalysis for the specified file.
      * Optionally re-parse if $reparse is true.
      *
-     * @param string $filePath The path to the PHP file.
-     * @param bool $reparse Whether to force re-parsing the file.
+     * @param  string  $filePath  The path to the PHP file.
+     * @param  bool  $reparse  Whether to force re-parsing the file.
      * @return CodeAnalysis The CodeAnalysis model instance.
      */
     public function analyzeFile(string $filePath, bool $reparse = false): CodeAnalysis
@@ -70,24 +68,24 @@ class CodeAnalysisService
     /**
      * Summarize AST by scanning it with UnifiedAstVisitor.
      *
-     * @param string $filePath The path to the PHP file.
-     * @param array $ast The abstract syntax tree of the file.
+     * @param  string  $filePath  The path to the PHP file.
+     * @param  array  $ast  The abstract syntax tree of the file.
      * @return array The summary of the AST.
      */
     protected function buildAstSummary(string $filePath, array $ast): array
     {
         Log::debug("CodeAnalysisService: Building AST summary for [{$filePath}].");
-        $visitor = new UnifiedAstVisitor();
+        $visitor = new UnifiedAstVisitor;
         $visitor->setCurrentFile($filePath);
 
-        $traverser = new NodeTraverser();
-        $traverser->addVisitor(new NameResolver());
+        $traverser = new NodeTraverser;
+        $traverser->addVisitor(new NameResolver);
         $traverser->addVisitor($visitor);
         $traverser->traverse($ast);
 
         $items = $visitor->getItems();
-        $classes = array_filter($items, fn($i) => in_array($i['type'], ['Class','Trait','Interface']));
-        $functions = array_filter($items, fn($i) => $i['type'] === 'Function');
+        $classes = array_filter($items, fn ($i) => in_array($i['type'], ['Class', 'Trait', 'Interface']));
+        $functions = array_filter($items, fn ($i) => $i['type'] === 'Function');
 
         return [
             'class_count' => count($classes),
@@ -99,21 +97,20 @@ class CodeAnalysisService
     /**
      * Instead of synchronous calls, we now queue each missing pass.
      *
-     * @param CodeAnalysis $analysis The CodeAnalysis instance.
-     * @param bool $dryRun Whether to perform a dry run without saving results.
-     * @return void
+     * @param  CodeAnalysis  $analysis  The CodeAnalysis instance.
+     * @param  bool  $dryRun  Whether to perform a dry run without saving results.
      */
     public function runAnalysis(CodeAnalysis $analysis, bool $dryRun = false): void
     {
         Log::info("CodeAnalysisService: Queueing multi-pass analysis for [{$analysis->file_path}].", [
-            'dryRun' => $dryRun
+            'dryRun' => $dryRun,
         ]);
 
         $completedPasses = (array) ($analysis->completed_passes ?? []);
         $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
 
         foreach ($passOrder as $passName) {
-            if (!in_array($passName, $completedPasses, true)) {
+            if (! in_array($passName, $completedPasses, true)) {
                 // Dispatch a job for each missing pass
                 Log::info("Dispatching ProcessAnalysisPassJob for pass [{$passName}] => [{$analysis->file_path}].");
                 ProcessAnalysisPassJob::dispatch(
@@ -128,8 +125,8 @@ class CodeAnalysisService
     /**
      * Build a prompt for a specific pass (used by ProcessAnalysisPassJob).
      *
-     * @param CodeAnalysis $analysis The CodeAnalysis instance.
-     * @param string $passName The name of the pass.
+     * @param  CodeAnalysis  $analysis  The CodeAnalysis instance.
+     * @param  string  $passName  The name of the pass.
      * @return string The constructed prompt.
      */
     public function buildPromptForPass(CodeAnalysis $analysis, string $passName): string
@@ -148,10 +145,10 @@ class CodeAnalysisService
 
         // For normal pass types
         if ($passType === 'ast' || $passType === 'both') {
-            $prompt .= "\n\nAST Data:\n" . json_encode($ast, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+            $prompt .= "\n\nAST Data:\n".json_encode($ast, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         }
         if ($passType === 'raw' || $passType === 'both') {
-            $prompt .= "\n\nRaw Code:\n" . $rawCode;
+            $prompt .= "\n\nRaw Code:\n".$rawCode;
         }
 
         // If passType is "previous", gather prior pass outputs
@@ -165,13 +162,14 @@ class CodeAnalysisService
         }
 
         $prompt .= "\n\nRespond with structured insights.\n";
+
         return $prompt;
     }
 
     /**
      * Get the raw code from the specified file path.
      *
-     * @param string $filePath The path to the PHP file.
+     * @param  string  $filePath  The path to the PHP file.
      * @return string The raw PHP code.
      */
     protected function getRawCode(string $filePath): string
@@ -179,7 +177,8 @@ class CodeAnalysisService
         try {
             return File::get($filePath);
         } catch (\Exception $ex) {
-            Log::warning("Could not read file [{$filePath}]: " . $ex->getMessage());
+            Log::warning("Could not read file [{$filePath}]: ".$ex->getMessage());
+
             return '';
         }
     }

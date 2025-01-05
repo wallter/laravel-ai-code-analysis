@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands\Db;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\File;
 
 /**
  * Backup the database to a specified path or default backup directory.
@@ -38,9 +38,10 @@ class DbBackupCommand extends Command
         $backupPath = $this->option('path') ?: storage_path('app/backups');
 
         // Ensure the backup directory exists; create it if it doesn't
-        if (!File::exists($backupPath)) {
-            if (!File::makeDirectory($backupPath, 0755, true)) {
+        if (! File::exists($backupPath)) {
+            if (! File::makeDirectory($backupPath, 0755, true)) {
                 $this->error("Failed to create backup directory at {$backupPath}.");
+
                 return 1;
             }
             $this->info("Created backup directory at {$backupPath}.");
@@ -50,8 +51,9 @@ class DbBackupCommand extends Command
         $defaultConnection = Config::get('database.default');
         $dbConfig = Config::get("database.connections.{$defaultConnection}");
 
-        if (!$dbConfig) {
+        if (! $dbConfig) {
             $this->error("Database connection '{$defaultConnection}' is not configured.");
+
             return 1;
         }
 
@@ -60,14 +62,16 @@ class DbBackupCommand extends Command
         // Ensure the database driver is SQLite
         if ($dbDriver !== 'sqlite') {
             $this->error("Database driver '{$dbDriver}' is not supported by this backup command. Only SQLite is supported.");
+
             return 1;
         }
 
         try {
             // Set the correct database path
             $databasePath = $dbConfig['database'];
-            if (!File::exists($databasePath)) {
+            if (! File::exists($databasePath)) {
                 $this->error("SQLite database file not found at {$databasePath}.");
+
                 return 1;
             }
 
@@ -76,15 +80,18 @@ class DbBackupCommand extends Command
             $backupFilePath = "{$backupPath}/{$backupFileName}";
 
             // Copy the SQLite database file to the backup location
-            if (!copy($databasePath, $backupFilePath)) {
+            if (! copy($databasePath, $backupFilePath)) {
                 $this->error("Failed to copy SQLite database to {$backupFilePath}.");
+
                 return 1;
             }
 
             $this->info("SQLite database backed up successfully to {$backupFilePath}.");
+
             return 0;
         } catch (\Exception $e) {
-            $this->error("Database backup failed: " . $e->getMessage());
+            $this->error('Database backup failed: '.$e->getMessage());
+
             return 1;
         }
     }

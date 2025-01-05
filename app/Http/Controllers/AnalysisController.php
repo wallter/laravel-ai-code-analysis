@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use App\Models\CodeAnalysis;
 use App\Services\AI\CodeAnalysisService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Controller handling analysis-related actions.
@@ -15,7 +15,7 @@ class AnalysisController extends Controller
     /**
      * Initialize the AnalysisController with necessary services.
      *
-     * @param CodeAnalysisService $codeAnalysisService The service handling code analysis.
+     * @param  CodeAnalysisService  $codeAnalysisService  The service handling code analysis.
      */
     public function __construct(protected CodeAnalysisService $codeAnalysisService)
     {
@@ -38,7 +38,7 @@ class AnalysisController extends Controller
     /**
      * Show details (including AI results) for a single CodeAnalysis record.
      *
-     * @param int $id The ID of the CodeAnalysis record.
+     * @param  int  $id  The ID of the CodeAnalysis record.
      * @return \Illuminate\View\View The view displaying the analysis details.
      */
     public function show(int $id)
@@ -58,12 +58,13 @@ class AnalysisController extends Controller
      *
      * Example form submission:
      *  <form action="{{ route('analysis.analyze') }}" method="POST">
+     *
      *    @csrf
      *    <input name="filePath" />
      *    <button type="submit">Analyze</button>
      *  </form>
      *
-     * @param \Illuminate\Http\Request $request The incoming HTTP request.
+     * @param  \Illuminate\Http\Request  $request  The incoming HTTP request.
      * @return \Illuminate\Http\RedirectResponse Redirects back with status or errors.
      */
     public function analyze(Request $request)
@@ -71,7 +72,7 @@ class AnalysisController extends Controller
         $filePath = $request->input('filePath');
 
         // Basic validation
-        if (!$filePath) {
+        if (! $filePath) {
             return back()->withErrors(['filePath' => 'Please provide a valid file/folder path']);
         }
 
@@ -86,6 +87,7 @@ class AnalysisController extends Controller
                 ->with('status', "Queued analysis for: {$analysis->file_path}");
         } catch (\Throwable $e) {
             Log::error("AnalysisController: Failed to analyze [{$filePath}]", ['error' => $e->getMessage()]);
+
             return back()->withErrors(['analysis' => "Failed to analyze [{$filePath}]: {$e->getMessage()}"]);
         }
     }

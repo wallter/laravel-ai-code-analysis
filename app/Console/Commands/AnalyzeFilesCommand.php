@@ -2,12 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Models\CodeAnalysis;
 use App\Services\AI\CodeAnalysisService;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Collection;
-use Throwable;
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Collect .php files, parse them, and run multi-pass AI analysis.
@@ -44,6 +43,7 @@ class AnalyzeFilesCommand extends FilesCommand
         if ($phpFiles->isEmpty()) {
             $this->warn('No files found. Aborting...');
             Log::warning('AnalyzeFilesCommand: No .php files found, aborting analysis.');
+
             return 0;
         }
 
@@ -76,8 +76,8 @@ class AnalyzeFilesCommand extends FilesCommand
     /**
      * Process each PHP file for analysis.
      *
-     * @param Collection<string> $phpFiles The collection of PHP file paths.
-     * @param bool $dryRun Indicates if the run is a dry run.
+     * @param  Collection<string>  $phpFiles  The collection of PHP file paths.
+     * @param  bool  $dryRun  Indicates if the run is a dry run.
      * @return Collection<array> The collection of analysis results.
      */
     protected function processFiles(Collection $phpFiles, bool $dryRun): Collection
@@ -93,16 +93,16 @@ class AnalyzeFilesCommand extends FilesCommand
                 $this->analysisService->runAnalysis($analysisRecord, $dryRun);
 
                 $results->push([
-                    'file'             => $analysisRecord->file_path,
-                    'analysis'         => $analysisRecord->analysis,
-                    'current_pass'     => $analysisRecord->current_pass,
+                    'file' => $analysisRecord->file_path,
+                    'analysis' => $analysisRecord->analysis,
+                    'current_pass' => $analysisRecord->current_pass,
                     'completed_passes' => $analysisRecord->completed_passes,
                 ]);
             } catch (Throwable $e) {
-                Log::error("AnalyzeFilesCommand: Analysis failed [{$filePath}]: " . $e->getMessage(), [
+                Log::error("AnalyzeFilesCommand: Analysis failed [{$filePath}]: ".$e->getMessage(), [
                     'exception' => $e,
                 ]);
-                $this->warn("Could not analyze [{$filePath}]: " . $e->getMessage());
+                $this->warn("Could not analyze [{$filePath}]: ".$e->getMessage());
             }
             $bar->advance();
         }
@@ -116,18 +116,18 @@ class AnalyzeFilesCommand extends FilesCommand
     /**
      * Export analysis results to a JSON file.
      *
-     * @param array $data The analysis data to export.
-     * @param string $filePath The file path to export the JSON to.
-     * @return void
+     * @param  array  $data  The analysis data to export.
+     * @param  string  $filePath  The file path to export the JSON to.
      */
     protected function exportToJson(array $data, string $filePath): void
     {
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        if (!$json) {
-            $this->warn("Failed to encode JSON: " . json_last_error_msg());
+        if (! $json) {
+            $this->warn('Failed to encode JSON: '.json_last_error_msg());
             Log::warning('AnalyzeFilesCommand: Failed to encode JSON output.', [
                 'error' => json_last_error_msg(),
             ]);
+
             return;
         }
 

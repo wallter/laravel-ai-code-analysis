@@ -25,9 +25,10 @@ abstract class FilesCommand extends Command
     protected function getOutputFile(): ?string
     {
         $file = $this->option('output-file');
-        if ($file && !str_ends_with(strtolower($file), '.json')) {
+        if ($file && ! str_ends_with(strtolower($file), '.json')) {
             $file .= '.json';
         }
+
         return $file ?: null;
     }
 

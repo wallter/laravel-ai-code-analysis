@@ -6,13 +6,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
 use Tests\TestCase;
-use App\Models\ParsedItem;
 
 class ParseFilesCommandTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function testParseFilesCommandStoresDataInParsedItemsTable()
+    public function test_parse_files_command_stores_data_in_parsed_items_table()
     {
         // Given: a known file with at least one class/function
         $testFilePath = base_path('app/Services/Parsing/ParserService.php');

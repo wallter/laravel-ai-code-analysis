@@ -2,12 +2,11 @@
 
 namespace App\Services\AI;
 
-use OpenAI\Laravel\Facades\OpenAI as OpenAIFacade;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Context;
-use InvalidArgumentException;
 use Exception;
+use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
+use OpenAI\Laravel\Facades\OpenAI as OpenAIFacade;
 
 /**
  * Handles calls to the OpenAI API via chat() endpoints,
@@ -30,8 +29,8 @@ class OpenAIService
     /**
      * Perform an OpenAI operation based on the provided identifier and parameters.
      *
-     * @param string $operationIdentifier The identifier for the OpenAI operation.
-     * @param array $params The parameters for the OpenAI operation.
+     * @param  string  $operationIdentifier  The identifier for the OpenAI operation.
+     * @param  array  $params  The parameters for the OpenAI operation.
      * @return string The response content from OpenAI.
      *
      * @throws InvalidArgumentException If the operation identifier is invalid.
@@ -91,7 +90,7 @@ class OpenAIService
 
             // 2) Extract content
             $content = $response['choices'][0]['message']['content'] ?? null;
-            throw_unless($content, new Exception("No content in chat response from OpenAI"));
+            throw_unless($content, new Exception('No content in chat response from OpenAI'));
 
             // 3) Extract usage
             // Usually looks like:
@@ -111,7 +110,7 @@ class OpenAIService
 
             return trim($content);
         } catch (\Throwable $e) {
-            Log::error("OpenAI request failed [{$operationIdentifier}]: " . $e->getMessage(), [
+            Log::error("OpenAI request failed [{$operationIdentifier}]: ".$e->getMessage(), [
                 'exception' => $e,
             ]);
             throw $e;

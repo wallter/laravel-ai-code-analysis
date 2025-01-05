@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services\Parsing;
@@ -15,7 +16,7 @@ class DocblockParser
     /**
      * Parse a docblock string and extract the short description and annotations.
      *
-     * @param string $docblock The docblock text to parse.
+     * @param  string  $docblock  The docblock text to parse.
      * @return array{
      *     shortDescription: string,
      *     annotations: array<string, mixed>
@@ -32,6 +33,7 @@ class DocblockParser
             $line = preg_replace('/\*\/\s*$/', '', $line);
             // Remove leading *
             $line = preg_replace('/^\s*\*\s?/', '', $line);
+
             return trim($line);
         }, $lines);
 
@@ -44,9 +46,10 @@ class DocblockParser
             if ($line === '') {
                 // Once we hit a blank line, everything that follows is annotation or extended description
                 $reachedBlankLine = true;
+
                 continue;
             }
-            if (!$reachedBlankLine && !str_starts_with($line, '@')) {
+            if (! $reachedBlankLine && ! str_starts_with($line, '@')) {
                 // Still in short description
                 $shortDescLines[] = $line;
             } else {
@@ -94,6 +97,7 @@ class DocblockParser
                         // reset currentTag because param is fully handled on one line
                         $currentTag = null;
                         $currentBuffer = '';
+
                         continue;
                     }
                 } elseif ($tag === 'return') {
@@ -103,9 +107,10 @@ class DocblockParser
                         $desc = $m[2] ?? '';
                         $annotations['return'][] = $desc === ''
                             ? $type
-                            : ($type . ' ' . $desc);
+                            : ($type.' '.$desc);
                         $currentTag = null;
                         $currentBuffer = '';
+
                         continue;
                     }
                 } elseif ($tag === 'throws') {
@@ -117,6 +122,7 @@ class DocblockParser
                         ];
                         $currentTag = null;
                         $currentBuffer = '';
+
                         continue;
                     }
                     // Alternatively, check for a class-based exception
@@ -127,6 +133,7 @@ class DocblockParser
                         ];
                         $currentTag = null;
                         $currentBuffer = '';
+
                         continue;
                     }
                 }
@@ -137,7 +144,7 @@ class DocblockParser
             } else {
                 // Not a new tag, so continuation of the existing tag
                 if ($currentTag) {
-                    $currentBuffer .= ' ' . $line;
+                    $currentBuffer .= ' '.$line;
                 }
             }
         }

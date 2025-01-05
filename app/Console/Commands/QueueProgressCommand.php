@@ -37,6 +37,7 @@ class QueueProgressCommand extends Command
         $totalJobs = DB::table('jobs')->count();
         if ($totalJobs === 0) {
             $this->info('No jobs in the queue.');
+
             return 0;
         }
 
@@ -46,7 +47,7 @@ class QueueProgressCommand extends Command
         exec('php artisan queue:work --stop-when-empty -n > /dev/null 2>&1 &');
 
         // 3. Set up the progress bar in the current console.
-        $output = new ConsoleOutput();
+        $output = new ConsoleOutput;
         $progressBar = new ProgressBar($output, $totalJobs);
         $progressBar->setFormat('%current%/%max% [%bar%] %percent:3s%%');
         $progressBar->start();

@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Collection;
 use App\Services\Parsing\ParserService;
+use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Parse PHP files and output discovered classes, traits, and functions.
@@ -60,7 +60,7 @@ class ParseFilesCommand extends FilesCommand
         ]);
 
         $this->info(sprintf(
-            "Found [%d] PHP files to parse. limit-class=%d, limit-method=%d",
+            'Found [%d] PHP files to parse. limit-class=%d, limit-method=%d',
             $phpFiles->count(),
             $limitClass,
             $limitMethod
@@ -73,6 +73,7 @@ class ParseFilesCommand extends FilesCommand
 
         if ($phpFiles->isEmpty()) {
             $this->warn('No .php files to parse.');
+
             return 0;
         }
 
@@ -102,9 +103,10 @@ class ParseFilesCommand extends FilesCommand
         // Apply optional method limit
         if ($limitMethod > 0) {
             $collectedItems = $collectedItems->map(function ($item) use ($limitMethod) {
-                if (property_exists($item, 'type') && in_array($item->type, ['Class','Trait','Interface'], true) && !empty($item->details['methods'])) {
+                if (property_exists($item, 'type') && in_array($item->type, ['Class', 'Trait', 'Interface'], true) && ! empty($item->details['methods'])) {
                     $item->details['methods'] = array_slice($item->details['methods'], 0, $limitMethod);
                 }
+
                 return $item;
             });
         }
@@ -116,7 +118,7 @@ class ParseFilesCommand extends FilesCommand
             });
         }
 
-        $this->info("Initial collected items: " . $collectedItems->count());
+        $this->info('Initial collected items: '.$collectedItems->count());
 
         if ($outputFile) {
             $this->exportJson($collectedItems->values(), $outputFile);
@@ -128,15 +130,15 @@ class ParseFilesCommand extends FilesCommand
     /**
      * Export collected items to a JSON file.
      *
-     * @param Collection $items The collection of items to export.
-     * @param string $filePath The file path to export the JSON to.
-     * @return void
+     * @param  Collection  $items  The collection of items to export.
+     * @param  string  $filePath  The file path to export the JSON to.
      */
     protected function exportJson(Collection $items, string $filePath): void
     {
         $json = json_encode($items->toArray(), JSON_PRETTY_PRINT);
-        if (!$json) {
-            $this->warn("Failed to encode to JSON: " . json_last_error_msg());
+        if (! $json) {
+            $this->warn('Failed to encode to JSON: '.json_last_error_msg());
+
             return;
         }
         @mkdir(dirname($filePath), 0777, true);

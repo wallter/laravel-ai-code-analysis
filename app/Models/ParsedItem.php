@@ -29,10 +29,10 @@ class ParsedItem extends Model
 
     protected $casts = [
         'annotations' => 'array',
-        'attributes'  => 'array',
-        'details'     => 'array',
-        'is_static'   => 'boolean',
-        'ast'         => 'array',
+        'attributes' => 'array',
+        'details' => 'array',
+        'is_static' => 'boolean',
+        'ast' => 'array',
         'called_methods' => 'array',
     ];
 }

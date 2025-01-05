@@ -1,14 +1,15 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services\Parsing;
 
+use Illuminate\Support\Collection;
 use PhpParser\Node;
-use PhpParser\NodeVisitorAbstract;
-use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Stmt\ClassLike;
 use PhpParser\Node\Stmt\Function_;
-use Illuminate\Support\Collection;
+use PhpParser\Node\Stmt\Namespace_;
+use PhpParser\NodeVisitorAbstract;
 
 /**
  * Single-pass visitor collecting classes (traits, interfaces) and free-floating functions.
@@ -17,7 +18,9 @@ use Illuminate\Support\Collection;
 class UnifiedAstVisitor extends NodeVisitorAbstract
 {
     protected Collection $items;
+
     protected ?string $currentFile = null;
+
     protected ?string $currentNamespace = null;
 
     public function __construct()
@@ -126,6 +129,7 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
             // Could further detect abstract/final classes if desired
             return 'Class';
         }
+
         return 'Class'; // default fallback
     }
 
@@ -147,6 +151,7 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
                 'line' => $method->getStartLine(),
             ];
         }
+
         return $methods;
     }
 
@@ -158,10 +163,11 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
         $params = [];
         foreach ($method->params as $p) {
             $params[] = [
-                'name' => '$' . $p->var->name,
+                'name' => '$'.$p->var->name,
                 'type' => $p->type ? $this->typeToString($p->type) : 'mixed',
             ];
         }
+
         return $params;
     }
 
@@ -173,10 +179,11 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
         $params = [];
         foreach ($function->params as $p) {
             $params[] = [
-                'name' => '$' . $p->var->name,
+                'name' => '$'.$p->var->name,
                 'type' => $p->type ? $this->typeToString($p->type) : 'mixed',
             ];
         }
+
         return $params;
     }
 
@@ -189,7 +196,7 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
             return $typeNode->name;
         }
         if ($typeNode instanceof Node\NullableType) {
-            return '?' . $this->typeToString($typeNode->type);
+            return '?'.$this->typeToString($typeNode->type);
         }
         if ($typeNode instanceof Node\UnionType) {
             return implode('|', array_map([$this, 'typeToString'], $typeNode->types));
@@ -197,6 +204,7 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
         if ($typeNode instanceof Node\Name) {
             return $typeNode->toString();
         }
+
         return 'mixed';
     }
 
@@ -206,7 +214,7 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
     protected function extractDocInfo(Node $node): array
     {
         $docComment = $node->getDocComment();
-        if (!$docComment) {
+        if (! $docComment) {
             return [
                 'shortDescription' => '',
                 'annotations' => [],

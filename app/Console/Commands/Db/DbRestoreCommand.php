@@ -3,9 +3,8 @@
 namespace App\Console\Commands\Db;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Config;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\File;
 
 /**
  * Restore the database from a specified backup file or the most recent backup.
@@ -42,8 +41,9 @@ class DbRestoreCommand extends Command
             $backupPath = $this->normalizePath($backupPath);
 
             // Check if the specified backup file exists
-            if (!File::exists($backupPath)) {
+            if (! File::exists($backupPath)) {
                 $this->error("Specified backup file not found at {$backupPath}.");
+
                 return 1;
             }
         } else {
@@ -51,8 +51,9 @@ class DbRestoreCommand extends Command
             $backupDirectory = storage_path('app/backups');
 
             // Check if the backup directory exists
-            if (!File::exists($backupDirectory)) {
+            if (! File::exists($backupDirectory)) {
                 $this->error("Backup directory not found at {$backupDirectory}.");
+
                 return 1;
             }
 
@@ -66,6 +67,7 @@ class DbRestoreCommand extends Command
 
             if ($sqliteBackups->isEmpty()) {
                 $this->error("No SQLite backup files found in {$backupDirectory}.");
+
                 return 1;
             }
 
@@ -82,8 +84,9 @@ class DbRestoreCommand extends Command
         $defaultConnection = Config::get('database.default');
         $dbConfig = Config::get("database.connections.{$defaultConnection}");
 
-        if (!$dbConfig) {
+        if (! $dbConfig) {
             $this->error("Database connection '{$defaultConnection}' is not configured.");
+
             return 1;
         }
 
@@ -92,6 +95,7 @@ class DbRestoreCommand extends Command
         // Ensure the database driver is SQLite
         if ($dbDriver !== 'sqlite') {
             $this->error("Database driver '{$dbDriver}' is not supported by this restore command. Only SQLite is supported.");
+
             return 1;
         }
 
@@ -101,9 +105,10 @@ class DbRestoreCommand extends Command
 
             // Ensure the directory for the database exists
             $databaseDir = dirname($databasePath);
-            if (!File::exists($databaseDir)) {
-                if (!File::makeDirectory($databaseDir, 0755, true)) {
+            if (! File::exists($databaseDir)) {
+                if (! File::makeDirectory($databaseDir, 0755, true)) {
                     $this->error("Failed to create database directory at {$databaseDir}.");
+
                     return 1;
                 }
                 $this->info("Created database directory at {$databaseDir}.");
@@ -111,22 +116,26 @@ class DbRestoreCommand extends Command
 
             // Check if the database file exists and confirm overwrite
             if (File::exists($databasePath)) {
-                if (!$this->confirm("Are you sure you want to overwrite the existing database at {$databasePath}?")) {
-                    $this->info("Database restore aborted.");
+                if (! $this->confirm("Are you sure you want to overwrite the existing database at {$databasePath}?")) {
+                    $this->info('Database restore aborted.');
+
                     return 0;
                 }
             }
 
             // Copy the backup file to the database path
-            if (!copy($backupPath, $databasePath)) {
+            if (! copy($backupPath, $databasePath)) {
                 $this->error("Failed to restore the database from {$backupPath} to {$databasePath}.");
+
                 return 1;
             }
 
             $this->info("Database restored successfully from {$backupPath} to {$databasePath}.");
+
             return 0;
         } catch (\Exception $e) {
-            $this->error("Database restore failed: " . $e->getMessage());
+            $this->error('Database restore failed: '.$e->getMessage());
+
             return 1;
         }
     }
@@ -134,7 +143,7 @@ class DbRestoreCommand extends Command
     /**
      * Normalize a given path to its absolute form.
      *
-     * @param string $path The path to normalize.
+     * @param  string  $path  The path to normalize.
      * @return string The normalized absolute path.
      */
     protected function normalizePath(string $path): string

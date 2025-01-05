@@ -2,14 +2,14 @@
 
 namespace App\Jobs;
 
-use App\Models\CodeAnalysis;
 use App\Models\AIResult;
+use App\Models\CodeAnalysis;
 use App\Services\AI\OpenAIService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -33,36 +33,39 @@ class ProcessAnalysisPassJob implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @param OpenAIService $openAIService The service handling OpenAI interactions.
-     * @return void
+     * @param  OpenAIService  $openAIService  The service handling OpenAI interactions.
      */
     public function handle(OpenAIService $openAIService): void
     {
         // 1) Retrieve CodeAnalysis from DB
         $analysis = CodeAnalysis::find($this->codeAnalysisId);
 
-        if (!$analysis) {
+        if (! $analysis) {
             Log::warning("ProcessAnalysisPassJob: CodeAnalysis [{$this->codeAnalysisId}] not found. Skipping.");
+
             return;
         }
 
         $completedPasses = (array) ($analysis->completed_passes ?? []);
         if (in_array($this->passName, $completedPasses, true)) {
             Log::info("ProcessAnalysisPassJob: Pass [{$this->passName}] already completed for [{$analysis->file_path}]. Skipping.");
+
             return;
         }
 
         // 2) Retrieve pass config
         $allPassConfigs = config('ai.operations.multi_pass_analysis', []);
         $config = $allPassConfigs[$this->passName] ?? null;
-        if (!$config) {
+        if (! $config) {
             Log::warning("ProcessAnalysisPassJob: No config for pass [{$this->passName}]. Skipping.");
+
             return;
         }
 
         // 3) If dry-run, skip actual AI call
         if ($this->dryRun) {
             Log::info("[DRY-RUN] => would run pass [{$this->passName}] for [{$analysis->file_path}].");
+
             return;
         }
 
@@ -85,7 +88,7 @@ class ProcessAnalysisPassJob implements ShouldQueue
             // 6) Extract usage
             $usage = $openAIService->getLastUsage();
             $metadata = [];
-            if (!empty($usage)) {
+            if (! empty($usage)) {
                 $metadata['usage'] = $usage;
                 // Optionally compute cost
                 $COST_PER_1K_TOKENS = env('OPENAI_COST_PER_1K_TOKENS', 0.002); // e.g., $0.002 per 1k tokens
@@ -111,7 +114,7 @@ class ProcessAnalysisPassJob implements ShouldQueue
 
             Log::info("ProcessAnalysisPassJob: Completed pass [{$this->passName}] for [{$analysis->file_path}].");
         } catch (\Throwable $e) {
-            Log::error("ProcessAnalysisPassJob: Error => " . $e->getMessage(), ['exception' => $e]);
+            Log::error('ProcessAnalysisPassJob: Error => '.$e->getMessage(), ['exception' => $e]);
         }
     }
 }
