@@ -1,5 +1,6 @@
 root = true
 
+# Global settings
 [*]
 charset = utf-8
 end_of_line = lf
@@ -8,11 +9,35 @@ indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
 
+# Markdown files
 [*.md]
 trim_trailing_whitespace = false
 
+# YAML files
 [*.{yml,yaml}]
 indent_size = 2
 
+# Docker Compose files
 [docker-compose.yml]
 indent_size = 4
+
+# PHP files
+[*.php]
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# JavaScript and JSON files
+[*.{js,json}]
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Blade templates
+[*.blade.php]
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
