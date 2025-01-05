@@ -204,9 +204,8 @@ class CodeAnalysisService
             return '';
         }
     }
-    }
 
-    /**
+    /*
      * Compute meaningful scores based on AI analysis results and store them.
      *
      * @param  CodeAnalysis  $analysis
@@ -264,3 +263,4 @@ class CodeAnalysisService
         preg_match("/{$scoreLabel}: (\d+(\.\d+)?)/", $responseText, $matches);
         return isset($matches[1]) ? (float) $matches[1] : 0.0;
     }
+}
