@@ -24,6 +24,7 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
   - [Features](#features)
     - [Code Parsing and Analysis](#code-parsing-and-analysis)
     - [Multi-Pass AI Analysis](#multi-pass-ai-analysis)
+    - [Artisan Commands](#artisan-commands)
   - [Requirements](#requirements)
   - [Installation](#installation)
   - [UI Setup](#ui-setup)
@@ -32,7 +33,7 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
       - [Parsing Configuration](#parsing-configuration)
     - [Parsing Configuration](#parsing-configuration-1)
   - [Usage](#usage)
-    - [Artisan Commands](#artisan-commands)
+    - [Artisan Commands](#artisan-commands-1)
     - [Token \& Cost Tracking](#token--cost-tracking)
     - [Queued Analysis](#queued-analysis)
     - [Testing](#testing)
@@ -100,10 +101,7 @@ The server will start at [http://localhost:8000](http://localhost:8000) by defau
   - **Dependency Review:** Analyzes external dependencies for compatibility, security risks, and outdated packages. Recommends updates and alternatives for deprecated or inefficient libraries.
   - **AST Insights:** Provides insights into the code structure and relationships using Abstract Syntax Tree (AST) data, helping to understand and navigate the codebase effectively.
 
-***Future Enhancements**:* Multi-pass analysis will include dependent passes that reuse data for scoring recommendations, consolidating documentation, and producing detailed summaries.
-
-
-- **Artisan Commands**
+### Artisan Commands
   - **`parse:files`:** Parses configured files/directories to list discovered classes and functions.
   - **`code:analyze`:** Analyzes PHP files, gathers AST data, and applies AI-driven multi-pass analysis.
   - **`passes:process`:** Processes AI analysis passes with options for dry-run and verbosity.
