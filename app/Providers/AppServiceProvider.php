@@ -32,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(AiderService::class, function ($app) {
             return new AiderService();
         });
+    }
 
     public function boot(): void
     {
