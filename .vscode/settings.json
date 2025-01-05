@@ -49,4 +49,61 @@
     // Window Title Configuration
     "window.title": "${activeFolderShort}/${activeEditorShort}${separator}${remoteName}",
     "window.titleSeparator": " - "
+},
+
+/** Enhanced UI Elements **/
+"workbench.colorCustomizations": {
+    // Selection Highlight Border
+    "editor.selectionHighlightBorder": "#4caf50", // Adds a green border to selection highlights
+
+    // Cursor Border
+    "editor.cursorBorder": "#4caf50", // Adds a border around the cursor for better visibility
+
+    // Scrollbar Thumb
+    "scrollbarSlider.background": "#234d3644", // Semi-transparent scrollbar thumb
+    "scrollbarSlider.hoverBackground": "#4caf5044", // Slightly more opaque on hover
+    "scrollbarSlider.activeBackground": "#4caf50CC", // More opaque when active
+
+    // Button Borders
+    "button.border": "#2e5a43", // Adds a subtle border to buttons
+
+    // Button Shadow
+    "button.shadow": "#00000033", // Adds a faint shadow to buttons
+
+    // Notification Borders
+    "notification.border": "#4caf50", // Green border for notifications
+
+    // Notification Background
+    "notification.background": "#234d3666", // Semi-transparent background for notifications
+
+    // Notification Hover Background
+    "notification.buttonBackground": "#4caf5044", // Semi-transparent background for notification buttons
+
+    // Tooltip Border
+    "tooltip.border": "#4caf50", // Adds a green border to tooltips
+
+    // Tooltip Shadow
+    "tooltip.shadow": "#00000055", // Adds a subtle shadow to tooltips
+
+    // Activity Bar Icon Hover
+    "activityBar.hoverBackground": "#2e5a43", // Slightly darker green on hover
+    "activityBar.hoverForeground": "#e0f2e9", // Light green for hovered icon text
+
+    // Sidebar Divider
+    "sideBarSectionHeader.border": "#4caf50", // Green border for sidebar section headers
+
+    // Active Tab Hover Background
+    "tab.hoverBackground": "#2e5a43", // Dark green background on tab hover
+
+    // Active Tab Hover Foreground
+    "tab.hoverForeground": "#e0f2e9", // Light green text on tab hover
+
+    // Editor Ruler Color
+    "editorRuler.foreground": "#4caf50", // Green color for editor rulers
+
+    // Panel Border
+    "panel.border": "#4caf50", // Green border around panels
+
+    // Panel Title Active Border
+    "panelTitle.activeBorder": "#4caf50", // Green border for active panel titles
 }
