@@ -11,99 +11,86 @@ return [
         'system_message' => 'You are a helpful AI assistant.',
     ],
 
-    'operations' => [
-
-        'code_analysis' => [
-            'model' => 'gpt-4o-mini',
-            'max_tokens' => 1500,
-            'temperature' => 0.4,
-            'system_message' => 'You generate thorough analysis from AST data + raw code.',
-            'prompt' => '',
-        ],
-
+    'passes' => [
         'doc_generation' => [
-            'model' => 'gpt-4o-mini',
-            'max_tokens' => 1000,
-            'temperature' => 0.3,
-            'system_message' => 'You generate concise PHP documentation from code and AST to compliment phpdoc documentation.',
+            'operation_identifier' => 'doc_generation',
+            'model' => env('AI_DOC_GENERATION_MODEL', 'gpt-4o-mini'),
+            'max_tokens' => env('AI_DOC_GENERATION_MAX_TOKENS', 1200),
+            'temperature' => env('AI_DOC_GENERATION_TEMPERATURE', 0.25),
+            'type' => 'both',
+            'system_message' => 'You generate concise PHP documentation from code and AST to complement phpdoc documentation.',
             'prompt' => implode("\n", [
-                'Create short but clear docs from the AST data + raw code:',
-                '- Summarize the purpose, methods, parameters, usage context.',
-                '- Avoid documenting __construct/getter/setter/etc functions.',
-                '- Avoid documenting or including any comment code blocks.',
-                'Mention custom annotations, like @url.',
-                'Limit to ~200 words max.',
+                'Create short but clear documentation from the AST data and raw code:',
+                '- Summarize the purpose, methods, parameters, and usage context.',
+                '- Avoid documenting __construct, getter, setter, and similar functions.',
+                '- Exclude comment code blocks from the documentation.',
+                'Mention custom annotations, such as @url.',
+                'Limit the documentation to approximately 200 words.',
             ]),
         ],
 
-        'style_review' => [
-            'model' => 'gpt-4o-mini',
-            'max_tokens' => 1000,
-            'temperature' => 0.3,
-            'system_message' => 'Code style reviewer analyzing PSR compliance.',
+        'functional_analysis' => [
+            'operation_identifier' => 'functional_analysis',
+            'model' => env('AI_FUNCTIONAL_ANALYSIS_MODEL', 'gpt-4o-mini'),
+            'max_tokens' => env('AI_FUNCTIONAL_ANALYSIS_MAX_TOKENS', 2500),
+            'temperature' => env('AI_FUNCTIONAL_ANALYSIS_TEMPERATURE', 0.65),
+            'type' => 'both',
+            'system_message' => 'You perform thorough functional analysis based on AST data and raw code.',
             'prompt' => implode("\n", [
-                'Check formatting, naming, doc clarity against coding standards.',
-                'Suggest short improvements for consistency.',
+                'Evaluate the functionality, identify edge cases, and detect performance bottlenecks.',
+                'Suggest improvements to enhance reliability and testability.',
             ]),
         ],
 
-        'multi_pass_analysis' => [
-
-            'pass_order' => [
-                'doc_generation',
-                'functional_analysis',
-                'style_convention',
-                'consolidation_pass',
-                'scoring_pass',
-            ],
-            'scoring_pass' => [
-                'operation' => 'scoring',
-                'type' => 'previous',
-                'max_tokens' => 500,
-                'temperature' => 0.3,
-                'prompt' => implode("\n", [
-                    'Analyze the previous AI analysis results and assign meaningful scores.',
-                    'Provide a summary and a final score based on documentation, functionality, and style.',
-                ]),
-            ],
-
-            'doc_generation' => [
-                'operation' => 'doc_generation',
-                'type' => 'both',
-                'max_tokens' => 1200,
-                'temperature' => 0.25,
-            ],
-
-            'functional_analysis' => [
-                'operation' => 'code_analysis',
-                'type' => 'both',
-                'max_tokens' => 2500,
-                'temperature' => 0.65,
-                'prompt' => implode("\n", [
-                    'Check functionality, edge cases, performance bottlenecks.',
-                    'Suggest improvements for reliability & testability.',
-                ]),
-            ],
-
-            'style_convention' => [
-                'operation' => 'style_review',
-                'type' => 'raw',
-                'max_tokens' => 1800,
-                'temperature' => 0.28,
-            ],
-
-            // The new pass type => "previous"
-            'consolidation_pass' => [
-                'operation' => 'code_analysis',
-                'type' => 'previous', // merges prior AI outputs
-                'max_tokens' => 2500,
-                'temperature' => 0.4,
-                'prompt' => implode("\n", [
-                    'You consolidate prior analysis results into a final summary.',
-                    'Use previous pass outputs + optional AST or raw code if needed.',
-                    'Assign a rating or recommendation based on prior feedback.',
-                ]),
-            ],
+        'style_convention' => [
+            'operation_identifier' => 'style_convention',
+            'model' => env('AI_STYLE_CONVENTION_MODEL', 'gpt-4o-mini'),
+            'max_tokens' => env('AI_STYLE_CONVENTION_MAX_TOKENS', 1800),
+            'temperature' => env('AI_STYLE_CONVENTION_TEMPERATURE', 0.28),
+            'type' => 'raw',
+            'system_message' => 'You review code style for PSR compliance.',
+            'prompt' => implode("\n", [
+                'Check the code for formatting, naming conventions, and documentation clarity according to coding standards.',
+                'Suggest concise improvements to ensure consistency.',
+            ]),
         ],
+
+        'consolidation_pass' => [
+            'operation_identifier' => 'consolidation_pass',
+            'model' => env('AI_CONSOLIDATION_PASS_MODEL', 'gpt-4o-mini'),
+            'max_tokens' => env('AI_CONSOLIDATION_PASS_MAX_TOKENS', 2500),
+            'temperature' => env('AI_CONSOLIDATION_PASS_TEMPERATURE', 0.4),
+            'type' => 'previous',
+            'system_message' => 'You consolidate prior AI analysis results into a final summary.',
+            'prompt' => implode("\n", [
+                'Combine the results of previous analysis passes into a comprehensive summary.',
+                'Utilize previous pass outputs and optionally include AST or raw code if necessary.',
+                'Provide a rating or recommendation based on the aggregated feedback.',
+            ]),
+        ],
+
+        'scoring_pass' => [
+            'operation_identifier' => 'scoring',
+            'model' => env('AI_SCORING_PASS_MODEL', 'gpt-4o-mini'),
+            'max_tokens' => env('AI_SCORING_PASS_MAX_TOKENS', 500),
+            'temperature' => env('AI_SCORING_PASS_TEMPERATURE', 0.3),
+            'type' => 'previous',
+            'system_message' => 'You analyze previous AI analysis results and assign scores.',
+            'prompt' => implode("\n", [
+                'Analyze the results of previous AI analysis passes and assign meaningful scores.',
+                'Provide a summary and a final score based on documentation, functionality, and style.',
+            ]),
+        ],
+    ],
+
+    'multi_pass_analysis' => [
+        'pass_order' => [
+            'doc_generation',
+            'functional_analysis',
+            'style_convention',
+            'consolidation_pass',
+            'scoring_pass',
+        ],
+    ],
     ],
 ];
