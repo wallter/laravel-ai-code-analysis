@@ -51,8 +51,6 @@
     "window.titleSeparator": " - "
 }
 
-/** Enhanced UI Elements **/
-"workbench.colorCustomizations": {
     // Selection Highlight Border
     "editor.selectionHighlightBorder": "#4caf50", // Adds a green border to selection highlights
 
