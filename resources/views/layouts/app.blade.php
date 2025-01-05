@@ -56,19 +56,13 @@
 
     <!-- Optional custom styling for code blocks, etc. -->
     <style>
-        .markdown-body pre,
-        .markdown-body code {
-            background-color: #f1f5f9;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-        }
-        .markdown-body h1,
-        .markdown-body h2,
-        .markdown-body h3 {
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
+        .prose :where(hr):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+         }
+         .prose :where(.prose > :first-child):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+            font-size: 2em;
+         }
     </style>
 </head>
 

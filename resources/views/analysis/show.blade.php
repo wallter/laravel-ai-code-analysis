@@ -170,10 +170,10 @@
                         x-transition
                     >
                         <button
-                            class="absolute top-8 right-8 text-xs px-2 py-1 border border-gray-400
-                                   dark:border-gray-500 rounded bg-white dark:bg-gray-600
-                                   hover:bg-gray-200 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200
-                                   transition-colors"
+                            class="absolute top-8 right-8 text-xs px-2 py-1 border border-gray-400 
+                                dark:border-gray-500 rounded bg-transparent hover:bg-gray-100 
+                                dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 
+                                transition-colors"
                             @click.stop="viewRaw = !viewRaw"
                         >
                             <span x-show="!viewRaw">Show Markdown</span>
@@ -181,7 +181,7 @@
                         </button>
 
                         <div x-show="!viewRaw" x-transition>
-                            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded shadow mt-2 transition-colors">
+                            <div class="p-4 rounded shadow mt-2 transition-colors">
                                 <div class="prose prose-indigo max-w-none dark:prose-invert">
                                     {!! \Illuminate\Support\Str::markdown($rawMarkdown) !!}
                                 </div>
@@ -189,7 +189,7 @@
                         </div>
 
                         <div x-show="viewRaw" x-transition>
-                            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded shadow mt-2 transition-colors">
+                            <div class="p-4 rounded shadow mt-2 transition-colors">
                                 <pre class="text-xs leading-relaxed whitespace-pre-wrap text-gray-800 dark:text-gray-100">
 <code class="language-md">
 {{ $rawMarkdown }}
