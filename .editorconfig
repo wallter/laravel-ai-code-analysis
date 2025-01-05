@@ -1,43 +1,35 @@
+# Root EditorConfig file
 root = true
 
-# Global settings
+# Match all files
 [*]
 charset = utf-8
 end_of_line = lf
-indent_size = 4
 indent_style = space
+indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-# Markdown files
-[*.md]
-trim_trailing_whitespace = false
-
-# YAML files
-[*.{yml,yaml}]
-indent_size = 2
-
-# Docker Compose files
-[docker-compose.yml]
-indent_size = 4
-
-# PHP files
+# Match PHP files
 [*.php]
-indent_size = 4
 indent_style = space
-insert_final_newline = true
-trim_trailing_whitespace = true
+indent_size = 4
 
-# JavaScript and JSON files
-[*.{js,json}]
+# Match JSON files
+[*.json]
+indent_style = space
 indent_size = 2
-indent_style = space
-insert_final_newline = true
+
+# Match Markdown files
+[*.md]
 trim_trailing_whitespace = true
 
-# Blade templates
-[*.blade.php]
-indent_size = 4
+# Match YAML files
+[*.yml]
 indent_style = space
-insert_final_newline = true
-trim_trailing_whitespace = true
+indent_size = 2
+
+# Match Blade template files
+[*.blade.php]
+indent_style = space
+indent_size = 4

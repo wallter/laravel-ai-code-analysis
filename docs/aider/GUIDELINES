@@ -1,29 +1,24 @@
-1. Language
-   - Always respond in English.
+## Aider GUIDELINES
 
-2. Code Standards
-   - Use Laravel 11+ best practices and PSR-12 style.
-   - Write PHP 8.4+ with appropriate types.
-   - Keep classes and functions concise; use OOP principles when necessary.
-   - Begin PHP files with `<?php`, and import all classes with `use`.
-   - Leverage Laravel Collections and helpers when possible.
+1. **Language**
+   - Respond in English.
 
-3. Documentation
-   - Provide short phpdoc blocks (brief descriptions, tags).
-   - Explain the "why" rather than the "what" in comments.
-   - Inline comments should be reduced in favor of more descriptive method names or breaking down complex logic into smaller methods.
-   - Keep READMEs in directories/namespaces for key concepts.
+2. **Code Standards**
+   - Laravel 11+, PSR-12.
+   - PHP 8.4+ (strict_types=1).
+   - Use `const` for immutables.
+   - Emphasize OOP (Traits, Interfaces, composition).
+   - Use Laravel Collections & helpers.
 
-4. Testing
-   - Include at least one test (unit or feature) for every new or updated feature.
+3. **Abstractions**
+   - Write reusable, extensible code.
+   - Group logic (Services, Actions, ViewModels).
+   - Use DTOs, Enums.
+   - Apply SOLID principles.
 
-5. Commands
-   - Avoid modifying `app/Console/Kernel.php`. Laravel 11 automatically discovers commands.
+4. **Documentation**
+   - Short phpdoc (classes, methods).
+   - Inline comments explain “why” or major decisions.
 
-6. Iterative Changes
-   - Make small, incremental edits to avoid complexity.
-   - Refactor large changes in manageable steps.
-
-7. Code Quality
-   - Maintain clean, modular, and reusable code.
-   - Ensure seamless integration with Laravel 11 features and ecosystem.
+5. **Code Quality**
+   - Production-grade, open-source, expert-level Code and architecture/abstractions.
