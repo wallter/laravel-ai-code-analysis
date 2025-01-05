@@ -19,7 +19,6 @@ class CodeAnalysis extends Model
         'ai_output', // Add this line
         'current_pass',      // Added
         'completed_passes',  // Added
-        'scores',
     ];
 
     /**

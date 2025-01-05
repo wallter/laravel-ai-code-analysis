@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AIScore;
 use App\Models\ParsedItem;
 use App\Services\AI\DocEnhancer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -89,13 +90,25 @@ class EnhanceDocsCommandTest extends TestCase
         // Refresh the model
         $analysis->refresh();
 
-        // Assert scores are correctly computed
-        $this->assertEquals([
-            'documentation_score' => 85.0,
-            'functionality_score' => 90.0,
-            'style_score' => 80.0,
-            'overall_score' => 85.0,
-        ], $analysis->scores);
+        // Assert AIScore records are correctly created
+        $this->assertCount(4, $analysis->aiScores, 'There should be 4 AIScore records.');
+
+        $documentationScore = $analysis->aiScores()->where('operation', 'documentation')->first();
+        $functionalityScore = $analysis->aiScores()->where('operation', 'functionality')->first();
+        $styleScore = $analysis->aiScores()->where('operation', 'style')->first();
+        $overallScore = $analysis->aiScores()->where('operation', 'overall')->first();
+
+        $this->assertNotNull($documentationScore, 'Documentation score should exist.');
+        $this->assertEquals(85.0, $documentationScore->score, 'Documentation score should be 85.0.');
+
+        $this->assertNotNull($functionalityScore, 'Functionality score should exist.');
+        $this->assertEquals(90.0, $functionalityScore->score, 'Functionality score should be 90.0.');
+
+        $this->assertNotNull($styleScore, 'Style score should exist.');
+        $this->assertEquals(80.0, $styleScore->score, 'Style score should be 80.0.');
+
+        $this->assertNotNull($overallScore, 'Overall score should exist.');
+        $this->assertEquals(85.0, $overallScore->score, 'Overall score should be 85.0.');
     }
 
     protected function tearDown(): void

@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\AIResult;
+use App\Models\AIScore;
 use App\Models\CodeAnalysis;
 use App\Services\AI\OpenAIService;
 use Illuminate\Bus\Queueable;

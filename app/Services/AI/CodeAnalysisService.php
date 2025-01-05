@@ -3,6 +3,7 @@
 namespace App\Services\AI;
 
 use App\Jobs\ProcessAnalysisPassJob;
+use App\Models\AIScore;
 use App\Models\CodeAnalysis;
 use App\Services\Parsing\ParserService;
 use App\Services\Parsing\UnifiedAstVisitor;
@@ -244,9 +245,33 @@ class CodeAnalysisService
             $scores['style_score']
         ) / 3, 2);
 
-        // Store scores in the CodeAnalysis model
-        $analysis->scores = $scores;
-        $analysis->save();
+        // Store each score as an AIScore record
+        AIScore::create([
+            'code_analysis_id' => $analysis->id,
+            'operation' => 'documentation',
+            'score' => $scores['documentation_score'],
+        ]);
+
+        AIScore::create([
+            'code_analysis_id' => $analysis->id,
+            'operation' => 'functionality',
+            'score' => $scores['functionality_score'],
+        ]);
+
+        AIScore::create([
+            'code_analysis_id' => $analysis->id,
+            'operation' => 'style',
+            'score' => $scores['style_score'],
+        ]);
+
+        AIScore::create([
+            'code_analysis_id' => $analysis->id,
+            'operation' => 'overall',
+            'score' => $scores['overall_score'],
+        ]);
+
+        // Optionally, log the scores for debugging
+        Log::info("CodeAnalysisService: Scores computed for [{$analysis->file_path}].", $scores);
     }
 
     /**
