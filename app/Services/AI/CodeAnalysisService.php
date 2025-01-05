@@ -37,7 +37,14 @@ class CodeAnalysisService
         return $this->parserService;
     }
 
-        // After all passes are dispatched, ensure scoring is processed
+    /**
+     * After all passes are dispatched, ensure scoring is processed.
+     *
+     * @param  CodeAnalysis  $analysis
+     * @return void
+     */
+    protected function ensureScoringProcessed(CodeAnalysis $analysis): void
+    {
         if ($analysis->completed_passes && in_array('scoring_pass', $analysis->completed_passes, true)) {
             $this->computeAndStoreScores($analysis);
         }
