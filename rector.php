@@ -2,7 +2,13 @@
 
 declare(strict_types=1);
 
+use Rector\CodingStyle\Rector\Catch_\CatchExceptionNameMatchingTypeRector;
+use Rector\CodingStyle\Rector\Stmt\NewlineAfterStatementRector;
+use Rector\CodingStyle\Rector\Stmt\RemoveUselessAliasInUseStatementRector;
+use Rector\CodingStyle\Rector\Use_\SeparateMultiUseImportsRector;
 use Rector\Config\RectorConfig;
+use Rector\Set\ValueObject\SetList;
+use Rector\TypeDeclaration\Rector\ClassMethod\ReturnTypeFromStrictNewArrayRector;
 use RectorLaravel\Set\LaravelLevelSetList;
 use RectorLaravel\Set\LaravelSetList;
 
@@ -30,6 +36,8 @@ return RectorConfig::configure()
         __DIR__.'/tests/Temporary',
     ])
     ->withSets([
+        SetList::DEAD_CODE,
+        SetList::PHP_84,
         LaravelLevelSetList::UP_TO_LARAVEL_110,
         LaravelSetList::LARAVEL_CODE_QUALITY,
         LaravelSetList::LARAVEL_COLLECTION,
@@ -42,4 +50,12 @@ return RectorConfig::configure()
         LaravelSetList::LARAVEL_IF_HELPERS,
         LaravelSetList::LARAVEL_LEGACY_FACTORIES_TO_CLASSES,
         // LaravelSetList::LARAVEL_STATIC_TO_INJECTION,
-    ]);
+    ])
+    ->withRules([
+        SeparateMultiUseImportsRector::class,
+        RemoveUselessAliasInUseStatementRector::class,
+        NewlineAfterStatementRector::class,
+        CatchExceptionNameMatchingTypeRector::class,
+        ReturnTypeFromStrictNewArrayRector::class
+    ])
+    ->withPhpSets();
