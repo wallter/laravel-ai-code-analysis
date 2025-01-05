@@ -1,7 +1,7 @@
 {
     /** terminal settings **/
     "terminal.integrated.defaultProfile.osx": "zsh",
-    "terminal.integrated.fontFamily": "MesloLGS NF",
+    "terminal.integrated.fontFamily": "monospace",
 
     /** AI Colored/Themed Green **/
     "workbench.colorCustomizations": {
