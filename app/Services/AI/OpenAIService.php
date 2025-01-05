@@ -38,7 +38,7 @@ class OpenAIService
      */
     public function performOperation(string $operationIdentifier, array $params = []): string
     {
-        $opConfig = config("ai.operations.{$operationIdentifier}", []);
+        $opConfig = config("ai.passes.{$operationIdentifier}", []);
         if (empty($opConfig)) {
             $msg = "No config found for operation [{$operationIdentifier}].";
             Log::error($msg);
@@ -74,7 +74,7 @@ class OpenAIService
         ];
 
         try {
-            $this->lastUsage = null; // reset usage
+            $this->lastUsage = null; // Reset usage
             Context::add('operation', $operationIdentifier);
 
             Log::info("OpenAIService => sending chat request [{$operationIdentifier}]", [
@@ -115,7 +115,8 @@ class OpenAIService
                 'operation' => $operationIdentifier,
             ]);
             throw $je;
-            Log::error("OpenAI request failed [{$operationIdentifier}]: ".$throwable->getMessage(), [
+        } catch (\Throwable $throwable) {
+            Log::error("OpenAI request failed [{$operationIdentifier}]: " . $throwable->getMessage(), [
                 'exception' => $throwable,
             ]);
             throw $throwable;
