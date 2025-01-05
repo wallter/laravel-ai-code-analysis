@@ -5,13 +5,15 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ParseFilesCommandTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_parse_files_command_stores_data_in_parsed_items_table()
+    #[Test]
+    public function parse_files_command_stores_data_in_parsed_items_table()
     {
         // Given: a known file with at least one class/function
         $testFilePath = base_path('app/Services/Parsing/ParserService.php');

@@ -4,16 +4,17 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class AiderUpgradeCommandTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_performs_upgrade_tasks_successfully()
     {
-        // Mock the HTTP API response
+        // Mock the HTTP API responses
         Http::fake([
             'https://api.example.com/data' => Http::response(['key' => 'value'], 200),
             'https://api.aider.com/upgrade' => Http::response(['status' => 'success'], 200),
@@ -26,7 +27,7 @@ class AiderUpgradeCommandTest extends TestCase
              ->assertExitCode(0);
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_http_api_failure()
     {
         // Mock a failed HTTP API response
@@ -40,7 +41,7 @@ class AiderUpgradeCommandTest extends TestCase
              ->assertExitCode(1);
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_aider_api_failure()
     {
         // Mock successful HTTP API response and failed Aider API response
