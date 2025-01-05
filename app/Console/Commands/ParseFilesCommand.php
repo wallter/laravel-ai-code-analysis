@@ -100,8 +100,6 @@ class ParseFilesCommand extends Command
 
         if ($outputFile) {
             $this->exportJson($collectedItems->values(), $outputFile);
-        } else {
-            $this->displayTable($collectedItems);
         }
 
         return 0;
@@ -117,54 +115,5 @@ class ParseFilesCommand extends Command
         @mkdir(dirname($filePath), 0777, true);
         File::put($filePath, $json);
         $this->info("Output written to {$filePath}");
-    }
-
-    protected function displayTable(Collection $items)
-    {
-        $tableData = $items->map(function ($item) {
-            if (property_exists($item, 'type') && in_array($item->type, ['Class','Trait','Interface'], true)) {
-                // Show methods
-                $methodsStr = collect($item->details['methods'] ?? [])
-                    ->pluck('name')
-                    ->implode(', ');
-                return [
-                    $item->type,
-                    $item->name,
-                    $methodsStr,
-                    $item->file,
-                    $item->line,
-                ];
-            }
-
-            if (property_exists($item, 'type') && in_array($item->type, ['Function'], true)) {
-                // Show function params
-                $paramsStr = collect($item->details['params'] ?? [])
-                    ->map(fn($p) => ($p['type'] ?? 'mixed'). ' ' . $p['name'])
-                    ->implode(', ');
-                return [
-                    $item->type,
-                    $item->name,
-                    $paramsStr,
-                    $item->file,
-                    $item->line,
-                ];
-            }
-
-            // Handle items without 'type'
-            return [
-                'Unknown',
-                $item->name ?? 'N/A',
-                'N/A',
-                $item->file ?? 'N/A',
-                $item->line ?? 'N/A',
-            ];
-        })->filter(function ($row) {
-            return $row[0] !== 'Unknown'; // Optionally skip unknown items
-        })->toArray();
-
-        $this->table(
-            ['Type', 'Name', 'Methods/Params', 'File', 'Line'],
-            $tableData
-        );
     }
 }

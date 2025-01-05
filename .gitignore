@@ -28,6 +28,9 @@ yarn-error.log
 # Testing data
 resources/access-app
 
+# PHP Doc
+/resources/phpdoc
+
 # json log output (there's probably a better place for this)
 docs/*.json
 
