@@ -30,8 +30,8 @@ class CodeAnalysis extends Model
     public function aiResults()
     {
         return $this->hasMany(AIResult::class);
-        'scores' => 'array',
     }
+
     protected function casts(): array
     {
         return [
