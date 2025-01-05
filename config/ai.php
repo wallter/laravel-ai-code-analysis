@@ -54,20 +54,31 @@ return [
                 'functional_analysis',
                 'style_convention',
                 'consolidation_pass',
+                'scoring_pass',
+            ],
+            'scoring_pass' => [
+                'operation' => 'scoring',
+                'type' => 'previous',
+                'max_tokens' => 500,
+                'temperature' => 0.3,
+                'prompt' => implode("\n", [
+                    'Analyze the previous AI analysis results and assign meaningful scores.',
+                    'Provide a summary and a final score based on documentation, functionality, and style.',
+                ]),
             ],
 
             'doc_generation' => [
                 'operation' => 'doc_generation',
                 'type' => 'both',
-                'max_tokens' => 1000,
-                'temperature' => 0.3,
+                'max_tokens' => 1200,
+                'temperature' => 0.25,
             ],
 
             'functional_analysis' => [
                 'operation' => 'code_analysis',
                 'type' => 'both',
-                'max_tokens' => 2000,
-                'temperature' => 0.7,
+                'max_tokens' => 2500,
+                'temperature' => 0.65,
                 'prompt' => implode("\n", [
                     'Check functionality, edge cases, performance bottlenecks.',
                     'Suggest improvements for reliability & testability.',
@@ -77,8 +88,8 @@ return [
             'style_convention' => [
                 'operation' => 'style_review',
                 'type' => 'raw',
-                'max_tokens' => 1500,
-                'temperature' => 0.3,
+                'max_tokens' => 1800,
+                'temperature' => 0.28,
             ],
 
             // The new pass type => "previous"

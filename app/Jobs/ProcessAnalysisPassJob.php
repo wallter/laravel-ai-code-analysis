@@ -107,6 +107,12 @@ class ProcessAnalysisPassJob implements ShouldQueue
                 'metadata' => $metadata,
             ]);
 
+            // If this is the scoring pass, compute and store scores
+            if ($this->passName === 'scoring_pass') {
+                $codeAnalysisService = app(\App\Services\AI\CodeAnalysisService::class);
+                $codeAnalysisService->computeAndStoreScores($analysis);
+            }
+
             // 8) Mark pass as complete
             $done = (array) $analysis->completed_passes;
             $done[] = $this->passName;

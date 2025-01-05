@@ -35,6 +35,12 @@ class CodeAnalysisService
     public function getParserService(): ParserService
     {
         return $this->parserService;
+        }
+
+        // After all passes are dispatched, ensure scoring is processed
+        if ($analysis->completed_passes && in_array('scoring_pass', $analysis->completed_passes, true)) {
+            $this->computeAndStoreScores($analysis);
+        }
     }
 
     /**
@@ -60,6 +66,16 @@ class CodeAnalysisService
             $analysis->ast = $ast;
             $analysis->analysis = $this->buildAstSummary($filePath, $ast);
             $analysis->save();
+        }
+
+        if ($passType === 'scoring') {
+            $prompt .= "\n\nPRIOR ANALYSIS RESULTS:\n";
+            $previousTexts = $analysis->aiResults()
+                ->whereIn('pass_name', ['doc_generation', 'functional_analysis', 'style_convention'])
+                ->orderBy('id', 'asc')
+                ->pluck('response_text')
+                ->implode("\n\n---\n\n");
+            $prompt .= $previousTexts;
         }
 
         return $analysis;
@@ -181,4 +197,63 @@ class CodeAnalysisService
             return '';
         }
     }
-}
+    }
+
+    /**
+     * Compute meaningful scores based on AI analysis results and store them.
+     *
+     * @param  CodeAnalysis  $analysis
+     * @return void
+     */
+    public function computeAndStoreScores(CodeAnalysis $analysis): void
+    {
+        $scores = [
+            'documentation_score' => 0,
+            'functionality_score' => 0,
+            'style_score' => 0,
+            'overall_score' => 0,
+        ];
+
+        $aiResults = $analysis->aiResults()
+            ->whereIn('pass_name', ['doc_generation', 'functional_analysis', 'style_convention'])
+            ->get();
+
+        foreach ($aiResults as $result) {
+            // Example parsing of AI responses to extract scores
+            if ($result->pass_name === 'doc_generation') {
+                $scores['documentation_score'] = $this->extractScore($result->response_text, 'Documentation Score');
+            }
+            if ($result->pass_name === 'functional_analysis') {
+                $scores['functionality_score'] = $this->extractScore($result->response_text, 'Functionality Score');
+            }
+            if ($result->pass_name === 'style_convention') {
+                $scores['style_score'] = $this->extractScore($result->response_text, 'Style Score');
+            }
+        }
+
+        // Calculate overall score as an average
+        $scores['overall_score'] = round((
+            $scores['documentation_score'] +
+            $scores['functionality_score'] +
+            $scores['style_score']
+        ) / 3, 2);
+
+        // Store scores in the CodeAnalysis model
+        $analysis->scores = $scores;
+        $analysis->save();
+    }
+
+    /**
+     * Extract a specific score from AI response text.
+     *
+     * @param  string  $responseText
+     * @param  string  $scoreLabel
+     * @return float
+     */
+    protected function extractScore(string $responseText, string $scoreLabel): float
+    {
+        // Implement parsing logic based on response format
+        // Placeholder implementation:
+        preg_match("/{$scoreLabel}: (\d+(\.\d+)?)/", $responseText, $matches);
+        return isset($matches[1]) ? (float) $matches[1] : 0.0;
+    }

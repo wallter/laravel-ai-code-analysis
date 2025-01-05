@@ -19,6 +19,7 @@ class CodeAnalysis extends Model
         'ai_output', // Add this line
         'current_pass',      // Added
         'completed_passes',  // Added
+        'scores',
     ];
 
     /**
@@ -29,6 +30,7 @@ class CodeAnalysis extends Model
     public function aiResults()
     {
         return $this->hasMany(AIResult::class);
+        'scores' => 'array',
     }
     protected function casts(): array
     {

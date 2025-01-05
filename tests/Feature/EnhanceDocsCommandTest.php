@@ -45,6 +45,59 @@ class EnhanceDocsCommandTest extends TestCase
         $this->assertEquals('Enhanced description', $parsedItem->fresh()->details['description']);
     }
 
+    public function test_scoring_pass_creates_scores_correctly(): void
+    {
+        // Create a CodeAnalysis instance
+        $analysis = CodeAnalysis::create([
+            'file_path' => 'test/path/TestClass.php',
+            'ast' => [],
+            'analysis' => [],
+            'ai_output' => [],
+            'current_pass' => 0,
+            'completed_passes' => [],
+        ]);
+
+        // Mock AIResult entries for previous passes
+        AIResult::create([
+            'code_analysis_id' => $analysis->id,
+            'pass_name' => 'doc_generation',
+            'response_text' => 'Documentation Score: 85.0',
+            'prompt_text' => '...',
+            'metadata' => [],
+        ]);
+
+        AIResult::create([
+            'code_analysis_id' => $analysis->id,
+            'pass_name' => 'functional_analysis',
+            'response_text' => 'Functionality Score: 90.0',
+            'prompt_text' => '...',
+            'metadata' => [],
+        ]);
+
+        AIResult::create([
+            'code_analysis_id' => $analysis->id,
+            'pass_name' => 'style_convention',
+            'response_text' => 'Style Score: 80.0',
+            'prompt_text' => '...',
+            'metadata' => [],
+        ]);
+
+        // Simulate executing the scoring pass
+        $codeAnalysisService = $this->app->make(CodeAnalysisService::class);
+        $codeAnalysisService->computeAndStoreScores($analysis);
+
+        // Refresh the model
+        $analysis->refresh();
+
+        // Assert scores are correctly computed
+        $this->assertEquals([
+            'documentation_score' => 85.0,
+            'functionality_score' => 90.0,
+            'style_score' => 80.0,
+            'overall_score' => 85.0,
+        ], $analysis->scores);
+    }
+
     protected function tearDown(): void
     {
         Mockery::close();
