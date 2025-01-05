@@ -41,6 +41,7 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
   - [Screenshots](#screenshots)
     - [Code Analysis Dashboard](#code-analysis-dashboard)
     - [Documentation Generation](#documentation-generation)
+  - [Demo Output](#demo-output)
   - [Contributing](#contributing)
   - [License](#license)
 
@@ -218,15 +219,88 @@ The AI capabilities are configured in `config/ai.php`. This file defines the AI 
 
   ```php
   'operations' => [
+
       'code_analysis' => [
-          'driver'         => 'chat',
-          'model'          => env('CODE_ANALYSIS_MODEL', 'gpt-4o-mini'),
-          'max_tokens'     => env('CODE_ANALYSIS_MAX_TOKENS', 1500),
-          'temperature'    => env('CODE_ANALYSIS_TEMPERATURE', 0.4),
-          'system_message' => 'You are an assistant that generates comprehensive documentation from AST data. Focus on describing classes, methods, parameters, and the usage context.',
-          'prompt'         => '',
+          'model' => 'gpt-4o-mini',
+          'max_tokens' => 1500,
+          'temperature' => 0.4,
+          'system_message' => 'You generate thorough analysis from AST data + raw code.',
+          'prompt' => '',
       ],
-      // Add additional operations as needed...
+
+      'doc_generation' => [
+          'model' => 'gpt-4o-mini',
+          'max_tokens' => 1000,
+          'temperature' => 0.3,
+          'system_message' => 'You generate concise PHP documentation from code and AST to compliment phpdoc documentation.',
+          'prompt' => implode("\n", [
+              'Create short but clear docs from the AST data + raw code:',
+              '- Summarize the purpose, methods, parameters, usage context.',
+              '- Avoid documenting __construct/getter/setter/etc functions.',
+              '- Avoid documenting or including any comment code blocks.',
+              'Mention custom annotations, like @url.',
+              'Limit to ~200 words max.',
+          ]),
+      ],
+
+      'style_review' => [
+          'model' => 'gpt-4o-mini',
+          'max_tokens' => 1000,
+          'temperature' => 0.3,
+          'system_message' => 'Code style reviewer analyzing PSR compliance.',
+          'prompt' => implode("\n", [
+              'Check formatting, naming, doc clarity against coding standards.',
+              'Suggest short improvements for consistency.',
+          ]),
+      ],
+
+      'multi_pass_analysis' => [
+
+          'pass_order' => [
+              'doc_generation',
+              'functional_analysis',
+              'style_convention',
+              'consolidation_pass',
+          ],
+
+          'doc_generation' => [
+              'operation' => 'doc_generation',
+              'type' => 'both',
+              'max_tokens' => 1000,
+              'temperature' => 0.3,
+          ],
+
+          'functional_analysis' => [
+              'operation' => 'code_analysis',
+              'type' => 'both',
+              'max_tokens' => 2000,
+              'temperature' => 0.7,
+              'prompt' => implode("\n", [
+                  'Check functionality, edge cases, performance bottlenecks.',
+                  'Suggest improvements for reliability & testability.',
+              ]),
+          ],
+
+          'style_convention' => [
+              'operation' => 'style_review',
+              'type' => 'raw',
+              'max_tokens' => 1500,
+              'temperature' => 0.3,
+          ],
+
+          // The new pass type => "previous"
+          'consolidation_pass' => [
+              'operation' => 'code_analysis',
+              'type' => 'previous', // merges prior AI outputs
+              'max_tokens' => 2500,
+              'temperature' => 0.4,
+              'prompt' => implode("\n", [
+                  'You consolidate prior analysis results into a final summary.',
+                  'Use previous pass outputs + optional AST or raw code if needed.',
+                  'Assign a rating or recommendation based on prior feedback.',
+              ]),
+          ],
+      ],
   ],
   ```
 
@@ -238,32 +312,20 @@ The AI capabilities are configured in `config/ai.php`. This file defines the AI 
   'multi_pass_analysis' => [
       'pass_order' => [
           'doc_generation',
-          'refactor_suggestions',
-          // Additional passes...
+          'functional_analysis',
+          'style_convention',
+          'consolidation_pass',
       ],
-      'doc_generation' => [
-          'operation'    => 'code_analysis',
-          'type'         => 'both',
-          'max_tokens'   => 1000,
-          'temperature'  => 0.3,
-          'prompt'       => 'Your prompt here...',
-      ],
-      'refactor_suggestions' => [
-          'operation'    => 'code_improvements',
-          'type'         => 'raw',
-          'max_tokens'   => 1800,
-          'temperature'  => 0.6,
-          'prompt'       => 'Your prompt here...',
-      ],
-      // Additional pass definitions...
+      // ... existing pass configurations ...
   ],
   ```
+
 #### Parsing Configuration
 
 In `config/parsing.php`, define:
-	- Folders to scan (recursively) for .php files
-	- Specific .php files to parse
-	- The ParserService will gather AST data from these paths.
+- Folders to scan (recursively) for .php files
+- Specific .php files to parse
+- The ParserService will gather AST data from these paths.
 
 - **Analysis Limits**
 
@@ -291,7 +353,7 @@ Parsing configuration is set up in `config/parsing.php`. This configuration dete
    - **Description:** Collects PHP files, stores discovered items (classes, functions) in the DB (via ParsedItem or similar).
 
 2. **Analyze Files (Multi-Pass)**
-
+   
    ```bash
    php artisan analyze:files --output-file=docs/analyze_all.json --verbose
    ```
@@ -377,6 +439,67 @@ The project includes (some unmaintained ... yes, got a bit lazy here) PHPUnit te
 ![File Analysis Summary Expanded](resources/images/github/documentation-generation2.png)
 ![File Analysis Light Theme](resources/images/github/documentation-generation3.png)
 
+## Demo Output
+
+<details>
+<summary>Click to expand</summary>
+
+```bash
+#!/usr/bin/env php
+<?php
+
+use Symfony\Component\Console\Input\ArgvInput;
+
+define('LARAVEL_START', microtime(true));
+
+// Register the Composer autoloader...
+require __DIR__.'/vendor/autoload.php';
+
+// Bootstrap Laravel and handle the command...
+$status = (require_once __DIR__.'/bootstrap/app.php')
+    ->handleCommand(new ArgvInput);
+
+exit($status);
+```
+
+```bash
+> ./run_all_commands.sh
+Would you like to refresh the database? (Y/N) [Y]: n
+Would you like to flush prior queued jobs? (Y/N) [Y]: n
+📂 Running parse:files...
+[32mFound [22] PHP files to parse. limit-class=0, limit-method=0[39m
+  0/22 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%[1G[2K 14/22 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░]  63%[1G[2K 22/22 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+[32mInitial collected items: 24[39m
+[32mOutput written to docs/parse_all.json[39m
+✅ parse:files completed.
+🔍 Running analyze:files...
+[32mFound [22] .php files.[39m
+  0/22 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%[1G[2K 14/22 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░]  63%[1G[2K 22/22 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+[32mWrote analysis to [docs/analyze_all.json].[39m
+[32mDone! Processed [22] file(s).[39m
+✅ analyze:files completed.
+⚙️ Running passes:process...
+[32mFound [4] passes in pass_order: doc_generation, functional_analysis, style_convention, consolidation_pass[39m
+[32mNo pending passes to process.[39m
+✅ passes:process completed.
+🚀 Processing the jobs in async...
+[32mNo jobs in the queue.[39m
+✅ Jobs processed.
+🌐 Starting the Artisan server & opening the UI...
+  [90mFailed to listen on 127.0.0.1:8000 (reason: Address already in use)[39m
+  [90mFailed to listen on 127.0.0.1:8001 (reason: Address already in use)[39m
+  [90mFailed to listen on 127.0.0.1:8002 (reason: Address already in use)[39m
+  [90mFailed to listen on 127.0.0.1:8003 (reason: Address already in use)[39m
+  [90mFailed to listen on 127.0.0.1:8004 (reason: Address already in use)[39m
+  [90mFailed to listen on 127.0.0.1:8005 (reason: Address already in use)[39m
+  [90mFailed to listen on 127.0.0.1:8006 (reason: Address already in use)[39m
+  [90mFailed to listen on 127.0.0.1:8007 (reason: Address already in use)[39m
+  [90mFailed to listen on 127.0.0.1:8008 (reason: Address already in use)[39m
+✅ Artisan server started and UI opened at http://localhost:8000
+```
+
+</details>
+
 ## Contributing
 
 Contributions are welcome! Please follow these steps to contribute:
@@ -424,4 +547,3 @@ Contributions are welcome! Please follow these steps to contribute:
 This project is open-sourced software licensed under the [Apache License 2.0](https://github.com/IQAndreas/markdown-licenses/blob/master/apache-v2.0.md).
 
 You may use, modify, and distribute this software under the terms of the Apache License. For more details, see the [LICENSE](LICENSE) file included in this repository.
-
