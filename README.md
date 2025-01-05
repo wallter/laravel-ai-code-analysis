@@ -50,18 +50,18 @@ cp .env.example .env
 php artisan key:generate
 
 # 2) Migrate DB
-php artisan migrate
+php artisan migrate:fresh
 
 # 3) Set your file/folder scanning in config/parsing.php
 
 # 4) Parse code, store results:
-php artisan parse:files --output-file=docs/parse_all.json --verbose
+php artisan parse:files
 
 # 5) Analyze code, queue AI passes:
-php artisan analyze:files --output-file=docs/analyze_all.json --verbose
+php artisan analyze:files
 
 # 6) Process additional passes if needed:
-php artisan passes:process --verbose
+php artisan passes:process
 
 # 7) Run/Start queue processing to asyncronous proccess passes via OpenAI:
 php artisan queue:work
