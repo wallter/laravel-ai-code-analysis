@@ -26,6 +26,8 @@ class ProcessAnalysisPassJob implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+    protected AiderServiceInterface $aiderService;
+
     public function __construct(
         protected int $codeAnalysisId,
         protected string $passName,
