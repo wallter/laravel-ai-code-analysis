@@ -93,7 +93,13 @@
                         $configuredTip = '(No configured prompt found)';
                     } else {
                         $sysMsg  = $opConfig['system_message'] ?? '(No system_message)';
-                        $prompt  = $opConfig['prompt'] ?? '(No prompt)';
+                        $prompt  = !empty($opConfig['prompt']) 
+                            ? $opConfig['prompt'] 
+                            : (
+                                !empty($mpConfig['prompt']) 
+                                    ? $mpConfig['prompt'] 
+                                    : '(No prompt)'
+                            );
                         $configuredTip = "System Message:\n{$sysMsg}";
                         if (!empty($prompt)) {
                             $configuredTip .= "\n\nPrompt:\n{$prompt}";
