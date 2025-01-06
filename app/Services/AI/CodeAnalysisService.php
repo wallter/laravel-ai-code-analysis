@@ -150,7 +150,6 @@ class CodeAnalysisService
                 Log::info("CodeAnalysisService: Dispatching ProcessAnalysisPassJob for pass [{$passName}] => [{$analysis->file_path}].");
                 ProcessAnalysisPassJob::dispatch(
                     codeAnalysisId: $analysis->id,
-                    passName: $operationIdentifier,
                     dryRun: $dryRun
                 );
             }
