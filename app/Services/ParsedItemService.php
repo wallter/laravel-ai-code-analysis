@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\Log;
 class ParsedItemService
 {
     /**
-     * Create a ParsedItem with provided data, applying defaults where necessary.
+     * Create or update a ParsedItem with provided data, applying defaults where necessary.
      *
-     * @param  array  $data  The data for creating the ParsedItem.
-     * @return ParsedItem|null The created ParsedItem instance or null on failure.
+     * @param  array  $data  The data for creating or updating the ParsedItem.
+     * @return ParsedItem|null The ParsedItem instance or null on failure.
      */
     public function createParsedItem(array $data): ?ParsedItem
     {
@@ -43,10 +43,17 @@ class ParsedItemService
                 $data['line_number'] = 0;
             }
 
-            // Create and return the ParsedItem
-            return ParsedItem::create($data);
+            // Create or update and return the ParsedItem
+            return ParsedItem::updateOrCreate(
+                [
+                    'type' => $data['type'],
+                    'name' => $data['name'],
+                    'file_path' => $data['file_path'],
+                ],
+                $data
+            );
         } catch (\Exception $exception) {
-            Log::error('ParsedItemService: Failed to create ParsedItem.', [
+            Log::error('ParsedItemService: Failed to create or update ParsedItem.', [
                 'error' => $exception->getMessage(),
                 'data' => $data,
             ]);
