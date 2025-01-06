@@ -12,8 +12,7 @@ class ListQueuedJobs extends Command
      *
      * --type= : Filter jobs by their class name (e.g. "App\Jobs\ProcessAnalysisPassJob").
      */
-    protected $signature = 'queue:list
-                            {--type= : Filter jobs by their type (class name)}';
+    protected $signature = 'queue:list {--type= : Filter jobs by their type (class name)}';
 
     /**
      * The console command description.
