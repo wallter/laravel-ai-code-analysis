@@ -76,6 +76,10 @@ class CodeAnalysisService
             $analysis->save();
         }
 
+        // Initialize $passType and $prompt to prevent undefined variable errors
+        $passType = 'scoring'; // You may need to set this dynamically based on your logic
+        $prompt = '';
+
         if ($passType === 'scoring') {
             $prompt .= "\n\nPRIOR ANALYSIS RESULTS:\n";
             $previousTexts = $analysis->aiResults()
