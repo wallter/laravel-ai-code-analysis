@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('type'); // 'Class', 'Function', or 'Method'
             $table->string('name');
             $table->string('file_path');
-            $table->unsignedInteger('line_number');
+            $table->unsignedInteger('line_number')->default(0);
 
             // Additional attributes
             $table->string('class_name')->nullable();

@@ -64,7 +64,7 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
                     'methods' => $methods,
                 ],
                 'file' => $this->currentFile,
-                'line' => $node->getStartLine(),
+                'line_number' => $node->getStartLine(),
             ]);
         }
 
@@ -82,7 +82,7 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
                     'description' => $docInfo['shortDescription'],
                 ],
                 'file' => $this->currentFile,
-                'line' => $node->getStartLine(),
+                'line_number' => $node->getStartLine(),
             ]);
         }
 

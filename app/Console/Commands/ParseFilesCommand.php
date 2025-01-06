@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\ParsedItem;
 use App\Services\Parsing\ParserService;
+use App\Services\ParsedItemService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -34,7 +35,7 @@ class ParseFilesCommand extends FilesCommand
     /**
      * @var ParserService
      */
-    public function __construct(protected ParserService $parserService)
+    public function __construct(protected ParserService $parserService, protected ParsedItemService $parsedItemService)
     {
         parent::__construct();
     }
@@ -89,7 +90,7 @@ class ParseFilesCommand extends FilesCommand
 
                 // Save parsed items to the database
                 foreach ($items as $item) {
-                    ParsedItem::create([
+                    $this->parsedItemService->createParsedItem([
                         'type' => $item['type'] ?? null,
                         'name' => $item['name'] ?? null,
                         'file_path' => $filePath,

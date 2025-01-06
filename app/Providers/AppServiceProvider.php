@@ -7,6 +7,7 @@ use App\Services\AI\AiderService;
 use App\Services\AI\OpenAIService;
 use App\Services\AI\AiderServiceInterface;
 use App\Services\Parsing\ParserService;
+use App\Services\ParsedItemService;
 use App\Console\Commands\AiderUpgradeCommand;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
@@ -44,6 +45,10 @@ class AppServiceProvider extends ServiceProvider
         // Bind the interface to the implementation
         $this->app->singleton(AiderServiceInterface::class, function ($app) {
             return new AiderService();
+        });
+        // Bind ParsedItemService
+        $this->app->singleton(ParsedItemService::class, function ($app) {
+            return new ParsedItemService();
         });
     }
 
