@@ -39,7 +39,8 @@ class ParseFilesCommand extends FilesCommand
     public function __construct(
         protected ParserService $parserService,
         protected ParsedItemService $parsedItemService,
-        protected JsonExportService $jsonExportService
+        protected JsonExportService $jsonExportService,
+        protected FileProcessorService $fileProcessorService
     )
     {
         parent::__construct();
