@@ -14,7 +14,7 @@ class AnalysisPassService
     public function __construct(
         protected OpenAIService $openAIService,
         protected CodeAnalysisService $codeAnalysisService,
-        // // protected AiderServiceInterface $aiderService
+        // protected AiderServiceInterface $aiderService // Not Used ... yet
     ) {}
 
     /**
