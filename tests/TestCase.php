@@ -21,4 +21,14 @@ abstract class TestCase extends BaseTestCase
 
         // Additional setup can be placed here if needed
     }
+    /**
+     * Tears down the test environment.
+     *
+     * @return void
+     */
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
 }

@@ -41,7 +41,8 @@ class ParsedItemServiceTest extends TestCase
     public function it_returns_null_when_creation_fails()
     {
         // Arrange
-        $service = new ParsedItemService();
+        $repositoryMock = Mockery::mock(ParsedItemRepositoryInterface::class);
+        $service = new ParsedItemService($repositoryMock);
         $data = []; // Missing required fields
 
         // Act

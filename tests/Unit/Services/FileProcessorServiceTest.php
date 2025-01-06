@@ -24,7 +24,7 @@ class FileProcessorServiceTest extends TestCase
         Storage::disk('local')->put($filePath, '<?php echo "Hello World"; ?>');
 
         // Act
-        $result = $service->processFile($filePath);
+        $result = $service->process($filePath);
 
         // Assert
         $this->assertTrue($result);
@@ -35,7 +35,8 @@ class FileProcessorServiceTest extends TestCase
     public function it_handles_nonexistent_file_gracefully()
     {
         // Arrange
-        $service = new FileProcessorService();
+        $parserServiceMock = Mockery::mock(ParserService::class);
+        $service = new FileProcessorService($parserServiceMock);
         $filePath = 'path/to/nonexistent.php';
 
         Storage::fake('local');
