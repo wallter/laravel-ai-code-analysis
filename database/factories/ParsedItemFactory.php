@@ -5,6 +5,9 @@ namespace Database\Factories;
 use App\Models\ParsedItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ParsedItem>
+ */
 class ParsedItemFactory extends Factory
 {
     protected $model = ParsedItem::class;
@@ -12,19 +15,19 @@ class ParsedItemFactory extends Factory
     public function definition()
     {
         return [
-            'type' => $this->faker->randomElement(['class', 'method', 'function']),
-            'name' => $this->faker->word(),
-            'file_path' => $this->faker->filePath(),
-            'line_number' => $this->faker->numberBetween(1, 500),
-            'annotations' => [$this->faker->optional()->word()],
-            'attributes' => [$this->faker->optional()->word()],
-            'details' => ['description' => $this->faker->sentence()],
-            'class_name' => $this->faker->word(),
+            'type' => fake()->randomElement(['class', 'method', 'function']),
+            'name' => fake()->word(),
+            'file_path' => fake()->filePath(),
+            'line_number' => fake()->numberBetween(1, 500),
+            'annotations' => [fake()->optional()->word()],
+            'attributes' => [fake()->optional()->word()],
+            'details' => ['description' => fake()->sentence()],
+            'class_name' => fake()->word(),
             'namespace' => 'App\\Models',
-            'visibility' => $this->faker->randomElement(['public', 'protected', 'private']),
-            'is_static' => $this->faker->boolean(),
-            'fully_qualified_name' => 'App\\Models\\'.$this->faker->word(),
-            'operation_summary' => $this->faker->sentence(),
+            'visibility' => fake()->randomElement(['public', 'protected', 'private']),
+            'is_static' => fake()->boolean(),
+            'fully_qualified_name' => 'App\\Models\\'.fake()->word(),
+            'operation_summary' => fake()->sentence(),
             'called_methods' => [],
             'ast' => [],
         ];
@@ -37,7 +40,7 @@ class ParsedItemFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'type' => 'class',
-            'class_name' => $this->faker->word(),
+            'class_name' => fake()->word(),
             'namespace' => 'App\\Models',
             'visibility' => 'public',
         ]);
@@ -52,7 +55,7 @@ class ParsedItemFactory extends Factory
             'type' => 'method',
             'class_name' => 'SampleClass',
             'namespace' => 'App\\Services',
-            'visibility' => $this->faker->randomElement(['public', 'protected']),
+            'visibility' => fake()->randomElement(['public', 'protected']),
         ]);
     }
 
@@ -74,16 +77,14 @@ class ParsedItemFactory extends Factory
      */
     public function detailedAst(): static
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'ast' => [
-                    'nodeType' => 'Stmt_Class',
-                    'attributes' => [
-                        'startLine' => $this->faker->numberBetween(1, 100),
-                        'endLine' => $this->faker->numberBetween(101, 200),
-                    ],
+        return $this->state(fn(array $attributes) => [
+            'ast' => [
+                'nodeType' => 'Stmt_Class',
+                'attributes' => [
+                    'startLine' => fake()->numberBetween(1, 100),
+                    'endLine' => fake()->numberBetween(101, 200),
                 ],
-            ];
-        });
+            ],
+        ]);
     }
 }

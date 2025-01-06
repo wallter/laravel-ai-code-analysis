@@ -15,7 +15,7 @@ class ParseFilesCommandTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function parse_files_command_stores_data_in_parsed_items_table()
+    public function parse_files_command_stores_data_in_parsed_items_table(): never
     {
         $this->markTestIncomplete('Not implemented yet.');
 
@@ -50,7 +50,7 @@ class ParseFilesCommandTest extends TestCase
     }
 
     #[Test]
-    public function parse_files_command_stores_multiple_classes_in_parsed_items_table()
+    public function parse_files_command_stores_multiple_classes_in_parsed_items_table(): never
     {
         $this->markTestIncomplete('Not implemented yet.');
 
@@ -92,7 +92,7 @@ class ParseFilesCommandTest extends TestCase
     }
 
     #[Test]
-    public function parse_files_command_stores_traits_in_parsed_items_table()
+    public function parse_files_command_stores_traits_in_parsed_items_table(): never
     {
         $this->markTestIncomplete('Not implemented yet.');
 
@@ -126,7 +126,7 @@ class ParseFilesCommandTest extends TestCase
     }
 
     #[Test]
-    public function parse_files_command_handles_files_with_syntax_errors()
+    public function parse_files_command_handles_files_with_syntax_errors(): never
     {
         $this->markTestIncomplete('Not implemented yet.');
 
@@ -154,7 +154,7 @@ class ParseFilesCommandTest extends TestCase
     }
 
     #[Test]
-    public function parse_files_command_handles_no_files_to_parse_gracefully()
+    public function parse_files_command_handles_no_files_to_parse_gracefully(): never
     {
         $this->markTestIncomplete('Not implemented yet.');
 
@@ -173,7 +173,7 @@ class ParseFilesCommandTest extends TestCase
     }
 
     #[Test]
-    public function parse_files_command_applies_limit_class_option()
+    public function parse_files_command_applies_limit_class_option(): never
     {
         $this->markTestIncomplete('Not implemented yet.');
 
@@ -225,7 +225,7 @@ class ParseFilesCommandTest extends TestCase
     }
 
     #[Test]
-    public function parse_files_command_applies_limit_method_option()
+    public function parse_files_command_applies_limit_method_option(): never
     {
         $this->markTestIncomplete('Not implemented yet.');
 
@@ -244,6 +244,7 @@ class ParseFilesCommandTest extends TestCase
         for ($i = 1; $i <= 5; $i++) {
             $phpCode .= "    public function method{$i}() {}\n";
         }
+
         $phpCode .= "}\n";
         File::put($testFilePath, $phpCode);
 
@@ -277,7 +278,7 @@ class ParseFilesCommandTest extends TestCase
     }
 
     #[Test]
-    public function parse_files_command_applies_filter_option()
+    public function parse_files_command_applies_filter_option(): never
     {
         $this->markTestIncomplete('Not implemented yet.');
 

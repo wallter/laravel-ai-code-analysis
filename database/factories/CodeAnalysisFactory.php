@@ -5,6 +5,9 @@ namespace Database\Factories;
 use App\Models\CodeAnalysis;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\CodeAnalysis>
+ */
 class CodeAnalysisFactory extends Factory
 {
     protected $model = CodeAnalysis::class;
@@ -12,15 +15,15 @@ class CodeAnalysisFactory extends Factory
     public function definition()
     {
         return [
-            'file_path' => $this->faker->filePath(),
-            'ast' => $this->faker->text(200), // Simplified AST representation
+            'file_path' => fake()->filePath(),
+            'ast' => fake()->text(200), // Simplified AST representation
             'analysis' => [
-                'complexity' => $this->faker->numberBetween(1, 10),
-                'readability' => $this->faker->numberBetween(1, 10),
+                'complexity' => fake()->numberBetween(1, 10),
+                'readability' => fake()->numberBetween(1, 10),
             ],
             'ai_output' => [
-                'summary' => $this->faker->sentence(),
-                'recommendations' => $this->faker->paragraph(),
+                'summary' => fake()->sentence(),
+                'recommendations' => fake()->paragraph(),
             ],
             'current_pass' => 1,
             'completed_passes' => [],
@@ -45,8 +48,8 @@ class CodeAnalysisFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'ai_output' => [
-                'summary' => $this->faker->sentence(),
-                'recommendations' => $this->faker->paragraph(),
+                'summary' => fake()->sentence(),
+                'recommendations' => fake()->paragraph(),
             ],
         ]);
     }

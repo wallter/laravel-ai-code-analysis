@@ -52,9 +52,7 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
         if ($node instanceof ClassLike && $node->name !== null) {
             $type = $this->resolveClassLikeType($node);
             $docInfo = $this->extractDocInfo($node);
-            $methods = $this->collectMethods($node);
-
-            $startLine = $node->getStartLine() ?? 0; // Ensure a default if getStartLine() returns null
+            $methods = $this->collectMethods($node); // Ensure a default if getStartLine() returns null
 
             $startLine = $node->getStartLine() ?? 0; // Ensure a default if getStartLine() returns null
 

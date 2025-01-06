@@ -6,11 +6,8 @@ use Illuminate\Support\Facades\Log;
 
 class FileProcessorService
 {
-    protected ParserService $parserService;
-
-    public function __construct(ParserService $parserService)
+    public function __construct(protected ParserService $parserService)
     {
-        $this->parserService = $parserService;
     }
 
     /**
@@ -28,8 +25,8 @@ class FileProcessorService
             }
 
             return true;
-        } catch (\Throwable $e) {
-            Log::error("FileProcessorService: Parse error on {$filePath} - ".$e->getMessage());
+        } catch (\Throwable $throwable) {
+            Log::error("FileProcessorService: Parse error on {$filePath} - ".$throwable->getMessage());
 
             return false;
         }

@@ -70,21 +70,15 @@ class CodeAnalysisService
             $analysis->ast = $ast;
             $analysis->analysis = $this->buildAstSummary($filePath, $ast);
             $analysis->save();
-        }
-
-        // Initialize $passType and $prompt to prevent undefined variable errors
-        $passType = 'scoring'; // You may need to set this dynamically based on your logic
+        } // You may need to set this dynamically based on your logic
         $prompt = '';
-
-        if ($passType === 'scoring') {
-            $prompt .= "\n\nPRIOR ANALYSIS RESULTS:\n";
-            $previousTexts = $analysis->aiResults()
-                ->whereIn('pass_name', ['doc_generation', 'functional_analysis', 'style_convention'])
-                ->orderBy('id', 'asc')
-                ->pluck('response_text')
-                ->implode("\n\n---\n\n");
-            $prompt .= $previousTexts;
-        }
+        $prompt .= "\n\nPRIOR ANALYSIS RESULTS:\n";
+        $previousTexts = $analysis->aiResults()
+            ->whereIn('pass_name', ['doc_generation', 'functional_analysis', 'style_convention'])
+            ->orderBy('id', 'asc')
+            ->pluck('response_text')
+            ->implode("\n\n---\n\n");
+        $prompt .= $previousTexts;
 
         return $analysis;
     }
@@ -233,8 +227,8 @@ class CodeAnalysisService
         $responseData = $latestScoringResult->response_text;
         try {
             $scoresData = json_decode($responseData, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $je) {
-            Log::error("computeAndStoreScores: JSON decode error for CodeAnalysis ID {$analysis->id}: ".$je->getMessage());
+        } catch (\JsonException $jsonException) {
+            Log::error("computeAndStoreScores: JSON decode error for CodeAnalysis ID {$analysis->id}: ".$jsonException->getMessage());
 
             return;
         }

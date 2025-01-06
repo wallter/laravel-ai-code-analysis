@@ -29,7 +29,7 @@ class CodeAnalysisTest extends TestCase
     public function it_has_many_aiscores()
     {
         $codeAnalysis = CodeAnalysis::factory()->create();
-        $aiscores = AIScore::factory()->count(3)->create(['code_analysis_id' => $codeAnalysis->id]);
+        AIScore::factory()->count(3)->create(['code_analysis_id' => $codeAnalysis->id]);
 
         $this->assertCount(3, $codeAnalysis->aiScores);
         $this->assertInstanceOf(AIScore::class, $codeAnalysis->aiScores->first());
@@ -39,7 +39,7 @@ class CodeAnalysisTest extends TestCase
     public function it_has_many_airesults()
     {
         $codeAnalysis = CodeAnalysis::factory()->create();
-        $aiResults = AIResult::factory()->count(2)->create(['code_analysis_id' => $codeAnalysis->id]);
+        AIResult::factory()->count(2)->create(['code_analysis_id' => $codeAnalysis->id]);
 
         $this->assertCount(2, $codeAnalysis->aiResults);
         $this->assertInstanceOf(AIResult::class, $codeAnalysis->aiResults->first());

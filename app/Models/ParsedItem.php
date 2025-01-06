@@ -30,24 +30,6 @@ class ParsedItem extends Model
         'ast',
     ];
 
-    protected $casts = [
-        'type' => 'string',
-        'name' => 'string',
-        'file_path' => 'string',
-        'line_number' => 'integer',
-        'annotations' => 'array',
-        'attributes' => 'array',
-        'details' => 'array',
-        'class_name' => 'string',
-        'namespace' => 'string',
-        'visibility' => 'string',
-        'is_static' => 'boolean',
-        'fully_qualified_name' => 'string',
-        'operation_summary' => 'string',
-        'called_methods' => 'array',
-        'ast' => 'array',
-    ];
-
     /**
      * The model's default values for attributes.
      *
@@ -70,4 +52,24 @@ class ParsedItem extends Model
         'fully_qualified_name' => null,
         'operation_summary' => null,
     ];
+    protected function casts(): array
+    {
+        return [
+            'type' => 'string',
+            'name' => 'string',
+            'file_path' => 'string',
+            'line_number' => 'integer',
+            'annotations' => 'array',
+            'attributes' => 'array',
+            'details' => 'array',
+            'class_name' => 'string',
+            'namespace' => 'string',
+            'visibility' => 'string',
+            'is_static' => 'boolean',
+            'fully_qualified_name' => 'string',
+            'operation_summary' => 'string',
+            'called_methods' => 'array',
+            'ast' => 'array',
+        ];
+    }
 }

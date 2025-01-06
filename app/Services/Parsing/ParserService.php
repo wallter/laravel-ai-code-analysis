@@ -17,16 +17,13 @@ use PhpParser\ParserFactory; // Added this line
  */
 class ParserService
 {
-    protected ParsedItemService $parsedItemService;
-
     /**
      * Initialize the ParserService with necessary dependencies.
      *
      * @param  ParsedItemService  $parsedItemService  The service handling ParsedItem creation.
      */
-    public function __construct(ParsedItemService $parsedItemService)
+    public function __construct(protected ParsedItemService $parsedItemService)
     {
-        $this->parsedItemService = $parsedItemService;
     }
 
     /**

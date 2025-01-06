@@ -28,8 +28,8 @@ class JsonExportService
 
             File::put($filePath, $json);
             Log::info("JsonExportService: Successfully exported data to {$filePath}");
-        } catch (\Exception $e) {
-            Log::error("JsonExportService: Failed to write to {$filePath}: ".$e->getMessage());
+        } catch (\Exception $exception) {
+            Log::error("JsonExportService: Failed to write to {$filePath}: ".$exception->getMessage());
         }
     }
 }

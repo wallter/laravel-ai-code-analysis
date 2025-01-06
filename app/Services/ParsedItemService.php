@@ -45,9 +45,9 @@ class ParsedItemService
 
             // Create and return the ParsedItem
             return ParsedItem::create($data);
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('ParsedItemService: Failed to create ParsedItem.', [
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
                 'data' => $data,
             ]);
 

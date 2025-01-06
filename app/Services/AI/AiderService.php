@@ -41,9 +41,9 @@ class AiderService implements AiderServiceInterface
             }
 
             return $response->json();
-        } catch (\Throwable $e) {
-            Log::error('AiderService: Exception during Aider interaction.', ['error' => $e->getMessage()]);
-            throw $e;
+        } catch (\Throwable $throwable) {
+            Log::error('AiderService: Exception during Aider interaction.', ['error' => $throwable->getMessage()]);
+            throw $throwable;
         }
     }
 
@@ -71,9 +71,9 @@ class AiderService implements AiderServiceInterface
             }
 
             return $response->json();
-        } catch (\Throwable $e) {
-            Log::error('AiderService: Exception during Aider upgrade.', ['error' => $e->getMessage()]);
-            throw $e;
+        } catch (\Throwable $throwable) {
+            Log::error('AiderService: Exception during Aider upgrade.', ['error' => $throwable->getMessage()]);
+            throw $throwable;
         }
     }
 }

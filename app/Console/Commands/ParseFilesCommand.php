@@ -140,7 +140,7 @@ class ParseFilesCommand extends FilesCommand
     protected function applyFilter(Collection $collectedItems, string $filter): Collection
     {
         if ($filter !== '') {
-            $collectedItems = $collectedItems->filter(fn ($item) => stripos($item['name'] ?? '', (string) $filter) !== false);
+            $collectedItems = $collectedItems->filter(fn ($item) => stripos($item['name'] ?? '', $filter) !== false);
             $this->info("Applying filter: items containing '{$filter}' in their name.");
         }
 

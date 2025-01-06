@@ -6,6 +6,9 @@ use App\Models\AIScore;
 use App\Models\CodeAnalysis;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\AIScore>
+ */
 class AIScoreFactory extends Factory
 {
     protected $model = AIScore::class;
@@ -14,9 +17,9 @@ class AIScoreFactory extends Factory
     {
         return [
             'code_analysis_id' => CodeAnalysis::factory(),
-            'operation' => $this->faker->randomElement(['complexity', 'readability', 'security']),
-            'score' => $this->faker->randomFloat(2, 0, 100),
-            'summary' => $this->faker->sentence(), // not nullable
+            'operation' => fake()->randomElement(['complexity', 'readability', 'security']),
+            'score' => fake()->randomFloat(2, 0, 100),
+            'summary' => fake()->sentence(), // not nullable
         ];
     }
 
@@ -26,7 +29,7 @@ class AIScoreFactory extends Factory
     public function high(): static
     {
         return $this->state(fn (array $attributes) => [
-            'score' => $this->faker->randomFloat(2, 80, 100),
+            'score' => fake()->randomFloat(2, 80, 100),
         ]);
     }
 
@@ -36,7 +39,7 @@ class AIScoreFactory extends Factory
     public function medium(): static
     {
         return $this->state(fn (array $attributes) => [
-            'score' => $this->faker->randomFloat(2, 50, 79),
+            'score' => fake()->randomFloat(2, 50, 79),
         ]);
     }
 
@@ -46,7 +49,7 @@ class AIScoreFactory extends Factory
     public function low(): static
     {
         return $this->state(fn (array $attributes) => [
-            'score' => $this->faker->randomFloat(2, 0, 49),
+            'score' => fake()->randomFloat(2, 0, 49),
         ]);
     }
 }

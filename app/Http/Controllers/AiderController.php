@@ -19,8 +19,8 @@ class AiderController extends Controller
 
         try {
             $result = $this->aiderService->interact($data);
-        } catch (\Exception $e) {
-            Log::error('AiderController: Interaction with Aider failed.', ['error' => $e->getMessage()]);
+        } catch (\Exception $exception) {
+            Log::error('AiderController: Interaction with Aider failed.', ['error' => $exception->getMessage()]);
 
             return response()->json(['error' => 'Aider interaction failed.'], 500);
         }

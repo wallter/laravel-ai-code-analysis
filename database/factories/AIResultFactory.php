@@ -6,6 +6,9 @@ use App\Models\AIResult;
 use App\Models\CodeAnalysis;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\AIResult>
+ */
 class AIResultFactory extends Factory
 {
     protected $model = AIResult::class;
@@ -14,9 +17,9 @@ class AIResultFactory extends Factory
     {
         return [
             'code_analysis_id' => CodeAnalysis::factory(),
-            'pass_name' => $this->faker->randomElement(['initial_analysis', 'complexity_evaluation', 'security_review']),
-            'prompt_text' => $this->faker->sentence(),
-            'response_text' => $this->faker->paragraph(),
+            'pass_name' => fake()->randomElement(['initial_analysis', 'complexity_evaluation', 'security_review']),
+            'prompt_text' => fake()->sentence(),
+            'response_text' => fake()->paragraph(),
             'metadata' => [],
         ];
     }
@@ -28,7 +31,7 @@ class AIResultFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'metadata' => [
-                'duration' => $this->faker->numberBetween(1, 5),
+                'duration' => fake()->numberBetween(1, 5),
                 'status' => 'success',
             ],
         ]);
@@ -41,7 +44,7 @@ class AIResultFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'metadata' => [
-                'duration' => $this->faker->numberBetween(6, 10),
+                'duration' => fake()->numberBetween(6, 10),
                 'status' => 'failure',
             ],
             'response_text' => null,
