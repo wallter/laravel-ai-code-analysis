@@ -14,9 +14,7 @@ class JsonExportServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // Mock the File facade
-        File::shouldReceive('exists')->andReturn(true);
-        File::shouldReceive('put')->andReturn(true);
+        // Removed global mocks to allow individual test setups
     }
 
     #[Test]
@@ -27,7 +25,7 @@ class JsonExportServiceTest extends TestCase
 
         File::shouldReceive('exists')->with('/path/to')->andReturn(true);
         File::shouldReceive('put')->with($filePath, json_encode($items->toArray(), JSON_PRETTY_PRINT))->andReturn(true);
-        Log::shouldReceive('info')->with("JsonExportService: Successfully exported data to {$filePath}");
+        Log::shouldReceive('info')->with("JsonExportService: Successfully exported data to {$filePath}")->once();
 
         $service = new JsonExportService();
         $service->export($items, $filePath);
@@ -62,7 +60,7 @@ class JsonExportServiceTest extends TestCase
         File::shouldReceive('exists')->with('/new/path')->andReturn(false);
         File::shouldReceive('makeDirectory')->with('/new/path', 0755, true)->andReturn(true);
         File::shouldReceive('put')->with($filePath, json_encode($items->toArray(), JSON_PRETTY_PRINT))->andReturn(true);
-        Log::shouldReceive('info')->with("JsonExportService: Successfully exported data to {$filePath}");
+        Log::shouldReceive('info')->with("JsonExportService: Successfully exported data to {$filePath}")->once();
 
         $service = new JsonExportService();
         $service->export($items, $filePath);
@@ -80,7 +78,7 @@ class JsonExportServiceTest extends TestCase
         File::shouldReceive('exists')->with('/path/to')->andReturn(true);
         File::shouldReceive('put')->with($filePath, json_encode($items->toArray(), JSON_PRETTY_PRINT))
             ->andThrow($exception);
-        Log::shouldReceive('error')->with("JsonExportService: Failed to write to {$filePath}: " . $exception->getMessage());
+        Log::shouldReceive('error')->with("JsonExportService: Failed to write to {$filePath}: " . $exception->getMessage())->once();
 
         $service = new JsonExportService();
         $service->export($items, $filePath);
