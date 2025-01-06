@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('file_path');
             $table->unsignedInteger('line_number');
 
-            // Additional attributes from other migrations
+            // Additional attributes
             $table->string('class_name')->nullable();
             $table->string('namespace')->nullable();
             $table->string('visibility')->nullable();
