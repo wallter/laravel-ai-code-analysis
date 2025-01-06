@@ -147,6 +147,8 @@ class PassesProcessCommand extends Command
                 'file_path' => $analysis->file_path,
                 'current_pass' => $analysis->current_pass,
                 'completed_passes' => implode(', ', $completedPasses),
+            ];
+
             } catch (\Throwable $e) {
                 Log::error("Error processing passes for [{$analysis->file_path}].", [
                     'exception' => $e,
