@@ -10,6 +10,7 @@
    - Use `const` for immutables.
    - Emphasize OOP (Traits, Interfaces, composition).
    - Use Laravel Collections & helpers.
+   - Use PHP Attributes (ie `@test` -> `#[Test] + use PHPUnit\Framework\Attributes\Test;`)
 
 3. **Abstractions**
    - Write reusable, extensible code.

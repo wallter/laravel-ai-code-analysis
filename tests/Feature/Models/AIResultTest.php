@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Models;
 
-use Tests\TestCase;
+use Tests\Feature\TestCase;
 use App\Models\AIResult;
 use App\Models\CodeAnalysis;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,7 +26,7 @@ class AIResultTest extends TestCase
         ], $aiResult->getFillable());
     }
 
-    #[Test]
+    /** @test */
     public function it_belongs_to_code_analysis()
     {
         $codeAnalysis = CodeAnalysis::factory()->create();
@@ -35,8 +35,7 @@ class AIResultTest extends TestCase
         $this->assertInstanceOf(CodeAnalysis::class, $aiResult->codeAnalysis);
         $this->assertEquals($codeAnalysis->id, $aiResult->codeAnalysis->id);
     }
-
-    #[Test]
+    /** @test */
     public function it_creates_successful_ai_results()
     {
         $aiResult = AIResult::factory()->success()->create();
@@ -47,7 +46,7 @@ class AIResultTest extends TestCase
         $this->assertNotNull($aiResult->response_text);
     }
 
-    #[Test]
+    /** @test */
     public function it_creates_failed_ai_results()
     {
         $aiResult = AIResult::factory()->failure()->create();
