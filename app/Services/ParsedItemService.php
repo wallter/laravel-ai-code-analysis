@@ -38,6 +38,11 @@ class ParsedItemService
                 'ast' => [],
             ], $data);
 
+            // Ensure 'line_number' is not null
+            if (is_null($data['line_number'])) {
+                $data['line_number'] = 0;
+            }
+
             // Create and return the ParsedItem
             return ParsedItem::create($data);
         } catch (\Exception $e) {

@@ -38,4 +38,22 @@ class ParsedItem extends Model
         'ast' => 'array',
         'called_methods' => 'array',
     ];
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'type' => 'Unknown',
+        'name' => 'Unnamed',
+        'file_path' => 'Unknown',
+        'line_number' => 0,
+        'annotations' => '[]',
+        'attributes' => '[]',
+        'details' => '[]',
+        'visibility' => 'public',
+        'is_static' => false,
+        'called_methods' => '[]',
+        'ast' => '[]',
+    ];
 }

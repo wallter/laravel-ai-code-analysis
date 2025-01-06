@@ -54,6 +54,10 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
             $docInfo = $this->extractDocInfo($node);
             $methods = $this->collectMethods($node);
 
+            $startLine = $node->getStartLine() ?? 0; // Ensure a default if getStartLine() returns null
+
+            $startLine = $node->getStartLine() ?? 0; // Ensure a default if getStartLine() returns null
+
             $this->items->push([
                 'type' => $type, // "Class", "Trait", or "Interface"
                 'name' => $node->name->toString(),
@@ -64,7 +68,7 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
                     'methods' => $methods,
                 ],
                 'file' => $this->currentFile,
-                'line_number' => $node->getStartLine(),
+                'line_number' => $startLine,
             ]);
         }
 
@@ -82,7 +86,7 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
                     'description' => $docInfo['shortDescription'],
                 ],
                 'file' => $this->currentFile,
-                'line_number' => $node->getStartLine(),
+                'line_number' => $startLine,
             ]);
         }
 
