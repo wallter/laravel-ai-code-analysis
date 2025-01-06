@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\AIResult;
 use App\Models\CodeAnalysis;
-use App\Services\AI\AiderServiceInterface;
+// use App\Services\AI\AiderServiceInterface;
 use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
 use Illuminate\Support\Facades\Log;
@@ -14,7 +14,7 @@ class AnalysisPassService
     public function __construct(
         protected OpenAIService $openAIService,
         protected CodeAnalysisService $codeAnalysisService,
-        protected AiderServiceInterface $aiderService
+        // // protected AiderServiceInterface $aiderService
     ) {}
 
     /**

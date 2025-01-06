@@ -75,8 +75,9 @@ php artisan analyze:files
 # 6) Process additional passes if needed:
 php artisan passes:process
 
-# 7) Run/Start queue processing to asyncronous proccess passes via OpenAI:
-php artisan queue:work
+# 7) Run the custom command (with a progressbar) to process the async jobs
+php artisan queue:progress
+# php artisan queue:work
 ```
 - Check console output
 
