@@ -32,4 +32,30 @@ class AIScoreTest extends TestCase
         $this->assertInstanceOf(CodeAnalysis::class, $aiscore->codeAnalysis);
         $this->assertEquals($codeAnalysis->id, $aiscore->codeAnalysis->id);
     }
+    /** @test */
+    public function it_creates_high_scores()
+    {
+        $aiscore = AIScore::factory()->high()->create();
+
+        $this->assertGreaterThanOrEqual(80, $aiscore->score);
+        $this->assertLessThanOrEqual(100, $aiscore->score);
+    }
+
+    /** @test */
+    public function it_creates_medium_scores()
+    {
+        $aiscore = AIScore::factory()->medium()->create();
+
+        $this->assertGreaterThanOrEqual(50, $aiscore->score);
+        $this->assertLessThan(80, $aiscore->score);
+    }
+
+    /** @test */
+    public function it_creates_low_scores()
+    {
+        $aiscore = AIScore::factory()->low()->create();
+
+        $this->assertGreaterThanOrEqual(0, $aiscore->score);
+        $this->assertLessThan(50, $aiscore->score);
+    }
 }

@@ -34,4 +34,25 @@ class AIResultTest extends TestCase
         $this->assertInstanceOf(CodeAnalysis::class, $aiResult->codeAnalysis);
         $this->assertEquals($codeAnalysis->id, $aiResult->codeAnalysis->id);
     }
+    /** @test */
+    public function it_creates_successful_ai_results()
+    {
+        $aiResult = AIResult::factory()->success()->create();
+
+        $this->assertEquals('success', $aiResult->metadata['status']);
+        $this->assertGreaterThanOrEqual(1, $aiResult->metadata['duration']);
+        $this->assertLessThanOrEqual(5, $aiResult->metadata['duration']);
+        $this->assertNotNull($aiResult->response_text);
+    }
+
+    /** @test */
+    public function it_creates_failed_ai_results()
+    {
+        $aiResult = AIResult::factory()->failure()->create();
+
+        $this->assertEquals('failure', $aiResult->metadata['status']);
+        $this->assertGreaterThanOrEqual(6, $aiResult->metadata['duration']);
+        $this->assertLessThanOrEqual(10, $aiResult->metadata['duration']);
+        $this->assertNull($aiResult->response_text);
+    }
 }

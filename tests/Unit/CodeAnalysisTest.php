@@ -46,4 +46,27 @@ class CodeAnalysisTest extends TestCase
         $this->assertCount(2, $codeAnalysis->aiResults);
         $this->assertInstanceOf(AIResult::class, $codeAnalysis->aiResults->first());
     }
+    /** @test */
+    public function it_creates_completed_code_analysis()
+    {
+        $codeAnalysis = CodeAnalysis::factory()->completed()->create();
+
+        $this->assertEquals(3, $codeAnalysis->current_pass);
+        $this->assertIsArray($codeAnalysis->completed_passes);
+        $this->assertCount(2, $codeAnalysis->completed_passes);
+        $this->assertContains('pass1', $codeAnalysis->completed_passes);
+        $this->assertContains('pass2', $codeAnalysis->completed_passes);
+    }
+
+    /** @test */
+    public function it_creates_code_analysis_with_ai_output()
+    {
+        $codeAnalysis = CodeAnalysis::factory()->withAiOutput()->create();
+
+        $this->assertIsArray($codeAnalysis->ai_output);
+        $this->assertArrayHasKey('summary', $codeAnalysis->ai_output);
+        $this->assertArrayHasKey('recommendations', $codeAnalysis->ai_output);
+        $this->assertNotEmpty($codeAnalysis->ai_output['summary']);
+        $this->assertNotEmpty($codeAnalysis->ai_output['recommendations']);
+    }
 }
