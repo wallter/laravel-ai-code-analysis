@@ -9,11 +9,6 @@ namespace App\Enums;
  */
 enum AIDelimiters: string
 {
-    case GUIDELINES_START = '<<<<<<< GUIDELINES';
-
-    case RESPONSE_FORMAT_START = '<<<<<<< RESPONSE FORMAT';
-
-    case EXAMPLE_START = '<<<<<<< EXAMPLE';
-
     case END = '>>>>>>>';
+    case START = '<<<<<<<';
 }

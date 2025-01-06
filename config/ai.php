@@ -49,18 +49,21 @@ return [
             'max_tokens' => env('OPENAI_MODEL_O1_MINI_MAX_TOKENS', 1500),
             'temperature' => env('OPENAI_MODEL_O1_MINI_TEMPERATURE', 0.3),
             'supports_system_message' => false, // o1-mini does not support system messages
+            'token_limit_parameter' => 'max_completion_tokens', // Use 'max_completion_tokens' instead of 'max_tokens'
         ],
         'gpt-4' => [
             'model_name' => env('OPENAI_MODEL_GPT4', 'gpt-4'),
             'max_tokens' => env('OPENAI_MODEL_GPT4_MAX_TOKENS', 2000),
             'temperature' => env('OPENAI_MODEL_GPT4_TEMPERATURE', 0.3),
             'supports_system_message' => true, // gpt-4 supports system messages
+            'token_limit_parameter' => 'max_tokens', // Use 'max_tokens'
         ],
         'gpt-3.5-turbo' => [
             'model_name' => env('OPENAI_MODEL_GPT35_TURBO', 'gpt-3.5-turbo'),
             'max_tokens' => env('OPENAI_MODEL_GPT35_TURBO_MAX_TOKENS', 1500),
             'temperature' => env('OPENAI_MODEL_GPT35_TURBO_TEMPERATURE', 0.4),
             'supports_system_message' => true, // gpt-3.5-turbo supports system messages
+            'token_limit_parameter' => 'max_tokens', // Use 'max_tokens'
         ],
     ],
 

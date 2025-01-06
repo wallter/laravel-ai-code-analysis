@@ -2,7 +2,7 @@
 
 namespace App\Services\AI;
 
-use App\Enums\AiDelimiters;
+use App\Enums\AIDelimiters;
 use App\Enums\OperationIdentifier;
 use App\Enums\PassType;
 use Illuminate\Support\Str;
@@ -51,55 +51,55 @@ class AIPromptBuilder
         if (in_array($passType, [PassType::AST->value, PassType::BOTH->value], true)) {
             if (! empty($this->astData)) {
                 $astJson = json_encode($this->astData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-                $prompt = $prompt->append("\n\n".AiDelimiters::GUIDELINES_START->value)
+                $prompt = $prompt->append("\n\n".AIDelimiters::START->value)
                     ->append("\n[AST DATA]")
                     ->append("\n{$astJson}")
-                    ->append("\n".AiDelimiters::END->value);
+                    ->append("\n".AIDelimiters::END->value);
             }
         }
 
         // Append raw code if pass type is 'raw' or 'both'
         if (in_array($passType, [PassType::RAW->value, PassType::BOTH->value], true)) {
             if (! empty($this->rawCode)) {
-                $prompt = $prompt->append("\n\n".AiDelimiters::GUIDELINES_START->value)
+                $prompt = $prompt->append("\n\n".AIDelimiters::START->value)
                     ->append("\n[RAW CODE]")
                     ->append("\n{$this->rawCode}")
-                    ->append("\n".AiDelimiters::END->value);
+                    ->append("\n".AIDelimiters::END->value);
             }
         }
 
         // Append previous pass outputs if pass type is 'previous'
         if ($passType === PassType::PREVIOUS->value) {
             if (! empty($this->previousResults)) {
-                $prompt = $prompt->append("\n\n".AiDelimiters::GUIDELINES_START->value)
+                $prompt = $prompt->append("\n\n".AIDelimiters::START->value)
                     ->append("\n[PREVIOUS ANALYSIS RESULTS]")
                     ->append("\n{$this->previousResults}")
-                    ->append("\n".AiDelimiters::END->value);
+                    ->append("\n".AIDelimiters::END->value);
             }
         }
 
         // Append guidelines
         if (isset($this->config['prompt_sections']['guidelines'])) {
             $guidelines = implode("\n", $this->config['prompt_sections']['guidelines']);
-            $prompt = $prompt->append("\n\n".AiDelimiters::GUIDELINES_START->value)
+            $prompt = $prompt->append("\n\n".AIDelimiters::START->value)
                 ->append("\n{$guidelines}")
-                ->append("\n".AiDelimiters::END->value);
+                ->append("\n".AIDelimiters::END->value);
         }
 
         // Append example if exists
         if (isset($this->config['prompt_sections']['example'])) {
             $example = implode("\n", $this->config['prompt_sections']['example']);
-            $prompt = $prompt->append("\n\n".AiDelimiters::EXAMPLE_START->value)
+            $prompt = $prompt->append("\n\n".AIDelimiters::START->value)
                 ->append("\n{$example}")
-                ->append("\n".AiDelimiters::END->value);
+                ->append("\n".AIDelimiters::END->value);
         }
 
         // Append response format
         if (isset($this->config['prompt_sections']['response_format'])) {
             $responseFormat = $this->config['prompt_sections']['response_format'];
-            $prompt = $prompt->append("\n\n".AiDelimiters::RESPONSE_FORMAT_START->value)
+            $prompt = $prompt->append("\n\n".AIDelimiters::START->value)
                 ->append("\n{$responseFormat}")
-                ->append("\n".AiDelimiters::END->value);
+                ->append("\n".AIDelimiters::END->value);
         }
 
         // Build the messages array based on model support

@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Enums\OperationIdentifier;
 use App\Services\AnalysisPassService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -25,7 +24,6 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
-
     /**
      * The number of times the job may be attempted.
      *
@@ -56,10 +54,6 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
          */
         protected int $codeAnalysisId,
         /**
-         * The OperationIdentifier ENUM instance.
-         */
-        protected OperationIdentifier $passName,
-        /**
          * Indicates if the job is a dry run.
          */
         protected bool $dryRun = false
@@ -70,7 +64,7 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
      */
     public function uniqueId(): string
     {
-        return "{$this->codeAnalysisId}-{$this->passName->value}-".($this->dryRun ? '1' : '0');
+        return "{$this->codeAnalysisId}-".($this->dryRun ? '1' : '0');
     }
 
     /**
@@ -79,10 +73,10 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
     public function handle(AnalysisPassService $analysisPassService): void
     {
         try {
-            $analysisPassService->processPass($this->codeAnalysisId, $this->passName->value, $this->dryRun);
+            $analysisPassService->processAllPasses($this->codeAnalysisId, $this->dryRun);
         } catch (Throwable $throwable) {
             // Log the exception and optionally retry or mark the job as failed
-            Log::error("ProcessAnalysisPassJob: Failed for CodeAnalysis ID {$this->codeAnalysisId}, Pass {$this->passName->value}. Error: {$throwable->getMessage()}", [
+            Log::error("ProcessAnalysisPassJob: Failed for CodeAnalysis ID {$this->codeAnalysisId}. Error: {$throwable->getMessage()}", [
                 'exception' => $throwable,
             ]);
 

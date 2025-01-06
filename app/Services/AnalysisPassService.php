@@ -5,77 +5,98 @@ namespace App\Services;
 use App\Enums\OperationIdentifier;
 use App\Models\AIResult;
 use App\Models\CodeAnalysis;
+use App\Services\AI\AIPromptBuilder;
+use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
+use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Service responsible for handling analysis passes for code.
+ * Service responsible for handling AI analysis passes for code.
  */
 class AnalysisPassService
 {
+    /**
+     * Constructor to inject dependencies.
+     */
     public function __construct(
         protected OpenAIService $openAIService,
         protected CodeAnalysisService $codeAnalysisService
-        // protected AiderServiceInterface $aiderService // Not Used ... yet
     ) {}
 
     /**
-     * Process an analysis pass.
+     * Process all pending AI analysis passes for a given CodeAnalysis.
      */
-    public function processPass(int $codeAnalysisId, string $passName, bool $dryRun): void
+    public function processAllPasses(int $codeAnalysisId, bool $dryRun = false): void
     {
-        Log::info("AnalysisPassService: Starting processPass for CodeAnalysis ID {$codeAnalysisId}, Pass '{$passName}', dryRun: ".($dryRun ? 'true' : 'false'));
+        Log::info("AnalysisPassService: Starting processAllPasses for CodeAnalysis ID {$codeAnalysisId}, dryRun: ".($dryRun ? 'true' : 'false'));
 
         try {
-            $analysis = $this->retrieveAnalysis($codeAnalysisId);
-            if (! $analysis) {
-                Log::warning("AnalysisPassService: No analysis found for CodeAnalysis ID {$codeAnalysisId}. Exiting processPass.");
+            // Start a database transaction to ensure atomicity
+            DB::transaction(function () use ($codeAnalysisId, $dryRun) {
+                $analysis = $this->retrieveAnalysis($codeAnalysisId);
+                if (! $analysis) {
+                    Log::warning("AnalysisPassService: No analysis found for CodeAnalysis ID {$codeAnalysisId}. Exiting processAllPasses.");
 
-                return;
-            }
+                    return;
+                }
 
-            if ($this->isPassCompleted($analysis, $passName)) {
-                Log::info("AnalysisPassService: Pass '{$passName}' already completed for CodeAnalysis ID {$codeAnalysisId}. Exiting processPass.");
+                $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
+                $completedPasses = (array) ($analysis->completed_passes ?? []);
 
-                return;
-            }
+                foreach ($passOrder as $passName) {
+                    if (in_array($passName, $completedPasses, true)) {
+                        Log::info("AnalysisPassService: Pass '{$passName}' already completed for CodeAnalysis ID {$codeAnalysisId}. Skipping.");
 
-            $passConfig = $this->getPassConfig($passName);
-            if (! $passConfig) {
-                Log::warning("AnalysisPassService: No configuration found for pass '{$passName}'. Exiting processPass.");
+                        continue;
+                    }
 
-                return;
-            }
+                    $passConfig = $this->getPassConfig($passName);
+                    if (! $passConfig) {
+                        Log::warning("AnalysisPassService: No configuration found for pass '{$passName}'. Skipping.");
 
-            if ($this->handleDryRun($passName, $analysis, $dryRun)) {
-                Log::info("AnalysisPassService: Dry run handled for pass '{$passName}'. Exiting processPass.");
+                        continue;
+                    }
 
-                return;
-            }
+                    if ($dryRun) {
+                        Log::info("[DRY-RUN] => would run pass [{$passName}] for [{$analysis->file_path}].");
 
-            Log::info("AnalysisPassService: Executing AI operation for pass '{$passName}'.");
-            $aiResult = $this->executeAiOperation($analysis, $passName, $passConfig);
-            Log::info("AnalysisPassService: AI operation completed for pass '{$passName}'.");
+                        continue;
+                    }
 
-            Log::info("AnalysisPassService: Extracting usage metrics for pass '{$passName}'.");
-            $metadata = $this->extractUsageMetrics();
+                    Log::info("AnalysisPassService: Executing pass '{$passName}' for CodeAnalysis ID {$codeAnalysisId}.");
+                    $aiResult = $this->executeAiOperation($analysis, $passName, $passConfig);
+                    Log::info("AnalysisPassService: AI operation completed for pass '{$passName}'.");
 
-            Log::info("AnalysisPassService: Creating AIResult entry for pass '{$passName}'.");
-            $this->createAiResultEntry(
-                $analysis,
-                $passName,
-                $aiResult['prompt'],
-                $aiResult['response_data'],
-                $metadata
-            );
+                    Log::info("AnalysisPassService: Extracting usage metrics for pass '{$passName}'.");
+                    $metadata = $this->extractUsageMetrics();
+                    Log::debug('AnalysisPassService: Usage metrics extracted: '.json_encode($metadata));
 
-            $this->handleScoringPass($analysis);
-            $this->markPassAsCompleted($analysis, $passName);
-        } catch (\Throwable $throwable) {
-            Log::error('AnalysisPassService: Exception in processPass => '.$throwable->getMessage(), ['exception' => $throwable]);
+                    Log::info("AnalysisPassService: Creating AIResult entry for pass '{$passName}'.");
+                    $this->createAiResultEntry(
+                        $analysis,
+                        $passName,
+                        $aiResult['prompt'],
+                        $aiResult['response_data'],
+                        $metadata
+                    );
+
+                    // Mark pass as completed
+                    $completedPasses[] = $passName;
+                    $analysis->completed_passes = array_unique($completedPasses);
+                    $analysis->save();
+
+                    Log::info("AnalysisPassService: Pass '{$passName}' marked as completed for CodeAnalysis ID {$codeAnalysisId}.");
+                }
+
+                Log::info("AnalysisPassService: All passes processed for CodeAnalysis ID {$codeAnalysisId}.");
+            });
+        } catch (Exception $exception) {
+            Log::error('AnalysisPassService: Exception in processAllPasses => '.$exception->getMessage(), ['exception' => $exception]);
         }
 
-        Log::info("AnalysisPassService: Finished processPass for CodeAnalysis ID {$codeAnalysisId}, Pass '{$passName}'.");
+        Log::info("AnalysisPassService: Finished processAllPasses for CodeAnalysis ID {$codeAnalysisId}.");
     }
 
     /**
@@ -93,22 +114,6 @@ class AnalysisPassService
     }
 
     /**
-     * Check if the pass has already been completed.
-     */
-    private function isPassCompleted(CodeAnalysis $analysis, string $passName): bool
-    {
-        Log::debug("AnalysisPassService: Checking if pass '{$passName}' is completed for CodeAnalysis ID {$analysis->id}.");
-        $completedPasses = (array) ($analysis->completed_passes ?? []);
-        if (in_array($passName, $completedPasses, true)) {
-            Log::info("AnalysisPassService: Pass [{$passName}] already completed for [{$analysis->file_path}]. Skipping.");
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
      * Retrieve the configuration for the specified pass.
      */
     private function getPassConfig(string $passName): ?array
@@ -117,58 +122,66 @@ class AnalysisPassService
         $passConfigs = config('ai.passes', []);
         $cfg = $passConfigs[$passName] ?? null;
         if (! $cfg) {
-            Log::warning("AnalysisPassService: No config for pass [{$passName}]. Skipping.");
+            Log::warning("AnalysisPassService: No config for pass '{$passName}'. Skipping.");
         }
 
         return $cfg;
     }
 
     /**
-     * Handle dry-run scenarios.
-     *
-     * @return bool Returns true if dry-run is handled and processing should stop.
-     */
-    private function handleDryRun(string $passName, CodeAnalysis $analysis, bool $dryRun): bool
-    {
-        if ($dryRun) {
-            Log::info("[DRY-RUN] => would run pass [{$passName}] for [{$analysis->file_path}].");
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Execute the AI operation.
-     *
-     * @return array Contains 'prompt' and 'response_data'.
+     * Execute the AI operation for a given pass.
      */
     private function executeAiOperation(CodeAnalysis $analysis, string $passName, array $passConfig): array
     {
-        // Build prompt using AiPromptBuilder
-        Log::debug("AnalysisPassService: Building prompt for pass '{$passName}'.");
-        $promptBuilder = new AiPromptBuilder(
-            OperationIdentifier::from($passName),
-            $passConfig,
-            $analysis->ast ?? [],
-            $this->getRawCode(),
-            $this->getPreviousResults()
+        // Initialize AiPromptBuilder with ENUM
+        try {
+            $operationIdentifier = OperationIdentifier::from($passConfig['operation_identifier']);
+        } catch (\ValueError $valueError) {
+            Log::error("AnalysisPassService: Invalid OperationIdentifier '{$passConfig['operation_identifier']}' for pass '{$passName}'. Skipping.");
+            throw $valueError;
+        }
+
+        $promptBuilder = new AIPromptBuilder(
+            operationIdentifier: $operationIdentifier,
+            config: $passConfig,
+            astData: $analysis->ast ?? [],
+            rawCode: $this->getRawCode($analysis->file_path),
+            previousResults: $this->getPreviousResults($analysis)
         );
+
+        // Build prompt
+        Log::debug("AnalysisPassService: Building prompt for pass '{$passName}'.");
         $prompt = $promptBuilder->buildPrompt();
         Log::debug("AnalysisPassService: Prompt built for pass '{$passName}': {$prompt}");
 
-        // Perform AI call via OpenAIService
+        // Determine the correct token parameter based on model configuration
+        $modelName = $passConfig['model'] ?? config('ai.default.model');
+        $modelConfig = config("ai.models.{$modelName}", []);
+        $tokenLimitParam = $modelConfig['token_limit_parameter'] ?? 'max_tokens';
+
+        // Prepare AI operation parameters
+        $aiParams = [
+            'model' => $modelConfig['model_name'] ?? $modelName,
+            $tokenLimitParam => $passConfig[$tokenLimitParam] ?? $modelConfig['max_tokens'] ?? config('ai.default.max_tokens'),
+            'temperature' => $passConfig['temperature'] ?? config('ai.default.temperature'),
+            'messages' => json_decode($prompt, true),
+        ];
+
+        // Log the parameters being sent (excluding sensitive information)
+        Log::debug("AnalysisPassService: Performing AI operation for pass '{$passName}' with parameters: ".json_encode([
+            'model' => $aiParams['model'],
+            $tokenLimitParam => $aiParams[$tokenLimitParam],
+            'temperature' => $aiParams['temperature'],
+            'messages' => '<<omitted>>', // To avoid logging sensitive data
+        ]));
+
+        // Perform AI operation
         Log::debug("AnalysisPassService: Performing AI operation for pass '{$passName}'.");
         $responseData = $this->openAIService->performOperation(
-            operationIdentifier: OperationIdentifier::from($passName),
-            params: [
-                'prompt' => $prompt,
-                'max_tokens' => $passConfig['max_tokens'] ?? config('ai.default.max_tokens'),
-                'temperature' => $passConfig['temperature'] ?? config('ai.default.temperature'),
-            ]
+            operationIdentifier: $operationIdentifier,
+            params: $aiParams
         );
-        Log::debug("AnalysisPassService: AI operation response for pass '{$passName}': {$responseData}");
+        Log::debug("AnalysisPassService: AI operation response for pass '{$passName}': ".json_encode($responseData));
 
         return [
             'prompt' => $prompt,
@@ -189,7 +202,7 @@ class AnalysisPassService
             Log::debug('AnalysisPassService: Usage metrics found: '.json_encode($usage));
             $metadata['usage'] = $usage;
             // Compute cost
-            $COST_PER_1K_TOKENS = config('ai.openai_cost_per_1k_tokens', 0.002); // e.g., $0.002 per 1k tokens
+            $COST_PER_1K_TOKENS = env('OPENAI_COST_PER_1K_TOKENS', 0.002); // e.g., $0.002 per 1k tokens
             $totalTokens = $usage['total_tokens'] ?? 0;
             $metadata['cost_estimate_usd'] = round(($totalTokens / 1000) * $COST_PER_1K_TOKENS, 6);
             Log::debug("AnalysisPassService: Cost estimate based on tokens: {$metadata['cost_estimate_usd']} USD.");
@@ -221,106 +234,41 @@ class AnalysisPassService
             } else {
                 Log::error("AnalysisPassService: Failed to create AIResult entry for pass '{$passName}'.");
             }
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             Log::error("AnalysisPassService: Exception while creating AIResult for pass '{$passName}': {$exception->getMessage()}", [
                 'exception' => $exception,
             ]);
+            throw $exception;
         }
     }
 
     /**
-     * Handle scoring pass after AI operation.
+     * Retrieve the raw code from the file path.
      */
-    private function handleScoringPass(CodeAnalysis $analysis): void
+    private function getRawCode(string $filePath): string
     {
-        // Define the scoring pass identifier
-        $scoringPassIdentifier = OperationIdentifier::from('scoring_pass');
+        if (file_exists($filePath)) {
+            Log::debug("AnalysisPassService: Retrieving raw code from '{$filePath}'.");
 
-        // Check if scoring pass is configured
-        $scoringPassConfig = config("ai.passes.{$scoringPassIdentifier->value}", []);
-        if (empty($scoringPassConfig)) {
-            Log::warning("AnalysisPassService: No configuration found for scoring pass '{$scoringPassIdentifier->value}'. Skipping.");
-
-            return;
+            return file_get_contents($filePath);
         }
 
-        // Build prompt for scoring pass
-        Log::debug("AnalysisPassService: Building prompt for scoring pass '{$scoringPassIdentifier->value}'.");
-        $promptBuilder = new AiPromptBuilder(
-            $scoringPassIdentifier,
-            $scoringPassConfig,
-            $analysis->ast ?? [],
-            $this->getRawCode(),
-            $this->getPreviousResults()
-        );
-        $prompt = $promptBuilder->buildPrompt();
-        Log::debug("AnalysisPassService: Prompt built for scoring pass '{$scoringPassIdentifier->value}': {$prompt}");
+        Log::warning("AnalysisPassService: Raw code file '{$filePath}' does not exist.");
 
-        // Perform scoring AI operation
-        Log::debug("AnalysisPassService: Performing AI operation for scoring pass '{$scoringPassIdentifier->value}'.");
-        $responseData = $this->openAIService->performOperation(
-            operationIdentifier: $scoringPassIdentifier,
-            params: [
-                'prompt' => $prompt,
-                'max_tokens' => $scoringPassConfig['max_tokens'] ?? config('ai.default.max_tokens'),
-                'temperature' => $scoringPassConfig['temperature'] ?? config('ai.default.temperature'),
-            ]
-        );
-        Log::debug("AnalysisPassService: AI operation response for scoring pass '{$scoringPassIdentifier->value}': {$responseData}");
-
-        // Extract usage metrics
-        $usageMetrics = $this->openAIService->getLastUsage();
-        $metadata = $this->prepareMetadata($usageMetrics);
-
-        // Create AIResult entry for scoring pass
-        $aiResult = AIResult::create([
-            'code_analysis_id' => $analysis->id,
-            'pass_name' => $scoringPassIdentifier->value,
-            'prompt_text' => $prompt,
-            'response_text' => $responseData,
-            'metadata' => $metadata,
-        ]);
-
-        if ($aiResult) {
-            Log::info("AnalysisPassService: AIResult entry created with ID {$aiResult->id} for scoring pass '{$scoringPassIdentifier->value}'.");
-        } else {
-            Log::error("AnalysisPassService: Failed to create AIResult entry for scoring pass '{$scoringPassIdentifier->value}'.");
-        }
+        return '';
     }
 
     /**
-     * Prepare metadata including usage and cost estimates.
+     * Retrieve previous analysis results.
      */
-    protected function prepareMetadata(?array $usageMetrics): array
+    private function getPreviousResults(CodeAnalysis $analysis): string
     {
-        $metadata = [];
+        Log::debug("AnalysisPassService: Retrieving previous analysis results for CodeAnalysis ID {$analysis->id}.");
 
-        if ($usageMetrics) {
-            $metadata['usage'] = $usageMetrics;
-
-            // Compute cost based on tokens
-            $COST_PER_1K_TOKENS = config('ai.openai_cost_per_1k_tokens', 0.002); // Example value: $0.002 per 1k tokens
-            $totalTokens = $usageMetrics['total_tokens'] ?? 0;
-            $metadata['cost_estimate_usd'] = round(($totalTokens / 1000) * $COST_PER_1K_TOKENS, 6);
-
-            Log::debug("AnalysisPassService: Cost estimate based on tokens: {$metadata['cost_estimate_usd']} USD.");
-        } else {
-            Log::warning('AnalysisPassService: No usage metrics available.');
-        }
-
-        return $metadata;
-    }
-
-    /**
-     * Mark the pass as completed in the CodeAnalysis instance.
-     */
-    protected function markPassAsCompleted(CodeAnalysis $analysis, string $passName): void
-    {
-        $completedPasses = (array) ($analysis->completed_passes ?? []);
-        $completedPasses[] = $passName;
-        $analysis->completed_passes = $completedPasses;
-        $analysis->save();
-
-        Log::info("AnalysisPassService: Pass '{$passName}' marked as completed for CodeAnalysis ID {$analysis->id}.");
+        return $analysis->aiResults()
+            ->whereIn('operation_identifier', OperationIdentifier::cases())
+            ->orderBy('id', 'asc')
+            ->pluck('response_text')
+            ->implode("\n\n---\n\n");
     }
 }
