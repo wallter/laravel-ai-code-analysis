@@ -1,229 +1,110 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Services\Parsing;
 
-use Illuminate\Support\Collection;
+use App\Enums\ParsedItemType;
 use PhpParser\Node;
-use PhpParser\Node\Stmt\ClassLike;
-use PhpParser\Node\Stmt\Function_;
-use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\NodeVisitorAbstract;
 
 /**
- * Single-pass visitor collecting classes (traits, interfaces) and free-floating functions.
- * Captures docblocks, methods, parameters, etc.
+ * Unified AST Visitor that handles multiple node types.
  */
 class UnifiedAstVisitor extends NodeVisitorAbstract
 {
-    protected Collection $items;
+    /**
+     * @var array<int, array<string, mixed>>
+     */
+    protected array $parsedItems = [];
 
+    /**
+     * The current file being parsed.
+     *
+     * @var string|null
+     */
     protected ?string $currentFile = null;
 
-    protected ?string $currentNamespace = null;
-
-    public function __construct()
+    /**
+     * Set the current file being parsed.
+     *
+     * @param string $filePath
+     * @return void
+     */
+    public function setCurrentFile(string $filePath): void
     {
-        $this->items = collect();
+        $this->currentFile = $filePath;
     }
 
     /**
-     * Set the current file being parsed; used for referencing in output.
+     * Enter node callback.
+     *
+     * @param Node $node
+     * @return null|int|Node|Node[]|void
      */
-    public function setCurrentFile(string $file): void
+    public function enterNode(Node $node)
     {
-        $this->currentFile = $file;
+        // Handle Classes, Traits, Interfaces
+        if (
+            ($node instanceof Node\Stmt\Class_ ||
+             $node instanceof Node\Stmt\Trait_ ||
+             $node instanceof Node\Stmt\Interface_) &&
+            $node->name !== null
+        ) {
+            $type = match (true) {
+                $node instanceof Node\Stmt\Class_ => ParsedItemType::CLASS_TYPE,
+                $node instanceof Node\Stmt\Trait_ => ParsedItemType::TRAIT_TYPE,
+                $node instanceof Node\Stmt\Interface_ => ParsedItemType::INTERFACE_TYPE,
+                default => ParsedItemType::UNKNOWN,
+            };
+
+            $fullyQualifiedName = $this->getFullyQualifiedName($node);
+
+            $this->parsedItems[] = [
+                'type'                  => $type->value,
+                'name'                  => $node->name->toString(),
+                'fully_qualified_name'  => $fullyQualifiedName,
+                'file_path'             => $this->currentFile,
+                'line_number'           => $node->getStartLine() ?? 0,
+                // Additional fields can be added here
+            ];
+        }
+
+        // Handle Functions
+        if ($node instanceof Node\Stmt\Function_ && $node->name !== null) {
+            $fullyQualifiedName = $this->getFullyQualifiedName($node);
+
+            $this->parsedItems[] = [
+                'type'                  => ParsedItemType::FUNCTION_TYPE->value,
+                'name'                  => $node->name->toString(),
+                'fully_qualified_name'  => $fullyQualifiedName,
+                'file_path'             => $this->currentFile,
+                'line_number'           => $node->getStartLine() ?? 0,
+                // Additional fields can be added here
+            ];
+        }
     }
 
     /**
-     * Called when entering a node in the AST.
+     * Get the fully qualified name of a node.
+     *
+     * @param Node $node
+     * @return string|null
      */
-    public function enterNode(Node $node): ?Node
+    protected function getFullyQualifiedName(Node $node): ?string
     {
-        // Track namespace
-        if ($node instanceof Namespace_) {
-            $this->currentNamespace = $node->name
-                ? $node->name->toString()
-                : null;
-        }
-
-        // Collect Class, Trait, or Interface
-        if ($node instanceof ClassLike && $node->name !== null) {
-            $type = $this->resolveClassLikeType($node);
-            $docInfo = $this->extractDocInfo($node);
-            $methods = $this->collectMethods($node); // Ensure a default if getStartLine() returns null
-
-            $startLine = $node->getStartLine() ?? 0; // Ensure a default if getStartLine() returns null
-
-            $this->items->push([
-                'type' => $type, // "Class", "Trait", or "Interface"
-                'name' => $node->name->toString(),
-                'namespace' => $this->currentNamespace,
-                'annotations' => $docInfo['annotations'],
-                'description' => $docInfo['shortDescription'],
-                'details' => [
-                    'methods' => $methods,
-                ],
-                'file' => $this->currentFile,
-                'line_number' => $startLine,
-            ]);
-        }
-
-        // Collect free-floating functions
-        if ($node instanceof Function_) {
-            $docInfo = $this->extractDocInfo($node);
-            $params = $this->collectFunctionParams($node);
-
-            $this->items->push([
-                'type' => 'Function',
-                'name' => $node->name->toString(),
-                'annotations' => $docInfo['annotations'],
-                'details' => [
-                    'params' => $params,
-                    'description' => $docInfo['shortDescription'],
-                ],
-                'file' => $this->currentFile,
-                'line_number' => $startLine,
-            ]);
+        if (property_exists($node, 'namespacedName') && $node->namespacedName) {
+            return $node->namespacedName->toString();
         }
 
         return null;
     }
 
     /**
-     * Called when leaving a node.
+     * Retrieve parsed items.
+     *
+     * @return array<int, array<string, mixed>>
      */
-    public function leaveNode(Node $node): ?Node
+    public function getParsedItems(): array
     {
-        // Reset namespace after leaving a Namespace_ node
-        if ($node instanceof Namespace_) {
-            $this->currentNamespace = null;
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns an array of all collected items (classes, traits, interfaces, functions).
-     */
-    public function getItems(): array
-    {
-        return $this->items->all();
-    }
-
-    // -------------------------------------------------------------------
-    // Below are private/protected helper methods for docblock, etc.
-    // -------------------------------------------------------------------
-
-    /**
-     * Distinguish if a node is a Class, Trait, or Interface.
-     */
-    protected function resolveClassLikeType(ClassLike $node): string
-    {
-        if ($node instanceof \PhpParser\Node\Stmt\Interface_) {
-            return 'Interface';
-        }
-
-        if ($node instanceof \PhpParser\Node\Stmt\Trait_) {
-            return 'Trait';
-        }
-
-        return 'Class'; // default fallback
-    }
-
-    /**
-     * Gather methods from a ClassLike node, extracting doc info & parameters.
-     */
-    protected function collectMethods(ClassLike $node): array
-    {
-        $methods = [];
-        foreach ($node->getMethods() as $method) {
-            $mDoc = $this->extractDocInfo($method);
-            $params = $this->collectMethodParams($method);
-
-            $methods[] = [
-                'name' => $method->name->toString(),
-                'description' => $mDoc['shortDescription'],
-                'annotations' => $mDoc['annotations'],
-                'params' => $params,
-                'line' => $method->getStartLine(),
-            ];
-        }
-
-        return $methods;
-    }
-
-    /**
-     * Collect parameters from a class method.
-     */
-    protected function collectMethodParams(Node\Stmt\ClassMethod $method): array
-    {
-        $params = [];
-        foreach ($method->params as $p) {
-            $params[] = [
-                'name' => '$'.$p->var->name,
-                'type' => $p->type ? $this->typeToString($p->type) : 'mixed',
-            ];
-        }
-
-        return $params;
-    }
-
-    /**
-     * Collect parameters from a free-floating function.
-     */
-    protected function collectFunctionParams(Function_ $function): array
-    {
-        $params = [];
-        foreach ($function->params as $p) {
-            $params[] = [
-                'name' => '$'.$p->var->name,
-                'type' => $p->type ? $this->typeToString($p->type) : 'mixed',
-            ];
-        }
-
-        return $params;
-    }
-
-    /**
-     * Convert a PhpParser type node into a string representation.
-     */
-    protected function typeToString($typeNode): string
-    {
-        if ($typeNode instanceof Node\Identifier) {
-            return $typeNode->name;
-        }
-
-        if ($typeNode instanceof Node\NullableType) {
-            return '?'.$this->typeToString($typeNode->type);
-        }
-
-        if ($typeNode instanceof Node\UnionType) {
-            return implode('|', array_map([$this, 'typeToString'], $typeNode->types));
-        }
-
-        if ($typeNode instanceof Node\Name) {
-            return $typeNode->toString();
-        }
-
-        return 'mixed';
-    }
-
-    /**
-     * Extract docblock info (short description + annotations) from a node.
-     */
-    protected function extractDocInfo(Node $node): array
-    {
-        $docComment = $node->getDocComment();
-        if (! $docComment) {
-            return [
-                'shortDescription' => '',
-                'annotations' => [],
-            ];
-        }
-
-        // Minimal docblock parse
-        return DocblockParser::parseDocblock($docComment->getText());
+        return $this->parsedItems;
     }
 }

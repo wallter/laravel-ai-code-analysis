@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateParsedItemsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('parsed_items', function (Blueprint $table) {
             $table->id();
+
             // Core identifiers
-            $table->string('type'); // 'Class', 'Function', or 'Method'
+            $table->string('type'); // 'Class', 'Function', 'Method', etc.
             $table->string('name');
             $table->string('file_path');
             $table->unsignedInteger('line_number')->default(0);
@@ -26,9 +27,11 @@ return new class extends Migration
             $table->boolean('is_static')->default(false);
             $table->string('fully_qualified_name')->nullable();
 
+            // AI and operation-related fields
             $table->text('operation_summary')->nullable();
             $table->json('called_methods')->nullable();
 
+            // AST and other details
             $table->longText('ast')->nullable();
 
             // JSON fields for extra details
@@ -38,7 +41,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            // Ensure uniqueness
+            // Ensure uniqueness to prevent duplicate entries
             $table->unique(['type', 'name', 'file_path'], 'parsed_items_unique');
         });
     }
@@ -50,4 +53,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('parsed_items');
     }
-};
+}

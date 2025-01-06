@@ -12,6 +12,11 @@ class ParsedItem extends Model
 {
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'type',
         'name',
@@ -33,44 +38,46 @@ class ParsedItem extends Model
     /**
      * The model's default values for attributes.
      *
-     * @var array
+     * @var array<string, mixed>
      */
     protected $attributes = [
-        'type' => 'Unknown',
-        'name' => 'Unnamed',
-        'file_path' => 'Unknown',
-        'line_number' => 0,
-        'annotations' => '[]',
-        'attributes' => '[]',
-        'details' => '[]',
-        'visibility' => 'public',
-        'is_static' => false,
-        'called_methods' => '[]',
-        'ast' => '[]',
-        'class_name' => null,
-        'namespace' => null,
+        'type'                 => 'Unknown',
+        'name'                 => 'Unnamed',
+        'file_path'            => 'Unknown',
+        'line_number'          => 0,
+        'annotations'          => '[]',
+        'attributes'           => '[]',
+        'details'              => '[]',
+        'class_name'           => null,
+        'namespace'            => null,
+        'visibility'           => 'public',
+        'is_static'            => false,
         'fully_qualified_name' => null,
-        'operation_summary' => null,
+        'operation_summary'    => null,
+        'called_methods'       => '[]',
+        'ast'                  => '[]',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'type' => 'string',
-            'name' => 'string',
-            'file_path' => 'string',
-            'line_number' => 'integer',
-            'annotations' => 'array',
-            'attributes' => 'array',
-            'details' => 'array',
-            'class_name' => 'string',
-            'namespace' => 'string',
-            'visibility' => 'string',
-            'is_static' => 'boolean',
-            'fully_qualified_name' => 'string',
-            'operation_summary' => 'string',
-            'called_methods' => 'array',
-            'ast' => 'array',
-        ];
-    }
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'type'                  => 'string',
+        'name'                  => 'string',
+        'file_path'             => 'string',
+        'line_number'           => 'integer',
+        'annotations'           => 'array',
+        'attributes'            => 'array',
+        'details'               => 'array',
+        'class_name'            => 'string',
+        'namespace'             => 'string',
+        'visibility'            => 'string',
+        'is_static'             => 'boolean',
+        'fully_qualified_name'  => 'string',
+        'operation_summary'     => 'string',
+        'called_methods'        => 'array',
+        'ast'                   => 'array',
+    ];
 }

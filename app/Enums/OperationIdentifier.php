@@ -13,7 +13,7 @@ enum OperationIdentifier: string
     case FUNCTIONAL_ANALYSIS = 'functional_analysis';
     case STYLE_CONVENTION = 'style_convention';
     case CONSOLIDATION_PASS = 'consolidation_pass';
-    case SCORING_PASS = 'scoring';
+    case SCORING_PASS = 'scoring_pass';
     case LARAVEL_MIGRATION = 'laravel_migration';
     case LARAVEL_MIGRATION_SCORING = 'laravel_migration_scoring';
 }

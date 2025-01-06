@@ -14,12 +14,12 @@ class AnalyzeFilesCommand extends FilesCommand
 {
     protected $signature = 'analyze:files
         {directory=app : The directory to analyze .php files within}
-        {--output-file= : Export to .json}
+        {--output-file= : Export analysis results to a .json file}
         {--limit-class= : (Unused in this example, but provided by FilesCommand)}
         {--limit-method= : (Unused in this example, but provided)}
         {--dry-run : Skip saving AI results to DB.}';
 
-    protected $description = 'Collect .php files, parse them, run multi-pass AI.';
+    protected $description = 'Collect .php files, parse them, and run multi-pass AI analysis.';
 
     /**
      * @var CodeAnalysisService
@@ -42,7 +42,7 @@ class AnalyzeFilesCommand extends FilesCommand
 
         $phpFiles = $this->collectPhpFiles($directory);
         if ($phpFiles->isEmpty()) {
-            $this->warn('No files found. Aborting...');
+            $this->warn('No PHP files found. Aborting analysis.');
             Log::warning('AnalyzeFilesCommand: No .php files found, aborting analysis.');
 
             return 0;
@@ -69,8 +69,8 @@ class AnalyzeFilesCommand extends FilesCommand
     protected function collectPhpFiles(string $directory): Collection
     {
         $phpFiles = $this->analysisService->collectPhpFiles($directory);
-        $this->info("Found [{$phpFiles->count()}] .php files.");
-        Log::info("AnalyzeFilesCommand: Found [{$phpFiles->count()}] .php files.");
+        $this->info("Found [{$phpFiles->count()}] .php files in [{$directory}].");
+        Log::info("AnalyzeFilesCommand: Found [{$phpFiles->count()}] .php files in [{$directory}].");
 
         return $phpFiles;
     }
@@ -91,7 +91,7 @@ class AnalyzeFilesCommand extends FilesCommand
         foreach ($phpFiles as $filePath) {
             try {
                 Log::info("AnalyzeFilesCommand: Analyzing [{$filePath}].");
-                $analysisRecord = $this->analysisService->analyzeFile($filePath, $dryRun);
+                $analysisRecord = $this->analysisService->analyzeFile($filePath, $reparse = false);
                 $this->analysisService->runAnalysis($analysisRecord, $dryRun);
 
                 $results->push([

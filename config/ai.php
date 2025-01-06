@@ -83,6 +83,7 @@ return [
             'type' => PassType::BOTH->value,
             'system_message' => 'You generate concise PHP documentation from code and AST to complement phpdoc.',
             'prompt_sections' => [
+                'base_prompt' => 'Analyze the following code:',
                 'guidelines' => [
                     '- Create short but clear documentation from the AST data and raw code.',
                     '- Summarize the purpose, methods, parameters, and usage context.',
@@ -109,6 +110,7 @@ return [
             'type' => PassType::BOTH->value,
             'system_message' => 'You perform thorough functional analysis based on AST data and raw code.',
             'prompt_sections' => [
+                'base_prompt' => 'Analyze the following code:',
                 'guidelines' => [
                     '- Evaluate functionality, identify edge cases, and detect performance bottlenecks.',
                     '- Suggest improvements to enhance reliability and testability.',
@@ -131,6 +133,7 @@ return [
             'type' => PassType::RAW->value,
             'system_message' => 'You review code style for PSR compliance.',
             'prompt_sections' => [
+                'base_prompt' => 'Analyze the following code:',
                 'guidelines' => [
                     '- Check formatting, naming conventions, and documentation clarity according to coding standards.',
                     '- Suggest concise improvements to ensure consistency.',
@@ -153,6 +156,7 @@ return [
             'type' => PassType::PREVIOUS->value,
             'system_message' => 'You consolidate prior AI analysis results into a final summary.',
             'prompt_sections' => [
+                'base_prompt' => 'Consolidate the following analysis results:',
                 'guidelines' => [
                     '- Combine outputs from all previous passes into a cohesive summary.',
                     '- Highlight key findings and provide overall recommendations.',
@@ -176,6 +180,7 @@ return [
             'type' => PassType::PREVIOUS->value,
             'system_message' => 'You analyze previous AI analysis results and assign scores.',
             'prompt_sections' => [
+                'base_prompt' => 'Evaluate the following analysis results:',
                 'guidelines' => [
                     '- Score documentation, functionality, and style on a scale of 0 to 100.',
                     '- Calculate overall_score as the average of the three scores.',
@@ -189,7 +194,7 @@ return [
                     '  "summary": "The codebase has excellent documentation and functionality but could improve on coding style consistency."',
                     '}',
                 ],
-                'response_format' => 'Return a JSON object with the scores and a brief summary.',
+                'response_format' => 'Return a JSON object with "documentation_score", "functionality_score", "style_score", "overall_score", and "summary".',
             ],
         ],
 
@@ -208,6 +213,7 @@ return [
             'type' => PassType::BOTH->value,
             'system_message' => 'You analyze code for Laravel migration improvements.',
             'prompt_sections' => [
+                'base_prompt' => 'Analyze the following Laravel migration code:',
                 'guidelines' => [
                     '- Identify Laravel migration best practices applicable to the code.',
                     '- Suggest improvements or code changes to enhance migration patterns.',
@@ -231,6 +237,7 @@ return [
             'type' => PassType::PREVIOUS->value,
             'system_message' => 'You assign a migration_score (0–100) for Laravel migration compliance.',
             'prompt_sections' => [
+                'base_prompt' => 'Evaluate the following Laravel migration analysis:',
                 'guidelines' => [
                     '- Rate migration quality on a scale of 0 to 100.',
                     '- Provide a short rationale for the score.',

@@ -10,6 +10,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Handles the processing of AI passes for code analysis.
@@ -23,6 +25,20 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
+    /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 3;
+
+    /**
+     * The number of seconds before the job should be retried.
+     *
+     * @var int
+     */
+    public $backoff = 60;
 
     /**
      * The number of seconds after which the unique lock will be released.
@@ -62,6 +78,16 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
      */
     public function handle(AnalysisPassService $analysisPassService): void
     {
-        $analysisPassService->processPass($this->codeAnalysisId, $this->passName->value, $this->dryRun);
+        try {
+            $analysisPassService->processPass($this->codeAnalysisId, $this->passName->value, $this->dryRun);
+        } catch (Throwable $throwable) {
+            // Log the exception and optionally retry or mark the job as failed
+            Log::error("ProcessAnalysisPassJob: Failed for CodeAnalysis ID {$this->codeAnalysisId}, Pass {$this->passName->value}. Error: {$throwable->getMessage()}", [
+                'exception' => $throwable,
+            ]);
+
+            // Optionally, you can rethrow to let Laravel handle the retry logic
+            throw $throwable;
+        }
     }
 }

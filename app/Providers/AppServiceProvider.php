@@ -51,9 +51,6 @@ class AppServiceProvider extends ServiceProvider
 
         // Bind the interface to the implementation
         $this->app->singleton(AiderServiceInterface::class, fn ($app) => new AiderService);
-
-        // Bind ParsedItemService
-        $this->app->singleton(ParsedItemService::class, fn ($app) => new ParsedItemService);
     }
 
     public function boot(): void
