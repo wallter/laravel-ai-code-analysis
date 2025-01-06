@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\ParsedItem;
 use App\Services\Parsing\ParserService;
-use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
