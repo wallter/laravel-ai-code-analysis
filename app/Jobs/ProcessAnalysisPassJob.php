@@ -50,7 +50,7 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
      */
     public function handle(): void
     {
-        $this->analysisPassService->runAnalysis($this->codeAnalysisId, $this->passName, $this->dryRun);
+        $this->analysisPassService->processPass($this->codeAnalysisId, $this->passName, $this->dryRun);
     }
 
     /**
