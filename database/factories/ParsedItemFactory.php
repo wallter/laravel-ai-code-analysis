@@ -16,9 +16,15 @@ class ParsedItemFactory extends Factory
             'name' => $this->faker->word(),
             'file_path' => $this->faker->filePath(),
             'line_number' => $this->faker->numberBetween(1, 500),
-            'annotations' => [],
-            'attributes' => [],
-            'details' => [],
+            'annotations' => [
+                $this->faker->optional()->word(),
+            ],
+            'attributes' => [
+                $this->faker->optional()->word(),
+            ],
+            'details' => [
+                'description' => $this->faker->sentence(),
+            ],
             'class_name' => $this->faker->word(),
             'namespace' => 'App\\Models',
             'visibility' => $this->faker->randomElement(['public', 'protected', 'private']),
@@ -28,5 +34,43 @@ class ParsedItemFactory extends Factory
             'called_methods' => [],
             'ast' => [],
         ];
+    }
+    /**
+     * State for class type.
+     */
+    public function typeClass(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'type' => 'class',
+            'class_name' => $this->faker->word(),
+            'namespace' => 'App\\Models',
+            'visibility' => 'public',
+        ]);
+    }
+
+    /**
+     * State for method type.
+     */
+    public function typeMethod(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'type' => 'method',
+            'class_name' => 'SampleClass',
+            'namespace' => 'App\\Services',
+            'visibility' => $this->faker->randomElement(['public', 'protected']),
+        ]);
+    }
+
+    /**
+     * State for function type.
+     */
+    public function typeFunction(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'type' => 'function',
+            'class_name' => null,
+            'namespace' => 'App\\Helpers',
+            'visibility' => 'public',
+        ]);
     }
 }

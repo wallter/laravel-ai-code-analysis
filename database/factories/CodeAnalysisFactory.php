@@ -13,11 +13,40 @@ class CodeAnalysisFactory extends Factory
     {
         return [
             'file_path' => $this->faker->filePath(),
-            'ast' => [], // Adjust as needed
-            'analysis' => [], // Adjust as needed
-            'ai_output' => [], // Adjust as needed
-            'current_pass' => $this->faker->word(),
+            'ast' => $this->faker->text(200), // Simplified AST representation
+            'analysis' => [
+                'complexity' => $this->faker->numberBetween(1, 10),
+                'readability' => $this->faker->numberBetween(1, 10),
+            ],
+            'ai_output' => [
+                'summary' => $this->faker->sentence(),
+                'recommendations' => $this->faker->paragraph(),
+            ],
+            'current_pass' => 1,
             'completed_passes' => [],
         ];
+    }
+    /**
+     * State for completed analysis.
+     */
+    public function completed(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'current_pass' => 3,
+            'completed_passes' => ['pass1', 'pass2'],
+        ]);
+    }
+
+    /**
+     * State with AI output.
+     */
+    public function withAiOutput(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'ai_output' => [
+                'summary' => $this->faker->sentence(),
+                'recommendations' => $this->faker->paragraph(),
+            ],
+        ]);
     }
 }

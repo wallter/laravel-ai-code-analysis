@@ -14,8 +14,37 @@ class AIScoreFactory extends Factory
     {
         return [
             'code_analysis_id' => CodeAnalysis::factory(),
-            'operation' => $this->faker->word(),
+            'operation' => $this->faker->randomElement(['complexity', 'readability', 'security']),
             'score' => $this->faker->randomFloat(2, 0, 100),
         ];
+    }
+    /**
+     * State for high scores.
+     */
+    public function high(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'score' => $this->faker->randomFloat(2, 80, 100),
+        ]);
+    }
+
+    /**
+     * State for medium scores.
+     */
+    public function medium(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'score' => $this->faker->randomFloat(2, 50, 79),
+        ]);
+    }
+
+    /**
+     * State for low scores.
+     */
+    public function low(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'score' => $this->faker->randomFloat(2, 0, 49),
+        ]);
     }
 }
