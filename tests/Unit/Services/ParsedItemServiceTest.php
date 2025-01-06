@@ -18,7 +18,8 @@ class ParsedItemServiceTest extends TestCase
     public function it_creates_parsed_item_successfully()
     {
         // Arrange
-        $service = new ParsedItemService();
+        $repositoryMock = Mockery::mock(ParsedItemRepositoryInterface::class);
+        $service = new ParsedItemService($repositoryMock);
         $data = [
             'name' => 'Test Item',
             'description' => 'A test parsed item.',

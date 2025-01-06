@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use Mockery;
-use App\Services\ParserService;
+use App\Services\Parsing\ParserService;
 use App\Services\Parsing\FileProcessorService;
 use Illuminate\Support\Facades\Log;
 
@@ -16,7 +16,8 @@ class FileProcessorServiceTest extends TestCase
     public function it_processes_file_correctly()
     {
         // Arrange
-        $service = new FileProcessorService();
+        $parserServiceMock = Mockery::mock(ParserService::class);
+        $service = new FileProcessorService($parserServiceMock);
         $filePath = 'path/to/file.php';
 
         Storage::fake('local');
