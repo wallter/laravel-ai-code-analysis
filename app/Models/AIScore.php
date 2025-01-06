@@ -12,6 +12,13 @@ class AIScore extends Model
 {
     use HasFactory;
 
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'ai_scores';
+
     protected $fillable = [
         'code_analysis_id',
         'operation',
