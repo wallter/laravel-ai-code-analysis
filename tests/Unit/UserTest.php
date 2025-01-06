@@ -5,12 +5,13 @@ namespace Tests\Unit;
 use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 
 class UserTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_has_fillable_attributes()
     {
         $user = User::factory()->make();
@@ -22,7 +23,7 @@ class UserTest extends TestCase
         ], $user->getFillable());
     }
 
-    /** @test */
+    #[Test]
     public function it_hides_sensitive_attributes()
     {
         $user = User::factory()->make();
@@ -31,7 +32,7 @@ class UserTest extends TestCase
         $this->assertContains('remember_token', $user->getHidden());
     }
 
-    /** @test */
+    #[Test]
     public function it_casts_attributes_correctly()
     {
         $user = User::factory()->make();
@@ -39,7 +40,8 @@ class UserTest extends TestCase
         $this->assertIsString($user->password);
         $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $user->email_verified_at);
     }
-    /** @test */
+
+    #[Test]
     public function it_creates_unverified_users()
     {
         $user = User::factory()->unverified()->create();
@@ -47,7 +49,7 @@ class UserTest extends TestCase
         $this->assertNull($user->email_verified_at);
     }
 
-    /** @test */
+    #[Test]
     public function it_creates_admin_users()
     {
         // Ensure the 'is_admin' attribute exists in the users table and User model

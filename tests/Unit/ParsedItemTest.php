@@ -5,12 +5,13 @@ namespace Tests\Unit;
 use Tests\TestCase;
 use App\Models\ParsedItem;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 
 class ParsedItemTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_has_fillable_attributes()
     {
         $parsedItem = ParsedItem::factory()->make();
@@ -34,8 +35,7 @@ class ParsedItemTest extends TestCase
         ], $parsedItem->getFillable());
     }
 
-    // Add relationship tests if ParsedItem has any relationships
-    /** @test */
+    #[Test]
     public function it_creates_class_type_parsed_items()
     {
         $parsedItem = ParsedItem::factory()->typeClass()->create();
@@ -46,7 +46,7 @@ class ParsedItemTest extends TestCase
         $this->assertEquals('public', $parsedItem->visibility);
     }
 
-    /** @test */
+    #[Test]
     public function it_creates_method_type_parsed_items()
     {
         $parsedItem = ParsedItem::factory()->typeMethod()->create();
@@ -57,7 +57,7 @@ class ParsedItemTest extends TestCase
         $this->assertContains($parsedItem->visibility, ['public', 'protected']);
     }
 
-    /** @test */
+    #[Test]
     public function it_creates_function_type_parsed_items()
     {
         $parsedItem = ParsedItem::factory()->typeFunction()->create();
@@ -66,5 +66,16 @@ class ParsedItemTest extends TestCase
         $this->assertNull($parsedItem->class_name);
         $this->assertEquals('App\\Helpers', $parsedItem->namespace);
         $this->assertEquals('public', $parsedItem->visibility);
+    }
+
+    #[Test]
+    public function it_creates_parsed_items_with_detailed_ast()
+    {
+        $parsedItem = ParsedItem::factory()->detailedAst()->create();
+
+        $this->assertIsArray($parsedItem->ast);
+        $this->assertEquals('Stmt_Class', $parsedItem->ast['nodeType']);
+        $this->assertArrayHasKey('startLine', $parsedItem->ast['attributes']);
+        $this->assertArrayHasKey('endLine', $parsedItem->ast['attributes']);
     }
 }

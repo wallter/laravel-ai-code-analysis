@@ -7,12 +7,13 @@ use App\Models\CodeAnalysis;
 use App\Models\AIScore;
 use App\Models\AIResult;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 
 class CodeAnalysisTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_has_fillable_attributes()
     {
         $codeAnalysis = CodeAnalysis::factory()->make();
@@ -27,7 +28,7 @@ class CodeAnalysisTest extends TestCase
         ], $codeAnalysis->getFillable());
     }
 
-    /** @test */
+    #[Test]
     public function it_has_many_aiscores()
     {
         $codeAnalysis = CodeAnalysis::factory()->create();
@@ -37,7 +38,7 @@ class CodeAnalysisTest extends TestCase
         $this->assertInstanceOf(AIScore::class, $codeAnalysis->aiScores->first());
     }
 
-    /** @test */
+    #[Test]
     public function it_has_many_airesults()
     {
         $codeAnalysis = CodeAnalysis::factory()->create();
@@ -46,7 +47,8 @@ class CodeAnalysisTest extends TestCase
         $this->assertCount(2, $codeAnalysis->aiResults);
         $this->assertInstanceOf(AIResult::class, $codeAnalysis->aiResults->first());
     }
-    /** @test */
+
+    #[Test]
     public function it_creates_completed_code_analysis()
     {
         $codeAnalysis = CodeAnalysis::factory()->completed()->create();
@@ -58,7 +60,7 @@ class CodeAnalysisTest extends TestCase
         $this->assertContains('pass2', $codeAnalysis->completed_passes);
     }
 
-    /** @test */
+    #[Test]
     public function it_creates_code_analysis_with_ai_output()
     {
         $codeAnalysis = CodeAnalysis::factory()->withAiOutput()->create();

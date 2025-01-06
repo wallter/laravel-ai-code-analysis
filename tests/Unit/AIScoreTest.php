@@ -6,12 +6,13 @@ use Tests\TestCase;
 use App\Models\AIScore;
 use App\Models\CodeAnalysis;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 
 class AIScoreTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_has_fillable_attributes()
     {
         $aiscore = AIScore::factory()->make();
@@ -23,7 +24,7 @@ class AIScoreTest extends TestCase
         ], $aiscore->getFillable());
     }
 
-    /** @test */
+    #[Test]
     public function it_belongs_to_code_analysis()
     {
         $codeAnalysis = CodeAnalysis::factory()->create();
@@ -32,7 +33,8 @@ class AIScoreTest extends TestCase
         $this->assertInstanceOf(CodeAnalysis::class, $aiscore->codeAnalysis);
         $this->assertEquals($codeAnalysis->id, $aiscore->codeAnalysis->id);
     }
-    /** @test */
+
+    #[Test]
     public function it_creates_high_scores()
     {
         $aiscore = AIScore::factory()->high()->create();
@@ -41,7 +43,7 @@ class AIScoreTest extends TestCase
         $this->assertLessThanOrEqual(100, $aiscore->score);
     }
 
-    /** @test */
+    #[Test]
     public function it_creates_medium_scores()
     {
         $aiscore = AIScore::factory()->medium()->create();
@@ -50,7 +52,7 @@ class AIScoreTest extends TestCase
         $this->assertLessThan(80, $aiscore->score);
     }
 
-    /** @test */
+    #[Test]
     public function it_creates_low_scores()
     {
         $aiscore = AIScore::factory()->low()->create();
