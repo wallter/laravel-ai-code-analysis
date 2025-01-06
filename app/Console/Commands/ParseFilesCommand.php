@@ -72,60 +72,24 @@ class ParseFilesCommand extends FilesCommand
             $limitMethod
         ));
 
-        if ($limitClass > 0 && $limitClass < $phpFiles->count()) {
-            $phpFiles = $phpFiles->take($limitClass);
-            $this->info("Applying limit-class: analyzing only the first {$limitClass} file(s).");
-        }
-
-        if ($phpFiles->isEmpty()) {
-            $this->warn('No .php files to parse.');
-
-            return 0;
-        }
-
         $bar = $this->output->createProgressBar($phpFiles->count());
         $bar->start();
 
         $collectedItems = collect();
         foreach ($phpFiles as $filePath) {
-            try {
-                // Parse and merge results
-                $items = $this->parserService->parseFile($filePath);
-                $collectedItems = $collectedItems->merge($items);
-
-                // Removed redundant loop since ParserService now handles ParsedItem creation.
-
-                if ($this->isVerbose()) {
-                    $this->info("Successfully parsed and stored: {$filePath}");
-                }
-            } catch (\Throwable $e) {
-                Log::error("Parse error: {$filePath}", ['error' => $e->getMessage()]);
-                $this->warn("Could not parse {$filePath}: {$e->getMessage()}");
-            }
-
+            $this->processFile($filePath);
+            $collectedItems->push($filePath); // Adjust based on actual return if needed
             $bar->advance();
         }
 
         $bar->finish();
         $this->newLine();
 
-        // Apply optional method limit
-        if ($limitMethod > 0) {
-            $collectedItems = $collectedItems->map(function ($item) use ($limitMethod) {
-                if (isset($item['type']) && in_array($item['type'], ['Class', 'Trait', 'Interface'], true) && !empty($item['details']['methods'])) {
-                    $item['details']['methods'] = array_slice($item['details']['methods'], 0, $limitMethod);
-                }
+        // Apply limits and filters
+        $collectedItems = $this->applyLimits($collectedItems, $limitClass, $limitMethod);
+        $collectedItems = $this->applyFilter($collectedItems, $filter);
 
-                return $item;
-            });
-        }
-
-        // Apply optional filter
-        if ($filter !== '') {
-            $collectedItems = $collectedItems->filter(fn($item) => stripos($item['name'] ?? '', (string) $filter) !== false);
-        }
-
-        $this->info('Initial collected items: '.$collectedItems->count());
+        $this->info('Initial collected items: ' . $collectedItems->count());
 
         if ($outputFile) {
             $this->jsonExportService->export($collectedItems->values(), $outputFile);
