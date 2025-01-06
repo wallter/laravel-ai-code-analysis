@@ -29,6 +29,10 @@ echo "⚙️ Running passes:process..."
 php artisan passes:process
 echo "✅ passes:process completed."
 
+echo "📊 Displaying Pending queued jobs ..."
+php artisan queue:list
+echo "✅ Pending queued jobs displayed."
+
 echo "🚀 Processing the jobs in async..."
 php artisan queue:progress
 echo "✅ Jobs processed."

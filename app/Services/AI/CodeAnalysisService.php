@@ -70,7 +70,8 @@ class CodeAnalysisService
             $analysis->ast = $ast;
             $analysis->analysis = $this->buildAstSummary($filePath, $ast);
             $analysis->save();
-        } // You may need to set this dynamically based on your logic
+        }
+         // You may need to set this dynamically based on your logic
         $prompt = '';
         $prompt .= "\n\nPRIOR ANALYSIS RESULTS:\n";
         $previousTexts = $analysis->aiResults()
