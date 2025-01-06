@@ -46,3 +46,4 @@ class ParseFilesCommandTest extends TestCase
         File::delete($testFilePath);
         File::deleteDirectory($testDirectory);
     }
+}
