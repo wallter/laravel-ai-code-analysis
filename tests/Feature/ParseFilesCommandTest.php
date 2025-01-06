@@ -27,7 +27,7 @@ class ParseFilesCommandTest extends TestCase
         Artisan::call('parse:files');
 
         // Then: the parsed_items table should have at least one row
-        $this->assertDatabaseCount('parsed_items', 1, "Expected 1 entry in parsed_items table, found {$this->getParsedItemsCount()}.");
+        $this->assertDatabaseCount('parsed_items', 1);
 
         // Optionally: Assert that a row exists with the correct data
         $this->assertDatabaseHas('parsed_items', [
