@@ -148,7 +148,7 @@ class PassesProcessCommand extends Command
             array_map(fn ($row) => [
                 $row['file_path'],
                 $row['current_pass'],
-                $row['completed_pass'],
+                $row['completed_passes'],
             ], $finalStatuses)
         );
 
