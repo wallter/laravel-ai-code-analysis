@@ -7,14 +7,14 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class JsonExportServiceTest extends TestCase
 {
     protected function setUp(): void
     {
         parent::setUp();
-        // Mock the File and Log facades
+        // Mock the File facade
         File::shouldReceive('exists')->andReturn(true);
         File::shouldReceive('put')->andReturn(true);
     }
@@ -41,13 +41,14 @@ class JsonExportServiceTest extends TestCase
         $items = collect([fopen('php://memory', 'r')]); // Resources cannot be JSON encoded
         $filePath = '/path/to/export.json';
 
-        $service = new JsonExportService();
-        $service->export($items, $filePath);
-
+        // Set the expectation before calling the export method
         Log::shouldReceive('warning')
             ->withArgs(function ($message) {
                 return str_contains($message, 'Failed to encode items to JSON');
             })->once();
+
+        $service = new JsonExportService();
+        $service->export($items, $filePath);
 
         $this->assertTrue(true);
     }
