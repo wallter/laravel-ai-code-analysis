@@ -157,7 +157,6 @@ class PassesProcessCommand extends Command
             $bar->advance();
         }
 
-
         $bar->finish();
         $this->newLine();
 
@@ -182,22 +181,5 @@ class PassesProcessCommand extends Command
                 $row['completed_passes'],
             ], $finalStatuses)
         );
-
-        $bar->finish();
-        $this->newLine();
-
-        // Display a summary of all queued jobs
-        if (!empty($queuedPasses)) {
-            $this->line('Queued Jobs Summary:');
-            $summaryRows = [];
-            foreach ($queuedPasses as $filePath => $passes) {
-                $summaryRows[] = [
-                    'File Path' => $filePath,
-                    'Queued Passes' => implode(', ', $passes),
-                ];
-            }
-            $this->table(['File Path', 'Queued Passes'], $summaryRows);
-        }
-        $bar->advance();
     }
 
