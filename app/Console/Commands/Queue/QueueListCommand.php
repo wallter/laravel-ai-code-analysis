@@ -5,7 +5,7 @@ namespace App\Console\Commands\Queue;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-class ListQueuedJobs extends Command
+class QueueListCommand extends Command
 {
     /**
      * The name and signature of the console command.
