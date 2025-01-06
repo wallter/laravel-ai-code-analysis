@@ -16,9 +16,9 @@ class CodeAnalysis extends Model
         'file_path',
         'ast',
         'analysis',
-        'ai_output', // Add this line
-        'current_pass',      // Added
-        'completed_passes',  // Added
+        'ai_output', 
+        'current_pass',
+        'completed_passes',
     ];
 
     /**
