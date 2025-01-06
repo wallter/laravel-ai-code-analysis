@@ -19,6 +19,7 @@ class AIScoreTest extends TestCase
             'code_analysis_id',
             'operation',
             'score',
+            'summary',
         ], $aiscore->getFillable());
     }
 
