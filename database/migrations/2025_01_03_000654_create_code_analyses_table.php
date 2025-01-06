@@ -20,6 +20,7 @@ return new class extends Migration
             $table->json('analysis');
             $table->integer('current_pass')->default(0);
             $table->json('completed_passes')->nullable();
+            $table->json('ai_output')->nullable();
             $table->timestamps();
         });
     }
