@@ -166,13 +166,18 @@ class ParserService
         $visitor = new class extends NodeVisitorAbstract {
             public array $parsedItems = [];
 
-            public function enterNode(Node $node)
+            public function enterNode(Node $node): void
             {
-                if ($node instanceof Node\Stmt\Class_ || $node instanceof Node\Stmt\Interface_) {
+                if (
+                    ($node instanceof Node\Stmt\Class_ || $node instanceof Node\Stmt\Interface_) &&
+                    $node->name !== null
+                ) {
                     $this->parsedItems[] = [
                         'type' => $node instanceof Node\Stmt\Class_ ? 'Class' : 'Interface',
                         'name' => $node->name->toString(),
                     ];
+                } else {
+                    Log::warning("ParserService: Encountered an anonymous class or interface.");
                 }
             }
         };
