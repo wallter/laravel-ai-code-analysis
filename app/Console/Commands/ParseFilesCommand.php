@@ -160,3 +160,4 @@ class ParseFilesCommand extends FilesCommand
 
         return $collectedItems;
     }
+}

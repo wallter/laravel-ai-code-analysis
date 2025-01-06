@@ -21,6 +21,7 @@
 4. **Documentation**
    - Short phpdoc (classes, methods).
    - Inline comments explain “why” or major decisions.
+   - When writing README (markdown) documentation ensure it is brief and favors tables
 
 5. **Code Quality**
    - Production-grade, open-source, expert-level Code and architecture/abstractions.
