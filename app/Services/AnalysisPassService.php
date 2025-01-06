@@ -216,30 +216,31 @@ class AnalysisPassService
     }
 
     /**
-     * Handle the scoring pass by computing and storing scores.
+     * Run the analysis by queuing the required passes.
+     *
+     * @param  CodeAnalysis  $analysis  The CodeAnalysis instance.
+     * @param  bool          $dryRun    Whether to perform a dry run.
+     * @return void
      */
-    private function handleScoringPass(CodeAnalysis $analysis, string $passName): void
+    public function runAnalysis(CodeAnalysis $analysis, bool $dryRun = false): void
     {
-        Log::debug("AnalysisPassService: Handling scoring pass. Pass name: '{$passName}'.");
-        if ($passName === 'scoring_pass') {
-            Log::info('AnalysisPassService: Scoring pass detected. Computing and storing scores.');
-            $this->codeAnalysisService->computeAndStoreScores($analysis);
-            Log::info('AnalysisPassService: Scoring and storing of scores completed.');
+        Log::info("AnalysisPassService: Queueing multi-pass analysis for [{$analysis->file_path}].", [
+            'dryRun' => $dryRun,
+        ]);
+
+        $completedPasses = (array) ($analysis->completed_passes ?? []);
+        $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
+
+        foreach ($passOrder as $passName) {
+            if (! in_array($passName, $completedPasses, true)) {
+                // Dispatch a job for each missing pass
+                Log::info("Dispatching ProcessAnalysisPassJob for pass [{$passName}] => [{$analysis->file_path}].");
+                ProcessAnalysisPassJob::dispatch(
+                    codeAnalysisId: $analysis->id,
+                    passName: $passName,
+                    dryRun: $dryRun
+                );
+            }
         }
-    }
-
-    /**
-     * Mark the pass as completed in the CodeAnalysis instance.
-     */
-    private function markPassAsCompleted(CodeAnalysis $analysis, string $passName): void
-    {
-        Log::debug("AnalysisPassService: Marking pass '{$passName}' as completed for CodeAnalysis ID {$analysis->id}.");
-        $done = (array) $analysis->completed_passes;
-        $done[] = $passName;
-        $analysis->completed_passes = array_values($done);
-        $analysis->current_pass += 1;
-        $analysis->save();
-
-        Log::info("AnalysisPassService: Completed pass [{$passName}] for [{$analysis->file_path}].");
     }
 }
