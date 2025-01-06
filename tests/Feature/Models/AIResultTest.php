@@ -44,7 +44,7 @@ class AIResultTest extends TestCase
         $this->assertNotNull($aiResult->response_text);
     }
 
-    /** @test */
+    #[Test]
     public function it_creates_failed_ai_results()
     {
         $aiResult = AIResult::factory()->failure()->create();

@@ -4,11 +4,12 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class ExampleTest extends TestCase
 {
 
-    /** @test */
+    #[Test]
     public function test_the_application_returns_a_successful_response(): void
     {
         // Create and authenticate a verified user
