@@ -64,29 +64,34 @@ return [
             'temperature' => env('OPENAI_MODEL_GPT35_TURBO_TEMPERATURE', 0.4),
         ],
 
-        // Example pass for a Code-Davinci model, useful for code-centric tasks.
-        'code-davinci-002' => [
-            'model_name' => env('OPENAI_MODEL_CODE_DAVINCI_002', 'code-davinci-002'),
-            'max_tokens' => env('OPENAI_MODEL_CODE_DAVINCI_002_MAX_TOKENS', 2500),
-            'temperature' => env('OPENAI_MODEL_CODE_DAVINCI_002_TEMPERATURE', 0.2),
-        ],
-    ],
+        // Exception in processPass => The model `code-davinci-002` has been deprecated, learn more here: https://platform.openai.com/docs/deprecations 
+        // // Example pass for a Code-Davinci model, useful for code-centric tasks.
+        // 'code-davinci-002' => [
+        //     'model_name' => env('OPENAI_MODEL_CODE_DAVINCI_002', 'code-davinci-002'),
+        //     'max_tokens' => env('OPENAI_MODEL_CODE_DAVINCI_002_MAX_TOKENS', 2500),
+        //     'temperature' => env('OPENAI_MODEL_CODE_DAVINCI_002_TEMPERATURE', 0.2),
+        // ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | AI Passes Configuration
-    |--------------------------------------------------------------------------
-    | Defines the various AI analysis passes with their respective configurations.
-    |--------------------------------------------------------------------------
-    */
-    'passes' => [
+        /*
+        |--------------------------------------------------------------------------
+        | Documentation Generation Pass
+        |--------------------------------------------------------------------------
+        | Creates concise documentation from code and AST.
+        | Helps developers quickly grasp functionality without reading raw code.
+        */
         'doc_generation' => [
             'operation_identifier' => 'doc_generation',
+            // Reference the "code-davinci-002" model from above.
             'model' => 'code-davinci-002',
+            // Allows more in-depth documentation but stays within a safe limit.
             'max_tokens' => env('AI_DOC_GENERATION_MAX_TOKENS', 1200),
+            // Slightly lower temperature to maintain concise output.
             'temperature' => env('AI_DOC_GENERATION_TEMPERATURE', 0.25),
+            // 'type' can be 'raw', 'both', or 'previous' to indicate input type.
             'type' => 'both',
+            // System message sets context for the documentation tasks.
             'system_message' => 'You generate concise PHP documentation from code and AST to complement phpdoc documentation.',
+            // The prompt array forms a multi-line input to the AI.
             'prompt' => implode("\n", [
                 'Create short but clear documentation from the AST data and raw code:',
                 '- Summarize the purpose, methods, parameters, and usage context.',
@@ -97,6 +102,13 @@ return [
             ]),
         ],
 
+        /*
+        |--------------------------------------------------------------------------
+        | Functional Analysis Pass
+        |--------------------------------------------------------------------------
+        | Evaluates functionality, edge cases, and performance bottlenecks.
+        | Useful for identifying potential bugs and improvement areas.
+        */
         'functional_analysis' => [
             'operation_identifier' => 'functional_analysis',
             'model' => 'gpt-4',
@@ -110,11 +122,19 @@ return [
             ]),
         ],
 
+        /*
+        |--------------------------------------------------------------------------
+        | Style & Convention Pass
+        |--------------------------------------------------------------------------
+        | Checks code style consistency against PSR or other defined standards.
+        | Encourages uniform formatting and maintainable code.
+        */
         'style_convention' => [
             'operation_identifier' => 'style_convention',
             'model' => 'gpt-3.5-turbo',
             'max_tokens' => env('AI_STYLE_CONVENTION_MAX_TOKENS', 1800),
             'temperature' => env('AI_STYLE_CONVENTION_TEMPERATURE', 0.28),
+            // 'raw' indicates it may rely heavily on direct code references rather than AST data.
             'type' => 'raw',
             'system_message' => 'You review code style for PSR compliance.',
             'prompt' => implode("\n", [
@@ -123,6 +143,13 @@ return [
             ]),
         ],
 
+        /*
+        |--------------------------------------------------------------------------
+        | Consolidation Pass
+        |--------------------------------------------------------------------------
+        | Aggregates results from earlier passes into a single summary.
+        | Helps developers see a unified perspective of documentation, functionality, and style.
+        */
         'consolidation_pass' => [
             'operation_identifier' => 'consolidation_pass',
             'model' => 'gpt-4',
@@ -137,6 +164,13 @@ return [
             ]),
         ],
 
+        /*
+        |--------------------------------------------------------------------------
+        | Scoring Pass
+        |--------------------------------------------------------------------------
+        | Assigns scores for documentation, functionality, and style, plus an overall score.
+        | Produces output in JSON format for easy parsing and integration.
+        */
         'scoring_pass' => [
             'operation_identifier' => 'scoring',
             'model' => 'gpt-4',
