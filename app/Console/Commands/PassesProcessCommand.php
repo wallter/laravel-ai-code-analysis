@@ -47,6 +47,9 @@ class PassesProcessCommand extends Command
      */
     public function handle(): int
     {
+        // Initialize an array to keep track of queued passes
+        $queuedPasses = [];
+
         // 1) Determine if we’re running in dry-run mode
         $dryRun = (bool) $this->option('dry-run');
         Log::info('PassesProcessCommand started.', ['dryRun' => $dryRun]);
@@ -105,7 +108,15 @@ class PassesProcessCommand extends Command
 
         // 6) Process each record needing passes
         foreach ($pendingAnalyses as $analysis) {
-            try {
+            // Determine which passes are missing for this analysis
+            $completedPasses = (array) ($analysis->completed_passes ?? []);
+            $missingPasses = array_filter($passOrder, function($pass) use ($completedPasses) {
+                return !in_array($pass, $completedPasses, true);
+            });
+
+            if (!empty($missingPasses)) {
+                $queuedPasses[$analysis->file_path] = $missingPasses;
+            }
                 // This runs all missing passes
                 $this->analysisPassService->runAnalysis($analysis, $dryRun);
 
@@ -140,7 +151,21 @@ class PassesProcessCommand extends Command
         $bar->finish();
         $this->newLine();
 
-        // 7) Final summary table
+        $bar->finish();
+        $this->newLine();
+
+        // Display a summary of all queued jobs
+        if (!empty($queuedPasses)) {
+            $this->line('Queued Jobs Summary:');
+            $summaryRows = [];
+            foreach ($queuedPasses as $filePath => $passes) {
+                $summaryRows[] = [
+                    'File Path' => $filePath,
+                    'Queued Passes' => implode(', ', $passes),
+                ];
+            }
+            $this->table(['File Path', 'Queued Passes'], $summaryRows);
+        }
         $this->line('Summary of processed records:');
         $this->table(
             ['File Path', 'Current Pass', 'Completed Passes'],
