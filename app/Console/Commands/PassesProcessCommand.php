@@ -117,39 +117,36 @@ class PassesProcessCommand extends Command
             if (!empty($missingPasses)) {
                 $queuedPasses[$analysis->file_path] = $missingPasses;
             }
-                // This runs all missing passes
-                $this->analysisPassService->runAnalysis($analysis, $dryRun);
+            // This runs all missing passes
+            $this->analysisPassService->runAnalysis($analysis, $dryRun);
 
-                $completedPasses = collect($analysis->completed_passes)->sort()->values()->all();
+            $completedPasses = collect($analysis->completed_passes)->sort()->values()->all();
 
-                if ($dryRun) {
-                    $this->comment("[DRY-RUN] => Would have completed passes for [{$analysis->file_path}]: "
-                        .implode(', ', $completedPasses));
-                } else {
-                    $this->info("Passes now completed for [{$analysis->file_path}]: "
-                        .implode(', ', $completedPasses));
-                    Log::info("Completed passes for [{$analysis->file_path}]: ".json_encode($completedPasses));
-                }
-
-                // Collect final status for table display
-                $finalStatuses[] = [
-                    'file_path' => $analysis->file_path,
-                    'current_pass' => $analysis->current_pass,
-                    'completed_passes' => implode(', ', $completedPasses),
-                ];
-            } catch (\Throwable $e) {
-                Log::error("Error processing passes for [{$analysis->file_path}].", [
-                    'exception' => $e,
-                ]);
-                $this->error("Failed to process passes for [{$analysis->file_path}]: {$e->getMessage()}");
+            if ($dryRun) {
+                $this->comment("[DRY-RUN] => Would have completed passes for [{$analysis->file_path}]: "
+                    .implode(', ', $completedPasses));
+            } else {
+                $this->info("Passes now completed for [{$analysis->file_path}]: "
+                    .implode(', ', $completedPasses));
+                Log::info("Completed passes for [{$analysis->file_path}]: ".json_encode($completedPasses));
             }
+
+            // Collect final status for table display
+            $finalStatuses[] = [
+                'file_path' => $analysis->file_path,
+                'current_pass' => $analysis->current_pass,
+                'completed_passes' => implode(', ', $completedPasses),
+        } catch (\Throwable $e) {
+            Log::error("Error processing passes for [{$analysis->file_path}].", [
+                'exception' => $e,
+            ]);
+            $this->error("Failed to process passes for [{$analysis->file_path}]: {$e->getMessage()}");
+        }
 
             // Advance progress bar for each record
             $bar->advance();
         }
 
-        $bar->finish();
-        $this->newLine();
 
         $bar->finish();
         $this->newLine();
