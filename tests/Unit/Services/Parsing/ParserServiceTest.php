@@ -90,8 +90,19 @@ class ParserServiceTest extends TestCase
         // Assert
         $this->assertIsArray($result);
     }
+    #[Test]
+    public function it_returns_empty_array_for_nonexistent_file()
     {
-        Mockery::close();
-        parent::tearDown();
+        // Arrange
+        $filePath = '/invalid/path/file.php';
+        $visitors = [];
+        $parserService = new ParserService();
+
+        // Act
+        $result = $parserService->parseFile($filePath, $visitors, false);
+
+        // Assert
+        $this->assertIsArray($result);
+        $this->assertEmpty($result);
     }
 }
