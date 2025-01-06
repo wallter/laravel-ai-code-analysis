@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Models\CodeAnalysis;
 use App\Services\AI\AiderServiceInterface;
-use App\Services\AI\OpenAIService;
 use App\Services\AnalysisPassService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;

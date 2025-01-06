@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Models\CodeAnalysis;
 use App\Services\AnalysisPassService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -160,7 +159,6 @@ class PassesProcessCommand extends Command
             $this->info('Pass processing completed for all pending analyses.');
             Log::info('Pass processing completed for all pending analyses.');
         }
-
 
         return 0;
     }

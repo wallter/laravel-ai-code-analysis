@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\ProcessAnalysisPassJob;
 use App\Models\AIResult;
 use App\Models\CodeAnalysis;
 // use App\Services\AI\AiderServiceInterface;
@@ -219,8 +220,7 @@ class AnalysisPassService
      * Run the analysis by queuing the required passes.
      *
      * @param  CodeAnalysis  $analysis  The CodeAnalysis instance.
-     * @param  bool          $dryRun    Whether to perform a dry run.
-     * @return void
+     * @param  bool  $dryRun  Whether to perform a dry run.
      */
     public function runAnalysis(CodeAnalysis $analysis, bool $dryRun = false): void
     {
