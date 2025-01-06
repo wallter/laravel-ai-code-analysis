@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\CodeAnalysis;
-use App\Services\AI\CodeAnalysisService;
+use App\Services\AnalysisPassService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Log;
@@ -31,9 +31,9 @@ class PassesProcessCommand extends Command
     protected $description = 'Process the next AI pass for each CodeAnalysis record with incomplete passes.';
 
     /**
-     * @var CodeAnalysisService
+     * @var AnalysisPassService
      */
-    public function __construct(protected CodeAnalysisService $analysisService)
+    public function __construct(protected AnalysisPassService $analysisPassService)
     {
         parent::__construct();
     }
@@ -50,20 +50,18 @@ class PassesProcessCommand extends Command
     {
         // 1) Determine if we’re running in dry-run mode
         $dryRun = (bool) $this->option('dry-run');
-        Context::add('dryRun', $dryRun);
-        Log::info('ProcessPassesCommand started.', ['dryRun' => $dryRun]);
+        Log::info('PassesProcessCommand started.', ['dryRun' => $dryRun]);
 
         // 2) Retrieve the pass order from config
         $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
         $passOrderCount = count($passOrder);
 
         $this->info("Found [{$passOrderCount}] passes in pass_order: ".implode(', ', $passOrder));
-        Log::debug('Passes => '.json_encode($passOrder));
+        Log::debug('Pass order retrieved: '.json_encode($passOrder));
 
         if ($passOrderCount < 1) {
             $this->warn("No pass_order defined in config('ai.operations.multi_pass_analysis.pass_order').");
-            Log::warning('PassOrder is empty. Aborting.');
-            Context::forget('dryRun');
+            Log::warning('Pass order is empty. Aborting processing.');
 
             return 0;
         }
@@ -73,7 +71,6 @@ class PassesProcessCommand extends Command
         if ($allAnalyses->isEmpty()) {
             $this->warn("No CodeAnalysis records in DB. Try running 'analyze:files' first.");
             Log::info('No CodeAnalysis found. Stopping.');
-            Context::forget('dryRun');
 
             return 0;
         }
@@ -92,18 +89,16 @@ class PassesProcessCommand extends Command
         if ($pendingAnalyses->isEmpty()) {
             $this->info('No pending passes to process.');
             Log::info('No pending passes found.');
-            Context::forget('dryRun');
 
             return 0;
         }
 
         // 5) Show how many records we’ll process
         $this->info("Found [{$pendingAnalyses->count()}] file(s) needing additional passes.");
-        Log::info("ProcessPassesCommand: Found {$pendingAnalyses->count()} record(s) needing passes.");
+        Log::info("Processing [{$pendingAnalyses->count()}] CodeAnalysis records with pending passes.");
 
         // Create a progress bar for the pending analyses
         $bar = $this->output->createProgressBar($pendingAnalyses->count());
-        $bar->setFormat('verbose');
         $bar->start();
 
         // We’ll store final statuses to display in a summary table
@@ -113,24 +108,24 @@ class PassesProcessCommand extends Command
         foreach ($pendingAnalyses as $analysis) {
             try {
                 // This runs all missing passes
-                $this->analysisService->runAnalysis($analysis, $dryRun);
+                $this->analysisPassService->runAnalysis($analysis, $dryRun);
 
-                $completeList = $analysis->completed_passes ?: [];
+                $completedPasses = collect($analysis->completed_passes)->sort()->values()->all();
 
                 if ($dryRun) {
                     $this->comment("[DRY-RUN] => Would have completed passes for [{$analysis->file_path}]: "
-                        .implode(', ', $completeList));
+                        .implode(', ', $completedPasses));
                 } else {
                     $this->info("Passes now completed for [{$analysis->file_path}]: "
-                        .implode(', ', $completeList));
-                    Log::info('Completed passes => '.json_encode($completeList));
+                        .implode(', ', $completedPasses));
+                    Log::info("Completed passes for [{$analysis->file_path}]: ".json_encode($completedPasses));
                 }
 
                 // Collect final status for table display
                 $finalStatuses[] = [
                     'file_path' => $analysis->file_path,
                     'current_pass' => $analysis->current_pass,
-                    'completed_pass' => implode(', ', $analysis->completed_passes ?? []),
+                    'completed_passes' => implode(', ', $completedPasses),
                 ];
             } catch (\Throwable $e) {
                 Log::error("Error processing passes for [{$analysis->file_path}].", [
@@ -166,7 +161,6 @@ class PassesProcessCommand extends Command
             Log::info('Pass processing completed for all pending analyses.');
         }
 
-        Context::forget('dryRun');
 
         return 0;
     }
