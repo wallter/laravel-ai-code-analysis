@@ -5,8 +5,9 @@ namespace App\Console\Commands;
 use App\Models\ParsedItem;
 use App\Services\Parsing\ParserService;
 use App\Services\ParsedItemService;
+use App\Services\Parsing\FileProcessorService;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\File;
+use App\Services\Export\JsonExportService;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -35,7 +36,11 @@ class ParseFilesCommand extends FilesCommand
     /**
      * @var ParserService
      */
-    public function __construct(protected ParserService $parserService, protected ParsedItemService $parsedItemService)
+    public function __construct(
+        protected ParserService $parserService,
+        protected ParsedItemService $parsedItemService,
+        protected JsonExportService $jsonExportService
+    )
     {
         parent::__construct();
     }
@@ -123,29 +128,71 @@ class ParseFilesCommand extends FilesCommand
         $this->info('Initial collected items: '.$collectedItems->count());
 
         if ($outputFile) {
-            $this->exportJson($collectedItems->values(), $outputFile);
+            $this->jsonExportService->export($collectedItems->values(), $outputFile);
+            $this->info("Output written to {$outputFile}");
         }
 
         return 0;
     }
 
+}
     /**
-     * Export collected items to a JSON file.
+     * Process and store parsed items for each PHP file.
      *
-     * @param  Collection  $items  The collection of items to export.
-     * @param  string  $filePath  The file path to export the JSON to.
+     * @param string $filePath
+     * @return void
      */
-    protected function exportJson(Collection $items, string $filePath): void
+    protected function processFile(string $filePath): void
     {
-        $json = json_encode($items->toArray(), JSON_PRETTY_PRINT);
-        if (! $json) {
-            $this->warn('Failed to encode to JSON: '.json_last_error_msg());
+        $success = $this->fileProcessorService->process($filePath, $this->isVerbose());
 
-            return;
+        if (!$success) {
+            $this->warn("Failed to parse and store: {$filePath}");
+        }
+    }
+
+    /**
+     * Apply class and method limits to the parsed items.
+     *
+     * @param Collection $collectedItems
+     * @param int $limitClass
+     * @param int $limitMethod
+     * @return Collection
+     */
+    protected function applyLimits(Collection $collectedItems, int $limitClass, int $limitMethod): Collection
+    {
+        if ($limitClass > 0) {
+            $collectedItems = $collectedItems->take($limitClass);
+            $this->info("Applying limit-class: analyzing only the first {$limitClass} item(s).");
         }
 
-        @mkdir(dirname($filePath), 0777, true);
-        File::put($filePath, $json);
-        $this->info("Output written to {$filePath}");
+        if ($limitMethod > 0) {
+            $collectedItems = $collectedItems->map(function ($item) use ($limitMethod) {
+                if (isset($item['type']) && in_array($item['type'], ['Class', 'Trait', 'Interface'], true) && !empty($item['details']['methods'])) {
+                    $item['details']['methods'] = array_slice($item['details']['methods'], 0, $limitMethod);
+                }
+
+                return $item;
+            });
+            $this->info("Applying limit-method: limiting methods to first {$limitMethod} per class/trait.");
+        }
+
+        return $collectedItems;
     }
-}
+
+    /**
+     * Apply name filter to the collected parsed items.
+     *
+     * @param Collection $collectedItems
+     * @param string $filter
+     * @return Collection
+     */
+    protected function applyFilter(Collection $collectedItems, string $filter): Collection
+    {
+        if ($filter !== '') {
+            $collectedItems = $collectedItems->filter(fn($item) => stripos($item['name'] ?? '', (string) $filter) !== false);
+            $this->info("Applying filter: items containing '{$filter}' in their name.");
+        }
+
+        return $collectedItems;
+    }

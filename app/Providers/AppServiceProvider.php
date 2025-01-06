@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use App\Services\AI\CodeAnalysisService;
+use App\Services\Export\JsonExportService;
 use App\Services\AI\AiderService;
 use App\Services\AI\OpenAIService;
 use App\Services\AI\AiderServiceInterface;
 use App\Services\Parsing\ParserService;
+use App\Services\Parsing\FileProcessorService;
 use App\Services\ParsedItemService;
 use App\Console\Commands\AiderUpgradeCommand;
 use Illuminate\Contracts\Foundation\Application;
@@ -21,6 +23,16 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ParserService::class, function (Application $app): ParserService {
             return new ParserService($app->make(ParsedItemService::class));
+        });
+
+        // Register FileProcessorService
+        $this->app->singleton(FileProcessorService::class, function ($app) {
+            return new FileProcessorService($app->make(ParserService::class));
+        });
+
+        // Register JsonExportService
+        $this->app->singleton(JsonExportService::class, function ($app) {
+            return new JsonExportService();
         });
 
         $this->app->singleton(OpenAIService::class, function (Application $app): OpenAIService {
