@@ -2,13 +2,12 @@
 
 namespace Tests\Feature\Models;
 
-use Tests\TestCase;
 use App\Models\User;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class UserTest extends TestCase
 {
-
     #[Test]
     public function it_has_fillable_attributes()
     {

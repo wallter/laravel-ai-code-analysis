@@ -2,14 +2,13 @@
 
 namespace Tests\Feature\Models;
 
-use Tests\TestCase;
 use App\Models\AIScore;
 use App\Models\CodeAnalysis;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class AIScoreTest extends TestCase
 {
-
     #[Test]
     public function it_has_fillable_attributes()
     {

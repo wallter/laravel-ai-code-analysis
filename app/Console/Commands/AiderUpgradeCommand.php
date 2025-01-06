@@ -35,6 +35,7 @@ class AiderUpgradeCommand extends Command
         if ($apiResponse->failed()) {
             $this->error('Failed to fetch data from the HTTP API.');
             Log::error('AiderUpgradeCommand: HTTP API request failed.', ['response' => $apiResponse->body()]);
+
             return 1;
         }
 
@@ -44,15 +45,16 @@ class AiderUpgradeCommand extends Command
 
         // Step 2: Call Aider with the fetched data
         $aiderResponse = Http::withHeaders([
-            'Authorization' => 'Bearer ' . config('services.aider.api_key'),
+            'Authorization' => 'Bearer '.config('services.aider.api_key'),
             'Accept' => 'application/json',
-        ])->post(config('services.aider.endpoint') . '/upgrade', [
+        ])->post(config('services.aider.endpoint').'/upgrade', [
             'data' => $data,
         ]);
 
         if ($aiderResponse->failed()) {
             $this->error('Aider API request failed.');
             Log::error('AiderUpgradeCommand: Aider API request failed.', ['response' => $aiderResponse->body()]);
+
             return 1;
         }
 

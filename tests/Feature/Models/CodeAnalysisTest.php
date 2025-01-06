@@ -2,15 +2,14 @@
 
 namespace Tests\Feature\Models;
 
-use Tests\TestCase;
-use App\Models\CodeAnalysis;
-use App\Models\AIScore;
 use App\Models\AIResult;
+use App\Models\AIScore;
+use App\Models\CodeAnalysis;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class CodeAnalysisTest extends TestCase
 {
-
     #[Test]
     public function it_has_fillable_attributes()
     {

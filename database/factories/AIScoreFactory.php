@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\AIScore;
 use App\Models\CodeAnalysis;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AIScoreFactory extends Factory
 {

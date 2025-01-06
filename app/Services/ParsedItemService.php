@@ -13,7 +13,7 @@ class ParsedItemService
     /**
      * Create a ParsedItem with provided data, applying defaults where necessary.
      *
-     * @param array $data The data for creating the ParsedItem.
+     * @param  array  $data  The data for creating the ParsedItem.
      * @return ParsedItem|null The created ParsedItem instance or null on failure.
      */
     public function createParsedItem(array $data): ?ParsedItem
@@ -39,14 +39,14 @@ class ParsedItemService
             ], $data);
 
             // Ensure 'line_number' is not null and is an integer
-            if (is_null($data['line_number']) || !is_int($data['line_number'])) {
+            if (is_null($data['line_number']) || ! is_int($data['line_number'])) {
                 $data['line_number'] = 0;
             }
 
             // Create and return the ParsedItem
             return ParsedItem::create($data);
         } catch (\Exception $e) {
-            Log::error("ParsedItemService: Failed to create ParsedItem.", [
+            Log::error('ParsedItemService: Failed to create ParsedItem.', [
                 'error' => $e->getMessage(),
                 'data' => $data,
             ]);

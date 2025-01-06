@@ -2,12 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Models\ParsedItem;
-use App\Services\Parsing\ParserService;
+use App\Services\Export\JsonExportService;
 use App\Services\ParsedItemService;
 use App\Services\Parsing\FileProcessorService;
+use App\Services\Parsing\ParserService;
 use Illuminate\Support\Collection;
-use App\Services\Export\JsonExportService;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -41,10 +40,9 @@ class ParseFilesCommand extends FilesCommand
         protected ParsedItemService $parsedItemService,
         protected JsonExportService $jsonExportService,
         protected FileProcessorService $fileProcessorService
-    )
-    {
+    ) {
         parent::__construct();
-}
+    }
 
     /**
      * Execute the console command.
@@ -90,7 +88,7 @@ class ParseFilesCommand extends FilesCommand
         $collectedItems = $this->applyLimits($collectedItems, $limitClass, $limitMethod);
         $collectedItems = $this->applyFilter($collectedItems, $filter);
 
-        $this->info('Initial collected items: ' . $collectedItems->count());
+        $this->info('Initial collected items: '.$collectedItems->count());
 
         if ($outputFile) {
             $this->jsonExportService->export($collectedItems->values(), $outputFile);
@@ -102,26 +100,18 @@ class ParseFilesCommand extends FilesCommand
 
     /**
      * Process and store parsed items for each PHP file.
-     *
-     * @param string $filePath
-     * @return void
      */
     protected function processFile(string $filePath): void
     {
         $success = $this->fileProcessorService->process($filePath, $this->isVerbose());
 
-        if (!$success) {
+        if (! $success) {
             $this->warn("Failed to parse and store: {$filePath}");
         }
     }
 
     /**
      * Apply class and method limits to the parsed items.
-     *
-     * @param Collection $collectedItems
-     * @param int $limitClass
-     * @param int $limitMethod
-     * @return Collection
      */
     protected function applyLimits(Collection $collectedItems, int $limitClass, int $limitMethod): Collection
     {
@@ -132,7 +122,7 @@ class ParseFilesCommand extends FilesCommand
 
         if ($limitMethod > 0) {
             $collectedItems = $collectedItems->map(function ($item) use ($limitMethod) {
-                if (isset($item['type']) && in_array($item['type'], ['Class', 'Trait', 'Interface'], true) && !empty($item['details']['methods'])) {
+                if (isset($item['type']) && in_array($item['type'], ['Class', 'Trait', 'Interface'], true) && ! empty($item['details']['methods'])) {
                     $item['details']['methods'] = array_slice($item['details']['methods'], 0, $limitMethod);
                 }
 
@@ -146,15 +136,11 @@ class ParseFilesCommand extends FilesCommand
 
     /**
      * Apply name filter to the collected parsed items.
-     *
-     * @param Collection $collectedItems
-     * @param string $filter
-     * @return Collection
      */
     protected function applyFilter(Collection $collectedItems, string $filter): Collection
     {
         if ($filter !== '') {
-            $collectedItems = $collectedItems->filter(fn($item) => stripos($item['name'] ?? '', (string) $filter) !== false);
+            $collectedItems = $collectedItems->filter(fn ($item) => stripos($item['name'] ?? '', (string) $filter) !== false);
             $this->info("Applying filter: items containing '{$filter}' in their name.");
         }
 

@@ -3,7 +3,6 @@
 namespace Tests\Unit\Services\Export;
 
 use App\Services\Export\JsonExportService;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use PHPUnit\Framework\Attributes\Test;
@@ -27,7 +26,7 @@ class JsonExportServiceTest extends TestCase
         File::shouldReceive('put')->with($filePath, json_encode($items->toArray(), JSON_PRETTY_PRINT))->andReturn(true);
         Log::shouldReceive('info')->with("JsonExportService: Successfully exported data to {$filePath}")->once();
 
-        $service = new JsonExportService();
+        $service = new JsonExportService;
         $service->export($items, $filePath);
 
         $this->assertTrue(true);
@@ -45,7 +44,7 @@ class JsonExportServiceTest extends TestCase
                 return str_contains($message, 'Failed to encode items to JSON');
             })->once();
 
-        $service = new JsonExportService();
+        $service = new JsonExportService;
         $service->export($items, $filePath);
 
         $this->assertTrue(true);
@@ -62,7 +61,7 @@ class JsonExportServiceTest extends TestCase
         File::shouldReceive('put')->with($filePath, json_encode($items->toArray(), JSON_PRETTY_PRINT))->andReturn(true);
         Log::shouldReceive('info')->with("JsonExportService: Successfully exported data to {$filePath}")->once();
 
-        $service = new JsonExportService();
+        $service = new JsonExportService;
         $service->export($items, $filePath);
 
         $this->assertTrue(true);
@@ -78,9 +77,9 @@ class JsonExportServiceTest extends TestCase
         File::shouldReceive('exists')->with('/path/to')->andReturn(true);
         File::shouldReceive('put')->with($filePath, json_encode($items->toArray(), JSON_PRETTY_PRINT))
             ->andThrow($exception);
-        Log::shouldReceive('error')->with("JsonExportService: Failed to write to {$filePath}: " . $exception->getMessage())->once();
+        Log::shouldReceive('error')->with("JsonExportService: Failed to write to {$filePath}: ".$exception->getMessage())->once();
 
-        $service = new JsonExportService();
+        $service = new JsonExportService;
         $service->export($items, $filePath);
 
         $this->assertTrue(true);

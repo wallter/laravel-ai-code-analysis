@@ -4,7 +4,7 @@ use App\Http\Controllers\AnalysisController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect to the analysis index page by default
-Route::get('/', fn() => redirect()->route('analysis.index'));
+Route::get('/', fn () => redirect()->route('analysis.index'));
 
 Route::get('/analysis', [AnalysisController::class, 'index'])->name('analysis.index');
 Route::post('/aider/interact', [AiderController::class, 'interact'])->name('aider.interact');

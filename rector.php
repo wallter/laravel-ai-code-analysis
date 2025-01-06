@@ -56,6 +56,6 @@ return RectorConfig::configure()
         RemoveUselessAliasInUseStatementRector::class,
         NewlineAfterStatementRector::class,
         CatchExceptionNameMatchingTypeRector::class,
-        ReturnTypeFromStrictNewArrayRector::class
+        ReturnTypeFromStrictNewArrayRector::class,
     ])
     ->withPhpSets();

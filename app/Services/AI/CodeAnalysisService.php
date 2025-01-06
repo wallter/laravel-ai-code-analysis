@@ -3,7 +3,6 @@
 namespace App\Services\AI;
 
 use App\Jobs\ProcessAnalysisPassJob;
-use App\Models\AIScore;
 use App\Models\CodeAnalysis;
 use App\Services\Parsing\ParserService;
 use App\Services\Parsing\UnifiedAstVisitor;
@@ -40,9 +39,6 @@ class CodeAnalysisService
 
     /**
      * After all passes are dispatched, ensure scoring is processed.
-     *
-     * @param  CodeAnalysis  $analysis
-     * @return void
      */
     protected function ensureScoringProcessed(CodeAnalysis $analysis): void
     {
@@ -162,9 +158,10 @@ class CodeAnalysisService
         // 1) Get the pass config
         $allPassConfigs = config('ai.passes', []);
         $cfg = $allPassConfigs[$passName] ?? null;
-        if (!$cfg) {
+        if (! $cfg) {
             Log::error("buildPromptForPass: No configuration found for pass '{$passName}'.");
-            return "Invalid pass name.";
+
+            return 'Invalid pass name.';
         }
 
         $passType = $cfg['type'] ?? 'both';
@@ -194,7 +191,7 @@ class CodeAnalysisService
             $prompt .= $previousTexts;
         }
 
-        return $prompt . "\n\nRespond with structured insights.\n";
+        return $prompt."\n\nRespond with structured insights.\n";
     }
 
     /**
@@ -227,8 +224,9 @@ class CodeAnalysisService
             ->latest()
             ->first();
 
-        if (!$latestScoringResult) {
+        if (! $latestScoringResult) {
             Log::warning("computeAndStoreScores: No scoring_pass result found for CodeAnalysis ID {$analysis->id}.");
+
             return;
         }
 
@@ -236,14 +234,16 @@ class CodeAnalysisService
         try {
             $scoresData = json_decode($responseData, true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $je) {
-            Log::error("computeAndStoreScores: JSON decode error for CodeAnalysis ID {$analysis->id}: " . $je->getMessage());
+            Log::error("computeAndStoreScores: JSON decode error for CodeAnalysis ID {$analysis->id}: ".$je->getMessage());
+
             return;
         }
 
         $requiredFields = ['documentation_score', 'functionality_score', 'style_score', 'overall_score', 'summary'];
         foreach ($requiredFields as $field) {
-            if (!array_key_exists($field, $scoresData)) {
+            if (! array_key_exists($field, $scoresData)) {
                 Log::error("computeAndStoreScores: Missing '{$field}' in AI response for CodeAnalysis ID {$analysis->id}.");
+
                 return;
             }
         }
@@ -286,10 +286,6 @@ class CodeAnalysisService
 
     /**
      * Extract a specific score from AI response text.
-     *
-     * @param  string  $responseText
-     * @param  string  $scoreLabel
-     * @return float
      */
     protected function extractScore(string $responseText, string $scoreLabel): float
     {
@@ -298,6 +294,7 @@ class CodeAnalysisService
         }
 
         Log::warning("extractScore: Unable to find '{$scoreLabel}' in response.");
+
         return 0.0;
     }
 }

@@ -2,14 +2,13 @@
 
 namespace Tests\Feature\Models;
 
-use Tests\Feature\TestCase;
 use App\Models\AIResult;
 use App\Models\CodeAnalysis;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\Feature\TestCase;
 
 class AIResultTest extends TestCase
 {
-
     #[Test]
     public function it_has_fillable_attributes()
     {
@@ -33,6 +32,7 @@ class AIResultTest extends TestCase
         $this->assertInstanceOf(CodeAnalysis::class, $aiResult->codeAnalysis);
         $this->assertEquals($codeAnalysis->id, $aiResult->codeAnalysis->id);
     }
+
     #[Test]
     public function it_creates_successful_ai_results()
     {

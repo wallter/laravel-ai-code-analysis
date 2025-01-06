@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
-use PhpParser\ParserFactory;
-use PhpParser\NodeVisitorAbstract; // Added this line
+use PhpParser\NodeVisitorAbstract;
+use PhpParser\ParserFactory; // Added this line
 
 /**
  * Provides file collection and single-visitor parsing.
@@ -22,7 +22,7 @@ class ParserService
     /**
      * Initialize the ParserService with necessary dependencies.
      *
-     * @param ParsedItemService $parsedItemService The service handling ParsedItem creation.
+     * @param  ParsedItemService  $parsedItemService  The service handling ParsedItem creation.
      */
     public function __construct(ParsedItemService $parsedItemService)
     {
@@ -76,7 +76,7 @@ class ParserService
         try {
             $code = File::get($realPath);
         } catch (\Throwable $throwable) {
-            Log::error("ParserService: failed to read [{$realPath}]: " . $throwable->getMessage());
+            Log::error("ParserService: failed to read [{$realPath}]: ".$throwable->getMessage());
 
             return [];
         }
@@ -92,7 +92,7 @@ class ParserService
                 return [];
             }
         } catch (\Throwable $throwable) {
-            Log::error("ParserService: parse error [{$realPath}]: " . $throwable->getMessage());
+            Log::error("ParserService: parse error [{$realPath}]: ".$throwable->getMessage());
 
             return [];
         }
@@ -123,7 +123,7 @@ class ParserService
                 );
                 Log::info("ParserService: Cached AST in DB for [{$realPath}].");
             } catch (\Throwable $throwable) {
-                Log::error("ParserService: failed caching AST [{$realPath}]: " . $throwable->getMessage());
+                Log::error("ParserService: failed caching AST [{$realPath}]: ".$throwable->getMessage());
             }
         }
 
@@ -156,17 +156,13 @@ class ParserService
             }
         }
 
-        Log::info("ParserService.getPhpFiles => [{$realDir}] => found [" . count($phpFiles) . '] .php files.');
+        Log::info("ParserService.getPhpFiles => [{$realDir}] => found [".count($phpFiles).'] .php files.');
 
         return collect($phpFiles);
     }
 
     /**
      * Extract classes and interfaces from AST and store them in parsed_items table.
-     *
-     * @param array $ast
-     * @param string $filePath
-     * @return void
      */
     protected function extractAndStoreParsedItems(array $ast, string $filePath): void
     {
@@ -174,8 +170,9 @@ class ParserService
             return;
         }
 
-        $traverser = new NodeTraverser();
-        $visitor = new class extends NodeVisitorAbstract {
+        $traverser = new NodeTraverser;
+        $visitor = new class extends NodeVisitorAbstract
+        {
             public array $parsedItems = [];
 
             public function enterNode(Node $node): void
@@ -227,6 +224,6 @@ class ParserService
             ]);
         }
 
-        Log::info("ParserService: Stored " . count($visitor->parsedItems) . " parsed items for [{$filePath}].");
+        Log::info('ParserService: Stored '.count($visitor->parsedItems)." parsed items for [{$filePath}].");
     }
 }

@@ -2,18 +2,15 @@
 
 namespace App\Jobs;
 
-use App\Models\AIResult;
-use App\Models\AIScore;
 use App\Models\CodeAnalysis;
-use App\Services\AnalysisPassService;
-use App\Services\AI\OpenAIService;
 use App\Services\AI\AiderServiceInterface;
+use App\Services\AI\OpenAIService;
+use App\Services\AnalysisPassService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Handles the processing of AI passes for code analysis.
@@ -27,7 +24,9 @@ class ProcessAnalysisPassJob implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     protected AiderServiceInterface $aiderService;
+
     protected AnalysisPassService $analysisPassService;
 
     public function __construct(

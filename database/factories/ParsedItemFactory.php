@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\ParsedItem;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ParsedItemFactory extends Factory
 {
@@ -23,7 +23,7 @@ class ParsedItemFactory extends Factory
             'namespace' => 'App\\Models',
             'visibility' => $this->faker->randomElement(['public', 'protected', 'private']),
             'is_static' => $this->faker->boolean(),
-            'fully_qualified_name' => 'App\\Models\\' . $this->faker->word(),
+            'fully_qualified_name' => 'App\\Models\\'.$this->faker->word(),
             'operation_summary' => $this->faker->sentence(),
             'called_methods' => [],
             'ast' => [],

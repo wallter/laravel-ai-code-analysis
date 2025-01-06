@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AI\AiderServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Services\AI\AiderServiceInterface;
 
 class AiderController extends Controller
 {
@@ -12,6 +12,7 @@ class AiderController extends Controller
     {
         //
     }
+
     public function interact(Request $request)
     {
         $data = $request->all();
@@ -20,6 +21,7 @@ class AiderController extends Controller
             $result = $this->aiderService->interact($data);
         } catch (\Exception $e) {
             Log::error('AiderController: Interaction with Aider failed.', ['error' => $e->getMessage()]);
+
             return response()->json(['error' => 'Aider interaction failed.'], 500);
         }
 

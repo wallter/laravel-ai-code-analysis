@@ -46,7 +46,7 @@ class AnalysisController extends Controller
         $analysis = CodeAnalysis::with('aiResults')->findOrFail($id);
 
         // Summation of all cost_estimate_usd
-        $totalCost = $analysis->aiResults->sum(fn($result) => $result->metadata['cost_estimate_usd'] ?? 0);
+        $totalCost = $analysis->aiResults->sum(fn ($result) => $result->metadata['cost_estimate_usd'] ?? 0);
 
         return view('analysis.show', compact('analysis', 'totalCost'));
     }

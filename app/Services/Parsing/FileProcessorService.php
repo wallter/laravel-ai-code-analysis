@@ -16,8 +16,6 @@ class FileProcessorService
     /**
      * Process a PHP file by parsing and storing its contents.
      *
-     * @param string $filePath
-     * @param bool $isVerbose
      * @return bool Returns true on success, false on failure.
      */
     public function process(string $filePath, bool $isVerbose = false): bool
@@ -31,7 +29,8 @@ class FileProcessorService
 
             return true;
         } catch (\Throwable $e) {
-            Log::error("FileProcessorService: Parse error on {$filePath} - " . $e->getMessage());
+            Log::error("FileProcessorService: Parse error on {$filePath} - ".$e->getMessage());
+
             return false;
         }
     }

@@ -31,6 +31,7 @@ class AIResult extends Model
     {
         return $this->belongsTo(CodeAnalysis::class);
     }
+
     protected function casts(): array
     {
         return [

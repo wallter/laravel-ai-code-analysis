@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\AIResult;
 use App\Models\CodeAnalysis;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AIResultFactory extends Factory
 {
@@ -20,6 +20,7 @@ class AIResultFactory extends Factory
             'metadata' => [],
         ];
     }
+
     /**
      * State for successful AI results.
      */

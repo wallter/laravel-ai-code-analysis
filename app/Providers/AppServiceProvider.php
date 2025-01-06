@@ -2,15 +2,15 @@
 
 namespace App\Providers;
 
-use App\Services\AI\CodeAnalysisService;
-use App\Services\Export\JsonExportService;
-use App\Services\AI\AiderService;
-use App\Services\AI\OpenAIService;
-use App\Services\AI\AiderServiceInterface;
-use App\Services\Parsing\ParserService;
-use App\Services\Parsing\FileProcessorService;
-use App\Services\ParsedItemService;
 use App\Console\Commands\AiderUpgradeCommand;
+use App\Services\AI\AiderService;
+use App\Services\AI\AiderServiceInterface;
+use App\Services\AI\CodeAnalysisService;
+use App\Services\AI\OpenAIService;
+use App\Services\Export\JsonExportService;
+use App\Services\ParsedItemService;
+use App\Services\Parsing\FileProcessorService;
+use App\Services\Parsing\ParserService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 
@@ -32,11 +32,11 @@ class AppServiceProvider extends ServiceProvider
 
         // Register JsonExportService
         $this->app->singleton(JsonExportService::class, function ($app) {
-            return new JsonExportService();
+            return new JsonExportService;
         });
 
         $this->app->singleton(OpenAIService::class, function (Application $app): OpenAIService {
-            return new OpenAIService();
+            return new OpenAIService;
         });
 
         $this->app->singleton(CodeAnalysisService::class, function (Application $app): CodeAnalysisService {
@@ -56,21 +56,21 @@ class AppServiceProvider extends ServiceProvider
 
         // Register AiderUpgradeCommand
         $this->app->singleton(AiderUpgradeCommand::class, function ($app) {
-            return new AiderUpgradeCommand();
+            return new AiderUpgradeCommand;
         });
 
         $this->app->singleton(AiderService::class, function ($app) {
-            return new AiderService();
+            return new AiderService;
         });
 
         // Bind the interface to the implementation
         $this->app->singleton(AiderServiceInterface::class, function ($app) {
-            return new AiderService();
+            return new AiderService;
         });
 
         // Bind ParsedItemService
         $this->app->singleton(ParsedItemService::class, function ($app) {
-            return new ParsedItemService();
+            return new ParsedItemService;
         });
     }
 

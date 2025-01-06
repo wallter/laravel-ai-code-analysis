@@ -55,6 +55,7 @@
         "rector": "vendor/bin/rector -c rector.php",
         "phpdoc": "docker run --rm -v $(pwd):/data phpdoc/phpdoc:3 && open resources/phpdoc/index.html",
         "pint": "vendor/bin/pint --repair",
+        "lint": "composer run pint && composer run rector",
 
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

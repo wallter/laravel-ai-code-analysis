@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\CodeAnalysis;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class CodeAnalysisFactory extends Factory
 {
@@ -26,6 +26,7 @@ class CodeAnalysisFactory extends Factory
             'completed_passes' => [],
         ];
     }
+
     /**
      * State for completed analysis.
      */

@@ -61,7 +61,7 @@ class DbRestoreCommand extends Command
             $backupFiles = File::files($backupDirectory);
 
             // Filter SQLite backup files
-            $sqliteBackups = collect($backupFiles)->filter(fn($file) => preg_match('/^backup_sqlite_\d{4}_\d{2}_\d{2}_\d{6}\.sqlite$/', (string) $file->getFilename()));
+            $sqliteBackups = collect($backupFiles)->filter(fn ($file) => preg_match('/^backup_sqlite_\d{4}_\d{2}_\d{2}_\d{6}\.sqlite$/', (string) $file->getFilename()));
 
             if ($sqliteBackups->isEmpty()) {
                 $this->error("No SQLite backup files found in {$backupDirectory}.");
@@ -70,7 +70,7 @@ class DbRestoreCommand extends Command
             }
 
             // Sort backups by creation time descending to get the most recent
-            $mostRecentBackup = $sqliteBackups->sortByDesc(fn($file) => $file->getCTime())->first()->getRealPath();
+            $mostRecentBackup = $sqliteBackups->sortByDesc(fn ($file) => $file->getCTime())->first()->getRealPath();
 
             $backupPath = $mostRecentBackup;
             $this->info("No backup path provided. Using the most recent backup: {$backupPath}");
