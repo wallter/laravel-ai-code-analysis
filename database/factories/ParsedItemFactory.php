@@ -16,15 +16,9 @@ class ParsedItemFactory extends Factory
             'name' => $this->faker->word(),
             'file_path' => $this->faker->filePath(),
             'line_number' => $this->faker->numberBetween(1, 500),
-            'annotations' => [
-                $this->faker->optional()->word(),
-            ],
-            'attributes' => [
-                $this->faker->optional()->word(),
-            ],
-            'details' => [
-                'description' => $this->faker->sentence(),
-            ],
+            'annotations' => [$this->faker->optional()->word()],
+            'attributes' => [$this->faker->optional()->word()],
+            'details' => ['description' => $this->faker->sentence()],
             'class_name' => $this->faker->word(),
             'namespace' => 'App\\Models',
             'visibility' => $this->faker->randomElement(['public', 'protected', 'private']),
