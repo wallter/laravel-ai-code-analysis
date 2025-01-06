@@ -4,14 +4,13 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[Test]
+    /** @test */
     public function test_the_application_returns_a_successful_response(): void
     {
         // Create and authenticate a verified user
@@ -20,8 +19,10 @@ class ExampleTest extends TestCase
         ]);
         $this->actingAs($user);
 
-        $response = $this->get('/');
+        // Act: Perform the GET request and follow redirects
+        $response = $this->followingRedirects()->get('/');
 
+        // Assert: Check if the final response status is 200
         $response->assertStatus(200);
     }
 }

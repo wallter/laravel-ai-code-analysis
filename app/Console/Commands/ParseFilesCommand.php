@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\ParsedItem;
 use App\Services\Parsing\ParserService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Parse PHP files and output discovered classes, traits, and functions.
+ * ParseFilesCommand parses PHP files and stores the discovered classes, traits, and functions into the database.
  */
 class ParseFilesCommand extends FilesCommand
 {
@@ -29,7 +30,7 @@ class ParseFilesCommand extends FilesCommand
      *
      * @var string
      */
-    protected $description = 'Parse PHP files and output discovered classes, traits, functions.';
+    protected $description = 'Parse PHP files and store discovered classes, traits, functions into the database.';
 
     /**
      * @var ParserService
@@ -87,8 +88,29 @@ class ParseFilesCommand extends FilesCommand
                 $items = $this->parserService->parseFile($filePath);
                 $collectedItems = $collectedItems->merge($items);
 
+                // Save parsed items to the database
+                foreach ($items as $item) {
+                    ParsedItem::create([
+                        'type' => $item['type'] ?? null,
+                        'name' => $item['name'] ?? null,
+                        'file_path' => $filePath,
+                        'line_number' => $item['line_number'] ?? null,
+                        'annotations' => $item['annotations'] ?? [],
+                        'attributes' => $item['attributes'] ?? [],
+                        'details' => $item['details'] ?? [],
+                        'class_name' => $item['class_name'] ?? null,
+                        'namespace' => $item['namespace'] ?? null,
+                        'visibility' => $item['visibility'] ?? null,
+                        'is_static' => $item['is_static'] ?? false,
+                        'fully_qualified_name' => $item['fully_qualified_name'] ?? null,
+                        'operation_summary' => $item['operation_summary'] ?? null,
+                        'called_methods' => $item['called_methods'] ?? [],
+                        'ast' => $item['ast'] ?? [],
+                    ]);
+                }
+
                 if ($this->isVerbose()) {
-                    $this->info("Successfully parsed: {$filePath}");
+                    $this->info("Successfully parsed and stored: {$filePath}");
                 }
             } catch (\Throwable $e) {
                 Log::error("Parse error: {$filePath}", ['error' => $e->getMessage()]);
@@ -104,8 +126,8 @@ class ParseFilesCommand extends FilesCommand
         // Apply optional method limit
         if ($limitMethod > 0) {
             $collectedItems = $collectedItems->map(function ($item) use ($limitMethod) {
-                if (property_exists($item, 'type') && in_array($item->type, ['Class', 'Trait', 'Interface'], true) && ! empty($item->details['methods'])) {
-                    $item->details['methods'] = array_slice($item->details['methods'], 0, $limitMethod);
+                if (isset($item['type']) && in_array($item['type'], ['Class', 'Trait', 'Interface'], true) && !empty($item['details']['methods'])) {
+                    $item['details']['methods'] = array_slice($item['details']['methods'], 0, $limitMethod);
                 }
 
                 return $item;
@@ -114,7 +136,7 @@ class ParseFilesCommand extends FilesCommand
 
         // Apply optional filter
         if ($filter !== '') {
-            $collectedItems = $collectedItems->filter(fn($item) => stripos($item->name, (string) $filter) !== false);
+            $collectedItems = $collectedItems->filter(fn($item) => stripos($item['name'] ?? '', (string) $filter) !== false);
         }
 
         $this->info('Initial collected items: '.$collectedItems->count());
