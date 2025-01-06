@@ -2,27 +2,28 @@
 
 namespace App\Services;
 
-use App\Jobs\ProcessAnalysisPassJob;
+use App\Enums\OperationIdentifier;
 use App\Models\AIResult;
 use App\Models\CodeAnalysis;
-// use App\Services\AI\AiderServiceInterface;
 use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Service responsible for handling analysis passes for code.
+ * Service responsible for handling AI analysis passes for code.
  */
 class AnalysisPassService
 {
+    /**
+     * Constructor to inject dependencies.
+     */
     public function __construct(
         protected OpenAIService $openAIService,
         protected CodeAnalysisService $codeAnalysisService
-        // protected AiderServiceInterface $aiderService // Not Used ... yet
     ) {}
 
     /**
-     * Process an analysis pass.
+     * Process an AI analysis pass.
      */
     public function processPass(int $codeAnalysisId, string $passName, bool $dryRun): void
     {
@@ -71,7 +72,7 @@ class AnalysisPassService
                 $metadata
             );
 
-            $this->handleScoringPass($analysis, $passName);
+            $this->handleScoringPass($analysis);
             $this->markPassAsCompleted($analysis, $passName);
         } catch (\Throwable $throwable) {
             Log::error('AnalysisPassService: Exception in processPass => '.$throwable->getMessage(), ['exception' => $throwable]);
@@ -148,15 +149,25 @@ class AnalysisPassService
      */
     private function executeAiOperation(CodeAnalysis $analysis, string $passName, array $passConfig): array
     {
+        // Initialize AiPromptBuilder with ENUM
+        $operationIdentifier = OperationIdentifier::from($passConfig['operation_identifier']);
+        $promptBuilder = new AiPromptBuilder(
+            $operationIdentifier,
+            $passConfig,
+            $analysis->ast ?? [],
+            $this->getRawCode($analysis->file_path),
+            $this->getPreviousResults($analysis)
+        );
+
         // Build prompt
         Log::debug("AnalysisPassService: Building prompt for pass '{$passName}'.");
-        $prompt = $this->codeAnalysisService->buildPromptForPass($analysis, $passName);
+        $prompt = $promptBuilder->buildPrompt();
         Log::debug("AnalysisPassService: Prompt built for pass '{$passName}': {$prompt}");
 
-        // Perform AI call
+        // Perform AI operation
         Log::debug("AnalysisPassService: Performing AI operation for pass '{$passName}'.");
         $responseData = $this->openAIService->performOperation(
-            operationIdentifier: $passConfig['operation_identifier'] ?? 'code_analysis',
+            operationIdentifier: $operationIdentifier,
             params: [
                 'prompt' => $prompt,
                 'max_tokens' => $passConfig['max_tokens'] ?? 1500,
@@ -217,30 +228,68 @@ class AnalysisPassService
     }
 
     /**
-     * Run the analysis by queuing the required passes.
-     *
-     * @param  CodeAnalysis  $analysis  The CodeAnalysis instance.
-     * @param  bool  $dryRun  Whether to perform a dry run.
+     * Handle the scoring pass.
      */
-    public function runAnalysis(CodeAnalysis $analysis, bool $dryRun = false): void
+    private function handleScoringPass(CodeAnalysis $analysis): void
     {
-        Log::info("AnalysisPassService: Queueing multi-pass analysis for [{$analysis->file_path}].", [
-            'dryRun' => $dryRun,
-        ]);
+        // Define the scoring pass based on passName
+        // For example, after 'doc_generation', you might have 'scoring_pass'
+        // Adjust this logic based on your actual pass flow
+        $scoringPassName = 'scoring_pass';
+        $scoringPassConfig = $this->getPassConfig($scoringPassName);
+
+        if (! $scoringPassConfig) {
+            Log::warning("AnalysisPassService: No configuration found for scoring pass '{$scoringPassName}'. Skipping scoring.");
+
+            return;
+        }
+
+        Log::info("AnalysisPassService: Executing scoring pass '{$scoringPassName}'.");
+        $scoringResult = $this->executeAiOperation($analysis, $scoringPassName, $scoringPassConfig);
+        Log::info("AnalysisPassService: Scoring pass '{$scoringPassName}' completed.");
+
+        Log::info("AnalysisPassService: Creating AIResult entry for scoring pass '{$scoringPassName}'.");
+        $this->createAiResultEntry(
+            $analysis,
+            $scoringPassName,
+            $scoringResult['prompt'],
+            $scoringResult['response_data'],
+            $this->extractUsageMetrics()
+        );
+    }
+
+    /**
+     * Mark the pass as completed in the CodeAnalysis record.
+     */
+    private function markPassAsCompleted(CodeAnalysis $analysis, string $passName): void
+    {
+        Log::debug("AnalysisPassService: Marking pass '{$passName}' as completed for CodeAnalysis ID {$analysis->id}.");
 
         $completedPasses = (array) ($analysis->completed_passes ?? []);
-        $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
+        $completedPasses[] = $passName;
+        $analysis->completed_passes = array_unique($completedPasses);
+        $analysis->save();
 
-        foreach ($passOrder as $passName) {
-            if (! in_array($passName, $completedPasses, true)) {
-                // Dispatch a job for each missing pass
-                Log::info("Dispatching ProcessAnalysisPassJob for pass [{$passName}] => [{$analysis->file_path}].");
-                ProcessAnalysisPassJob::dispatch(
-                    codeAnalysisId: $analysis->id,
-                    passName: $passName,
-                    dryRun: $dryRun
-                );
-            }
-        }
+        Log::info("AnalysisPassService: Pass '{$passName}' marked as completed for CodeAnalysis ID {$analysis->id}.");
+    }
+
+    /**
+     * Retrieve the raw code from the file path.
+     */
+    private function getRawCode(string $filePath): string
+    {
+        return file_exists($filePath) ? file_get_contents($filePath) : '';
+    }
+
+    /**
+     * Retrieve previous analysis results.
+     */
+    private function getPreviousResults(CodeAnalysis $analysis): string
+    {
+        return $analysis->aiResults()
+            ->whereIn('operation_identifier', OperationIdentifier::cases())
+            ->orderBy('id', 'asc')
+            ->pluck('response_text')
+            ->implode("\n\n---\n\n");
     }
 }

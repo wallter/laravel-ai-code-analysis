@@ -1,5 +1,8 @@
 <?php
 
+use App\Enums\OperationIdentifier;
+use App\Enums\PassType;
+
 /**
  * AI Analysis Configuration
  *
@@ -9,7 +12,6 @@
  *
  * Environment variables enable flexible parameter changes without code modifications.
  */
-
 return [
 
     /*
@@ -66,6 +68,7 @@ return [
     | Each pass focuses on a specific analysis task.
     */
     'passes' => [
+
         /*
         |--------------------------------------------------------------------------
         | Documentation Generation Pass
@@ -73,20 +76,23 @@ return [
         | Summarizes code and AST data. Aids human readers and RAG lookups.
         */
         'doc_generation' => [
-            'operation_identifier' => 'doc_generation',
+            'operation_identifier' => OperationIdentifier::DOC_GENERATION->value,
             'model' => 'o1-mini',
             'max_tokens' => env('AI_DOC_GENERATION_MAX_TOKENS', 1200),
             'temperature' => env('AI_DOC_GENERATION_TEMPERATURE', 0.25),
-            'type' => 'both',
-            'system_message' => 'You generate concise PHP documentation from code and AST to complement phpdoc documentation.',
-            'prompt' => implode("\n", [
-                'Create short but clear documentation from the AST data and raw code:',
-                '- Summarize the purpose, methods, parameters, and usage context.',
-                '- Avoid __construct, getter, and setter details.',
-                '- Exclude comment code blocks.',
-                '- Mention custom annotations like @url.',
-                'Limit docs to ~200 words.',
-            ]),
+            'type' => PassType::BOTH->value,
+            'system_message' => 'You generate concise PHP documentation from code and AST to complement phpdoc.',
+            'prompt_sections' => [
+                'guidelines' => [
+                    '- Create short but clear documentation from the AST data and raw code.',
+                    '- Summarize the purpose, methods, parameters, and usage context.',
+                    '- Avoid documenting __construct, getter, setter, and similar functions.',
+                    '- Exclude comment code blocks from the documentation.',
+                    '- Mention custom annotations, such as @url.',
+                    '- Limit the documentation to approximately 200 words.',
+                ],
+                'response_format' => 'Provide concise, human-readable documentation.',
+            ],
         ],
 
         /*
@@ -96,16 +102,19 @@ return [
         | Identifies edge cases, performance issues, and reliability concerns.
         */
         'functional_analysis' => [
-            'operation_identifier' => 'functional_analysis',
+            'operation_identifier' => OperationIdentifier::FUNCTIONAL_ANALYSIS->value,
             'model' => 'gpt-4',
             'max_tokens' => env('AI_FUNCTIONAL_ANALYSIS_MAX_TOKENS', 2500),
             'temperature' => env('AI_FUNCTIONAL_ANALYSIS_TEMPERATURE', 0.65),
-            'type' => 'both',
+            'type' => PassType::BOTH->value,
             'system_message' => 'You perform thorough functional analysis based on AST data and raw code.',
-            'prompt' => implode("\n", [
-                'Evaluate functionality, find edge cases, detect performance bottlenecks.',
-                'Suggest improvements to boost reliability and testability.',
-            ]),
+            'prompt_sections' => [
+                'guidelines' => [
+                    '- Evaluate functionality, identify edge cases, and detect performance bottlenecks.',
+                    '- Suggest improvements to enhance reliability and testability.',
+                ],
+                'response_format' => 'Provide concise, structured insights with actionable recommendations.',
+            ],
         ],
 
         /*
@@ -115,16 +124,19 @@ return [
         | Checks code style consistency against PSR or similar standards.
         */
         'style_convention' => [
-            'operation_identifier' => 'style_convention',
+            'operation_identifier' => OperationIdentifier::STYLE_CONVENTION->value,
             'model' => 'gpt-3.5-turbo',
             'max_tokens' => env('AI_STYLE_CONVENTION_MAX_TOKENS', 1800),
             'temperature' => env('AI_STYLE_CONVENTION_TEMPERATURE', 0.28),
-            'type' => 'raw',
+            'type' => PassType::RAW->value,
             'system_message' => 'You review code style for PSR compliance.',
-            'prompt' => implode("\n", [
-                'Check formatting, naming conventions, and clarity per coding standards.',
-                'Suggest concise improvements to ensure consistency.',
-            ]),
+            'prompt_sections' => [
+                'guidelines' => [
+                    '- Check formatting, naming conventions, and documentation clarity according to coding standards.',
+                    '- Suggest concise improvements to ensure consistency.',
+                ],
+                'response_format' => 'Provide bullet points or short paragraphs highlighting style issues and suggestions.',
+            ],
         ],
 
         /*
@@ -134,16 +146,19 @@ return [
         | Aggregates results from earlier passes into a single summary.
         */
         'consolidation_pass' => [
-            'operation_identifier' => 'consolidation_pass',
+            'operation_identifier' => OperationIdentifier::CONSOLIDATION_PASS->value,
             'model' => 'gpt-4',
             'max_tokens' => env('AI_CONSOLIDATION_PASS_MAX_TOKENS', 2500),
             'temperature' => env('AI_CONSOLIDATION_PASS_TEMPERATURE', 0.4),
-            'type' => 'previous',
+            'type' => PassType::PREVIOUS->value,
             'system_message' => 'You consolidate prior AI analysis results into a final summary.',
-            'prompt' => implode("\n", [
-                'Combine results of previous passes into one concise summary.',
-                'Include any ratings or recommendations from prior outputs.',
-            ]),
+            'prompt_sections' => [
+                'guidelines' => [
+                    '- Combine outputs from all previous passes into a cohesive summary.',
+                    '- Highlight key findings and provide overall recommendations.',
+                ],
+                'response_format' => 'Provide a unified summary with actionable recommendations.',
+            ],
         ],
 
         /*
@@ -154,24 +169,28 @@ return [
         | Outputs JSON for easy parsing.
         */
         'scoring_pass' => [
-            'operation_identifier' => 'scoring',
+            'operation_identifier' => OperationIdentifier::SCORING_PASS->value,
             'model' => 'gpt-4',
             'max_tokens' => env('AI_SCORING_PASS_MAX_TOKENS', 500),
             'temperature' => env('AI_SCORING_PASS_TEMPERATURE', 0.3),
-            'type' => 'previous',
+            'type' => PassType::PREVIOUS->value,
             'system_message' => 'You analyze previous AI analysis results and assign scores.',
-            'prompt' => implode("\n", [
-                'Score documentation, functionality, and style (0–100).',
-                'Calculate overall_score as their average.',
-                'Format response in JSON like:',
-                '{',
-                '  "documentation_score": 85.0,',
-                '  "functionality_score": 90.0,',
-                '  "style_score": 80.0,',
-                '  "overall_score": 85.0,',
-                '  "summary": "Short explanation"',
-                '}',
-            ]),
+            'prompt_sections' => [
+                'guidelines' => [
+                    '- Score documentation, functionality, and style on a scale of 0 to 100.',
+                    '- Calculate overall_score as the average of the three scores.',
+                ],
+                'example' => [
+                    '{',
+                    '  "documentation_score": 85.0,',
+                    '  "functionality_score": 90.0,',
+                    '  "style_score": 80.0,',
+                    '  "overall_score": 85.0,',
+                    '  "summary": "The codebase has excellent documentation and functionality but could improve on coding style consistency."',
+                    '}',
+                ],
+                'response_format' => 'Return a JSON object with the scores and a brief summary.',
+            ],
         ],
 
         /*
@@ -182,17 +201,20 @@ return [
         | Helps developers ensure smooth migrations aligned with Laravel patterns.
         */
         'laravel_migration' => [
-            'operation_identifier' => 'laravel_migration',
-            // A balanced model for shorter responses and cost-effectiveness.
+            'operation_identifier' => OperationIdentifier::LARAVEL_MIGRATION->value,
             'model' => 'gpt-3.5-turbo',
             'max_tokens' => env('AI_LARAVEL_MIGRATION_MAX_TOKENS', 1000),
             'temperature' => env('AI_LARAVEL_MIGRATION_TEMPERATURE', 0.3),
-            'type' => 'both',
+            'type' => PassType::BOTH->value,
             'system_message' => 'You analyze code for Laravel migration improvements.',
-            'prompt' => implode("\n", [
-                'Identify Laravel migration best practices that can be applied.',
-                'Keep explanations short and actionable for RAG usage.',
-            ]),
+            'prompt_sections' => [
+                'guidelines' => [
+                    '- Identify Laravel migration best practices applicable to the code.',
+                    '- Suggest improvements or code changes to enhance migration patterns.',
+                    '- Keep explanations short and actionable for RAG usage.',
+                ],
+                'response_format' => 'Provide a list of improvements or code changes that enhance Laravel migration patterns.',
+            ],
         ],
 
         /*
@@ -202,20 +224,25 @@ return [
         | Rates migration quality (0–100) and gives a concise explanation.
         */
         'laravel_migration_scoring' => [
-            'operation_identifier' => 'laravel_migration_scoring',
+            'operation_identifier' => OperationIdentifier::LARAVEL_MIGRATION_SCORING->value,
             'model' => 'gpt-4',
             'max_tokens' => env('AI_LARAVEL_MIGRATION_SCORING_MAX_TOKENS', 500),
             'temperature' => env('AI_LARAVEL_MIGRATION_SCORING_TEMPERATURE', 0.3),
-            'type' => 'previous',
+            'type' => PassType::PREVIOUS->value,
             'system_message' => 'You assign a migration_score (0–100) for Laravel migration compliance.',
-            'prompt' => implode("\n", [
-                'Analyze code based on Laravel migration practices.',
-                'Output JSON with "migration_score" and a short "summary".',
-                '{',
-                '  "migration_score": 85.0,',
-                '  "summary": "Brief rationale"',
-                '}',
-            ]),
+            'prompt_sections' => [
+                'guidelines' => [
+                    '- Rate migration quality on a scale of 0 to 100.',
+                    '- Provide a short rationale for the score.',
+                ],
+                'example' => [
+                    '{',
+                    '  "migration_score": 85.0,',
+                    '  "summary": "Follows Laravel migration best practices with minor improvements needed."',
+                    '}',
+                ],
+                'response_format' => 'Return a JSON object with "migration_score" and "summary".',
+            ],
         ],
     ],
 

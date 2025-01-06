@@ -2,7 +2,9 @@
 
 namespace App\Services\AI;
 
+use App\Enums\OperationIdentifier;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
@@ -10,7 +12,7 @@ use OpenAI\Laravel\Facades\OpenAI as OpenAIFacade;
 
 /**
  * Handles calls to the OpenAI API via chat() endpoints,
- * capturing token usage in $this->lastUsage.
+ * capturing token usage and optimizing requests.
  */
 class OpenAIService
 {
@@ -29,37 +31,41 @@ class OpenAIService
     /**
      * Perform an OpenAI operation based on the provided identifier and parameters.
      *
-     * @param  string  $operationIdentifier  The identifier for the OpenAI operation.
-     * @param  array  $params  The parameters for the OpenAI operation.
+     * @param  OperationIdentifier  $operationIdentifier  The ENUM identifier for the OpenAI operation.
+     * @param  array  $params  Additional parameters for the OpenAI operation.
      * @return string The response content from OpenAI.
      *
      * @throws InvalidArgumentException If the operation identifier is invalid.
      * @throws Exception If the OpenAI response does not contain content.
      */
-    public function performOperation(string $operationIdentifier, array $params = []): string
+    public function performOperation(OperationIdentifier $operationIdentifier, array $params = []): string
     {
-        $opConfig = config("ai.passes.{$operationIdentifier}", []);
+        $opConfig = config("ai.passes.{$operationIdentifier->value}", []);
         if (empty($opConfig)) {
-            $msg = "No config found for operation [{$operationIdentifier}].";
+            $msg = "No config found for operation [{$operationIdentifier->value}].";
             Log::error($msg);
             throw new InvalidArgumentException($msg);
         }
 
-        // Merge with defaults
+        // Initialize variables from config with fallbacks
         $model = $opConfig['model'] ?? config('ai.default.model');
         $maxTokens = $params['max_tokens'] ?? $opConfig['max_tokens'] ?? config('ai.default.max_tokens');
         $temperature = $params['temperature'] ?? $opConfig['temperature'] ?? config('ai.default.temperature');
         $systemMessage = $opConfig['system_message'] ?? config('ai.default.system_message');
-        $promptText = $params['prompt'] ?? $opConfig['prompt'];
+
+        // Retrieve prompt text, either from params or config
+        $promptText = $params['prompt'] ?? $opConfig['prompt'] ?? '';
 
         if (empty($promptText)) {
-            $msg = "No prompt text provided for [{$operationIdentifier}].";
+            $msg = "No prompt text provided for [{$operationIdentifier->value}].";
             Log::error($msg);
             throw new InvalidArgumentException($msg);
         }
 
-        Log::debug("OpenAIService.performOperation => [{$operationIdentifier}]", [
-            'model' => $model, 'max_tokens' => $maxTokens, 'temperature' => $temperature,
+        Log::debug("OpenAIService.performOperation => [{$operationIdentifier->value}]", [
+            'model' => $model,
+            'max_tokens' => $maxTokens,
+            'temperature' => $temperature,
         ]);
 
         // Prepare chat payload
@@ -75,30 +81,36 @@ class OpenAIService
 
         try {
             $this->lastUsage = null; // Reset usage
-            Context::add('operation', $operationIdentifier);
+            Context::add('operation', $operationIdentifier->value);
 
-            Log::info("OpenAIService => sending chat request [{$operationIdentifier}]", [
+            Log::info("OpenAIService => sending chat request [{$operationIdentifier->value}]", [
                 'payload' => array_merge($payload, ['messages' => '<<omitted>>']),
             ]);
 
-            // 1) Make the chat() call
+            // Implement caching to avoid redundant API calls
+            $cacheKey = $this->generateCacheKey($operationIdentifier, $payload);
+            if (Cache::has($cacheKey)) {
+                Log::info("OpenAIService => cache hit for [{$operationIdentifier->value}].");
+
+                return Cache::get($cacheKey);
+            }
+
+            // Make the chat() call
             $response = OpenAIFacade::chat()->create($payload);
 
-            Log::info("OpenAIService => received chat response [{$operationIdentifier}]", [
+            Log::info("OpenAIService => received chat response [{$operationIdentifier->value}]", [
                 'response' => $response,
             ]);
 
-            // 2) Extract content
+            // Extract content
             $content = $response['choices'][0]['message']['content'] ?? null;
-            throw_unless($content, new Exception('No content in chat response from OpenAI'));
+            if (! $content) {
+                $msg = 'No content in chat response from OpenAI';
+                Log::error("OpenAIService: {$msg} for [{$operationIdentifier->value}].");
+                throw new Exception($msg);
+            }
 
-            // 3) Extract usage
-            // Usually looks like:
-            // "usage": {
-            //   "prompt_tokens": 123,
-            //   "completion_tokens": 456,
-            //   "total_tokens": 579
-            // }
+            // Extract usage
             $usage = $response['usage'] ?? null;
             if ($usage) {
                 $this->lastUsage = [
@@ -108,20 +120,31 @@ class OpenAIService
                 ];
             }
 
+            // Cache the response for future identical requests
+            Cache::put($cacheKey, trim((string) $content), now()->addMinutes(10)); // Adjust cache duration as needed
+
             return trim((string) $content);
         } catch (\JsonException $je) {
             Log::error('OpenAIService: JSON error => '.$je->getMessage(), [
                 'exception' => $je,
-                'operation' => $operationIdentifier,
+                'operation' => $operationIdentifier->value,
             ]);
             throw $je;
         } catch (\Throwable $throwable) {
-            Log::error("OpenAI request failed [{$operationIdentifier}]: ".$throwable->getMessage(), [
+            Log::error("OpenAI request failed [{$operationIdentifier->value}]: ".$throwable->getMessage(), [
                 'exception' => $throwable,
             ]);
             throw $throwable;
         } finally {
             Context::forget('operation');
         }
+    }
+
+    /**
+     * Generate a unique cache key based on operation and payload.
+     */
+    protected function generateCacheKey(OperationIdentifier $operationIdentifier, array $payload): string
+    {
+        return 'openai_'.md5($operationIdentifier->value.json_encode($payload));
     }
 }

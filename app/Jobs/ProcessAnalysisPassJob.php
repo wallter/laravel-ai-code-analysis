@@ -2,8 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\CodeAnalysis;
-use App\Services\AI\AiderServiceInterface;
+use App\Enums\OperationIdentifier;
 use App\Services\AnalysisPassService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -25,40 +24,46 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    protected AiderServiceInterface $aiderService;
-
-    protected AnalysisPassService $analysisPassService;
-
-    public function __construct(
-        protected int $codeAnalysisId,
-        protected string $passName,
-        protected bool $dryRun = false
-    ) {
-        $this->aiderService = app(AiderServiceInterface::class);
-        // Removed duplicate assignment of $this->aiderService
-        $this->analysisPassService = app(AnalysisPassService::class);
-    }
-
     /**
      * The number of seconds after which the unique lock will be released.
      */
     public int $uniqueFor = 300;
 
     /**
-     * Execute the job.
+     * Create a new job instance.
+     *
+     * @return void
      */
-    public function handle(): void
+    public function __construct(
+        /**
+         * The CodeAnalysis ID.
+         */
+        protected int $codeAnalysisId,
+        /**
+         * The OperationIdentifier ENUM instance.
+         */
+        protected OperationIdentifier $passName,
+        /**
+         * Indicates if the job is a dry run.
+         */
+        protected bool $dryRun = false
+    )
     {
-        $this->analysisPassService->processPass($this->codeAnalysisId, $this->passName, $this->dryRun);
     }
 
     /**
      * Get the unique identifier for the job.
-     *
-     * @return string
      */
-    public function uniqueId()
+    public function uniqueId(): string
     {
-        return "{$this->codeAnalysisId}-{$this->passName}-".($this->dryRun ? '1' : '0');
+        return "{$this->codeAnalysisId}-{$this->passName->value}-".($this->dryRun ? '1' : '0');
+    }
+
+    /**
+     * Execute the job.
+     */
+    public function handle(AnalysisPassService $analysisPassService): void
+    {
+        $analysisPassService->processPass($this->codeAnalysisId, $this->passName->value, $this->dryRun);
     }
 }
