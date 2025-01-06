@@ -23,6 +23,7 @@ yarn-error.log
 /.zed
 .aider*
 .phpdoc*
+tests/temp*
 
 # Testing data
 resources/access-app
