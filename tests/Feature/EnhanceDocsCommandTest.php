@@ -5,13 +5,11 @@ namespace Tests\Feature;
 use App\Models\AIScore;
 use App\Models\ParsedItem;
 use App\Services\AI\DocEnhancer;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 use Tests\TestCase;
 
 class EnhanceDocsCommandTest extends TestCase
 {
-    use RefreshDatabase;
 
     public function test_doc_enhancement_command_updates_parsed_items(): void
     {

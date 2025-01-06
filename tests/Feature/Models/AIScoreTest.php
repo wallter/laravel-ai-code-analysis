@@ -5,12 +5,10 @@ namespace Tests\Feature\Models;
 use Tests\TestCase;
 use App\Models\AIScore;
 use App\Models\CodeAnalysis;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 
 class AIScoreTest extends TestCase
 {
-    use RefreshDatabase;
 
     #[Test]
     public function it_has_fillable_attributes()

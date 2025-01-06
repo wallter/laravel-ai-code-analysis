@@ -4,12 +4,10 @@ namespace Tests\Feature\Models;
 
 use Tests\TestCase;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 
 class UserTest extends TestCase
 {
-    use RefreshDatabase;
 
     #[Test]
     public function it_has_fillable_attributes()

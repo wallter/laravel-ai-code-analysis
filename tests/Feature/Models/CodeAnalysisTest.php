@@ -6,12 +6,10 @@ use Tests\TestCase;
 use App\Models\CodeAnalysis;
 use App\Models\AIScore;
 use App\Models\AIResult;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 
 class CodeAnalysisTest extends TestCase
 {
-    use RefreshDatabase;
 
     #[Test]
     public function it_has_fillable_attributes()

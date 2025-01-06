@@ -17,7 +17,7 @@ class AiderControllerTest extends TestCase
         parent::tearDown();
     }
 
-    /** @test */
+    #[Test]
     public function it_can_interact_with_aider()
     {
         // Arrange: Mock the AiderServiceInterface

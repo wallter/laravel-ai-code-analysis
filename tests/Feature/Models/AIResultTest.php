@@ -5,12 +5,10 @@ namespace Tests\Feature\Models;
 use Tests\Feature\TestCase;
 use App\Models\AIResult;
 use App\Models\CodeAnalysis;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 
 class AIResultTest extends TestCase
 {
-    use RefreshDatabase;
 
     #[Test]
     public function it_has_fillable_attributes()
@@ -26,7 +24,7 @@ class AIResultTest extends TestCase
         ], $aiResult->getFillable());
     }
 
-    /** @test */
+    #[Test]
     public function it_belongs_to_code_analysis()
     {
         $codeAnalysis = CodeAnalysis::factory()->create();
@@ -35,7 +33,7 @@ class AIResultTest extends TestCase
         $this->assertInstanceOf(CodeAnalysis::class, $aiResult->codeAnalysis);
         $this->assertEquals($codeAnalysis->id, $aiResult->codeAnalysis->id);
     }
-    /** @test */
+    #[Test]
     public function it_creates_successful_ai_results()
     {
         $aiResult = AIResult::factory()->success()->create();
