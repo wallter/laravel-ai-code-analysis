@@ -36,7 +36,7 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
         protected bool $dryRun = false
     ) {
         $this->aiderService = app(AiderServiceInterface::class);
-        $this->aiderService = app(AiderServiceInterface::class);
+        // Removed duplicate assignment of $this->aiderService
         $this->analysisPassService = app(AnalysisPassService::class);
     }
 
@@ -47,12 +47,10 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @param  OpenAIService  $openAIService  The service handling OpenAI interactions.
      */
-    public function handle(OpenAIService $openAIService): void
+    public function handle(): void
     {
-        $this->analysisPassService->processPass($this->codeAnalysisId, $this->passName, $this->dryRun);
+        $this->analysisPassService->runAnalysis($this->codeAnalysisId, $this->passName, $this->dryRun);
     }
 
     /**

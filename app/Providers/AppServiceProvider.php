@@ -37,10 +37,11 @@ class AppServiceProvider extends ServiceProvider
             $app->make(ParserService::class)
         ));
 
+        // Updated AnalysisPassService registration to match constructor parameters
         $this->app->singleton(\App\Services\AnalysisPassService::class, fn ($app) => new \App\Services\AnalysisPassService(
             $app->make(\App\Services\AI\OpenAIService::class),
-            $app->make(\App\Services\AI\CodeAnalysisService::class),
-            $app->make(\App\Services\AI\AiderServiceInterface::class)
+            $app->make(\App\Services\AI\CodeAnalysisService::class)
+            // Removed AiderServiceInterface as it's not used yet
         ));
 
         // Register AiderUpgradeCommand
