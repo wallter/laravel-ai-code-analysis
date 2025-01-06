@@ -38,7 +38,6 @@ return [
         'temperature' => env('AI_DEFAULT_TEMPERATURE', 0.5),
         // System message guides the AI's overall role or tone.
         'system_message' => 'You are a helpful AI assistant.',
-        ],
     ],
 
     /*
@@ -134,6 +133,7 @@ return [
             'model' => 'gpt-3.5-turbo',
             'max_tokens' => env('AI_STYLE_CONVENTION_MAX_TOKENS', 1800),
             'temperature' => env('AI_STYLE_CONVENTION_TEMPERATURE', 0.28),
+            // 'raw' indicates it may rely heavily on direct code references rather than AST data.
             'type' => 'raw',
             'system_message' => 'You review code style for PSR compliance.',
             'prompt' => implode("\n", [
@@ -207,12 +207,14 @@ return [
     */
     'operations' => [
         'multi_pass_analysis' => [
-        'pass_order' => [
-            'doc_generation',
-            'functional_analysis',
-            'style_convention',
-            'consolidation_pass',
-            'scoring_pass',
+            'pass_order' => [
+                'doc_generation',
+                'functional_analysis',
+                'style_convention',
+                'consolidation_pass',
+                'scoring_pass',
+            ],
         ],
     ],
+
 ];
