@@ -6,8 +6,9 @@ use App\Enums\OperationIdentifier;
 use App\Models\AIResult;
 use App\Models\CodeAnalysis;
 use App\Services\AI\AIPromptBuilder;
-use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
+use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -24,62 +25,76 @@ class AnalysisPassService
     ) {}
 
     /**
-     * Process an AI analysis pass.
+     * Process all pending AI analysis passes for a given CodeAnalysis.
      */
-    public function processPass(int $codeAnalysisId, string $passName, bool $dryRun): void
+    public function processAllPasses(int $codeAnalysisId, bool $dryRun = false): void
     {
-        Log::info("AnalysisPassService: Starting processPass for CodeAnalysis ID {$codeAnalysisId}, Pass '{$passName}', dryRun: ".($dryRun ? 'true' : 'false'));
+        Log::info("AnalysisPassService: Starting processAllPasses for CodeAnalysis ID {$codeAnalysisId}, dryRun: ".($dryRun ? 'true' : 'false'));
 
         try {
-            $analysis = $this->retrieveAnalysis($codeAnalysisId);
-            if (! $analysis) {
-                Log::warning("AnalysisPassService: No analysis found for CodeAnalysis ID {$codeAnalysisId}. Exiting processPass.");
+            // Start a database transaction to ensure atomicity
+            DB::transaction(function () use ($codeAnalysisId, $dryRun) {
+                $analysis = $this->retrieveAnalysis($codeAnalysisId);
+                if (! $analysis) {
+                    Log::warning("AnalysisPassService: No analysis found for CodeAnalysis ID {$codeAnalysisId}. Exiting processAllPasses.");
 
-                return;
-            }
+                    return;
+                }
 
-            if ($this->isPassCompleted($analysis, $passName)) {
-                Log::info("AnalysisPassService: Pass '{$passName}' already completed for CodeAnalysis ID {$codeAnalysisId}. Exiting processPass.");
+                $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
+                $completedPasses = (array) ($analysis->completed_passes ?? []);
 
-                return;
-            }
+                foreach ($passOrder as $passName) {
+                    if (in_array($passName, $completedPasses, true)) {
+                        Log::info("AnalysisPassService: Pass '{$passName}' already completed for CodeAnalysis ID {$codeAnalysisId}. Skipping.");
 
-            $passConfig = $this->getPassConfig($passName);
-            if (! $passConfig) {
-                Log::warning("AnalysisPassService: No configuration found for pass '{$passName}'. Exiting processPass.");
+                        continue;
+                    }
 
-                return;
-            }
+                    $passConfig = $this->getPassConfig($passName);
+                    if (! $passConfig) {
+                        Log::warning("AnalysisPassService: No configuration found for pass '{$passName}'. Skipping.");
 
-            if ($this->handleDryRun($passName, $analysis, $dryRun)) {
-                Log::info("AnalysisPassService: Dry run handled for pass '{$passName}'. Exiting processPass.");
+                        continue;
+                    }
 
-                return;
-            }
+                    if ($dryRun) {
+                        Log::info("[DRY-RUN] => would run pass [{$passName}] for [{$analysis->file_path}].");
 
-            Log::info("AnalysisPassService: Executing AI operation for pass '{$passName}'.");
-            $aiResult = $this->executeAiOperation($analysis, $passName, $passConfig);
-            Log::info("AnalysisPassService: AI operation completed for pass '{$passName}'.");
+                        continue;
+                    }
 
-            Log::info("AnalysisPassService: Extracting usage metrics for pass '{$passName}'.");
-            $metadata = $this->extractUsageMetrics();
+                    Log::info("AnalysisPassService: Executing pass '{$passName}' for CodeAnalysis ID {$codeAnalysisId}.");
+                    $aiResult = $this->executeAiOperation($analysis, $passName, $passConfig);
+                    Log::info("AnalysisPassService: AI operation completed for pass '{$passName}'.");
 
-            Log::info("AnalysisPassService: Creating AIResult entry for pass '{$passName}'.");
-            $this->createAiResultEntry(
-                $analysis,
-                $passName,
-                $aiResult['prompt'],
-                $aiResult['response_data'],
-                $metadata
-            );
+                    Log::info("AnalysisPassService: Extracting usage metrics for pass '{$passName}'.");
+                    $metadata = $this->extractUsageMetrics();
 
-            $this->handleScoringPass($analysis);
-            $this->markPassAsCompleted($analysis, $passName);
-        } catch (\Throwable $throwable) {
-            Log::error('AnalysisPassService: Exception in processPass => '.$throwable->getMessage(), ['exception' => $throwable]);
+                    Log::info("AnalysisPassService: Creating AIResult entry for pass '{$passName}'.");
+                    $this->createAiResultEntry(
+                        $analysis,
+                        $passName,
+                        $aiResult['prompt'],
+                        $aiResult['response_data'],
+                        $metadata
+                    );
+
+                    // Mark pass as completed
+                    $completedPasses[] = $passName;
+                    $analysis->completed_passes = array_unique($completedPasses);
+                    $analysis->save();
+
+                    Log::info("AnalysisPassService: Pass '{$passName}' marked as completed for CodeAnalysis ID {$codeAnalysisId}.");
+                }
+
+                Log::info("AnalysisPassService: All passes processed for CodeAnalysis ID {$codeAnalysisId}.");
+            });
+        } catch (Exception $exception) {
+            Log::error('AnalysisPassService: Exception in processAllPasses => '.$exception->getMessage(), ['exception' => $exception]);
         }
 
-        Log::info("AnalysisPassService: Finished processPass for CodeAnalysis ID {$codeAnalysisId}, Pass '{$passName}'.");
+        Log::info("AnalysisPassService: Finished processAllPasses for CodeAnalysis ID {$codeAnalysisId}.");
     }
 
     /**
@@ -97,22 +112,6 @@ class AnalysisPassService
     }
 
     /**
-     * Check if the pass has already been completed.
-     */
-    private function isPassCompleted(CodeAnalysis $analysis, string $passName): bool
-    {
-        Log::debug("AnalysisPassService: Checking if pass '{$passName}' is completed for CodeAnalysis ID {$analysis->id}.");
-        $completedPasses = (array) ($analysis->completed_passes ?? []);
-        if (in_array($passName, $completedPasses, true)) {
-            Log::info("AnalysisPassService: Pass [{$passName}] already completed for [{$analysis->file_path}]. Skipping.");
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
      * Retrieve the configuration for the specified pass.
      */
     private function getPassConfig(string $passName): ?array
@@ -121,32 +120,14 @@ class AnalysisPassService
         $passConfigs = config('ai.passes', []);
         $cfg = $passConfigs[$passName] ?? null;
         if (! $cfg) {
-            Log::warning("AnalysisPassService: No config for pass [{$passName}]. Skipping.");
+            Log::warning("AnalysisPassService: No config for pass '{$passName}'. Skipping.");
         }
 
         return $cfg;
     }
 
     /**
-     * Handle dry-run scenarios.
-     *
-     * @return bool Returns true if dry-run is handled and processing should stop.
-     */
-    private function handleDryRun(string $passName, CodeAnalysis $analysis, bool $dryRun): bool
-    {
-        if ($dryRun) {
-            Log::info("[DRY-RUN] => would run pass [{$passName}] for [{$analysis->file_path}].");
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Execute the AI operation.
-     *
-     * @return array Contains 'prompt' and 'response_data'.
+     * Execute the AI operation for a given pass.
      */
     private function executeAiOperation(CodeAnalysis $analysis, string $passName, array $passConfig): array
     {
@@ -226,52 +207,6 @@ class AnalysisPassService
         } else {
             Log::error("AnalysisPassService: Failed to create AIResult entry for pass '{$passName}'.");
         }
-    }
-
-    /**
-     * Handle the scoring pass.
-     */
-    private function handleScoringPass(CodeAnalysis $analysis): void
-    {
-        // Define the scoring pass based on passName
-        // For example, after 'doc_generation', you might have 'scoring_pass'
-        // Adjust this logic based on your actual pass flow
-        $scoringPassName = 'scoring_pass';
-        $scoringPassConfig = $this->getPassConfig($scoringPassName);
-
-        if (! $scoringPassConfig) {
-            Log::warning("AnalysisPassService: No configuration found for scoring pass '{$scoringPassName}'. Skipping scoring.");
-
-            return;
-        }
-
-        Log::info("AnalysisPassService: Executing scoring pass '{$scoringPassName}'.");
-        $scoringResult = $this->executeAiOperation($analysis, $scoringPassName, $scoringPassConfig);
-        Log::info("AnalysisPassService: Scoring pass '{$scoringPassName}' completed.");
-
-        Log::info("AnalysisPassService: Creating AIResult entry for scoring pass '{$scoringPassName}'.");
-        $this->createAiResultEntry(
-            $analysis,
-            $scoringPassName,
-            $scoringResult['prompt'],
-            $scoringResult['response_data'],
-            $this->extractUsageMetrics()
-        );
-    }
-
-    /**
-     * Mark the pass as completed in the CodeAnalysis record.
-     */
-    private function markPassAsCompleted(CodeAnalysis $analysis, string $passName): void
-    {
-        Log::debug("AnalysisPassService: Marking pass '{$passName}' as completed for CodeAnalysis ID {$analysis->id}.");
-
-        $completedPasses = (array) ($analysis->completed_passes ?? []);
-        $completedPasses[] = $passName;
-        $analysis->completed_passes = array_unique($completedPasses);
-        $analysis->save();
-
-        Log::info("AnalysisPassService: Pass '{$passName}' marked as completed for CodeAnalysis ID {$analysis->id}.");
     }
 
     /**

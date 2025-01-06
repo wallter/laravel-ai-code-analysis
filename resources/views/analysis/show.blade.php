@@ -113,7 +113,7 @@
                     }
 
                     // Determine if this pass should display raw JSON without toggle
-                    $isScoringPass = $passName === App\Enums\OperationIdentifier::SCORING_PASS->value;
+                    $isKnownScoring = str_contains(strtolower($passName), 'scoring');
 
                     $defaultOpen = $passName === App\Enums\OperationIdentifier::CONSOLIDATION_PASS->value ? 'true' : 'false';
                 @endphp
@@ -179,7 +179,7 @@
                         x-show="expandAll || localOpen"
                         x-transition
                     >
-                        @if($isScoringPass)
+                        @if($isKnownScoring)
                             <!-- Display JSON directly without toggle -->
                             <div class="p-4 rounded shadow mt-2 overflow-auto">
                                 <pre class="bg-gray-100 dark:bg-gray-700 p-2 rounded text-xs text-gray-800 dark:text-gray-100">

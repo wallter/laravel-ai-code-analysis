@@ -33,9 +33,13 @@ class OpenAIService
      *
      * @param  OperationIdentifier  $operationIdentifier  The ENUM identifier for the OpenAI operation.
      * @param  array  $params  Additional parameters for the OpenAI operation.
+     *                         Expected keys:
+     *                         - 'ast_data' (array|null)
+     *                         - 'raw_code' (string)
+     *                         - 'previous_results' (string)
      * @return string The response content from OpenAI.
      *
-     * @throws InvalidArgumentException If the operation identifier is invalid.
+     * @throws InvalidArgumentException If the operation identifier is invalid or prompt is missing.
      * @throws Exception If the OpenAI response does not contain content.
      */
     public function performOperation(OperationIdentifier $operationIdentifier, array $params = []): string
@@ -51,13 +55,20 @@ class OpenAIService
         $model = $opConfig['model'] ?? config('ai.default.model');
         $maxTokens = $params['max_tokens'] ?? $opConfig['max_tokens'] ?? config('ai.default.max_tokens');
         $temperature = $params['temperature'] ?? $opConfig['temperature'] ?? config('ai.default.temperature');
-        $systemMessage = $opConfig['system_message'] ?? config('ai.default.system_message');
 
-        // Retrieve prompt text, either from params or config
-        $promptText = $params['prompt'] ?? $opConfig['prompt'] ?? '';
+        // Retrieve prompt text using AIPromptBuilder
+        $promptBuilder = new AIPromptBuilder(
+            operationIdentifier: $operationIdentifier,
+            config: $opConfig,
+            astData: $params['ast_data'] ?? null,
+            rawCode: $params['raw_code'] ?? '',
+            previousResults: $params['previous_results'] ?? ''
+        );
 
-        if (empty($promptText)) {
-            $msg = "No prompt text provided for [{$operationIdentifier->value}].";
+        $messagesJson = $promptBuilder->buildPrompt();
+
+        if (empty($messagesJson)) {
+            $msg = "Failed to build prompt for operation [{$operationIdentifier->value}].";
             Log::error($msg);
             throw new InvalidArgumentException($msg);
         }
@@ -71,10 +82,7 @@ class OpenAIService
         // Prepare chat payload
         $payload = [
             'model' => $model,
-            'messages' => [
-                ['role' => 'system', 'content' => $systemMessage],
-                ['role' => 'user', 'content' => $promptText],
-            ],
+            'messages' => json_decode($messagesJson, true),
             'max_tokens' => $maxTokens,
             'temperature' => $temperature,
         ];

@@ -48,16 +48,19 @@ return [
             'model_name' => env('OPENAI_MODEL_O1_MINI', 'o1-mini'),
             'max_tokens' => env('OPENAI_MODEL_O1_MINI_MAX_TOKENS', 1500),
             'temperature' => env('OPENAI_MODEL_O1_MINI_TEMPERATURE', 0.3),
+            'supports_system_message' => false, // o1-mini does not support system messages
         ],
         'gpt-4' => [
             'model_name' => env('OPENAI_MODEL_GPT4', 'gpt-4'),
             'max_tokens' => env('OPENAI_MODEL_GPT4_MAX_TOKENS', 2000),
             'temperature' => env('OPENAI_MODEL_GPT4_TEMPERATURE', 0.3),
+            'supports_system_message' => true, // gpt-4 supports system messages
         ],
         'gpt-3.5-turbo' => [
             'model_name' => env('OPENAI_MODEL_GPT35_TURBO', 'gpt-3.5-turbo'),
             'max_tokens' => env('OPENAI_MODEL_GPT35_TURBO_MAX_TOKENS', 1500),
             'temperature' => env('OPENAI_MODEL_GPT35_TURBO_TEMPERATURE', 0.4),
+            'supports_system_message' => true, // gpt-3.5-turbo supports system messages
         ],
     ],
 
@@ -245,7 +248,7 @@ return [
                 'example' => [
                     '{',
                     '  "migration_score": 85.0,',
-                    '  "summary": "Follows Laravel migration best practices with minor improvements needed."',
+                    '  "summary": "This Laravel migration analysis shows good compliance with best practices, but there are minor areas for improvement."',
                     '}',
                 ],
                 'response_format' => 'Return a JSON object with "migration_score" and "summary".',
@@ -267,7 +270,7 @@ return [
                 'functional_analysis',
                 'style_convention',
                 'consolidation_pass',
-                'scoring_pass',
+                'scoring_pass', // Ensure this is listed only once
                 'laravel_migration',
                 'laravel_migration_scoring',
             ],

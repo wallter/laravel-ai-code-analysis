@@ -21,23 +21,34 @@ class AIPromptBuilder
      * @param  string  $rawCode  The raw code.
      * @param  string  $previousResults  The previous analysis results.
      */
-    public function __construct(protected OperationIdentifier $operationIdentifier, protected array $config, protected ?array $astData = null, protected string $rawCode = '', protected string $previousResults = '') {}
+    public function __construct(
+        protected OperationIdentifier $operationIdentifier,
+        protected array $config,
+        protected ?array $astData = null,
+        protected string $rawCode = '',
+        protected string $previousResults = ''
+    ) {}
 
     /**
      * Build the AI prompt based on the pass configuration.
      *
-     * @return string The constructed AI prompt.
+     * @return string The constructed AI prompt as JSON string.
      */
     public function buildPrompt(): string
     {
         $passType = $this->config['type'] ?? PassType::BOTH->value;
         $basePrompt = $this->config['prompt_sections']['base_prompt'] ?? 'Analyze the following code:';
 
-        // Initialize prompt with base prompt
+        // Retrieve model configuration to check if 'system' messages are supported
+        $modelName = $this->config['model'] ?? config('ai.default.model');
+        $modelConfig = config("ai.models.{$modelName}", []);
+        $supportsSystemMessage = $modelConfig['supports_system_message'] ?? false;
+
+        // Initialize prompt
         $prompt = Str::of($basePrompt);
 
         // Append AST data if pass type is 'ast' or 'both'
-        if (in_array($passType, [PassType::AST->value, PassType::BOTH->value])) {
+        if (in_array($passType, [PassType::AST->value, PassType::BOTH->value], true)) {
             if (! empty($this->astData)) {
                 $astJson = json_encode($this->astData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
                 $prompt = $prompt->append("\n\n".AiDelimiters::GUIDELINES_START->value)
@@ -48,7 +59,7 @@ class AIPromptBuilder
         }
 
         // Append raw code if pass type is 'raw' or 'both'
-        if (in_array($passType, [PassType::RAW->value, PassType::BOTH->value])) {
+        if (in_array($passType, [PassType::RAW->value, PassType::BOTH->value], true)) {
             if (! empty($this->rawCode)) {
                 $prompt = $prompt->append("\n\n".AiDelimiters::GUIDELINES_START->value)
                     ->append("\n[RAW CODE]")
@@ -91,6 +102,18 @@ class AIPromptBuilder
                 ->append("\n".AiDelimiters::END->value);
         }
 
-        return $prompt->toString();
+        // Build the messages array based on model support
+        $messages = [];
+
+        if ($supportsSystemMessage && isset($this->config['system_message'])) {
+            $messages[] = ['role' => 'system', 'content' => $this->config['system_message']];
+        }
+
+        $messages[] = ['role' => 'user', 'content' => $prompt->toString()];
+
+        // Convert to JSON for OpenAI API
+        $messagesJson = json_encode($messages, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        return $messagesJson;
     }
 }
