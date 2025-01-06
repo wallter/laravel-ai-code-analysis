@@ -176,8 +176,6 @@ class ParserService
                         'type' => $node instanceof Node\Stmt\Class_ ? 'Class' : 'Interface',
                         'name' => $node->name->toString(),
                     ];
-                } else {
-                    Log::warning("ParserService: Encountered an anonymous class or interface.");
                 }
             }
         };

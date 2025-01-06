@@ -16,7 +16,7 @@ return [
     */
     'folders' => [
         // Directories to parse recursively
-        app_path(),
+        app_path('Models'),
     ],
 
     'files' => [
