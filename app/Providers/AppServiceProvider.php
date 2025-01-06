@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use App\Console\Commands\AiderUpgradeCommand;
-use App\Console\Commands\Queue\ListQueuedJobs; // Added import for ListQueuedJobs
+use App\Console\Commands\Queue\QueueListCommand;
 use App\Services\AI\AiderService;
 use App\Services\AI\AiderServiceInterface;
 use App\Services\AI\CodeAnalysisService;
@@ -64,7 +64,7 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 AiderUpgradeCommand::class,
-                ListQueuedJobs::class, // Added registration for ListQueuedJobs
+                QueueListCommand::class,
             ]);
         }
     }
