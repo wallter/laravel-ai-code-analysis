@@ -71,7 +71,25 @@ class ParserServiceTest extends TestCase
         $this->assertEmpty($result);
     }
 
-    public function tearDown(): void
+    #[Test]
+    public function it_invokes_visitors_during_parsing()
+    {
+        // Arrange
+        $filePath = '/path/to/file.php';
+        $visitorMock = Mockery::mock(VisitorInterface::class);
+        $visitorMock->shouldReceive('visit')
+            ->once()
+            ->with(Mockery::type(\PhpParser\Node::class));
+
+        $visitors = [$visitorMock];
+        $parserService = new ParserService();
+
+        // Act
+        $result = $parserService->parseFile($filePath, $visitors, false);
+
+        // Assert
+        $this->assertIsArray($result);
+    }
     {
         Mockery::close();
         parent::tearDown();
