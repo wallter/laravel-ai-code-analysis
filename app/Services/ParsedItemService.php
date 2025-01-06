@@ -38,8 +38,8 @@ class ParsedItemService
                 'ast' => [],
             ], $data);
 
-            // Ensure 'line_number' is not null
-            if (is_null($data['line_number'])) {
+            // Ensure 'line_number' is not null and is an integer
+            if (is_null($data['line_number']) || !is_int($data['line_number'])) {
                 $data['line_number'] = 0;
             }
 

@@ -3,13 +3,12 @@
 namespace App\Services\Parsing;
 
 use App\Models\CodeAnalysis;
-use App\Models\ParsedItem;
+use App\Services\ParsedItemService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
-use PhpParser\NodeVisitorAbstract;
 use PhpParser\ParserFactory;
 
 /**
@@ -17,6 +16,18 @@ use PhpParser\ParserFactory;
  */
 class ParserService
 {
+    protected ParsedItemService $parsedItemService;
+
+    /**
+     * Initialize the ParserService with necessary dependencies.
+     *
+     * @param ParsedItemService $parsedItemService The service handling ParsedItem creation.
+     */
+    public function __construct(ParsedItemService $parsedItemService)
+    {
+        $this->parsedItemService = $parsedItemService;
+    }
+
     /**
      * Collect .php files from config('parsing.files') + config('parsing.folders').
      *
@@ -41,7 +52,7 @@ class ParserService
      * Parse a single PHP file with optional visitors, and return the raw AST array.
      * If $useCache is true, we check code_analyses table first.
      *
-     * @param  string  $filePath  The path to the PHP file to parse.
+     * @param  string  $filePath  The path to the PHP file.
      * @param  array  $visitors  Optional array of NodeVisitor instances.
      * @param  bool  $useCache  Whether to use cached AST from the database.
      * @return array The parsed AST.
@@ -169,12 +180,24 @@ class ParserService
             public function enterNode(Node $node): void
             {
                 if (
-                    ($node instanceof Node\Stmt\Class_ || $node instanceof Node\Stmt\Interface_) &&
-                    $node->name !== null
+                    ($node instanceof Node\Stmt\Class_ || $node instanceof Node\Stmt\Interface_)
+                    && $node->name !== null
                 ) {
                     $this->parsedItems[] = [
                         'type' => $node instanceof Node\Stmt\Class_ ? 'Class' : 'Interface',
                         'name' => $node->name->toString(),
+                        'line_number' => $node->getStartLine() ?? 0,
+                        'annotations' => [], // To be filled if needed
+                        'attributes' => [], // To be filled if needed
+                        'details' => [], // To be filled if needed
+                        'class_name' => null, // To be filled if needed
+                        'namespace' => null, // To be filled if needed
+                        'visibility' => 'public', // Default visibility
+                        'is_static' => false, // Default static
+                        'fully_qualified_name' => null, // To be filled if needed
+                        'operation_summary' => null, // To be filled if needed
+                        'called_methods' => [], // To be filled if needed
+                        'ast' => [], // To be filled if needed
                     ];
                 }
             }
@@ -184,16 +207,23 @@ class ParserService
         $traverser->traverse($ast);
 
         foreach ($visitor->parsedItems as $item) {
-            ParsedItem::updateOrCreate(
-                [
-                    'type' => $item['type'],
-                    'name' => $item['name'],
-                    'file_path' => $filePath,
-                ],
-                [
-                    // Add any additional fields if necessary
-                ]
-            );
+            $this->parsedItemService->createParsedItem([
+                'type' => $item['type'],
+                'name' => $item['name'],
+                'file_path' => $filePath,
+                'line_number' => $item['line_number'],
+                'annotations' => $item['annotations'],
+                'attributes' => $item['attributes'],
+                'details' => $item['details'],
+                'class_name' => $item['class_name'],
+                'namespace' => $item['namespace'],
+                'visibility' => $item['visibility'],
+                'is_static' => $item['is_static'],
+                'fully_qualified_name' => $item['fully_qualified_name'],
+                'operation_summary' => $item['operation_summary'],
+                'called_methods' => $item['called_methods'],
+                'ast' => $item['ast'],
+            ]);
         }
 
         Log::info("ParserService: Stored " . count($visitor->parsedItems) . " parsed items for [{$filePath}].");
