@@ -22,7 +22,7 @@ class ParseFilesCommandTest extends TestCase
         $this->assertTrue(file_exists($testFilePath), "Test file does not exist at path: {$testFilePath}");
 
         // When: we mock the config and run the parse:files command
-        Config::set('services.parsing.files', [$testFilePath]);
+        Config::set('parsing.files', [$testFilePath]);
         Artisan::call('parse:files');
 
         // Then: the parsed_items table should have at least one row
