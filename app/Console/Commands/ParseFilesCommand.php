@@ -88,26 +88,7 @@ class ParseFilesCommand extends FilesCommand
                 $items = $this->parserService->parseFile($filePath);
                 $collectedItems = $collectedItems->merge($items);
 
-                // Save parsed items to the database
-                foreach ($items as $item) {
-                    $this->parsedItemService->createParsedItem([
-                        'type' => $item['type'] ?? null,
-                        'name' => $item['name'] ?? null,
-                        'file_path' => $filePath,
-                        'line_number' => $item['line_number'] ?? null,
-                        'annotations' => $item['annotations'] ?? [],
-                        'attributes' => $item['attributes'] ?? [],
-                        'details' => $item['details'] ?? [],
-                        'class_name' => $item['class_name'] ?? null,
-                        'namespace' => $item['namespace'] ?? null,
-                        'visibility' => $item['visibility'] ?? null,
-                        'is_static' => $item['is_static'] ?? false,
-                        'fully_qualified_name' => $item['fully_qualified_name'] ?? null,
-                        'operation_summary' => $item['operation_summary'] ?? null,
-                        'called_methods' => $item['called_methods'] ?? [],
-                        'ast' => $item['ast'] ?? [],
-                    ]);
-                }
+                // Removed redundant loop since ParserService now handles ParsedItem creation.
 
                 if ($this->isVerbose()) {
                     $this->info("Successfully parsed and stored: {$filePath}");
