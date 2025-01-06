@@ -24,6 +24,7 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
     /**
      * The number of times the job may be attempted.
      *

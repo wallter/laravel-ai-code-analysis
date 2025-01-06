@@ -2,10 +2,10 @@
 
 namespace App\Services\AI;
 
+use App\Enums\OperationIdentifier;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use OpenAI\Exceptions\ErrorException;
 
 class OpenAIService
 {
@@ -23,9 +23,9 @@ class OpenAIService
     /**
      * Perform an AI operation using the OpenAI API.
      *
-     * @throws ErrorException
+     * @throws Exception
      */
-    public function performOperation(string $operationIdentifier, array $params): array
+    public function performOperation(OperationIdentifier $operationIdentifier, array $params): string
     {
         try {
             $response = Http::withHeaders([
@@ -40,14 +40,16 @@ class OpenAIService
                 return $data['choices'][0]['message']['content'] ?? '';
             } else {
                 $error = $response->json('error.message', 'Unknown error');
-                Log::error("OpenAIService: API request failed for operation '{$operationIdentifier}': {$error}");
-                throw new Exception("OpenAI request failed [{$operationIdentifier}]: {$error}");
+                $operationName = $operationIdentifier->value;
+                Log::error("OpenAIService: API request failed for operation '{$operationName}': {$error}");
+                throw new Exception("OpenAI request failed [{$operationName}]: {$error}");
             }
         } catch (Exception $exception) {
-            Log::error("OpenAIService: Exception during API request for operation '{$operationIdentifier}': {$exception->getMessage()}", [
+            $operationName = $operationIdentifier->value;
+            Log::error("OpenAIService: Exception during API request for operation '{$operationName}': {$exception->getMessage()}", [
                 'exception' => $exception,
             ]);
-            throw new Exception("OpenAI request failed [{$operationIdentifier}]: {$exception->getMessage()}");
+            throw new Exception("OpenAI request failed [{$operationName}]: {$exception->getMessage()}");
         }
     }
 

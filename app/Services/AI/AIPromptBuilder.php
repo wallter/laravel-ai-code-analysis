@@ -9,9 +9,7 @@ class AIPromptBuilder
     /**
      * Constructor to initialize the prompt builder.
      */
-    public function __construct(protected OperationIdentifier $operationIdentifier, protected array $config, protected array $astData, protected string $rawCode, protected string $previousResults)
-    {
-    }
+    public function __construct(protected OperationIdentifier $operationIdentifier, protected array $config, protected array $astData, protected string $rawCode, protected string $previousResults) {}
 
     /**
      * Build the AI prompt messages.
@@ -51,6 +49,6 @@ class AIPromptBuilder
             $prompt .= "\n\n".implode("\n", $promptSections['example']);
         }
 
-        return $prompt . ("\n\n" . ($promptSections['response_format'] ?? ''));
+        return $prompt.("\n\n".($promptSections['response_format'] ?? ''));
     }
 }

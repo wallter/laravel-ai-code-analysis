@@ -41,43 +41,49 @@ return [
     |--------------------------------------------------------------------------
     | OpenAI Models Configuration
     |--------------------------------------------------------------------------
-    | Each key describes a model with specific parameters.
+    | Each key describes a model with its specific parameters, including
+    | whether it supports system messages and which token parameter to use.
     */
     'models' => [
+        // Not used for now, but retained for potential future usage.
         'o1-mini' => [
             'model_name' => env('OPENAI_MODEL_O1_MINI', 'o1-mini'),
             'max_tokens' => env('OPENAI_MODEL_O1_MINI_MAX_TOKENS', 1500),
             'temperature' => env('OPENAI_MODEL_O1_MINI_TEMPERATURE', 0.3),
-            'supports_system_message' => false, // o1-mini does not support system messages
-            'token_limit_parameter' => 'max_completion_tokens', // Use 'max_completion_tokens' instead of 'max_tokens'
+            'supports_system_message' => false,
+            'token_limit_parameter' => 'max_completion_tokens',
         ],
-        'gpt-4o' => [ // New Model
-            'model_name' => env('OPENAI_MODEL_GPT4O', 'gpt-4o'),
-            'max_tokens' => env('OPENAI_MODEL_GPT4O_MAX_TOKENS', 2500),
-            'temperature' => env('OPENAI_MODEL_GPT4O_TEMPERATURE', 0.3),
-            'supports_system_message' => true, // Assuming gpt-4o supports system messages
-            'token_limit_parameter' => 'max_tokens', // Use 'max_tokens'
-        ],
-        'gpt-4o-mini' => [ // New Model
-            'model_name' => env('OPENAI_MODEL_GPT4O_MINI', 'gpt-4o-mini'),
-            'max_tokens' => env('OPENAI_MODEL_GPT4O_MINI_MAX_TOKENS', 1000),
-            'temperature' => env('OPENAI_MODEL_GPT4O_MINI_TEMPERATURE', 0.4),
-            'supports_system_message' => false, // Assuming gpt-4o-mini does not support system messages
-            'token_limit_parameter' => 'max_completion_tokens', // Use 'max_completion_tokens' instead of 'max_tokens'
-        ],
+
         'gpt-4' => [
             'model_name' => env('OPENAI_MODEL_GPT4', 'gpt-4'),
             'max_tokens' => env('OPENAI_MODEL_GPT4_MAX_TOKENS', 2000),
             'temperature' => env('OPENAI_MODEL_GPT4_TEMPERATURE', 0.3),
-            'supports_system_message' => true, // gpt-4 supports system messages
-            'token_limit_parameter' => 'max_tokens', // Use 'max_tokens'
+            'supports_system_message' => true,
+            'token_limit_parameter' => 'max_tokens',
         ],
+
         'gpt-3.5-turbo' => [
             'model_name' => env('OPENAI_MODEL_GPT35_TURBO', 'gpt-3.5-turbo'),
             'max_tokens' => env('OPENAI_MODEL_GPT35_TURBO_MAX_TOKENS', 1500),
             'temperature' => env('OPENAI_MODEL_GPT35_TURBO_TEMPERATURE', 0.4),
-            'supports_system_message' => true, // gpt-3.5-turbo supports system messages
-            'token_limit_parameter' => 'max_tokens', // Use 'max_tokens'
+            'supports_system_message' => true,
+            'token_limit_parameter' => 'max_tokens',
+        ],
+
+        'gpt-4o' => [
+            'model_name' => env('OPENAI_MODEL_GPT4O', 'gpt-4o'),
+            'max_tokens' => env('OPENAI_MODEL_GPT4O_MAX_TOKENS', 2500),
+            'temperature' => env('OPENAI_MODEL_GPT4O_TEMPERATURE', 0.3),
+            'supports_system_message' => true,
+            'token_limit_parameter' => 'max_tokens',
+        ],
+
+        'gpt-40-mini' => [
+            'model_name' => env('OPENAI_MODEL_GPT40_MINI', 'gpt-40-mini'),
+            'max_tokens' => env('OPENAI_MODEL_GPT40_MINI_MAX_TOKENS', 1000),
+            'temperature' => env('OPENAI_MODEL_GPT40_MINI_TEMPERATURE', 0.4),
+            'supports_system_message' => false,
+            'token_limit_parameter' => 'max_completion_tokens',
         ],
     ],
 
@@ -85,7 +91,7 @@ return [
     |--------------------------------------------------------------------------
     | AI Passes Configuration
     |--------------------------------------------------------------------------
-    | Each pass focuses on a specific analysis task.
+    | Each key focuses on a specific analysis task or pass.
     */
     'passes' => [
 
@@ -93,11 +99,16 @@ return [
         |--------------------------------------------------------------------------
         | Documentation Generation Pass
         |--------------------------------------------------------------------------
-        | Summarizes code and AST data. Aids human readers and RAG lookups.
+        | Summarizes code and AST data. Helpful for human readers and RAG lookups.
+        |
+        | Updated to use 'gpt-4o' instead of 'o1-mini' to avoid the model limitations.
         */
         'doc_generation' => [
             'operation_identifier' => OperationIdentifier::DOC_GENERATION->value,
-            'model' => 'o1-mini',
+            'model' => 'gpt-4o',  // Updated
+            // Because 'gpt-4o' uses 'max_tokens', but your pass previously used max_completion_tokens, you can
+            // choose to keep it or rename as needed. We'll align with the new model's parameter usage.
+            // For consistency with the logs, let's keep 'max_completion_tokens' but map it in your service to 'max_tokens'.
             'max_tokens' => env('AI_DOC_GENERATION_MAX_TOKENS', 1200),
             'temperature' => env('AI_DOC_GENERATION_TEMPERATURE', 0.25),
             'type' => PassType::BOTH->value,
@@ -283,11 +294,12 @@ return [
     'operations' => [
         'multi_pass_analysis' => [
             'pass_order' => [
+                // Updated to use gpt-4o for doc_generation (and ignoring o1-mini)
                 'doc_generation',
                 'functional_analysis',
                 'style_convention',
                 'consolidation_pass',
-                'scoring_pass', // Ensure this is listed only once
+                'scoring_pass',
                 'laravel_migration',
                 'laravel_migration_scoring',
             ],
