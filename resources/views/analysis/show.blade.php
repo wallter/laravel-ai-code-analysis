@@ -4,35 +4,42 @@
 @php
     // Sort so 'consolidation_pass' is first
     $allResults = $analysis->aiResults->sortByDesc(
-        fn($res) => $res->pass_name === 'consolidation_pass'
+        fn($res) => $res->pass_name === App\Enums\OperationIdentifier::CONSOLIDATION_PASS->value
     );
+
+    // Calculate total cost if needed
+    $totalCost = $analysis->aiResults->sum(function($result) {
+        return $result->metadata['cost_estimate_usd'] ?? 0;
+    });
 @endphp
 
 <div class="mb-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h2 class="text-2xl font-bold leading-tight">Analysis Details</h2>
+            <h2 class="text-2xl font-bold leading-tight dark:text-white">Analysis Details</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 Viewing AI results for:
                 <span class="font-semibold">{{ $analysis->file_path }}</span>
             </p>
         </div>
-        <a 
-            href="{{ route('analysis.index') }}"
-            class="inline-block bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 
-                   text-gray-700 dark:text-gray-200 px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 
-                   transition-colors sm:hidden"
-        >
-            &larr; Back
-        </a>
-        <a 
-            href="{{ route('analysis.index') }}"
-            class="hidden sm:inline-block bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 
-                   text-gray-700 dark:text-gray-200 px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 
-                   transition-colors"
-        >
-            &larr; Back to List
-        </a>
+        <div class="mt-4 sm:mt-0">
+            <a 
+                href="{{ route('analysis.index') }}"
+                class="inline-block bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 
+                       text-gray-700 dark:text-gray-200 px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 
+                       transition-colors sm:hidden"
+            >
+                &larr; Back
+            </a>
+            <a 
+                href="{{ route('analysis.index') }}"
+                class="hidden sm:inline-block bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 
+                       text-gray-700 dark:text-gray-200 px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 
+                       transition-colors"
+            >
+                &larr; Back to List
+            </a>
+        </div>
     </div>
 </div>
 
@@ -54,7 +61,7 @@
                 <span class="text-gray-400 dark:text-gray-500">None</span>
             @endif
         </p>
-        @if(isset($totalCost))
+        @if($totalCost > 0)
             <p class="mt-2">
                 <strong>Total Estimated Cost:</strong>
                 <span class="inline-block px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded ml-1">
@@ -87,7 +94,7 @@
                 @php
                     $passName    = $result->pass_name;
                     $passCost    = $result->metadata['cost_estimate_usd'] ?? 0;
-                    $rawMarkdown = $result->response_text ?? '';
+                    $rawContent  = $result->response_text ?? '';
 
                     $costClasses = $passCost > 0.01
                         ? 'bg-yellow-100 text-yellow-800'
@@ -101,20 +108,14 @@
                         $configuredTip = '(No configured prompt found)';
                     } else {
                         $sysMsg  = $opConfig['system_message'] ?? '(No system_message)';
-                        $prompt  = !empty($opConfig['prompt']) 
-                            ? $opConfig['prompt'] 
-                            : (
-                                !empty($mpConfig['prompt']) 
-                                    ? $mpConfig['prompt'] 
-                                    : '(No prompt)'
-                            );
-                        $configuredTip = "System Message:\n{$sysMsg}";
-                        if (!empty($prompt)) {
-                            $configuredTip .= "\n\nPrompt:\n{$prompt}";
-                        }
+                        $prompt  = $opConfig['prompt'] ?? '(No prompt)';
+                        $configuredTip = "System Message:\n{$sysMsg}\n\nPrompt:\n{$prompt}";
                     }
 
-                    $defaultOpen = $passName === 'consolidation_pass' ? 'true' : 'false';
+                    // Determine if this pass should display raw JSON without toggle
+                    $isScoringPass = $passName === App\Enums\OperationIdentifier::SCORING_PASS->value;
+
+                    $defaultOpen = $passName === App\Enums\OperationIdentifier::CONSOLIDATION_PASS->value ? 'true' : 'false';
                 @endphp
 
                 <div 
@@ -144,7 +145,8 @@
                                         x-show="showPrompt"
                                         x-transition
                                         style="display: none;"
-                                    >{{ $configuredTip }}</div></span>
+                                    >{{ $configuredTip }}</div>
+                                </span>
                             </h4>
                             <span class="text-xs text-gray-500 dark:text-gray-400">
                                 Created: {{ $result->created_at->format('Y-m-d H:i') }}
@@ -177,34 +179,44 @@
                         x-show="expandAll || localOpen"
                         x-transition
                     >
-                        <button
-                            class="absolute top-8 right-8 text-xs px-2 py-1 border border-gray-400 
-                                dark:border-gray-500 rounded bg-transparent hover:bg-gray-100 
-                                dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 
-                                transition-colors"
-                            @click.stop="viewRaw = !viewRaw"
-                        >
-                            <span x-show="!viewRaw">Show Markdown</span>
-                            <span x-show="viewRaw">Show Rendered</span>
-                        </button>
-
-                        <div x-show="!viewRaw" x-transition>
-                            <div class="p-4 rounded shadow mt-2 transition-colors">
-                                <div class="prose prose-indigo max-w-none dark:prose-invert">
-                                    {!! \Illuminate\Support\Str::markdown($rawMarkdown) !!}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div x-show="viewRaw" x-transition>
-                            <div class="p-4 rounded shadow mt-2 transition-colors">
-                                <pre class="text-xs leading-relaxed whitespace-pre-wrap text-gray-800 dark:text-gray-100">
-<code class="language-md">
-{{ $rawMarkdown }}
-</code>
+                        @if($isScoringPass)
+                            <!-- Display JSON directly without toggle -->
+                            <div class="p-4 rounded shadow mt-2 overflow-auto">
+                                <pre class="bg-gray-100 dark:bg-gray-700 p-2 rounded text-xs text-gray-800 dark:text-gray-100">
+{{ json_encode(json_decode($rawContent, true), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}
                                 </pre>
                             </div>
-                        </div>
+                        @else
+                            <!-- Show Markdown / Rendered toggle button -->
+                            <button
+                                class="absolute top-8 right-8 text-xs px-2 py-1 border border-gray-400 
+                                    dark:border-gray-500 rounded bg-transparent hover:bg-gray-100 
+                                    dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 
+                                    transition-colors"
+                                @click.stop="viewRaw = !viewRaw"
+                            >
+                                <span x-show="!viewRaw">Show Rendered</span>
+                                <span x-show="viewRaw">Show Markdown</span>
+                            </button>
+
+                            <div x-show="!viewRaw" x-transition>
+                                <div class="p-4 rounded shadow mt-2 transition-colors">
+                                    <div class="prose prose-indigo max-w-none dark:prose-invert">
+                                        {!! \Illuminate\Support\Str::markdown($rawContent) !!}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div x-show="viewRaw" x-transition>
+                                <div class="p-4 rounded shadow mt-2 transition-colors">
+                                    <pre class="text-xs leading-relaxed whitespace-pre-wrap text-gray-800 dark:text-gray-100">
+<code class="language-md">
+{{ $rawContent }}
+</code>
+                                    </pre>
+                                </div>
+                            </div>
+                        @endif
 
                         @if(!empty($result->metadata['usage']))
                             <div class="text-sm text-gray-700 dark:text-gray-200 mt-4 border-t 

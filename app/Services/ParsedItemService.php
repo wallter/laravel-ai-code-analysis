@@ -20,9 +20,7 @@ class ParsedItemService
      *
      * @param  ParsedItem  $parsedItem  The ParsedItem model instance.
      */
-    public function __construct(protected ParsedItem $parsedItem)
-    {
-    }
+    public function __construct(protected ParsedItem $parsedItem) {}
 
     /**
      * Create or update a ParsedItem with provided data.

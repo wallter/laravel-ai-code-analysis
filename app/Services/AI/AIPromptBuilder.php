@@ -43,7 +43,7 @@ class AIPromptBuilder
                 $prompt = $prompt->append("\n\n".AiDelimiters::GUIDELINES_START->value)
                     ->append("\n[AST DATA]")
                     ->append("\n{$astJson}")
-                    ->append("\n".AiDelimiters::GUIDELINES_END->value);
+                    ->append("\n".AiDelimiters::END->value);
             }
         }
 
@@ -53,7 +53,7 @@ class AIPromptBuilder
                 $prompt = $prompt->append("\n\n".AiDelimiters::GUIDELINES_START->value)
                     ->append("\n[RAW CODE]")
                     ->append("\n{$this->rawCode}")
-                    ->append("\n".AiDelimiters::GUIDELINES_END->value);
+                    ->append("\n".AiDelimiters::END->value);
             }
         }
 
@@ -63,7 +63,7 @@ class AIPromptBuilder
                 $prompt = $prompt->append("\n\n".AiDelimiters::GUIDELINES_START->value)
                     ->append("\n[PREVIOUS ANALYSIS RESULTS]")
                     ->append("\n{$this->previousResults}")
-                    ->append("\n".AiDelimiters::GUIDELINES_END->value);
+                    ->append("\n".AiDelimiters::END->value);
             }
         }
 
@@ -72,7 +72,7 @@ class AIPromptBuilder
             $guidelines = implode("\n", $this->config['prompt_sections']['guidelines']);
             $prompt = $prompt->append("\n\n".AiDelimiters::GUIDELINES_START->value)
                 ->append("\n{$guidelines}")
-                ->append("\n".AiDelimiters::GUIDELINES_END->value);
+                ->append("\n".AiDelimiters::END->value);
         }
 
         // Append example if exists
@@ -80,7 +80,7 @@ class AIPromptBuilder
             $example = implode("\n", $this->config['prompt_sections']['example']);
             $prompt = $prompt->append("\n\n".AiDelimiters::EXAMPLE_START->value)
                 ->append("\n{$example}")
-                ->append("\n".AiDelimiters::EXAMPLE_END->value);
+                ->append("\n".AiDelimiters::END->value);
         }
 
         // Append response format
@@ -88,7 +88,7 @@ class AIPromptBuilder
             $responseFormat = $this->config['prompt_sections']['response_format'];
             $prompt = $prompt->append("\n\n".AiDelimiters::RESPONSE_FORMAT_START->value)
                 ->append("\n{$responseFormat}")
-                ->append("\n".AiDelimiters::RESPONSE_FORMAT_END->value);
+                ->append("\n".AiDelimiters::END->value);
         }
 
         return $prompt->toString();

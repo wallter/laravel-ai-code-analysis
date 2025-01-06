@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\OperationIdentifier;
 use App\Models\AIResult;
 use App\Models\CodeAnalysis;
+use App\Services\AI\AIPromptBuilder;
 use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
 use Illuminate\Support\Facades\Log;
@@ -151,7 +152,7 @@ class AnalysisPassService
     {
         // Initialize AiPromptBuilder with ENUM
         $operationIdentifier = OperationIdentifier::from($passConfig['operation_identifier']);
-        $promptBuilder = new AiPromptBuilder(
+        $promptBuilder = new AIPromptBuilder(
             $operationIdentifier,
             $passConfig,
             $analysis->ast ?? [],
