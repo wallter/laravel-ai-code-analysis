@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Console\Commands\AiderUpgradeCommand;
+use App\Console\Commands\Queue\ListQueuedJobs; // Added import for ListQueuedJobs
 use App\Services\AI\AiderService;
 use App\Services\AI\AiderServiceInterface;
 use App\Services\AI\CodeAnalysisService;
@@ -52,16 +53,23 @@ class AppServiceProvider extends ServiceProvider
 
         // Bind ParsedItemService
         $this->app->singleton(ParsedItemService::class, fn($app) => new ParsedItemService);
+
+        // Register commands
+        $this->commands([
+            AiderUpgradeCommand::class,
+            ListQueuedJobs::class, // Added registration for ListQueuedJobs
+        ]);
     }
 
     public function boot(): void
     {
         // Existing boot logic...
 
-        // Register the command with Artisan
+        // Register the commands with Artisan
         if ($this->app->runningInConsole()) {
             $this->commands([
                 AiderUpgradeCommand::class,
+                ListQueuedJobs::class, // Added registration for ListQueuedJobs
             ]);
         }
     }
