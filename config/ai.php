@@ -64,14 +64,27 @@ return [
             'temperature' => env('OPENAI_MODEL_GPT35_TURBO_TEMPERATURE', 0.4),
         ],
 
-        // Exception in processPass => The model `code-davinci-002` has been deprecated, learn more here: https://platform.openai.com/docs/deprecations 
-        // // Example pass for a Code-Davinci model, useful for code-centric tasks.
-        // 'code-davinci-002' => [
-        //     'model_name' => env('OPENAI_MODEL_CODE_DAVINCI_002', 'code-davinci-002'),
-        //     'max_tokens' => env('OPENAI_MODEL_CODE_DAVINCI_002_MAX_TOKENS', 2500),
-        //     'temperature' => env('OPENAI_MODEL_CODE_DAVINCI_002_TEMPERATURE', 0.2),
-        // ],
+        /*
+        |--------------------------------------------------------------------------
+        | O1-Mini Model Configuration
+        |--------------------------------------------------------------------------
+        | Represents the "o1-mini" model for specific AI tasks.
+        */
+        'o1-mini' => [
+            'model_name' => env('OPENAI_MODEL_O1_MINI', 'o1-mini'),
+            'max_tokens' => env('OPENAI_MODEL_O1_MINI_MAX_TOKENS', 1500),
+            'temperature' => env('OPENAI_MODEL_O1_MINI_TEMPERATURE', 0.3),
+        ],
 
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | AI Passes Configuration
+    |--------------------------------------------------------------------------
+    | Each AI pass has specific configurations, utilizing different models and prompts.
+    */
+    'passes' => [
         /*
         |--------------------------------------------------------------------------
         | Documentation Generation Pass
@@ -81,8 +94,8 @@ return [
         */
         'doc_generation' => [
             'operation_identifier' => 'doc_generation',
-            // Reference the "code-davinci-002" model from above.
-            'model' => 'code-davinci-002',
+            // Reference the "o1-mini" model from above.
+            'model' => 'o1-mini',
             // Allows more in-depth documentation but stays within a safe limit.
             'max_tokens' => env('AI_DOC_GENERATION_MAX_TOKENS', 1200),
             // Slightly lower temperature to maintain concise output.
@@ -190,7 +203,7 @@ return [
                 '  "functionality_score": 90.0,',
                 '  "style_score": 80.0,',
                 '  "overall_score": 85.0,',
-                '  "summary": "The codebase has excellent documentation and functionality but could improve on coding style consistency."',
+                '  "summary": "The codebase has excellent documentation and functionality but could improve on coding style consistency."',   
                 '}',
                 '',
                 'Replace the example values with actual scores and summary based on your analysis.',
