@@ -5,7 +5,10 @@ namespace Tests\Unit\Services\Parsing;
 use App\Services\Parsing\ParserService;
 use Illuminate\Support\Collection;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
+use App\Services\Parsing\VisitorInterface;
+use Mockery;
+use Illuminate\Support\Facades\Cache;
 
 class ParserServiceTest extends TestCase
 {
@@ -22,7 +25,8 @@ class ParserServiceTest extends TestCase
 
         // Assert
         $this->assertIsArray($result);
-        // Add more assertions based on expected parsing outcome
+        $this->assertArrayHasKey('classes', $result);
+        $this->assertNotEmpty($result['classes']);
     }
 
     #[Test]
@@ -37,8 +41,39 @@ class ParserServiceTest extends TestCase
         $result = $parserService->parseFile($filePath, $visitors, true);
 
         // Assert
-        // Assert that cache was utilized, possibly by mocking cache interactions
+        Cache::shouldReceive('has')
+            ->once()
+            ->with('parsed_file_' . md5($filePath))
+            ->andReturn(true);
+
+        Cache::shouldReceive('get')
+            ->once()
+            ->with('parsed_file_' . md5($filePath))
+            ->andReturn(['cached' => 'data']);
+
+        $this->assertIsArray($result);
+        $this->assertEquals(['cached' => 'data'], $result);
     }
 
-    // Add more tests covering different scenarios and edge cases
+    #[Test]
+    public function it_handles_parsing_errors_gracefully()
+    {
+        // Arrange
+        $filePath = '/invalid/path/file.php';
+        $visitors = [];
+        $parserService = new ParserService();
+
+        // Act
+        $result = $parserService->parseFile($filePath, $visitors, false);
+
+        // Assert
+        $this->assertIsArray($result);
+        $this->assertEmpty($result);
+    }
+
+    public function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
 }
