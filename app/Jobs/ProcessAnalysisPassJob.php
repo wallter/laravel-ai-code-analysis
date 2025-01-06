@@ -47,9 +47,7 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
          * Indicates if the job is a dry run.
          */
         protected bool $dryRun = false
-    )
-    {
-    }
+    ) {}
 
     /**
      * Get the unique identifier for the job.

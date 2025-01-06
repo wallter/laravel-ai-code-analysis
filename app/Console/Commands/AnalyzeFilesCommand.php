@@ -63,7 +63,7 @@ class AnalyzeFilesCommand extends FilesCommand
     /**
      * Collect PHP files using the CodeAnalysisService.
      *
-     * @param string $directory The directory to search within.
+     * @param  string  $directory  The directory to search within.
      * @return Collection<string> The collection of PHP file paths.
      */
     protected function collectPhpFiles(string $directory): Collection

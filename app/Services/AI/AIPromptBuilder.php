@@ -21,9 +21,7 @@ class AIPromptBuilder
      * @param  string  $rawCode  The raw code.
      * @param  string  $previousResults  The previous analysis results.
      */
-    public function __construct(protected OperationIdentifier $operationIdentifier, protected array $config, protected ?array $astData = null, protected string $rawCode = '', protected string $previousResults = '')
-    {
-    }
+    public function __construct(protected OperationIdentifier $operationIdentifier, protected array $config, protected ?array $astData = null, protected string $rawCode = '', protected string $previousResults = '') {}
 
     /**
      * Build the AI prompt based on the pass configuration.
