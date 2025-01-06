@@ -15,6 +15,10 @@ class AiderService implements AiderServiceInterface
     {
         $this->apiKey = config('services.aider.api_key');
         $this->endpoint = config('services.aider.endpoint', 'https://api.aider.com');
+        
+        if (empty($this->apiKey)) {
+            throw new \InvalidArgumentException('AIDER_API_KEY is not set or is empty in the environment variables.');
+        }
     }
 
     /**
