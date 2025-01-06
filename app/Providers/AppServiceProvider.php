@@ -53,17 +53,11 @@ class AppServiceProvider extends ServiceProvider
 
         // Bind ParsedItemService
         $this->app->singleton(ParsedItemService::class, fn($app) => new ParsedItemService);
-
-        // Register commands
-        $this->commands([
-            AiderUpgradeCommand::class,
-            ListQueuedJobs::class, // Added registration for ListQueuedJobs
-        ]);
     }
 
     public function boot(): void
     {
-        // Existing boot logic...
+        // ... boot logic...
 
         // Register the commands with Artisan
         if ($this->app->runningInConsole()) {
