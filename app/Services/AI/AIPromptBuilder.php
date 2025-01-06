@@ -2,118 +2,55 @@
 
 namespace App\Services\AI;
 
-use App\Enums\AIDelimiters;
 use App\Enums\OperationIdentifier;
-use App\Enums\PassType;
-use Illuminate\Support\Str;
 
-/**
- * Builds AI prompts based on pass configurations and provided data.
- */
 class AIPromptBuilder
 {
     /**
-     * Constructor to initialize the Prompt Builder.
-     *
-     * @param  OperationIdentifier  $operationIdentifier  The ENUM identifier for the AI operation.
-     * @param  array  $config  The AI pass configuration.
-     * @param  array|null  $astData  The AST data.
-     * @param  string  $rawCode  The raw code.
-     * @param  string  $previousResults  The previous analysis results.
+     * Constructor to initialize the prompt builder.
      */
-    public function __construct(
-        protected OperationIdentifier $operationIdentifier,
-        protected array $config,
-        protected ?array $astData = null,
-        protected string $rawCode = '',
-        protected string $previousResults = ''
-    ) {}
+    public function __construct(protected OperationIdentifier $operationIdentifier, protected array $config, protected array $astData, protected string $rawCode, protected string $previousResults)
+    {
+    }
 
     /**
-     * Build the AI prompt based on the pass configuration.
-     *
-     * @return string The constructed AI prompt as JSON string.
+     * Build the AI prompt messages.
      */
     public function buildPrompt(): string
     {
-        $passType = $this->config['type'] ?? PassType::BOTH->value;
-        $basePrompt = $this->config['prompt_sections']['base_prompt'] ?? 'Analyze the following code:';
-
-        // Retrieve model configuration to check if 'system' messages are supported
-        $modelName = $this->config['model'] ?? config('ai.default.model');
-        $modelConfig = config("ai.models.{$modelName}", []);
-        $supportsSystemMessage = $modelConfig['supports_system_message'] ?? false;
-
-        // Initialize prompt
-        $prompt = Str::of($basePrompt);
-
-        // Append AST data if pass type is 'ast' or 'both'
-        if (in_array($passType, [PassType::AST->value, PassType::BOTH->value], true)) {
-            if (! empty($this->astData)) {
-                $astJson = json_encode($this->astData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-                $prompt = $prompt->append("\n\n".AIDelimiters::START->value)
-                    ->append("\n[AST DATA]")
-                    ->append("\n{$astJson}")
-                    ->append("\n".AIDelimiters::END->value);
-            }
-        }
-
-        // Append raw code if pass type is 'raw' or 'both'
-        if (in_array($passType, [PassType::RAW->value, PassType::BOTH->value], true)) {
-            if (! empty($this->rawCode)) {
-                $prompt = $prompt->append("\n\n".AIDelimiters::START->value)
-                    ->append("\n[RAW CODE]")
-                    ->append("\n{$this->rawCode}")
-                    ->append("\n".AIDelimiters::END->value);
-            }
-        }
-
-        // Append previous pass outputs if pass type is 'previous'
-        if ($passType === PassType::PREVIOUS->value) {
-            if (! empty($this->previousResults)) {
-                $prompt = $prompt->append("\n\n".AIDelimiters::START->value)
-                    ->append("\n[PREVIOUS ANALYSIS RESULTS]")
-                    ->append("\n{$this->previousResults}")
-                    ->append("\n".AIDelimiters::END->value);
-            }
-        }
-
-        // Append guidelines
-        if (isset($this->config['prompt_sections']['guidelines'])) {
-            $guidelines = implode("\n", $this->config['prompt_sections']['guidelines']);
-            $prompt = $prompt->append("\n\n".AIDelimiters::START->value)
-                ->append("\n{$guidelines}")
-                ->append("\n".AIDelimiters::END->value);
-        }
-
-        // Append example if exists
-        if (isset($this->config['prompt_sections']['example'])) {
-            $example = implode("\n", $this->config['prompt_sections']['example']);
-            $prompt = $prompt->append("\n\n".AIDelimiters::START->value)
-                ->append("\n{$example}")
-                ->append("\n".AIDelimiters::END->value);
-        }
-
-        // Append response format
-        if (isset($this->config['prompt_sections']['response_format'])) {
-            $responseFormat = $this->config['prompt_sections']['response_format'];
-            $prompt = $prompt->append("\n\n".AIDelimiters::START->value)
-                ->append("\n{$responseFormat}")
-                ->append("\n".AIDelimiters::END->value);
-        }
-
-        // Build the messages array based on model support
         $messages = [];
 
-        if ($supportsSystemMessage && isset($this->config['system_message'])) {
-            $messages[] = ['role' => 'system', 'content' => $this->config['system_message']];
+        if ($this->config['supports_system_message'] ?? false) {
+            $messages[] = [
+                'role' => 'system',
+                'content' => $this->config['system_message'] ?? '',
+            ];
         }
 
-        $messages[] = ['role' => 'user', 'content' => $prompt->toString()];
+        $messages[] = [
+            'role' => 'user',
+            'content' => $this->buildUserPrompt(),
+        ];
 
-        // Convert to JSON for OpenAI API
-        $messagesJson = json_encode($messages, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        return json_encode($messages);
+    }
 
-        return $messagesJson;
+    /**
+     * Build the user prompt based on pass configuration.
+     */
+    private function buildUserPrompt(): string
+    {
+        $promptSections = $this->config['prompt_sections'] ?? [];
+
+        $prompt = $promptSections['base_prompt'] ?? '';
+        foreach ($promptSections['guidelines'] ?? [] as $guideline) {
+            $prompt .= "\n".$guideline;
+        }
+
+        if (isset($promptSections['example'])) {
+            $prompt .= "\n\n".implode("\n", $promptSections['example']);
+        }
+
+        return $prompt . ("\n\n" . ($promptSections['response_format'] ?? ''));
     }
 }

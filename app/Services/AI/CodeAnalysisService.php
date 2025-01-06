@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Services\AI;
 
 use App\Enums\OperationIdentifier;
+use App\Enums\ParsedItemType;
 use App\Jobs\ProcessAnalysisPassJob;
 use App\Models\CodeAnalysis;
 use App\Services\Parsing\ParserService;
+use App\Services\Parsing\UnifiedAstVisitor;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;

@@ -162,10 +162,16 @@ class AnalysisPassService
         // Prepare AI operation parameters
         $aiParams = [
             'model' => $modelConfig['model_name'] ?? $modelName,
-            $tokenLimitParam => $passConfig[$tokenLimitParam] ?? $modelConfig['max_tokens'] ?? config('ai.default.max_tokens'),
             'temperature' => $passConfig['temperature'] ?? config('ai.default.temperature'),
             'messages' => json_decode($prompt, true),
         ];
+
+        // Set the correct token limit parameter
+        if ($tokenLimitParam === 'max_completion_tokens') {
+            $aiParams['max_completion_tokens'] = $passConfig[$tokenLimitParam] ?? $modelConfig['max_tokens'] ?? config('ai.default.max_tokens');
+        } else {
+            $aiParams['max_tokens'] = $passConfig[$tokenLimitParam] ?? $modelConfig['max_tokens'] ?? config('ai.default.max_tokens');
+        }
 
         // Log the parameters being sent (excluding sensitive information)
         Log::debug("AnalysisPassService: Performing AI operation for pass '{$passName}' with parameters: ".json_encode([

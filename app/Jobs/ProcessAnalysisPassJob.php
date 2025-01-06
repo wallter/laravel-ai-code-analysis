@@ -15,8 +15,8 @@ use Throwable;
 /**
  * Handles the processing of AI passes for code analysis.
  *
- * This job retrieves the specified CodeAnalysis record, performs the designated AI pass,
- * stores the results, and marks the pass as completed.
+ * This job retrieves the specified CodeAnalysis record, performs all designated AI passes,
+ * stores the results, and marks the passes as completed.
  */
 class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
 {
