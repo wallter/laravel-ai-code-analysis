@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\ParserFactory;
+use PhpParser\NodeVisitorAbstract; // Added this line
 
 /**
  * Provides file collection and single-visitor parsing.
