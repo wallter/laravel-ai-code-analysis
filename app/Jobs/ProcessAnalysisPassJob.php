@@ -9,6 +9,7 @@ use App\Services\AnalysisPassService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
@@ -18,7 +19,7 @@ use Illuminate\Queue\SerializesModels;
  * This job retrieves the specified CodeAnalysis record, performs the designated AI pass,
  * stores the results, and marks the pass as completed.
  */
-class ProcessAnalysisPassJob implements ShouldQueue
+class ProcessAnalysisPassJob implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable;
     use InteractsWithQueue;
@@ -40,6 +41,13 @@ class ProcessAnalysisPassJob implements ShouldQueue
     }
 
     /**
+     * The number of seconds after which the unique lock will be released.
+     *
+     * @var int
+     */
+    public int $uniqueFor = 300;
+
+    /**
      * Execute the job.
      *
      * @param  OpenAIService  $openAIService  The service handling OpenAI interactions.
@@ -47,5 +55,14 @@ class ProcessAnalysisPassJob implements ShouldQueue
     public function handle(OpenAIService $openAIService): void
     {
         $this->analysisPassService->processPass($this->codeAnalysisId, $this->passName, $this->dryRun);
+    }
+    /**
+     * Get the unique identifier for the job.
+     *
+     * @return string
+     */
+    public function uniqueId()
+    {
+        return "{$this->codeAnalysisId}-{$this->passName}-" . ($this->dryRun ? '1' : '0');
     }
 }
