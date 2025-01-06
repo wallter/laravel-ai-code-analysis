@@ -154,12 +154,6 @@ class PassesProcessCommand extends Command
                 $this->error("Failed to process passes for [{$analysis->file_path}]: {$e->getMessage()}");
             }
 
-        } catch (\Throwable $e) {
-            Log::error("Error processing passes for [{$analysis->file_path}].", [
-                'exception' => $e,
-            ]);
-            $this->error("Failed to process passes for [{$analysis->file_path}]: {$e->getMessage()}");
-        }
             $bar->advance();
         }
 
