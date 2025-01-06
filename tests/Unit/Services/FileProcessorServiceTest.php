@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Services;
 
-use App\Services\FileProcessorService;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use Mockery;
 use App\Services\ParserService;
+use App\Services\Parsing\FileProcessorService;
 use Illuminate\Support\Facades\Log;
 
 class FileProcessorServiceTest extends TestCase
@@ -97,7 +97,27 @@ class FileProcessorServiceTest extends TestCase
         }
     }
 
-    public function tearDown(): void
+    #[Test]
+    public function it_handles_multiple_visitors()
+    {
+        // Arrange
+        $filePath = '/path/to/file.php';
+        $visitorMock1 = Mockery::mock(VisitorInterface::class);
+        $visitorMock1->shouldReceive('visit')->once();
+        $visitorMock2 = Mockery::mock(VisitorInterface::class);
+        $visitorMock2->shouldReceive('visit')->once();
+
+        $visitors = [$visitorMock1, $visitorMock2];
+        $parserService = new ParserService();
+
+        // Act
+        $result = $parserService->parseFile($filePath, $visitors, false);
+
+        // Assert
+        $this->assertIsArray($result);
+    }
+
+    protected function tearDown(): void
     {
         Mockery::close();
         parent::tearDown();

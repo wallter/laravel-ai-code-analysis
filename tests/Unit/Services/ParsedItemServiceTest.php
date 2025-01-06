@@ -116,7 +116,32 @@ class ParsedItemServiceTest extends TestCase
         $this->assertCount(1, ParsedItem::where('name', 'Duplicate Item')->get());
     }
 
-    public function tearDown(): void
+    #[Test]
+    public function it_parses_and_caches_when_cache_miss()
+    {
+        // Arrange
+        $filePath = '/path/to/file.php';
+        $parserService = new ParserService();
+        $visitors = []; // Define necessary visitors
+
+        Cache::shouldReceive('has')
+            ->once()
+            ->with('parsed_file_' . md5($filePath))
+            ->andReturn(false);
+
+        Cache::shouldReceive('set')
+            ->once()
+            ->with('parsed_file_' . md5($filePath), Mockery::type('array'))
+            ->andReturnTrue();
+
+        // Act
+        $result = $parserService->parseFile($filePath, $visitors, true);
+
+        // Assert
+        $this->assertIsArray($result);
+    }
+    
+    protected function tearDown(): void
     {
         Mockery::close();
         parent::tearDown();
