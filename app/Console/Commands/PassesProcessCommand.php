@@ -50,6 +50,9 @@ class PassesProcessCommand extends Command
         // Initialize an array to keep track of queued passes
         $queuedPasses = [];
 
+        // Initialize an array to keep track of queued passes
+        $queuedPasses = [];
+
         // 1) Determine if we’re running in dry-run mode
         $dryRun = (bool) $this->option('dry-run');
         Log::info('PassesProcessCommand started.', ['dryRun' => $dryRun]);
@@ -117,7 +120,15 @@ class PassesProcessCommand extends Command
             if (!empty($missingPasses)) {
                 $queuedPasses[$analysis->file_path] = $missingPasses;
             }
-            // This runs all missing passes
+            // Determine which passes are missing for this analysis
+            $completedPasses = (array) ($analysis->completed_passes ?? []);
+            $missingPasses = array_filter($passOrder, function($pass) use ($completedPasses) {
+                return !in_array($pass, $completedPasses, true);
+            });
+
+            if (!empty($missingPasses)) {
+                $queuedPasses[$analysis->file_path] = $missingPasses;
+            }
             $this->analysisPassService->runAnalysis($analysis, $dryRun);
 
             $completedPasses = collect($analysis->completed_passes)->sort()->values()->all();
@@ -143,7 +154,12 @@ class PassesProcessCommand extends Command
                 $this->error("Failed to process passes for [{$analysis->file_path}]: {$e->getMessage()}");
             }
 
-            // Advance progress bar for each record
+        } catch (\Throwable $e) {
+            Log::error("Error processing passes for [{$analysis->file_path}].", [
+                'exception' => $e,
+            ]);
+            $this->error("Failed to process passes for [{$analysis->file_path}]: {$e->getMessage()}");
+        }
             $bar->advance();
         }
 
@@ -173,44 +189,21 @@ class PassesProcessCommand extends Command
             ], $finalStatuses)
         );
 
-        // Advance progress bar for each record
+        $bar->finish();
+        $this->newLine();
+
+        // Display a summary of all queued jobs
+        if (!empty($queuedPasses)) {
+            $this->line('Queued Jobs Summary:');
+            $summaryRows = [];
+            foreach ($queuedPasses as $filePath => $passes) {
+                $summaryRows[] = [
+                    'File Path' => $filePath,
+                    'Queued Passes' => implode(', ', $passes),
+                ];
+            }
+            $this->table(['File Path', 'Queued Passes'], $summaryRows);
+        }
         $bar->advance();
     }
 
-    $bar->finish();
-    $this->newLine();
-
-    // Display a summary of all queued jobs
-    if (!empty($queuedPasses)) {
-        $this->line('Queued Jobs Summary:');
-        $summaryRows = [];
-        foreach ($queuedPasses as $filePath => $passes) {
-            $summaryRows[] = [
-                'File Path' => $filePath,
-                'Queued Passes' => implode(', ', $passes),
-            ];
-        }
-        $this->table(['File Path', 'Queued Passes'], $summaryRows);
-    }
-    $this->line('Summary of processed records:');
-    $this->table(
-        ['File Path', 'Current Pass', 'Completed Passes'],
-        array_map(fn ($row) => [
-            $row['file_path'],
-            $row['current_pass'],
-            $row['completed_passes'],
-        ], $finalStatuses)
-    );
-
-    // 8) Wrap up
-    if ($dryRun) {
-        $this->warn('Dry-run pass processing completed (no DB changes).');
-        Log::info('Dry-run pass processing completed, no DB updates.');
-    } else {
-        $this->info('Pass processing completed for all pending analyses.');
-        Log::info('Pass processing completed for all pending analyses.');
-    }
-
-    return 0;
-}
-}
