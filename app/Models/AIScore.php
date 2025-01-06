@@ -23,6 +23,7 @@ class AIScore extends Model
         'code_analysis_id',
         'operation',
         'score',
+        'summary',
     ];
 
     /**
