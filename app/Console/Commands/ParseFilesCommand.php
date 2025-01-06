@@ -44,7 +44,7 @@ class ParseFilesCommand extends FilesCommand
     )
     {
         parent::__construct();
-    }
+}
 
     /**
      * Execute the console command.
@@ -100,7 +100,6 @@ class ParseFilesCommand extends FilesCommand
         return 0;
     }
 
-}
     /**
      * Process and store parsed items for each PHP file.
      *
