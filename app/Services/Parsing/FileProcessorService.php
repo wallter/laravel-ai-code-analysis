@@ -6,9 +6,7 @@ use Illuminate\Support\Facades\Log;
 
 class FileProcessorService
 {
-    public function __construct(protected ParserService $parserService)
-    {
-    }
+    public function __construct(protected ParserService $parserService) {}
 
     /**
      * Process a PHP file by parsing and storing its contents.

@@ -22,9 +22,7 @@ class ParserService
      *
      * @param  ParsedItemService  $parsedItemService  The service handling ParsedItem creation.
      */
-    public function __construct(protected ParsedItemService $parsedItemService)
-    {
-    }
+    public function __construct(protected ParsedItemService $parsedItemService) {}
 
     /**
      * Collect .php files from config('parsing.files') + config('parsing.folders').

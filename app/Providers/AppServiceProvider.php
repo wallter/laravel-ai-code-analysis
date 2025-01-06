@@ -22,37 +22,37 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(ParserService::class, fn(Application $app): ParserService => new ParserService($app->make(ParsedItemService::class)));
+        $this->app->singleton(ParserService::class, fn (Application $app): ParserService => new ParserService($app->make(ParsedItemService::class)));
 
         // Register FileProcessorService
-        $this->app->singleton(FileProcessorService::class, fn($app) => new FileProcessorService($app->make(ParserService::class)));
+        $this->app->singleton(FileProcessorService::class, fn ($app) => new FileProcessorService($app->make(ParserService::class)));
 
         // Register JsonExportService
-        $this->app->singleton(JsonExportService::class, fn($app) => new JsonExportService);
+        $this->app->singleton(JsonExportService::class, fn ($app) => new JsonExportService);
 
-        $this->app->singleton(OpenAIService::class, fn(Application $app): OpenAIService => new OpenAIService);
+        $this->app->singleton(OpenAIService::class, fn (Application $app): OpenAIService => new OpenAIService);
 
-        $this->app->singleton(CodeAnalysisService::class, fn(Application $app): CodeAnalysisService => new CodeAnalysisService(
+        $this->app->singleton(CodeAnalysisService::class, fn (Application $app): CodeAnalysisService => new CodeAnalysisService(
             $app->make(OpenAIService::class),
             $app->make(ParserService::class)
         ));
 
-        $this->app->singleton(\App\Services\AnalysisPassService::class, fn($app) => new \App\Services\AnalysisPassService(
+        $this->app->singleton(\App\Services\AnalysisPassService::class, fn ($app) => new \App\Services\AnalysisPassService(
             $app->make(\App\Services\AI\OpenAIService::class),
             $app->make(\App\Services\AI\CodeAnalysisService::class),
             $app->make(\App\Services\AI\AiderServiceInterface::class)
         ));
 
         // Register AiderUpgradeCommand
-        $this->app->singleton(AiderUpgradeCommand::class, fn($app) => new AiderUpgradeCommand);
+        $this->app->singleton(AiderUpgradeCommand::class, fn ($app) => new AiderUpgradeCommand);
 
-        $this->app->singleton(AiderService::class, fn($app) => new AiderService);
+        $this->app->singleton(AiderService::class, fn ($app) => new AiderService);
 
         // Bind the interface to the implementation
-        $this->app->singleton(AiderServiceInterface::class, fn($app) => new AiderService);
+        $this->app->singleton(AiderServiceInterface::class, fn ($app) => new AiderService);
 
         // Bind ParsedItemService
-        $this->app->singleton(ParsedItemService::class, fn($app) => new ParsedItemService);
+        $this->app->singleton(ParsedItemService::class, fn ($app) => new ParsedItemService);
     }
 
     public function boot(): void

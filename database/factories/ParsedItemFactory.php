@@ -77,7 +77,7 @@ class ParsedItemFactory extends Factory
      */
     public function detailedAst(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'ast' => [
                 'nodeType' => 'Stmt_Class',
                 'attributes' => [

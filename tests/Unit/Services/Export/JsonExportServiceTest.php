@@ -40,7 +40,7 @@ class JsonExportServiceTest extends TestCase
 
         // Set the expectation before calling the export method
         Log::shouldReceive('warning')
-            ->withArgs(fn($message) => str_contains((string) $message, 'Failed to encode items to JSON'))->once();
+            ->withArgs(fn ($message) => str_contains((string) $message, 'Failed to encode items to JSON'))->once();
 
         $service = new JsonExportService;
         $service->export($items, $filePath);

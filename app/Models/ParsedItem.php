@@ -52,6 +52,7 @@ class ParsedItem extends Model
         'fully_qualified_name' => null,
         'operation_summary' => null,
     ];
+
     protected function casts(): array
     {
         return [

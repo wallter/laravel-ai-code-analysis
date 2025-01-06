@@ -31,6 +31,7 @@ class ListQueuedJobs extends Command
 
         if ($jobs->isEmpty()) {
             $this->info('No jobs found in the queue.');
+
             return;
         }
 
@@ -41,8 +42,9 @@ class ListQueuedJobs extends Command
             $payload = json_decode($job->payload);
 
             // If payload fails to decode, skip or show an error
-            if (!$payload) {
+            if (! $payload) {
                 $this->error("Failed to decode payload for Job ID: {$job->id}");
+
                 continue;
             }
 
@@ -77,9 +79,6 @@ class ListQueuedJobs extends Command
 
     /**
      * Extract job-specific data without calling the job's handle() method.
-     *
-     * @param  object  $payload
-     * @return array
      */
     private function extractJobData(object $payload): array
     {

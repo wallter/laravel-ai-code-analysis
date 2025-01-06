@@ -31,22 +31,26 @@ class AnalysisPassService
             $analysis = $this->retrieveAnalysis($codeAnalysisId);
             if (! $analysis) {
                 Log::warning("AnalysisPassService: No analysis found for CodeAnalysis ID {$codeAnalysisId}. Exiting processPass.");
+
                 return;
             }
 
             if ($this->isPassCompleted($analysis, $passName)) {
                 Log::info("AnalysisPassService: Pass '{$passName}' already completed for CodeAnalysis ID {$codeAnalysisId}. Exiting processPass.");
+
                 return;
             }
 
             $passConfig = $this->getPassConfig($passName);
             if (! $passConfig) {
                 Log::warning("AnalysisPassService: No configuration found for pass '{$passName}'. Exiting processPass.");
+
                 return;
             }
 
             if ($this->handleDryRun($passName, $analysis, $dryRun)) {
                 Log::info("AnalysisPassService: Dry run handled for pass '{$passName}'. Exiting processPass.");
+
                 return;
             }
 
@@ -129,6 +133,7 @@ class AnalysisPassService
     {
         if ($dryRun) {
             Log::info("[DRY-RUN] => would run pass [{$passName}] for [{$analysis->file_path}].");
+
             return true;
         }
 
@@ -157,7 +162,7 @@ class AnalysisPassService
                 'temperature' => $passConfig['temperature'] ?? 0.5,
             ]
         );
-        Log::debug("AnalysisPassService: AI operation response for pass '{$passName}': " . json_encode($responseData));
+        Log::debug("AnalysisPassService: AI operation response for pass '{$passName}': ".json_encode($responseData));
 
         return [
             'prompt' => $prompt,
@@ -170,12 +175,12 @@ class AnalysisPassService
      */
     private function extractUsageMetrics(): array
     {
-        Log::debug("AnalysisPassService: Extracting usage metrics.");
+        Log::debug('AnalysisPassService: Extracting usage metrics.');
         $usage = $this->openAIService->getLastUsage();
         $metadata = [];
 
         if (! empty($usage)) {
-            Log::debug("AnalysisPassService: Usage metrics found: " . json_encode($usage));
+            Log::debug('AnalysisPassService: Usage metrics found: '.json_encode($usage));
             $metadata['usage'] = $usage;
             // Compute cost
             $COST_PER_1K_TOKENS = env('OPENAI_COST_PER_1K_TOKENS', 0.002); // e.g., $0.002 per 1k tokens
@@ -183,7 +188,7 @@ class AnalysisPassService
             $metadata['cost_estimate_usd'] = round(($totalTokens / 1000) * $COST_PER_1K_TOKENS, 6);
             Log::debug("AnalysisPassService: Cost estimate based on tokens: {$metadata['cost_estimate_usd']} USD.");
         } else {
-            Log::warning("AnalysisPassService: No usage metrics found.");
+            Log::warning('AnalysisPassService: No usage metrics found.');
         }
 
         return $metadata;
@@ -217,9 +222,9 @@ class AnalysisPassService
     {
         Log::debug("AnalysisPassService: Handling scoring pass. Pass name: '{$passName}'.");
         if ($passName === 'scoring_pass') {
-            Log::info("AnalysisPassService: Scoring pass detected. Computing and storing scores.");
+            Log::info('AnalysisPassService: Scoring pass detected. Computing and storing scores.');
             $this->codeAnalysisService->computeAndStoreScores($analysis);
-            Log::info("AnalysisPassService: Scoring and storing of scores completed.");
+            Log::info('AnalysisPassService: Scoring and storing of scores completed.');
         }
     }
 
