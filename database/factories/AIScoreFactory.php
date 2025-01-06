@@ -16,7 +16,7 @@ class AIScoreFactory extends Factory
             'code_analysis_id' => CodeAnalysis::factory(),
             'operation' => $this->faker->randomElement(['complexity', 'readability', 'security']),
             'score' => $this->faker->randomFloat(2, 0, 100),
-            'summary' => $this->faker->sentence(), // Added summary field
+            'summary' => $this->faker->sentence(), // not nullable
         ];
     }
 
@@ -27,7 +27,6 @@ class AIScoreFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'score' => $this->faker->randomFloat(2, 80, 100),
-            'summary' => $this->faker->sentence(), // Ensure summary is set
         ]);
     }
 
@@ -38,7 +37,6 @@ class AIScoreFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'score' => $this->faker->randomFloat(2, 50, 79),
-            'summary' => $this->faker->sentence(), // Ensure summary is set
         ]);
     }
 
@@ -49,7 +47,6 @@ class AIScoreFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'score' => $this->faker->randomFloat(2, 0, 49),
-            'summary' => $this->faker->sentence(), // Ensure summary is set
         ]);
     }
 }
