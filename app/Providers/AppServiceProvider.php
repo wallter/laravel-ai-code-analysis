@@ -19,14 +19,21 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(ParserService::class, fn(Application $app): ParserService => new ParserService);
+        $this->app->singleton(ParserService::class, function (Application $app): ParserService {
+            return new ParserService($app->make(ParsedItemService::class));
+        });
 
-        $this->app->singleton(OpenAIService::class, fn(Application $app): OpenAIService => new OpenAIService);
+        $this->app->singleton(OpenAIService::class, function (Application $app): OpenAIService {
+            return new OpenAIService();
+        });
 
-        $this->app->singleton(CodeAnalysisService::class, fn(Application $app): CodeAnalysisService => new CodeAnalysisService(
-            $app->make(OpenAIService::class),
-            $app->make(ParserService::class)
-        ));
+        $this->app->singleton(CodeAnalysisService::class, function (Application $app): CodeAnalysisService {
+            return new CodeAnalysisService(
+                $app->make(OpenAIService::class),
+                $app->make(ParserService::class)
+            );
+        });
+
         $this->app->singleton(\App\Services\AnalysisPassService::class, function ($app) {
             return new \App\Services\AnalysisPassService(
                 $app->make(\App\Services\AI\OpenAIService::class),
@@ -39,13 +46,16 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(AiderUpgradeCommand::class, function ($app) {
             return new AiderUpgradeCommand();
         });
+
         $this->app->singleton(AiderService::class, function ($app) {
             return new AiderService();
         });
+
         // Bind the interface to the implementation
         $this->app->singleton(AiderServiceInterface::class, function ($app) {
             return new AiderService();
         });
+
         // Bind ParsedItemService
         $this->app->singleton(ParsedItemService::class, function ($app) {
             return new ParsedItemService();
