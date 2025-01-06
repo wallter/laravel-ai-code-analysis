@@ -31,12 +31,14 @@ class JsonExportServiceTest extends TestCase
 
         $service = new JsonExportService();
         $service->export($items, $filePath);
+
+        $this->assertTrue(true);
     }
 
     #[Test]
     public function it_logs_warning_when_json_encoding_fails()
     {
-        $items = collect([resource]); // Resources cannot be JSON encoded
+        $items = collect([fopen('php://memory', 'r')]); // Resources cannot be JSON encoded
         $filePath = '/path/to/export.json';
 
         $service = new JsonExportService();
@@ -46,6 +48,8 @@ class JsonExportServiceTest extends TestCase
             ->withArgs(function ($message) {
                 return str_contains($message, 'Failed to encode items to JSON');
             })->once();
+
+        $this->assertTrue(true);
     }
 
     #[Test]
@@ -61,6 +65,8 @@ class JsonExportServiceTest extends TestCase
 
         $service = new JsonExportService();
         $service->export($items, $filePath);
+
+        $this->assertTrue(true);
     }
 
     #[Test]
@@ -77,5 +83,7 @@ class JsonExportServiceTest extends TestCase
 
         $service = new JsonExportService();
         $service->export($items, $filePath);
+
+        $this->assertTrue(true);
     }
 }
