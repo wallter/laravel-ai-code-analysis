@@ -26,6 +26,14 @@ class AppServiceProvider extends ServiceProvider
             $app->make(OpenAIService::class),
             $app->make(ParserService::class)
         ));
+        $this->app->singleton(\App\Services\AnalysisPassService::class, function ($app) {
+            return new \App\Services\AnalysisPassService(
+                $app->make(\App\Services\AI\OpenAIService::class),
+                $app->make(\App\Services\AI\CodeAnalysisService::class),
+                $app->make(\App\Services\AI\AiderServiceInterface::class)
+            );
+        });
+
         // Register AiderUpgradeCommand
         $this->app->singleton(AiderUpgradeCommand::class, function ($app) {
             return new AiderUpgradeCommand();
