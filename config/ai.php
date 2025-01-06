@@ -38,6 +38,7 @@ return [
         'temperature' => env('AI_DEFAULT_TEMPERATURE', 0.5),
         // System message guides the AI's overall role or tone.
         'system_message' => 'You are a helpful AI assistant.',
+        ],
     ],
 
     /*
@@ -205,7 +206,8 @@ return [
     | -> 'style_convention' -> 'consolidation_pass' -> 'scoring_pass'.
     | This is where you can add or remove steps in the analysis pipeline.
     */
-    'multi_pass_analysis' => [
+    'operations' => [
+        'multi_pass_analysis' => [
         'pass_order' => [
             'doc_generation',
             'functional_analysis',
