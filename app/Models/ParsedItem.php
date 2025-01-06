@@ -41,43 +41,46 @@ class ParsedItem extends Model
      * @var array<string, mixed>
      */
     protected $attributes = [
-        'type'                 => 'Unknown',
-        'name'                 => 'Unnamed',
-        'file_path'            => 'Unknown',
-        'line_number'          => 0,
-        'annotations'          => '[]',
-        'attributes'           => '[]',
-        'details'              => '[]',
-        'class_name'           => null,
-        'namespace'            => null,
-        'visibility'           => 'public',
-        'is_static'            => false,
+        'type' => 'Unknown',
+        'name' => 'Unnamed',
+        'file_path' => 'Unknown',
+        'line_number' => 0,
+        'annotations' => '[]',
+        'attributes' => '[]',
+        'details' => '[]',
+        'class_name' => null,
+        'namespace' => null,
+        'visibility' => 'public',
+        'is_static' => false,
         'fully_qualified_name' => null,
-        'operation_summary'    => null,
-        'called_methods'       => '[]',
-        'ast'                  => '[]',
+        'operation_summary' => null,
+        'called_methods' => '[]',
+        'ast' => '[]',
     ];
 
     /**
      * The attributes that should be cast to native types.
      *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'type'                  => 'string',
-        'name'                  => 'string',
-        'file_path'             => 'string',
-        'line_number'           => 'integer',
-        'annotations'           => 'array',
-        'attributes'            => 'array',
-        'details'               => 'array',
-        'class_name'            => 'string',
-        'namespace'             => 'string',
-        'visibility'            => 'string',
-        'is_static'             => 'boolean',
-        'fully_qualified_name'  => 'string',
-        'operation_summary'     => 'string',
-        'called_methods'        => 'array',
-        'ast'                   => 'array',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'type' => 'string',
+            'name' => 'string',
+            'file_path' => 'string',
+            'line_number' => 'integer',
+            'annotations' => 'array',
+            'attributes' => 'array',
+            'details' => 'array',
+            'class_name' => 'string',
+            'namespace' => 'string',
+            'visibility' => 'string',
+            'is_static' => 'boolean',
+            'fully_qualified_name' => 'string',
+            'operation_summary' => 'string',
+            'called_methods' => 'array',
+            'ast' => 'array',
+        ];
+    }
 }

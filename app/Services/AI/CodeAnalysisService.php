@@ -8,7 +8,6 @@ use App\Enums\OperationIdentifier;
 use App\Jobs\ProcessAnalysisPassJob;
 use App\Models\CodeAnalysis;
 use App\Services\Parsing\ParserService;
-use App\Services\AiPromptBuilder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -24,8 +23,8 @@ class CodeAnalysisService
     /**
      * Constructor to inject necessary services.
      *
-     * @param OpenAIService  $openAIService  Handles interactions with OpenAI API.
-     * @param ParserService  $parserService  Handles PHP file parsing.
+     * @param  OpenAIService  $openAIService  Handles interactions with OpenAI API.
+     * @param  ParserService  $parserService  Handles PHP file parsing.
      */
     public function __construct(
         protected OpenAIService $openAIService,
@@ -35,9 +34,8 @@ class CodeAnalysisService
     /**
      * Analyze a PHP file by parsing it and creating/updating the CodeAnalysis record.
      *
-     * @param string $filePath The path to the PHP file.
-     * @param bool   $reparse  Whether to force re-parsing the file.
-     *
+     * @param  string  $filePath  The path to the PHP file.
+     * @param  bool  $reparse  Whether to force re-parsing the file.
      * @return CodeAnalysis The CodeAnalysis model instance.
      */
     public function analyzeFile(string $filePath, bool $reparse = false): CodeAnalysis
@@ -70,9 +68,8 @@ class CodeAnalysisService
     /**
      * Summarize AST by scanning it with UnifiedAstVisitor.
      *
-     * @param string $filePath The path to the PHP file.
-     * @param array  $ast      The abstract syntax tree of the file.
-     *
+     * @param  string  $filePath  The path to the PHP file.
+     * @param  array  $ast  The abstract syntax tree of the file.
      * @return array The summary of the AST.
      */
     protected function buildAstSummary(string $filePath, array $ast): array
@@ -80,12 +77,12 @@ class CodeAnalysisService
         Log::debug("CodeAnalysisService: Building AST summary for [{$filePath}].");
 
         // Initialize UnifiedAstVisitor
-        $visitor = new UnifiedAstVisitor();
+        $visitor = new UnifiedAstVisitor;
         $visitor->setCurrentFile($filePath);
 
         // Traverse AST with UnifiedAstVisitor
-        $traverser = new NodeTraverser();
-        $traverser->addVisitor(new NameResolver());
+        $traverser = new NodeTraverser;
+        $traverser->addVisitor(new NameResolver);
         $traverser->addVisitor($visitor);
         $traverser->traverse($ast);
 
@@ -97,17 +94,16 @@ class CodeAnalysisService
         $functions = array_filter($parsedItems, fn ($item) => $item['type'] === ParsedItemType::FUNCTION_TYPE->value);
 
         return [
-            'class_count'    => count($classes),
+            'class_count' => count($classes),
             'function_count' => count($functions),
-            'items'          => array_values($parsedItems),
+            'items' => array_values($parsedItems),
         ];
     }
 
     /**
      * Collect all PHP files within a specified directory.
      *
-     * @param string $directory The directory to search within.
-     *
+     * @param  string  $directory  The directory to search within.
      * @return Collection<string> A collection of PHP file paths.
      */
     public function collectPhpFiles(string $directory = 'app'): Collection
@@ -119,8 +115,8 @@ class CodeAnalysisService
             Log::info("CodeAnalysisService: Found [{$files->count()}] PHP file(s) in [{$directory}].");
 
             return $files;
-        } catch (Throwable $exception) {
-            Log::error("CodeAnalysisService: Failed to collect PHP files from [{$directory}]. Error: {$exception->getMessage()}");
+        } catch (Throwable $throwable) {
+            Log::error("CodeAnalysisService: Failed to collect PHP files from [{$directory}]. Error: {$throwable->getMessage()}");
 
             return collect();
         }
@@ -129,10 +125,8 @@ class CodeAnalysisService
     /**
      * Queue AI passes for the given CodeAnalysis instance.
      *
-     * @param CodeAnalysis $analysis The CodeAnalysis instance.
-     * @param bool         $dryRun  Whether to perform a dry run without saving results.
-     *
-     * @return void
+     * @param  CodeAnalysis  $analysis  The CodeAnalysis instance.
+     * @param  bool  $dryRun  Whether to perform a dry run without saving results.
      */
     public function runAnalysis(CodeAnalysis $analysis, bool $dryRun = false): void
     {
@@ -144,11 +138,12 @@ class CodeAnalysisService
         $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
 
         foreach ($passOrder as $passName) {
-            if (!in_array($passName, $completedPasses, true)) {
+            if (! in_array($passName, $completedPasses, true)) {
                 $operationIdentifier = OperationIdentifier::tryFrom($passName);
 
-                if (!$operationIdentifier) {
+                if (! $operationIdentifier) {
                     Log::error("CodeAnalysisService: Invalid pass name '{$passName}'. Cannot dispatch ProcessAnalysisPassJob.");
+
                     continue; // Skip this pass and continue with others
                 }
 
@@ -165,9 +160,7 @@ class CodeAnalysisService
     /**
      * Compute and store scores based on AI analysis results.
      *
-     * @param CodeAnalysis $analysis The CodeAnalysis instance.
-     *
-     * @return void
+     * @param  CodeAnalysis  $analysis  The CodeAnalysis instance.
      */
     public function computeAndStoreScores(CodeAnalysis $analysis): void
     {
@@ -176,8 +169,9 @@ class CodeAnalysisService
             ->latest()
             ->first();
 
-        if (!$latestScoringResult) {
+        if (! $latestScoringResult) {
             Log::warning("CodeAnalysisService: No scoring_pass result found for CodeAnalysis ID {$analysis->id}.");
+
             return;
         }
 
@@ -187,13 +181,15 @@ class CodeAnalysisService
             $scoresData = json_decode($responseData, true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $jsonException) {
             Log::error("CodeAnalysisService: JSON decode error for CodeAnalysis ID {$analysis->id}: {$jsonException->getMessage()}");
+
             return;
         }
 
         $requiredFields = ['documentation_score', 'functionality_score', 'style_score', 'overall_score', 'summary'];
         foreach ($requiredFields as $field) {
-            if (!array_key_exists($field, $scoresData)) {
+            if (! array_key_exists($field, $scoresData)) {
                 Log::error("CodeAnalysisService: Missing '{$field}' in AI response for CodeAnalysis ID {$analysis->id}.");
+
                 return;
             }
         }
@@ -201,31 +197,31 @@ class CodeAnalysisService
         $aiScores = [
             [
                 'code_analysis_id' => $analysis->id,
-                'operation'       => 'documentation',
-                'score'           => (float) $scoresData['documentation_score'],
-                'created_at'      => now(),
-                'updated_at'      => now(),
+                'operation' => 'documentation',
+                'score' => (float) $scoresData['documentation_score'],
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'code_analysis_id' => $analysis->id,
-                'operation'       => 'functionality',
-                'score'           => (float) $scoresData['functionality_score'],
-                'created_at'      => now(),
-                'updated_at'      => now(),
+                'operation' => 'functionality',
+                'score' => (float) $scoresData['functionality_score'],
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'code_analysis_id' => $analysis->id,
-                'operation'       => 'style',
-                'score'           => (float) $scoresData['style_score'],
-                'created_at'      => now(),
-                'updated_at'      => now(),
+                'operation' => 'style',
+                'score' => (float) $scoresData['style_score'],
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'code_analysis_id' => $analysis->id,
-                'operation'       => 'overall',
-                'score'           => (float) $scoresData['overall_score'],
-                'created_at'      => now(),
-                'updated_at'      => now(),
+                'operation' => 'overall',
+                'score' => (float) $scoresData['overall_score'],
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
         ];
 
@@ -237,10 +233,8 @@ class CodeAnalysisService
     /**
      * Handle the scoring pass.
      *
-     * @param CodeAnalysis $analysis The CodeAnalysis instance.
-     * @param string       $passName The name of the completed pass.
-     *
-     * @return void
+     * @param  CodeAnalysis  $analysis  The CodeAnalysis instance.
+     * @param  string  $passName  The name of the completed pass.
      */
     protected function handleScoringPass(CodeAnalysis $analysis, string $passName): void
     {
@@ -249,8 +243,9 @@ class CodeAnalysisService
         $scoringPassName = OperationIdentifier::SCORING_PASS->value;
         $scoringPassConfig = $this->getPassConfig($scoringPassName);
 
-        if (!$scoringPassConfig) {
+        if (! $scoringPassConfig) {
             Log::warning("CodeAnalysisService: No configuration found for scoring pass '{$scoringPassName}'. Skipping scoring.");
+
             return;
         }
 
@@ -263,8 +258,7 @@ class CodeAnalysisService
     /**
      * Retrieve previous analysis results.
      *
-     * @param CodeAnalysis $analysis The CodeAnalysis instance.
-     *
+     * @param  CodeAnalysis  $analysis  The CodeAnalysis instance.
      * @return string Consolidated previous analysis results.
      */
     protected function getPreviousResults(CodeAnalysis $analysis): string
@@ -279,8 +273,7 @@ class CodeAnalysisService
     /**
      * Retrieve the configuration for the specified pass.
      *
-     * @param string $passName The name of the pass.
-     *
+     * @param  string  $passName  The name of the pass.
      * @return array|null The pass configuration or null if not found.
      */
     private function getPassConfig(string $passName): ?array
@@ -290,7 +283,7 @@ class CodeAnalysisService
         $passConfigs = config('ai.passes', []);
         $cfg = $passConfigs[$passName] ?? null;
 
-        if (!$cfg) {
+        if (! $cfg) {
             Log::warning("CodeAnalysisService: No config found for pass [{$passName}]. Skipping.");
         }
 

@@ -18,16 +18,11 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
 
     /**
      * The current file being parsed.
-     *
-     * @var string|null
      */
     protected ?string $currentFile = null;
 
     /**
      * Set the current file being parsed.
-     *
-     * @param string $filePath
-     * @return void
      */
     public function setCurrentFile(string $filePath): void
     {
@@ -37,7 +32,6 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
     /**
      * Enter node callback.
      *
-     * @param Node $node
      * @return null|int|Node|Node[]|void
      */
     public function enterNode(Node $node)
@@ -59,11 +53,11 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
             $fullyQualifiedName = $this->getFullyQualifiedName($node);
 
             $this->parsedItems[] = [
-                'type'                  => $type->value,
-                'name'                  => $node->name->toString(),
-                'fully_qualified_name'  => $fullyQualifiedName,
-                'file_path'             => $this->currentFile,
-                'line_number'           => $node->getStartLine() ?? 0,
+                'type' => $type->value,
+                'name' => $node->name->toString(),
+                'fully_qualified_name' => $fullyQualifiedName,
+                'file_path' => $this->currentFile,
+                'line_number' => $node->getStartLine() ?? 0,
                 // Additional fields can be added here
             ];
         }
@@ -73,11 +67,11 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
             $fullyQualifiedName = $this->getFullyQualifiedName($node);
 
             $this->parsedItems[] = [
-                'type'                  => ParsedItemType::FUNCTION_TYPE->value,
-                'name'                  => $node->name->toString(),
-                'fully_qualified_name'  => $fullyQualifiedName,
-                'file_path'             => $this->currentFile,
-                'line_number'           => $node->getStartLine() ?? 0,
+                'type' => ParsedItemType::FUNCTION_TYPE->value,
+                'name' => $node->name->toString(),
+                'fully_qualified_name' => $fullyQualifiedName,
+                'file_path' => $this->currentFile,
+                'line_number' => $node->getStartLine() ?? 0,
                 // Additional fields can be added here
             ];
         }
@@ -85,9 +79,6 @@ class UnifiedAstVisitor extends NodeVisitorAbstract
 
     /**
      * Get the fully qualified name of a node.
-     *
-     * @param Node $node
-     * @return string|null
      */
     protected function getFullyQualifiedName(Node $node): ?string
     {

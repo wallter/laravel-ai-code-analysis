@@ -2,16 +2,14 @@
 
 namespace App\Services\Parsing;
 
-use App\Enums\ParsedItemType;
 use App\Models\CodeAnalysis;
-use App\Services\Parsing\UnifiedAstVisitor;
 use App\Services\ParsedItemService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
-use PhpParser\ParserFactory;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
+use PhpParser\ParserFactory;
 use Throwable;
 
 /**
@@ -22,7 +20,7 @@ class ParserService
     /**
      * Initialize the ParserService with necessary dependencies.
      *
-     * @param ParsedItemService $parsedItemService The service handling ParsedItem creation.
+     * @param  ParsedItemService  $parsedItemService  The service handling ParsedItem creation.
      */
     public function __construct(protected ParsedItemService $parsedItemService) {}
 
@@ -33,7 +31,7 @@ class ParserService
      */
     public function collectPhpFiles(string $directory = 'app'): Collection
     {
-        Log::info("ParserService: Collecting .php files from configuration.");
+        Log::info('ParserService: Collecting .php files from configuration.');
 
         $files = config('parsing.files', []);
         $folders = config('parsing.folders', []);
@@ -56,8 +54,8 @@ class ParserService
      * Parse a single PHP file with UnifiedAstVisitor, and return the raw AST array.
      * If $useCache is true, checks code_analyses table first.
      *
-     * @param string $filePath The path to the PHP file.
-     * @param bool $useCache Whether to use cached AST from the database.
+     * @param  string  $filePath  The path to the PHP file.
+     * @param  bool  $useCache  Whether to use cached AST from the database.
      * @return array The parsed AST.
      */
     public function parseFile(string $filePath, bool $useCache = false): array
@@ -67,8 +65,9 @@ class ParserService
 
         if ($useCache) {
             $cached = CodeAnalysis::where('file_path', $realPath)->first();
-            if ($cached && !empty($cached->ast)) {
+            if ($cached && ! empty($cached->ast)) {
                 Log::info("ParserService: Found cached AST for [{$realPath}].");
+
                 return $cached->ast;
             }
         }
@@ -78,6 +77,7 @@ class ParserService
             $code = File::get($realPath);
         } catch (Throwable $throwable) {
             Log::error("ParserService: Failed to read [{$realPath}]: {$throwable->getMessage()}");
+
             return [];
         }
 
@@ -86,22 +86,24 @@ class ParserService
         $ast = [];
         try {
             $ast = $parser->parse($code);
-            if (!$ast) {
+            if (! $ast) {
                 Log::warning("ParserService: AST is null for [{$realPath}].");
+
                 return [];
             }
         } catch (Throwable $throwable) {
             Log::error("ParserService: Parse error [{$realPath}]: {$throwable->getMessage()}");
+
             return [];
         }
 
         // Initialize UnifiedAstVisitor
-        $visitor = new UnifiedAstVisitor();
+        $visitor = new UnifiedAstVisitor;
         $visitor->setCurrentFile($realPath);
 
         // Traverse AST with UnifiedAstVisitor
-        $traverser = new NodeTraverser();
-        $traverser->addVisitor(new NameResolver());
+        $traverser = new NodeTraverser;
+        $traverser->addVisitor(new NameResolver);
         $traverser->addVisitor($visitor);
         $traverser->traverse($ast);
 
@@ -127,14 +129,15 @@ class ParserService
     /**
      * Recursively get .php files from a directory.
      *
-     * @param string $directory The directory path to search.
+     * @param  string  $directory  The directory path to search.
      * @return Collection<string> A collection of PHP file paths.
      */
     protected function getPhpFiles(string $directory): Collection
     {
         $realDir = realpath($directory);
-        if (!$realDir || !is_dir($realDir)) {
+        if (! $realDir || ! is_dir($realDir)) {
             Log::warning("ParserService.getPhpFiles: Folder not found or invalid => [{$directory}].");
+
             return collect();
         }
 
@@ -149,7 +152,7 @@ class ParserService
             }
         }
 
-        Log::info("ParserService.getPhpFiles => [{$realDir}] => found [" . count($phpFiles) . '] .php files.');
+        Log::info("ParserService.getPhpFiles => [{$realDir}] => found [".count($phpFiles).'] .php files.');
 
         return collect($phpFiles);
     }
@@ -157,9 +160,8 @@ class ParserService
     /**
      * Extract classes, traits, interfaces, and functions from parsed items and store them.
      *
-     * @param array<int, array<string, mixed>> $parsedItems The parsed items from AST.
-     * @param string $filePath The path to the PHP file.
-     * @return void
+     * @param  array<int, array<string, mixed>>  $parsedItems  The parsed items from AST.
+     * @param  string  $filePath  The path to the PHP file.
      */
     protected function extractAndStoreParsedItems(array $parsedItems, string $filePath): void
     {
@@ -178,6 +180,6 @@ class ParserService
             ]);
         }
 
-        Log::info("ParserService: Stored " . count($parsedItems) . " parsed items for [{$filePath}].");
+        Log::info('ParserService: Stored '.count($parsedItems)." parsed items for [{$filePath}].");
     }
 }

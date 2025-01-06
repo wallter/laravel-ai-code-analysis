@@ -16,20 +16,12 @@ use Illuminate\Validation\ValidationException;
 class ParsedItemService
 {
     /**
-     * The ParsedItem model instance.
-     *
-     * @var ParsedItem
-     */
-    protected ParsedItem $parsedItem;
-
-    /**
      * Constructor to inject the ParsedItem model.
      *
-     * @param ParsedItem $parsedItem The ParsedItem model instance.
+     * @param  ParsedItem  $parsedItem  The ParsedItem model instance.
      */
-    public function __construct(ParsedItem $parsedItem)
+    public function __construct(protected ParsedItem $parsedItem)
     {
-        $this->parsedItem = $parsedItem;
     }
 
     /**
@@ -49,8 +41,8 @@ class ParsedItemService
             // Create or update the ParsedItem
             $parsedItem = $this->parsedItem->updateOrCreate(
                 [
-                    'type'      => $data['type'],
-                    'name'      => $data['name'],
+                    'type' => $data['type'],
+                    'name' => $data['name'],
                     'file_path' => $data['file_path'],
                 ],
                 $data
@@ -58,16 +50,16 @@ class ParsedItemService
 
             Log::info('ParsedItemService: ParsedItem created or updated successfully.', [
                 'parsed_item_id' => $parsedItem->id,
-                'type'            => $parsedItem->type,
-                'name'            => $parsedItem->name,
-                'file_path'       => $parsedItem->file_path,
+                'type' => $parsedItem->type,
+                'name' => $parsedItem->name,
+                'file_path' => $parsedItem->file_path,
             ]);
 
             return $parsedItem;
         } catch (\Exception $exception) {
             Log::error('ParsedItemService: Failed to create or update ParsedItem.', [
                 'error' => $exception->getMessage(),
-                'data'  => $data,
+                'data' => $data,
             ]);
 
             return null;
@@ -79,29 +71,27 @@ class ParsedItemService
      *
      * @param  array<string, mixed>  $data  The data to validate.
      *
-     * @return void
-     *
      * @throws ValidationException If validation fails.
      */
     protected function validateData(array $data): void
     {
         // Define validation rules
         $rules = [
-            'type'                 => ['required', 'string', 'in:' . implode(',', ParsedItemType::values())],
-            'name'                 => ['required', 'string'],
-            'file_path'            => ['required', 'string'],
-            'line_number'          => ['nullable', 'integer', 'min:0'],
-            'annotations'          => ['nullable', 'array'],
-            'attributes'           => ['nullable', 'array'],
-            'details'              => ['nullable', 'array'],
-            'class_name'           => ['nullable', 'string'],
-            'namespace'            => ['nullable', 'string'],
-            'visibility'           => ['nullable', 'string', 'in:public,protected,private'],
-            'is_static'            => ['nullable', 'boolean'],
+            'type' => ['required', 'string', 'in:'.implode(',', ParsedItemType::values())],
+            'name' => ['required', 'string'],
+            'file_path' => ['required', 'string'],
+            'line_number' => ['nullable', 'integer', 'min:0'],
+            'annotations' => ['nullable', 'array'],
+            'attributes' => ['nullable', 'array'],
+            'details' => ['nullable', 'array'],
+            'class_name' => ['nullable', 'string'],
+            'namespace' => ['nullable', 'string'],
+            'visibility' => ['nullable', 'string', 'in:public,protected,private'],
+            'is_static' => ['nullable', 'boolean'],
             'fully_qualified_name' => ['nullable', 'string'],
-            'operation_summary'    => ['nullable', 'string'],
-            'called_methods'       => ['nullable', 'array'],
-            'ast'                  => ['nullable', 'array'],
+            'operation_summary' => ['nullable', 'string'],
+            'called_methods' => ['nullable', 'array'],
+            'ast' => ['nullable', 'array'],
         ];
 
         // Perform validation
@@ -111,7 +101,7 @@ class ParsedItemService
         if ($validator->fails()) {
             Log::warning('ParsedItemService: Validation failed while creating ParsedItem.', [
                 'errors' => $validator->errors()->toArray(),
-                'data'   => $data,
+                'data' => $data,
             ]);
 
             throw new ValidationException($validator);
