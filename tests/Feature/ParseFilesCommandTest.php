@@ -12,7 +12,9 @@ use Tests\TestCase;
 class ParseFilesCommandTest extends TestCase
 {
     use RefreshDatabase;
-use Illuminate\Support\Facades\File;
+    }
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Artisan;
 
 #[Test]
 public function parse_files_command_stores_data_in_parsed_items_table()
