@@ -25,10 +25,6 @@ echo "🔍 Running analyze:files..."
 php artisan analyze:files --output-file=docs/analyze_all.json
 echo "✅ analyze:files completed."
 
-echo "⚙️ Running passes:process..."
-php artisan passes:process
-echo "✅ passes:process completed."
-
 echo "📊 Displaying Pending queued jobs ..."
 php artisan queue:list
 echo "✅ Pending queued jobs displayed."

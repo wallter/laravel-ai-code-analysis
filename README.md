@@ -72,11 +72,11 @@ php artisan parse:files
 # 5) Analyze code, queue AI passes:
 php artisan analyze:files
 
-# 6) Process additional passes if needed:
-php artisan passes:process
-
-# 7) Run the custom command (with a progressbar) to process the async jobs
+# 6) Run the custom command (with a progressbar) to process the async jobs
 php artisan queue:progress
+
+# Or just run a queue worker
+
 # php artisan queue:work
 ```
 - Check console output
@@ -113,7 +113,6 @@ The server will start at [http://localhost:8000](http://localhost:8000) by defau
 ### Artisan Commands
   - **`parse:files`:** Parses configured files/directories to list discovered classes and functions.
   - **`code:analyze`:** Analyzes PHP files, gathers AST data, and applies AI-driven multi-pass analysis.
-  - **`passes:process`:** Processes AI analysis passes with options for dry-run and verbosity.
     
     - (experimental) **`generate:tests`:** Generates PHPUnit test skeletons for discovered classes and methods.
     - Database utilities:
@@ -369,23 +368,14 @@ Parsing configuration is set up in `config/parsing.php`. This configuration dete
      - Creates or updates a CodeAnalysis record for each file.
      - Queues AI passes if using the new asynchronous approach.
 
-3. **Process Passes**
-
-   ```bash
-   php artisan passes:process
-   ```
-   - **Description:** 
-     - Finds any CodeAnalysis needing further passes and dispatches them to the queue.
-     - Use `--dry-run` to test logic without storing AI results, `--verbose` for extra logs.
-
-4. **Generate Tests (experimental)**
+3. **Generate Tests (experimental)**
 
    ```bash
    php artisan generate:tests
    ```
    - **Description:** Creates or updates test files for discovered classes & methods (in progress).
 
-5. **DB Backup / Restore**
+4. **DB Backup / Restore**
 
    ```bash
    php artisan db:backup
@@ -468,10 +458,6 @@ Would you like to flush prior queued jobs? (Y/N) [Y]: n
 [32mWrote analysis to [docs/analyze_all.json].[39m
 [32mDone! Processed [22] file(s).[39m
 ✅ analyze:files completed.
-⚙️ Running passes:process...
-[32mFound [4] passes in pass_order: doc_generation, functional_analysis, style_convention, consolidation_pass[39m
-[32mNo pending passes to process.[39m
-✅ passes:process completed.
 🚀 Processing the jobs in async...
 [32mNo jobs in the queue.[39m
 ✅ Jobs processed.
