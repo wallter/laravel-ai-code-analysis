@@ -59,7 +59,7 @@ class CodeAnalysis extends Model
      * @param  string  $value
      * @return string
      */
-    public function getFilePathAttribute(string $value): string
+    public function getFilePathAttribute($value): string
     {
         $basePath = Config::get('filesystems.base_path');
         return realpath($basePath . DIRECTORY_SEPARATOR . $value) ?: $basePath . DIRECTORY_SEPARATOR . $value;
@@ -74,7 +74,7 @@ class CodeAnalysis extends Model
     public function setFilePathAttribute(string $value): void
     {
         $basePath = Config::get('filesystems.base_path');
-        if (str_st_starts_with($value, $basePath)) {
+        if (str_starts_with($value, $basePath)) {
             $relativePath = ltrim(str_replace($basePath, '', $value), DIRECTORY_SEPARATOR);
             $this->attributes['file_path'] = $relativePath;
         } else {
