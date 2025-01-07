@@ -26,6 +26,52 @@ class CodeAnalysis extends Model
         'completed_passes',
     ];
 
+    protected $casts = [
+        'file_path' => 'string',
+        'relative_file_path' => 'string',
+        'ast' => 'array',
+        'analysis' => 'array',
+        'ai_output' => 'array',
+        'completed_passes' => 'array',
+    ];
+    
+    /**
+     * Accessor to get the absolute file path.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public function getFilePathAttribute($value): string
+    {
+        $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
+        $absolutePath = realpath($basePath . DIRECTORY_SEPARATOR . $value);
+        return $absolutePath ?: $value;
+    }
+
+    /**
+     * Mutator to set the file path.
+     *
+     * @param  string  $value
+     * @return void
+     */
+    public function setFilePathAttribute(string $value): void
+    {
+        $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
+
+        // Ensure both paths use forward slashes
+        $value = str_replace(['\\'], '/', $value);
+        $basePath = str_replace(['\\'], '/', $basePath);
+
+        if (Str::startsWith($value, $basePath)) {
+            $relativePath = Str::replaceFirst($basePath . '/', '', $value);
+            $this->attributes['file_path'] = $relativePath;
+            Log::debug("CodeAnalysis Model: Set 'file_path' to relative path '{$relativePath}'.");
+        } else {
+            $this->attributes['file_path'] = $value;
+            Log::warning("CodeAnalysis Model: The file path '{$value}' does not start with base path '{$basePath}'. Stored as is.");
+        }
+    }
+
     /**
      * Get the AI results associated with this code analysis.
      *
@@ -44,43 +90,5 @@ class CodeAnalysis extends Model
     public function aiScores()
     {
         return $this->hasMany(AIScore::class);
-    }
-
-    protected $casts = [
-        'file_path' => 'string',
-        'relative_file_path' => 'string',
-        'ast' => 'array',
-        'analysis' => 'array',
-        'ai_output' => 'array',
-        'completed_passes' => 'array',
-    ];
-    
-    /**
-     * Accessor to get the absolute file path.
-     *
-     * @param  string  $value
-     * @return string
-     */
-    public function getFilePathAttribute($value): string
-    {
-        $basePath = Config::get('filesystems.base_path');
-        return realpath($basePath . DIRECTORY_SEPARATOR . $value) ?: $value;
-    }
-
-    /**
-     * Mutator to set the file path.
-     *
-     * @param  string  $value
-     * @return void
-     */
-    public function setFilePathAttribute(string $value): void
-    {
-        $basePath = Config::get('filesystems.base_path');
-        if (Str::startsWith($value, $basePath)) {
-            $relativePath = Str::after($value, rtrim($basePath, '/') . '/');
-            $this->attributes['file_path'] = $relativePath;
-        } else {
-            $this->attributes['file_path'] = $value;
-        }
     }
 }
