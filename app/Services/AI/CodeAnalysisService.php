@@ -65,10 +65,9 @@ class CodeAnalysisService
                 $analysis->analysis = $this->buildAstSummary($relativePath, $ast);
                 $analysis->save();
                 Log::info("CodeAnalysisService: AST and summary updated for [{$relativePath}].");
-            } catch (Throwable $e) {
-                Log::error("CodeAnalysisService: Failed to parse file [{$relativePath}]. Error: {$e->getMessage()}");
-                // Depending on requirements, you might want to rethrow or handle differently
-            }
+        } catch (Throwable $e) {
+            Log::error("CodeAnalysisService: Failed to parse file [{$relativePath}]. Error: {$e->getMessage()}");
+            // Depending on requirements, you might want to rethrow or handle differently
         }
 
         return $analysis;
