@@ -105,7 +105,10 @@
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
           @foreach ($analyses as $analysis)
-            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <tr 
+              class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+              onclick="window.location='{{ route('analysis.show', $analysis->id) }}'"
+            >
               <td class="px-4 py-2 text-gray-800 dark:text-gray-100 w-1/3 break-all">
                 {{ $analysis->relative_file_path }}
               </td>
@@ -120,6 +123,9 @@
                 @endif
               </td>
               <td class="px-4 py-2 text-center w-1/6">
+                <x-button href="{{ route('analysis.show', $analysis->id) }}" class="bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500">
+                    Details
+                </x-button>
                 <x-button href="{{ route('analysis.edit', $analysis->id) }}" class="border-yellow-600 text-yellow-600 hover:bg-yellow-100 focus:ring-yellow-500">
                     Edit
                 </x-button>
