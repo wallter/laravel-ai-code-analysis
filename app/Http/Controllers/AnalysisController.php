@@ -20,7 +20,7 @@ class AnalysisController extends Controller
     public function __construct(protected CodeAnalysisService $codeAnalysisService)
     {
         // No auth or middleware needed, as requested.
-    }
+}
 
     /**
      * Display a listing of all CodeAnalysis records.
