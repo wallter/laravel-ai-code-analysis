@@ -89,4 +89,104 @@ class AnalysisController extends Controller
             return back()->withErrors(['analysis' => "Failed to analyze [{$filePath}]: {$throwable->getMessage()}"]);
         }
     }
-}
+    }
+
+    /**
+     * Show the form for creating a new CodeAnalysis.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function create()
+    {
+        return view('analysis.create');
+    }
+
+    /**
+     * Store a newly created CodeAnalysis in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function store(Request $request)
+    {
+        // Validate input
+        $request->validate([
+            'filePath' => 'required|string|max:255',
+        ]);
+
+        try {
+            // Create and analyze the file
+            $analysis = $this->codeAnalysisService->analyzeFile($request->filePath, false);
+            $this->codeAnalysisService->runAnalysis($analysis, false);
+
+            return redirect()->route('analysis.index')
+                ->with('status', "Successfully queued analysis for: {$analysis->file_path}");
+        } catch (\Throwable $throwable) {
+            Log::error("AnalysisController: Failed to store analysis [{$request->filePath}]", ['error' => $throwable->getMessage()]);
+
+            return back()->withErrors(['analysis' => "Failed to analyze [{$request->filePath}]: {$throwable->getMessage()}"]);
+        }
+    }
+
+    /**
+     * Show the form for editing the specified CodeAnalysis.
+     *
+     * @param  \App\Models\CodeAnalysis  $analysis
+     * @return \Illuminate\View\View
+     */
+    public function edit(CodeAnalysis $analysis)
+    {
+        return view('analysis.edit', compact('analysis'));
+    }
+
+    /**
+     * Update the specified CodeAnalysis in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\CodeAnalysis  $analysis
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(Request $request, CodeAnalysis $analysis)
+    {
+        // Validate input
+        $request->validate([
+            'filePath' => 'required|string|max:255',
+        ]);
+
+        try {
+            // Update file path
+            $analysis->file_path = $request->filePath;
+            $analysis->save();
+
+            // Optionally, re-run analysis if needed
+            $this->codeAnalysisService->analyzeFile($analysis->file_path, true);
+            $this->codeAnalysisService->runAnalysis($analysis, false);
+
+            return redirect()->route('analysis.index')
+                ->with('status', "Successfully updated analysis for: {$analysis->file_path}");
+        } catch (\Throwable $throwable) {
+            Log::error("AnalysisController: Failed to update analysis [ID: {$analysis->id}]", ['error' => $throwable->getMessage()]);
+
+            return back()->withErrors(['analysis' => "Failed to update [{$analysis->file_path}]: {$throwable->getMessage()}"]);
+        }
+    }
+
+    /**
+     * Remove the specified CodeAnalysis from storage.
+     *
+     * @param  \App\Models\CodeAnalysis  $analysis
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy(CodeAnalysis $analysis)
+    {
+        try {
+            $analysis->delete();
+
+            return redirect()->route('analysis.index')
+                ->with('status', "Successfully deleted analysis for: {$analysis->file_path}");
+        } catch (\Throwable $throwable) {
+            Log::error("AnalysisController: Failed to delete analysis [ID: {$analysis->id}]", ['error' => $throwable->getMessage()]);
+
+            return back()->withErrors(['analysis' => "Failed to delete [{$analysis->file_path}]: {$throwable->getMessage()}"]);
+        }
+    }
