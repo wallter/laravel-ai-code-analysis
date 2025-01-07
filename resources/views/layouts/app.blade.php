@@ -93,19 +93,20 @@
                   <span x-show="sidebarOpen" x-transition>Analyses</span>
                   <span x-show="!sidebarOpen" class="block" x-transition>A</span>
                 </a>
-                <a href="#"
+                <hr class="bg-gray-200 h-px border-0 opacity-50 my-2">
+                <a href="https://www.linkedin.com/in/tylerrwall/" target="_blank"
                    class="block py-2 px-2 hover:bg-forest-800 rounded mb-1 transition-colors"
                    :class="sidebarOpen ? 'text-sm' : 'text-xs text-center'"
                 >
-                  <span x-show="sidebarOpen" x-transition>Another Link</span>
-                  <span x-show="!sidebarOpen" class="block" x-transition>B</span>
+                  <span x-show="sidebarOpen" x-transition>Tyler Wall | LinkedIn</span>
+                  <span x-show="!sidebarOpen" class="block" x-transition>L</span>
                 </a>
-                <a href="#"
+                <a href="https://github.com/wallter" target="_blank"
                    class="block py-2 px-2 hover:bg-forest-800 rounded transition-colors"
                    :class="sidebarOpen ? 'text-sm' : 'text-xs text-center'"
                 >
-                  <span x-show="sidebarOpen" x-transition>Settings</span>
-                  <span x-show="!sidebarOpen" class="block" x-transition>S</span>
+                  <span x-show="sidebarOpen" x-transition>Tyler Wall | Github</span>
+                  <span x-show="!sidebarOpen" class="block" x-transition>G</span>
                 </a>
             </nav>
         </div>
