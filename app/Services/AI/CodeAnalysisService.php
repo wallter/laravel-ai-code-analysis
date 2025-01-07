@@ -116,5 +116,49 @@ class CodeAnalysisService
         return $filePath;
     }
 
+    /**
+     * Collect PHP files from the given directory.
+     *
+     * @param string $directory The directory to scan for PHP files.
+     * @return Collection<string> The collection of PHP file paths.
+     */
+    public function collectPhpFiles(string $directory): Collection
+    {
+        Log::info("CodeAnalysisService: Collecting PHP files from directory '{$directory}'.");
+
+        try {
+            $phpFiles = collect(File::allFiles($directory))
+                ->filter(function ($file) {
+                    return $file->getExtension() === 'php';
+                })
+                ->map(function ($file) use ($directory) {
+                    return $this->normalizeFilePath($file->getPathname());
+                });
+
+            Log::debug("CodeAnalysisService: Collected " . $phpFiles->count() . " PHP files from '{$directory}'.");
+            return $phpFiles;
+        } catch (Throwable $e) {
+            Log::error("CodeAnalysisService: Failed to collect PHP files from directory '{$directory}'. Error: {$e->getMessage()}");
+            return collect();
+        }
+    }
+
+    /**
+     * Build a summary of the AST for analysis.
+     *
+     * @param string $relativePath The relative file path.
+     * @param array $ast The abstract syntax tree.
+     * @return array The summary of the AST.
+     */
+    protected function buildAstSummary(string $relativePath, array $ast): array
+    {
+        // Implementation of AST summary building
+        // This is a placeholder and should be implemented based on specific requirements
+        return [
+            'total_nodes' => count($ast),
+            // Add more summary details as needed
+        ];
+    }
+
     // ... (rest of the CodeAnalysisService remains unchanged)
 }
