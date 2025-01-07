@@ -14,6 +14,8 @@ class CodeAnalysis extends Model
 {
     use HasFactory;
 
+    protected $table = 'code_analyses';
+
     protected $fillable = [
         'file_path',
         'relative_file_path',
