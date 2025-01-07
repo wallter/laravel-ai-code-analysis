@@ -155,32 +155,37 @@ class CodeAnalysisService
     /**
      * Run the complete analysis process.
      *
-     * @param  string  $directory   The directory to analyze.
      * @param  bool    $dryRun      Whether to perform a dry run without saving results.
      * @param  string  $outputFile  The path to the output JSON file.
      * @return void
      */
-    public function runAnalysis(string $directory = 'app', bool $dryRun = false, string $outputFile = 'all.json'): void
+    public function runAnalysis(bool $dryRun = false, string $outputFile = 'all.json'): void
     {
-        Log::info("CodeAnalysisService: Starting analysis on directory '{$directory}' with dryRun={$dryRun}.");
+        Log::info("CodeAnalysisService: Starting analysis with dryRun={$dryRun}.");
 
-        $phpFiles = $this->collectPhpFiles($directory);
+        // Retrieve the folders from the parsing configuration
+        $folders = config('parsing.folders', []);
 
         $results = [];
 
-        foreach ($phpFiles as $filePath) {
-            try {
-                Log::debug("CodeAnalysisService: Analyzing file '{$filePath}'.");
-                $analysis = $this->analyzeFile($filePath, $dryRun);
+        foreach ($folders as $directory) {
+            Log::info("CodeAnalysisService: Analyzing directory '{$directory}'.");
+            $phpFiles = $this->collectPhpFiles($directory);
 
-                // Assuming you want to collect some data from each analysis
-                $results[] = [
-                    'file_path' => $analysis->file_path,
-                    'ast_summary' => $analysis->analysis,
-                    'ai_output' => $analysis->ai_output,
-                ];
-            } catch (Throwable $e) {
-                Log::error("CodeAnalysisService: Failed to analyze file '{$filePath}'. Error: {$e->getMessage()}");
+            foreach ($phpFiles as $filePath) {
+                try {
+                    Log::debug("CodeAnalysisService: Analyzing file '{$filePath}'.");
+                    $analysis = $this->analyzeFile($filePath, $dryRun);
+
+                    // Assuming you want to collect some data from each analysis
+                    $results[] = [
+                        'file_path' => $analysis->file_path,
+                        'ast_summary' => $analysis->analysis,
+                        'ai_output' => $analysis->ai_output,
+                    ];
+                } catch (Throwable $e) {
+                    Log::error("CodeAnalysisService: Failed to analyze file '{$filePath}'. Error: {$e->getMessage()}");
+                }
             }
         }
 
