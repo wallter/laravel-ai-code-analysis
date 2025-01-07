@@ -39,7 +39,7 @@ class CodeAnalysisService
     /**
      * Analyze a PHP file by parsing it and creating/updating the CodeAnalysis record.
      *
-     * @param  string  $filePath  The path to the PHP file.
+     * @param  string  $filePath  The relative path to the PHP file.
      * @param  bool  $reparse  Whether to force re-parsing the file.
      * @return CodeAnalysis The CodeAnalysis model instance.
      */
@@ -47,11 +47,11 @@ class CodeAnalysisService
     {
         Log::debug("CodeAnalysisService: Checking or creating CodeAnalysis for [{$filePath}].");
 
-        $basePath = Config::get('filesystems.base_path');
-        $absolutePath = realpath($basePath . DIRECTORY_SEPARATOR . $filePath) ?: $filePath;
+        // Use the relative file path directly
+        $relativePath = $filePath;
 
         $analysis = CodeAnalysis::firstOrCreate(
-            ['file_path' => $absolutePath],
+            ['file_path' => $relativePath],
             [
                 'ast' => [],
                 'analysis' => [],
@@ -433,19 +433,33 @@ class CodeAnalysisService
     /**
      * Retrieve the raw code from the file path.
      *
-     * @param  string  $filePath  The path to the PHP file.
+     * @param  string  $filePath  The relative path to the PHP file.
      * @return string The raw code content.
      */
     private function getRawCode(string $filePath): string
     {
-        if (file_exists($filePath)) {
-            Log::debug("AnalysisPassService: Retrieving raw code from '{$filePath}'.");
+        // Construct the absolute path using base_path
+        $absolutePath = base_path($filePath);
 
-            return file_get_contents($filePath);
+        if (File::exists($absolutePath)) {
+            Log::debug("AnalysisPassService: Retrieving raw code from '{$absolutePath}'.");
+
+            return File::get($absolutePath);
         }
 
-        Log::warning("AnalysisPassService: Raw code file '{$filePath}' does not exist.");
+        Log::warning("AnalysisPassService: Raw code file '{$absolutePath}' does not exist.");
 
         return '';
+    }
+
+    /**
+     * Retrieve the pass configuration.
+     *
+     * @param  string  $passName  The name of the pass.
+     * @return array|null The configuration array or null if not found.
+     */
+    protected function getPassConfig(string $passName): ?array
+    {
+        return config("ai.operations.multi_pass_analysis.passes.{$passName}");
     }
 }
