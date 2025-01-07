@@ -110,7 +110,7 @@ class ParseFilesCommand extends FilesCommand
         $success = $this->fileProcessorService->process($absolutePath, $this->isVerbose());
 
         if (! $success) {
-            $this->warn("Failed to parse and store: {$filePath}");
+            $this->warn("Failed to parse and store: {$absolutePath}");
         }
     }
 

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -82,5 +84,47 @@ class ParsedItem extends Model
             'called_methods' => 'array',
             'ast' => 'array',
         ];
+    }
+
+    /**
+     * Accessor to get the absolute file path.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public function getFilePathAttribute($value): string
+    {
+        $basePath = Config::get('filesystems.base_path');
+        return realpath($basePath . DIRECTORY_SEPARATOR . $value) ?: $value;
+    }
+
+    /**
+     * Mutator to set the relative file path.
+     *
+     * @param  string  $value
+     * @return void
+     */
+    public function setFilePathAttribute(string $value): void
+    {
+        $basePath = Config::get('filesystems.base_path');
+        if (Str::startsWith($value, $basePath)) {
+            $relativePath = Str::substr($value, strlen($basePath) + 1);
+            $this->attributes['file_path'] = $relativePath;
+        } else {
+            $this->attributes['file_path'] = $value;
+        }
+    }
+
+    /**
+     * Get the relative file path.
+     *
+     * @return string
+     */
+    public function getRelativeFilePathAttribute(): string
+    {
+        $basePath = Config::get('filesystems.base_path');
+        return Str::startsWith($this->file_path, $basePath)
+            ? Str::substr($this->file_path, strlen($basePath) + 1)
+            : $this->file_path;
     }
 }
