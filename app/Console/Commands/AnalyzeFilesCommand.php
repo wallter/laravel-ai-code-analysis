@@ -6,6 +6,7 @@ use App\Services\AI\CodeAnalysisService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Throwable;
+use App\Jobs\ProcessAnalysisPassJob;
 
 /**
  * Collect .php files, parse them, and run multi-pass AI analysis.
@@ -50,19 +51,35 @@ class AnalyzeFilesCommand extends FilesCommand
 
         $results = $this->processFiles($phpFiles, $dryRun);
 
-        // Run the analysis after processing all files
-        try {
-            $this->analysisService->runAnalysis($dryRun, $outputFile ?? 'all.json');
-            Log::info("AnalyzeFilesCommand: runAnalysis executed with dryRun={$dryRun}.");
-        } catch (Throwable $e) {
-            Log::error("AnalyzeFilesCommand: runAnalysis failed. Error: ".$e->getMessage(), [
-                'exception' => $e,
-            ]);
-            $this->warn("runAnalysis failed: ".$e->getMessage());
-        }
-
         if ($outputFile) {
-            $this->exportToJson($results->toArray(), $outputFile);
+            // Run the analysis and export to JSON
+            try {
+                $this->analysisService->runAnalysis($dryRun, $outputFile);
+                Log::info("AnalyzeFilesCommand: runAnalysis executed with dryRun={$dryRun}.");
+            } catch (Throwable $e) {
+                Log::error("AnalyzeFilesCommand: runAnalysis failed. Error: " . $e->getMessage(), [
+                    'exception' => $e,
+                ]);
+                $this->warn("runAnalysis failed: " . $e->getMessage());
+
+                return 1;
+            }
+
+            if ($outputFile) {
+                $this->exportToJson($results->toArray(), $outputFile);
+            }
+
+            $this->info("Wrote analysis to [{$outputFile}].");
+            Log::info("AnalyzeFilesCommand: Wrote analysis JSON to [{$outputFile}].");
+        } else {
+            // Queue ProcessAnalysisPassJob for each file
+            foreach ($phpFiles as $filePath) {
+                ProcessAnalysisPassJob::dispatch($filePath, $dryRun);
+                Log::info("AnalyzeFilesCommand: Queued ProcessAnalysisPassJob for [{$filePath}].");
+            }
+
+            $this->info("Queued [{$phpFiles->count()}] analysis jobs.");
+            Log::info("AnalyzeFilesCommand: Queued [{$phpFiles->count()}] analysis jobs.");
         }
 
         $this->info("Done! Processed [{$results->count()}] file(s).");
@@ -112,10 +129,10 @@ class AnalyzeFilesCommand extends FilesCommand
                     'completed_passes' => $analysisRecord->completed_passes,
                 ]);
             } catch (Throwable $e) {
-                Log::error("AnalyzeFilesCommand: Analysis failed [{$filePath}]: ".$e->getMessage(), [
+                Log::error("AnalyzeFilesCommand: Analysis failed [{$filePath}]: " . $e->getMessage(), [
                     'exception' => $e,
                 ]);
-                $this->warn("Could not analyze [{$filePath}]: ".$e->getMessage());
+                $this->warn("Could not analyze [{$filePath}]: " . $e->getMessage());
             }
 
             $bar->advance();
@@ -137,7 +154,7 @@ class AnalyzeFilesCommand extends FilesCommand
     {
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         if (! $json) {
-            $this->warn('Failed to encode JSON: '.json_last_error_msg());
+            $this->warn('Failed to encode JSON: ' . json_last_error_msg());
             Log::warning('AnalyzeFilesCommand: Failed to encode JSON output.', [
                 'error' => json_last_error_msg(),
             ]);
