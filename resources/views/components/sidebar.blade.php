@@ -1,6 +1,5 @@
 <aside 
-    class="sidebar-transition bg-forest-900 text-forest-lt flex flex-col justify-between
-           h-full sticky top-0 hidden sm:flex min-h-screen"
+    class="sidebar-transition bg-forest-900 text-forest-lt flex flex-col justify-between h-full sticky top-0 hidden sm:flex min-h-screen w-16"
     :class="sidebarOpen ? 'w-64' : 'w-16'"
 >
     <!-- Top portion -->
