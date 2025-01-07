@@ -43,7 +43,12 @@ class AnalysisPassService
                 }
 
                 $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
-                $completedPasses = (array) ($analysis->completed_passes ?? []);
+                
+                // Initialize pass-specific processing
+                foreach ($passOrder as $passName) {
+                    // Dispatch individual pass jobs
+                    dispatch(new \App\Jobs\ProcessIndividualPassJob($codeAnalysisId, $passName, $dryRun));
+                }
 
                 foreach ($passOrder as $passName) {
                     if (in_array($passName, $completedPasses, true)) {

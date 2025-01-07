@@ -25,9 +25,14 @@ class AIPromptBuilder
             ];
         }
 
+        // Construct the user prompt with clear sections for code and AST data
+        $userContent = $this->buildUserPrompt();
+        $userContent .= "\n\n## Code:\n```php\n{$this->rawCode}\n```";
+        $userContent .= "\n\n## AST Data:\n```json\n" . json_encode($this->astData, JSON_PRETTY_PRINT) . "\n```";
+
         $messages[] = [
             'role' => 'user',
-            'content' => $this->buildUserPrompt(),
+            'content' => $userContent,
         ];
 
         return json_encode($messages);
