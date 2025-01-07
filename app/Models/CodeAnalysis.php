@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 
 /**
@@ -71,7 +71,7 @@ class CodeAnalysis extends Model
     public function setFilePathAttribute(string $value): void
     {
         $basePath = Config::get('filesystems.base_path');
-        if (str_starts_with($value, $basePath)) {
+        if (Str::startsWith($value, $basePath)) {
             $relativePath = Str::after($value, $basePath . DIRECTORY_SEPARATOR);
             $this->attributes['file_path'] = $relativePath;
         } else {
