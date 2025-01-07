@@ -120,14 +120,14 @@
                 @endif
               </td>
               <td class="px-4 py-2 text-center w-1/6">
-                <x-button href="{{ route('analysis.edit', $analysis->id) }}" class="bg-yellow-600 text-white hover:bg-yellow-700 focus:ring-yellow-500">
+                <x-button href="{{ route('analysis.edit', $analysis->id) }}" class="border-yellow-600 text-yellow-600 hover:bg-yellow-100 focus:ring-yellow-500">
                     Edit
                 </x-button>
                 
                 <form action="{{ route('analysis.destroy', $analysis->id) }}" method="POST" class="inline">
                     @csrf
                     @method('DELETE')
-                    <x-button type="submit" class="bg-red-600 text-white hover:bg-red-700 focus:ring-red-500" onclick="return confirm('Are you sure you want to delete this analysis?');">
+                    <x-button type="submit" class="border-red-600 text-red-600 hover:bg-red-100 focus:ring-red-500" onclick="return confirm('Are you sure you want to delete this analysis?');">
                         Delete
                     </x-button>
                 </form>
