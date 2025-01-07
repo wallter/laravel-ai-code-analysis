@@ -85,6 +85,7 @@ class ParsedItem extends Model
             'ast' => 'array',
         ];
     }
+
     /**
      * Accessor to get the absolute file path.
      *
@@ -94,6 +95,7 @@ class ParsedItem extends Model
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function ($value) {
             $basePath = Config::get('filesystems.base_path');
+
             return realpath($basePath.DIRECTORY_SEPARATOR.$value) ?: $value;
         }, set: function (string $value) {
             $basePath = Config::get('filesystems.base_path');
@@ -103,9 +105,11 @@ class ParsedItem extends Model
             } else {
                 $this->attributes['file_path'] = $value;
             }
+
             return ['file_path' => $value];
         });
     }
+
     /**
      * Get the relative file path.
      */
@@ -113,6 +117,7 @@ class ParsedItem extends Model
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function () {
             $basePath = Config::get('filesystems.base_path');
+
             return Str::startsWith($this->file_path, $basePath)
                 ? Str::substr($this->file_path, strlen($basePath) + 1)
                 : $this->file_path;

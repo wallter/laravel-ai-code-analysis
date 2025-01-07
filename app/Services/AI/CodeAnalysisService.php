@@ -61,6 +61,7 @@ class CodeAnalysisService
             foreach (config('ai.passes') as $passName => $passConfig) {
                 Cache::forget("ai_response_{$analysis->id}_{$passName}");
             }
+
             try {
                 $ast = $this->parserService->parseFile($relativePath);
                 $analysis->ast = $ast;
@@ -127,8 +128,8 @@ class CodeAnalysisService
 
         try {
             $phpFiles = collect(File::allFiles($directory))
-                ->filter(fn($file) => $file->getExtension() === 'php')
-                ->map(fn($file) => $this->normalizeFilePath($file->getPathname()));
+                ->filter(fn ($file) => $file->getExtension() === 'php')
+                ->map(fn ($file) => $this->normalizeFilePath($file->getPathname()));
 
             Log::debug('CodeAnalysisService: Collected '.$phpFiles->count()." PHP files from '{$directory}'.");
 
@@ -160,9 +161,8 @@ class CodeAnalysisService
     /**
      * Run the complete analysis process.
      *
-     * @param  bool    $dryRun      Whether to perform a dry run without saving results.
+     * @param  bool  $dryRun  Whether to perform a dry run without saving results.
      * @param  string  $outputFile  The path to the output JSON file.
-     * @return void
      */
     public function runAnalysis(bool $dryRun = false, string $outputFile = 'all.json'): void
     {
@@ -194,7 +194,7 @@ class CodeAnalysisService
             }
         }
 
-        if (!$dryRun) {
+        if (! $dryRun) {
             try {
                 File::put($outputFile, json_encode($results, JSON_PRETTY_PRINT));
                 Log::info("CodeAnalysisService: Analysis results written to '{$outputFile}'.");
@@ -202,9 +202,9 @@ class CodeAnalysisService
                 Log::error("CodeAnalysisService: Failed to write analysis results to '{$outputFile}'. Error: {$e->getMessage()}");
             }
         } else {
-            Log::info("CodeAnalysisService: Dry run completed. No results were saved.");
+            Log::info('CodeAnalysisService: Dry run completed. No results were saved.');
         }
 
-        Log::info("CodeAnalysisService: Analysis process completed.");
+        Log::info('CodeAnalysisService: Analysis process completed.');
     }
 }

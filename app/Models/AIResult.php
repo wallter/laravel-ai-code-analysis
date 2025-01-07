@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\AIResultContentType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Enums\AIResultContentType;
 
 /**
  * AIResult model represents the results from AI analysis passes.
@@ -34,6 +34,7 @@ class AIResult extends Model
     {
         return $this->belongsTo(CodeAnalysis::class);
     }
+
     protected function casts(): array
     {
         return [

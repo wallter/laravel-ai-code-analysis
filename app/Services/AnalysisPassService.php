@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Cache;
 use App\Enums\OperationIdentifier;
 use App\Models\AIResult;
 use App\Models\CodeAnalysis;
@@ -10,6 +9,7 @@ use App\Services\AI\AIPromptBuilder;
 use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -44,7 +44,7 @@ class AnalysisPassService
                 }
 
                 $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
-                
+
                 // Initialize pass-specific processing
                 foreach ($passOrder as $passName) {
                     // Dispatch individual pass jobs
@@ -161,11 +161,13 @@ class AnalysisPassService
         if (Cache::has($cacheKey)) {
             Log::info("AnalysisPassService: Retrieved cached response for pass '{$passName}'.");
             $responseData = Cache::get($cacheKey);
+
             return [
                 'prompt' => '', // No need to rebuild prompt if cached
                 'response_data' => $responseData,
             ];
         }
+
         $promptBuilder = new AIPromptBuilder(
             operationIdentifier: $operationIdentifier,
             config: $passConfig,

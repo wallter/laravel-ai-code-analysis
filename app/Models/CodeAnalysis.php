@@ -26,6 +26,7 @@ class CodeAnalysis extends Model
         'current_pass',
         'completed_passes',
     ];
+
     /**
      * Accessor to get the absolute file path.
      *
@@ -36,6 +37,7 @@ class CodeAnalysis extends Model
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function ($value) {
             $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
             $absolutePath = realpath($basePath.DIRECTORY_SEPARATOR.$value);
+
             return $absolutePath ?: $value;
         }, set: function (string $value) {
             $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
@@ -50,6 +52,7 @@ class CodeAnalysis extends Model
                 $this->attributes['file_path'] = $value;
                 Log::warning("CodeAnalysis Model: The file path '{$value}' does not start with base path '{$basePath}'. Stored as is.");
             }
+
             return ['file_path' => $value];
         });
     }
@@ -73,6 +76,7 @@ class CodeAnalysis extends Model
     {
         return $this->hasMany(AIScore::class);
     }
+
     protected function casts(): array
     {
         return [

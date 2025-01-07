@@ -13,48 +13,36 @@ use Throwable;
 
 class ProcessIndividualPassJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
 
-    /**
-     * The CodeAnalysis ID.
-     *
-     * @var int
-     */
-    protected int $codeAnalysisId;
+    use InteractsWithQueue;
 
-    /**
-     * The name of the AI pass to execute.
-     *
-     * @var string
-     */
-    protected string $passName;
+    use Queueable;
 
-    /**
-     * Indicates if the job is a dry run.
-     *
-     * @var bool
-     */
-    protected bool $dryRun;
+    use SerializesModels;
 
     /**
      * Create a new job instance.
-     *
-     * @param int $codeAnalysisId
-     * @param string $passName
-     * @param bool $dryRun
      */
-    public function __construct(int $codeAnalysisId, string $passName, bool $dryRun = false)
+    public function __construct(
+        /**
+         * The CodeAnalysis ID.
+         */
+        protected int $codeAnalysisId,
+        /**
+         * The name of the AI pass to execute.
+         */
+        protected string $passName,
+        /**
+         * Indicates if the job is a dry run.
+         */
+        protected bool $dryRun = false
+    )
     {
-        $this->codeAnalysisId = $codeAnalysisId;
-        $this->passName = $passName;
-        $this->dryRun = $dryRun;
     }
 
     /**
      * Execute the job.
-     *
-     * @param AnalysisPassService $analysisPassService
-     * @return void
      */
     public function handle(AnalysisPassService $analysisPassService): void
     {
@@ -65,12 +53,12 @@ class ProcessIndividualPassJob implements ShouldQueue
 
             Log::info("ProcessIndividualPassJob: Completed pass '{$this->passName}' for CodeAnalysis ID {$this->codeAnalysisId}.");
 
-        } catch (Throwable $e) {
-            Log::error("ProcessIndividualPassJob: Failed pass '{$this->passName}' for CodeAnalysis ID {$this->codeAnalysisId}. Error: {$e->getMessage()}", [
-                'exception' => $e,
+        } catch (Throwable $throwable) {
+            Log::error("ProcessIndividualPassJob: Failed pass '{$this->passName}' for CodeAnalysis ID {$this->codeAnalysisId}. Error: {$throwable->getMessage()}", [
+                'exception' => $throwable,
             ]);
 
-            throw $e;
+            throw $throwable;
         }
     }
 }

@@ -7,21 +7,18 @@ use Illuminate\View\Component;
 class Alert extends Component
 {
     /**
-     * The CSS classes for the alert.
-     *
-     * @var string
-     */
-    public $class;
-
-    /**
      * Create a new component instance.
      *
-     * @param string $class Optional additional CSS classes.
+     * @param  string  $class  Optional additional CSS classes.
      * @return void
      */
-    public function __construct($class = '')
+    public function __construct(
+        /**
+         * The CSS classes for the alert.
+         */
+        public $class = ''
+    )
     {
-        $this->class = $class;
     }
 
     /**
