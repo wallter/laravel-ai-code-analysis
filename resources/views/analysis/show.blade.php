@@ -16,7 +16,7 @@
       <h2 class="text-2xl font-bold leading-tight dark:text-white">Analysis Details</h2>
       <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
         Viewing AI results for:
-        <span class="font-semibold">{{ $analysis->relative_file_path }}</span>
+        <span class="font-semibold">{{ $analysis->file_path }}</span>
       </p>
     </div>
     <div class="mt-2 sm:mt-0">
