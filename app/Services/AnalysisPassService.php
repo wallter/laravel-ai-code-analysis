@@ -166,6 +166,7 @@ class AnalysisPassService
                 'response_data' => $responseData,
             ];
         }
+        $promptBuilder = new AIPromptBuilder(
             operationIdentifier: $operationIdentifier,
             config: $passConfig,
             astData: $analysis->ast ?? [],
