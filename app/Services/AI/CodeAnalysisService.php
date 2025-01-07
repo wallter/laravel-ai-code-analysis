@@ -7,6 +7,7 @@ namespace App\Services\AI;
 use App\Models\CodeAnalysis;
 use App\Services\Parsing\ParserService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -60,14 +61,16 @@ class CodeAnalysisService
             foreach (config('ai.passes') as $passName => $passConfig) {
                 Cache::forget("ai_response_{$analysis->id}_{$passName}");
             }
+            try {
                 $ast = $this->parserService->parseFile($relativePath);
                 $analysis->ast = $ast;
                 $analysis->analysis = $this->buildAstSummary($relativePath, $ast);
                 $analysis->save();
                 Log::info("CodeAnalysisService: AST and summary updated for [{$relativePath}].");
-        } catch (Throwable $e) {
-            Log::error("CodeAnalysisService: Failed to parse file [{$relativePath}]. Error: {$e->getMessage()}");
-            // Depending on requirements, you might want to rethrow or handle differently
+            } catch (Throwable $e) {
+                Log::error("CodeAnalysisService: Failed to parse file [{$relativePath}]. Error: {$e->getMessage()}");
+                // Depending on requirements, you might want to rethrow or handle differently
+            }
         }
 
         return $analysis;
