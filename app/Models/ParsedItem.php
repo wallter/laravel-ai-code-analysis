@@ -108,7 +108,7 @@ class ParsedItem extends Model
     {
         $basePath = Config::get('filesystems.base_path');
         if (Str::startsWith($value, $basePath)) {
-            $relativePath = Str::substr($value, strlen($basePath) + 1);
+            $relativePath = Str::after($value, $basePath . DIRECTORY_SEPARATOR);
             $this->attributes['file_path'] = $relativePath;
         } else {
             $this->attributes['file_path'] = $value;

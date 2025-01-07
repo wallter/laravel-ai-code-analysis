@@ -99,6 +99,13 @@ class AnalysisPassService
         Log::info("AnalysisPassService: Finished processAllPasses for CodeAnalysis ID {$codeAnalysisId}.");
     }
 
+    protected function updateTotalCost(CodeAnalysis $analysis): void
+    {
+        $totalCost = $analysis->aiResults()->sum('cost_estimate_usd');
+        $analysis->total_cost_usd = $totalCost;
+        $analysis->save();
+    }
+
     /**
      * Retrieve the CodeAnalysis instance from the database.
      */

@@ -20,7 +20,11 @@ class AIResult extends Model
         'prompt_text',
         'response_text',
         'metadata',
-    ];
+    'cost_estimate_usd',
+    'content_type',
+    'cost_estimate_usd' => 'decimal:6',
+    'content_type' => AIResultContentType::class,
+];
 
     /**
      * Get the CodeAnalysis instance associated with this AIResult.

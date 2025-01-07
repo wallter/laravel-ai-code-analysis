@@ -66,9 +66,9 @@ class ParserService
         Log::debug("ParserService.parseFile => [{$absolutePath}], useCache={$useCache}");
 
         if ($useCache) {
-            $cached = CodeAnalysis::where('file_path', $realPath)->first();
+            $cached = CodeAnalysis::where('file_path', $filePath)->first();
             if ($cached && ! empty($cached->ast)) {
-                Log::info("ParserService: Found cached AST for [{$realPath}].");
+                Log::info("ParserService: Found cached AST for [{$filePath}].");
 
                 return $cached->ast;
             }
