@@ -30,7 +30,6 @@ class CodeAnalysis extends Model
     public function aiResults()
     {
         return $this->hasMany(AIResult::class);
-    }
 
     /**
      * Get the AI scores associated with this code analysis.
@@ -42,7 +41,12 @@ class CodeAnalysis extends Model
         return $this->hasMany(AIScore::class);
     }
 
-    protected function casts(): array
+    protected $casts = [
+        'ast' => 'array',
+        'analysis' => 'array',
+        'ai_output' => 'array',
+        'completed_passes' => 'array',
+    ];
     {
         return [
             'ast' => 'array',
