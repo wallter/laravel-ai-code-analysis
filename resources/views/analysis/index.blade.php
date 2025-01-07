@@ -54,7 +54,7 @@
           @foreach ($analyses as $analysis)
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
               <td class="px-4 py-2 text-gray-800 dark:text-gray-100 w-1/3 break-all">
-                {{ $analysis->file_path }}
+                {{ $analysis->relative_file_path }}
               </td>
               <td class="px-4 py-2 text-gray-800 dark:text-gray-100 w-1/4">
                 {{ $analysis->current_pass }}
