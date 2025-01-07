@@ -76,9 +76,9 @@ class ParserService
 
         // Read code
         try {
-            $code = File::get($realPath);
+            $code = File::get($absolutePath);
         } catch (Throwable $throwable) {
-            Log::error("ParserService: Failed to read [{$realPath}]: {$throwable->getMessage()}");
+            Log::error("ParserService: Failed to read [{$absolutePath}]: {$throwable->getMessage()}");
 
             return [];
         }
@@ -89,19 +89,19 @@ class ParserService
         try {
             $ast = $parser->parse($code);
             if (! $ast) {
-                Log::warning("ParserService: AST is null for [{$realPath}].");
+                Log::warning("ParserService: AST is null for [{$absolutePath}].");
 
                 return [];
             }
         } catch (Throwable $throwable) {
-            Log::error("ParserService: Parse error [{$realPath}]: {$throwable->getMessage()}");
+            Log::error("ParserService: Parse error [{$absolutePath}]: {$throwable->getMessage()}");
 
             return [];
         }
 
         // Initialize UnifiedAstVisitor
         $visitor = new UnifiedAstVisitor;
-        $visitor->setCurrentFile($realPath);
+        $visitor->setCurrentFile($absolutePath);
 
         // Traverse AST with UnifiedAstVisitor
         $traverser = new NodeTraverser;
@@ -110,18 +110,18 @@ class ParserService
         $traverser->traverse($ast);
 
         // Extract and store parsed items
-        $this->extractAndStoreParsedItems($visitor->getParsedItems(), $realPath);
+        $this->extractAndStoreParsedItems($visitor->getParsedItems(), $absolutePath);
 
         // Optionally store AST in DB
         if ($useCache) {
             try {
                 CodeAnalysis::updateOrCreate(
-                    ['file_path' => $realPath],
+                    ['file_path' => $absolutePath],
                     ['ast' => $ast]
                 );
-                Log::info("ParserService: Cached AST in DB for [{$realPath}].");
+                Log::info("ParserService: Cached AST in DB for [{$absolutePath}].");
             } catch (Throwable $throwable) {
-                Log::error("ParserService: Failed caching AST [{$realPath}]: {$throwable->getMessage()}");
+                Log::error("ParserService: Failed caching AST [{$absolutePath}]: {$throwable->getMessage()}");
             }
         }
 

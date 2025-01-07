@@ -5,7 +5,6 @@
     $allResults = $analysis->aiResults->sortByDesc(
         fn($res) => $res->pass_name === App\Enums\OperationIdentifier::CONSOLIDATION_PASS->value
     );
-
     $totalCost = $analysis->aiResults->sum(
         fn($r) => $r->metadata['cost_estimate_usd'] ?? 0
     );
@@ -16,7 +15,8 @@
     <div>
       <h2 class="text-2xl font-bold leading-tight dark:text-white">Analysis Details</h2>
       <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-        Viewing AI results for: <span class="font-semibold">{{ $analysis->relative_file_path }}</span>
+        Viewing AI results for:
+        <span class="font-semibold">{{ $analysis->relative_file_path }}</span>
       </p>
     </div>
     <div class="mt-2 sm:mt-0">
@@ -87,7 +87,8 @@
               ? 'bg-yellow-100 text-yellow-800'
               : 'bg-green-100 text-green-800';
 
-          $mpConfig  = config("ai.operations.multi_pass_analysis.{$passName}", []);
+          // Retrieve pass config
+          $mpConfig = config("ai.operations.multi_pass_analysis.{$passName}", []);
           $operation = $mpConfig['operation'] ?? null;
           $opConfig  = $operation ? config("ai.operations.{$operation}", []) : [];
 
@@ -99,9 +100,8 @@
               $configuredTip = "System Message:\n{$sysMsg}\n\nPrompt:\n{$prompt}";
           }
 
-          $defaultOpen = $passName === App\Enums\OperationIdentifier::CONSOLIDATION_PASS->value
-              ? 'true'
-              : 'false';
+          // Open consolidation pass by default
+          $defaultOpen = $passName === App\Enums\OperationIdentifier::CONSOLIDATION_PASS->value ? 'true' : 'false';
         @endphp
 
         <div
@@ -153,7 +153,7 @@
                 :class="{ 'rotate-180': expandAll || localOpen }"
                 fill="none"
                 stroke="currentColor"
-                viewBox="0 0 24 24" 
+                viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path 
@@ -171,7 +171,6 @@
             x-show="expandAll || localOpen"
             x-transition
           >
-            <!-- Absolute toggler in top-right -->
             <button
               class="absolute top-3 right-3 text-xs px-2 py-1 border border-gray-400
                      dark:border-gray-500 rounded bg-white dark:bg-gray-700

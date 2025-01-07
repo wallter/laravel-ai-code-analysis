@@ -8,7 +8,7 @@ return [
     |
     | An array of paths (absolute or relative) that should be scanned when
     | no explicit arguments are passed to the parse commands. For example:
-    | 'files' => [
+    | ('folders' OR 'files') => [
     |     base_path('app/Services'), // a directory
     |     base_path('app/Helpers.php'), // single file
     | ],
@@ -21,7 +21,7 @@ return [
 
     'files' => [
         // Individual files to parse
-        // base_path('app/Helpers.php'),
+        // base_path('app/Models/CodeAnalysis.php'),
     ],
 
     /*
