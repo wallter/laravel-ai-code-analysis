@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Log;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitor\NameResolver;
 use Throwable;
+use Illuminate\Support\Str;
 
 /**
  * Manages AST parsing and prepares CodeAnalysis records for AI processing.
@@ -47,8 +48,8 @@ class CodeAnalysisService
     {
         Log::debug("CodeAnalysisService: Checking or creating CodeAnalysis for [{$filePath}].");
 
-        // Use the relative file path directly
-        $relativePath = $filePath;
+        // Normalize the relative file path
+        $relativePath = $this->normalizeFilePath($filePath);
 
         $analysis = CodeAnalysis::firstOrCreate(
             ['file_path' => $relativePath],
@@ -62,20 +63,43 @@ class CodeAnalysisService
 
         // Re-parse if no AST or if reparse is requested
         if ($reparse || empty($analysis->ast)) {
-            Log::info("CodeAnalysisService: Parsing file [{$filePath}] into AST.");
+            Log::info("CodeAnalysisService: Parsing file [{$relativePath}] into AST.");
             try {
-                $ast = $this->parserService->parseFile($filePath);
+                $ast = $this->parserService->parseFile($relativePath);
                 $analysis->ast = $ast;
-                $analysis->analysis = $this->buildAstSummary($filePath, $ast);
+                $analysis->analysis = $this->buildAstSummary($relativePath, $ast);
                 $analysis->save();
-                Log::info("CodeAnalysisService: AST and summary updated for [{$filePath}].");
+                Log::info("CodeAnalysisService: AST and summary updated for [{$relativePath}].");
             } catch (Throwable $e) {
-                Log::error("CodeAnalysisService: Failed to parse file [{$filePath}]. Error: {$e->getMessage()}");
+                Log::error("CodeAnalysisService: Failed to parse file [{$relativePath}]. Error: {$e->getMessage()}");
                 // Depending on requirements, you might want to rethrow or handle differently
             }
         }
 
         return $analysis;
+    }
+
+    /**
+     * Normalize the file path to ensure consistency.
+     *
+     * @param string $filePath The original file path.
+     * @return string The normalized relative file path.
+     */
+    protected function normalizeFilePath(string $filePath): string
+    {
+        // Remove any leading slashes
+        $normalizedPath = Str::startsWith($filePath, ['/', '\\']) ? ltrim($filePath, '/\\') : $filePath;
+
+        // Replace backslashes with forward slashes for consistency
+        $normalizedPath = str_replace(['\\'], '/', $normalizedPath);
+
+        // Optionally, ensure it's relative to the base path
+        $basePath = base_path();
+        if (Str::startsWith($normalizedPath, $basePath)) {
+            $normalizedPath = Str::after($normalizedPath, rtrim($basePath, '/') . '/');
+        }
+
+        return $normalizedPath;
     }
 
     /**
@@ -438,8 +462,10 @@ class CodeAnalysisService
      */
     private function getRawCode(string $filePath): string
     {
+        // Use the normalized file path
+        $relativePath = $this->normalizeFilePath($filePath);
         // Construct the absolute path using base_path
-        $absolutePath = base_path($filePath);
+        $absolutePath = base_path($relativePath);
 
         if (File::exists($absolutePath)) {
             Log::debug("AnalysisPassService: Retrieving raw code from '{$absolutePath}'.");
