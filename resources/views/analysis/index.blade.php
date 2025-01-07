@@ -46,11 +46,7 @@
                     Enter a file or folder path below to queue an AI analysis:
                 </p>
             </div>
-            <div>
-                <x-button href="{{ route('analysis.create') }}" class="bg-green-600 text-white hover:bg-green-700 focus:ring-green-500">
-                    + Create New Analysis
-                </x-button>
-            </div>
+            <!-- Removed the '+ Create New Analysis' button -->
         </div>
     
         <form
