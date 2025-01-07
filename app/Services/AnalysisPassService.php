@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use App\Enums\OperationIdentifier;
 use App\Models\AIResult;
 use App\Models\CodeAnalysis;
@@ -153,7 +154,18 @@ class AnalysisPassService
             throw $valueError;
         }
 
-        $promptBuilder = new AIPromptBuilder(
+        // Generate a unique cache key based on CodeAnalysis ID and pass name
+        $cacheKey = "ai_response_{$analysis->id}_{$passName}";
+
+        // Check if response is cached
+        if (Cache::has($cacheKey)) {
+            Log::info("AnalysisPassService: Retrieved cached response for pass '{$passName}'.");
+            $responseData = Cache::get($cacheKey);
+            return [
+                'prompt' => '', // No need to rebuild prompt if cached
+                'response_data' => $responseData,
+            ];
+        }
             operationIdentifier: $operationIdentifier,
             config: $passConfig,
             astData: $analysis->ast ?? [],
@@ -200,6 +212,9 @@ class AnalysisPassService
             params: $aiParams
         );
         Log::debug("AnalysisPassService: AI operation response for pass '{$passName}': ".json_encode($responseData));
+
+        // Cache the response for 24 hours
+        Cache::put($cacheKey, $responseData, now()->addDay());
 
         return [
             'prompt' => $prompt,

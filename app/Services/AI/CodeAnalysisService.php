@@ -56,7 +56,10 @@ class CodeAnalysisService
         // Re-parse if no AST or if reparse is requested
         if ($reparse || empty($analysis->ast)) {
             Log::info("CodeAnalysisService: Parsing file [{$relativePath}] into AST.");
-            try {
+            // Invalidate cache for all associated AI passes
+            foreach (config('ai.passes') as $passName => $passConfig) {
+                Cache::forget("ai_response_{$analysis->id}_{$passName}");
+            }
                 $ast = $this->parserService->parseFile($relativePath);
                 $analysis->ast = $ast;
                 $analysis->analysis = $this->buildAstSummary($relativePath, $ast);
