@@ -72,14 +72,14 @@ class AnalyzeFilesCommand extends FilesCommand
             $this->info("Wrote analysis to [{$outputFile}].");
             Log::info("AnalyzeFilesCommand: Wrote analysis JSON to [{$outputFile}].");
         } else {
-            // Queue ProcessAnalysisPassJob for each file
-            foreach ($phpFiles as $filePath) {
-                ProcessAnalysisPassJob::dispatch($filePath, $dryRun);
-                Log::info("AnalyzeFilesCommand: Queued ProcessAnalysisPassJob for [{$filePath}].");
+            // Queue ProcessAnalysisPassJob for each CodeAnalysis ID
+            foreach ($results as $result) {
+                ProcessAnalysisPassJob::dispatch($result['id'], $dryRun);
+                Log::info("AnalyzeFilesCommand: Queued ProcessAnalysisPassJob for CodeAnalysis ID [{$result['id']}].");
             }
 
-            $this->info("Queued [{$phpFiles->count()}] analysis jobs.");
-            Log::info("AnalyzeFilesCommand: Queued [{$phpFiles->count()}] analysis jobs.");
+            $this->info("Queued [{$results->count()}] analysis jobs.");
+            Log::info("AnalyzeFilesCommand: Queued [{$results->count()}] analysis jobs.");
         }
 
         $this->info("Done! Processed [{$results->count()}] file(s).");
@@ -108,7 +108,7 @@ class AnalyzeFilesCommand extends FilesCommand
      *
      * @param  Collection<string>  $phpFiles  The collection of PHP file paths.
      * @param  bool  $dryRun  Indicates if the run is a dry run.
-     * @return Collection<array> The collection of analysis results.
+     * @return Collection<array> The collection of analysis results including 'id'.
      */
     protected function processFiles(Collection $phpFiles, bool $dryRun): Collection
     {
@@ -123,6 +123,7 @@ class AnalyzeFilesCommand extends FilesCommand
                 // Removed incorrect runAnalysis call here
 
                 $results->push([
+                    'id' => $analysisRecord->id,
                     'file' => $analysisRecord->file_path,
                     'analysis' => $analysisRecord->analysis,
                     'current_pass' => $analysisRecord->current_pass,
