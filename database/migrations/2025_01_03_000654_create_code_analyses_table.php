@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('code_analyses', function (Blueprint $table) {
             $table->id();
             $table->string('file_path')->unique();
+            $table->string('relative_file_path')->nullable();
             $table->json('ast');
             $table->json('analysis');
             $table->integer('current_pass')->default(0);
