@@ -58,6 +58,7 @@ class CodeAnalysisService
                 'analysis' => [],
                 'current_pass' => 0,
                 'completed_passes' => [],
+                'relative_file_path' => $relativePath, // Added to ensure relative_file_path is set
             ]
         );
 
