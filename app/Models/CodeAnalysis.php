@@ -16,6 +16,7 @@ class CodeAnalysis extends Model
 
     protected $fillable = [
         'file_path',
+        'relative_file_path',
         'ast',
         'analysis',
         'ai_output',
@@ -44,6 +45,8 @@ class CodeAnalysis extends Model
     }
 
     protected $casts = [
+        'file_path' => 'string',
+        'relative_file_path' => 'string',
         'ast' => 'array',
         'analysis' => 'array',
         'ai_output' => 'array',
@@ -63,7 +66,7 @@ class CodeAnalysis extends Model
     }
 
     /**
-     * Mutator to set the relative file path.
+     * Mutator to set the file path.
      *
      * @param  string  $value
      * @return void
@@ -72,7 +75,7 @@ class CodeAnalysis extends Model
     {
         $basePath = Config::get('filesystems.base_path');
         if (Str::startsWith($value, $basePath)) {
-            $relativePath = Str::after($value, $basePath . DIRECTORY_SEPARATOR);
+            $relativePath = Str::after($value, rtrim($basePath, '/') . '/');
             $this->attributes['file_path'] = $relativePath;
         } else {
             $this->attributes['file_path'] = $value;
