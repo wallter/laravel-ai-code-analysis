@@ -50,6 +50,17 @@ class AnalyzeFilesCommand extends FilesCommand
 
         $results = $this->processFiles($phpFiles, $dryRun);
 
+        // Run the analysis after processing all files
+        try {
+            $this->analysisService->runAnalysis($dryRun, $outputFile ?? 'all.json');
+            Log::info("AnalyzeFilesCommand: runAnalysis executed with dryRun={$dryRun}.");
+        } catch (Throwable $e) {
+            Log::error("AnalyzeFilesCommand: runAnalysis failed. Error: ".$e->getMessage(), [
+                'exception' => $e,
+            ]);
+            $this->warn("runAnalysis failed: ".$e->getMessage());
+        }
+
         if ($outputFile) {
             $this->exportToJson($results->toArray(), $outputFile);
         }
@@ -92,7 +103,7 @@ class AnalyzeFilesCommand extends FilesCommand
             try {
                 Log::info("AnalyzeFilesCommand: Analyzing [{$filePath}].");
                 $analysisRecord = $this->analysisService->analyzeFile($filePath, $reparse = false);
-                $this->analysisService->runAnalysis($analysisRecord, $dryRun);
+                // Removed incorrect runAnalysis call here
 
                 $results->push([
                     'file' => $analysisRecord->file_path,
