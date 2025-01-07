@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Services\Export\JsonExportService;
 use App\Services\ParsedItemService;
 use App\Services\Parsing\FileProcessorService;
+use Illuminate\Support\Facades\Config;
 use App\Services\Parsing\ParserService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -103,7 +104,10 @@ class ParseFilesCommand extends FilesCommand
      */
     protected function processFile(string $filePath): void
     {
-        $success = $this->fileProcessorService->process($filePath, $this->isVerbose());
+        $basePath = Config::get('filesystems.base_path');
+        $absolutePath = realpath($basePath . DIRECTORY_SEPARATOR . $filePath) ?: $filePath;
+
+        $success = $this->fileProcessorService->process($absolutePath, $this->isVerbose());
 
         if (! $success) {
             $this->warn("Failed to parse and store: {$filePath}");

@@ -10,6 +10,7 @@ use App\Jobs\ProcessAnalysisPassJob;
 use App\Models\CodeAnalysis;
 use App\Services\Parsing\ParserService;
 use App\Services\Parsing\UnifiedAstVisitor;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -44,7 +45,11 @@ class CodeAnalysisService
     {
         Log::debug("CodeAnalysisService: Checking or creating CodeAnalysis for [{$filePath}].");
 
+        $basePath = Config::get('filesystems.base_path');
+        $absolutePath = realpath($basePath . DIRECTORY_SEPARATOR . $filePath) ?: $filePath;
+
         $analysis = CodeAnalysis::firstOrCreate(
+            ['file_path' => $absolutePath],
             ['file_path' => $filePath],
             ['ast' => [], 'analysis' => [], 'current_pass' => 0, 'completed_passes' => []]
         );

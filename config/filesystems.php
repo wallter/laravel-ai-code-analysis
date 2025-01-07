@@ -59,6 +59,8 @@ return [
 
     ],
 
+    'base_path' => env('FILE_BASE_PATH', base_path()),
+
     /*
     |--------------------------------------------------------------------------
     | Symbolic Links
