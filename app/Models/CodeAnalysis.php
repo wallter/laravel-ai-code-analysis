@@ -30,6 +30,7 @@ class CodeAnalysis extends Model
     public function aiResults()
     {
         return $this->hasMany(AIResult::class);
+    }
 
     /**
      * Get the AI scores associated with this code analysis.
@@ -47,16 +48,7 @@ class CodeAnalysis extends Model
         'ai_output' => 'array',
         'completed_passes' => 'array',
     ];
-    {
-        return [
-            'ast' => 'array',
-            'analysis' => 'array',
-            'ai_output' => 'array',
-            'completed_passes' => 'array',
-        ];
-    }
-    }
-
+    
     /**
      * Accessor to get the absolute file path.
      *
@@ -85,3 +77,4 @@ class CodeAnalysis extends Model
             $this->attributes['file_path'] = $value;
         }
     }
+}
