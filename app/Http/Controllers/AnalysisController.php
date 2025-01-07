@@ -89,7 +89,6 @@ class AnalysisController extends Controller
             return back()->withErrors(['analysis' => "Failed to analyze [{$filePath}]: {$throwable->getMessage()}"]);
         }
     }
-    }
 
     /**
      * Show the form for creating a new CodeAnalysis.
@@ -190,3 +189,4 @@ class AnalysisController extends Controller
             return back()->withErrors(['analysis' => "Failed to delete [{$analysis->file_path}]: {$throwable->getMessage()}"]);
         }
     }
+}
