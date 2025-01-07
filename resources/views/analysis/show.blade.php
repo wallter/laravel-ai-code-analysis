@@ -20,14 +20,9 @@
       </p>
     </div>
     <div class="mt-2 sm:mt-0">
-      <a
-        href="{{ route('analysis.index') }}"
-        class="inline-block bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600
-               text-gray-700 dark:text-gray-200 px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600
-               transition-colors"
-      >
-        &larr; Back to List
-      </a>
+      <x-button href="{{ route('analysis.index') }}" class="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600">
+          &larr; Back to List
+      </x-button>
     </div>
   </div>
 

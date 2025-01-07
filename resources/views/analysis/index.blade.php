@@ -22,13 +22,9 @@
                focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-800
                dark:text-gray-100 transition-colors"
       />
-      <button
-        type="submit"
-        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors
-               focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        Analyze
-      </button>
+      <x-button type="submit" class="bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500">
+          Analyze
+      </x-button>
     </form>
   </div>
 
