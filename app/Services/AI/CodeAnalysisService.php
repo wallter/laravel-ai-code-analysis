@@ -152,5 +152,49 @@ class CodeAnalysisService
         ];
     }
 
-    // ... (rest of the CodeAnalysisService remains unchanged)
+    /**
+     * Run the complete analysis process.
+     *
+     * @param  string  $directory   The directory to analyze.
+     * @param  bool    $dryRun      Whether to perform a dry run without saving results.
+     * @param  string  $outputFile  The path to the output JSON file.
+     * @return void
+     */
+    public function runAnalysis(string $directory = 'app', bool $dryRun = false, string $outputFile = 'all.json'): void
+    {
+        Log::info("CodeAnalysisService: Starting analysis on directory '{$directory}' with dryRun={$dryRun}.");
+
+        $phpFiles = $this->collectPhpFiles($directory);
+
+        $results = [];
+
+        foreach ($phpFiles as $filePath) {
+            try {
+                Log::debug("CodeAnalysisService: Analyzing file '{$filePath}'.");
+                $analysis = $this->analyzeFile($filePath, $dryRun);
+
+                // Assuming you want to collect some data from each analysis
+                $results[] = [
+                    'file_path' => $analysis->file_path,
+                    'ast_summary' => $analysis->analysis,
+                    'ai_output' => $analysis->ai_output,
+                ];
+            } catch (Throwable $e) {
+                Log::error("CodeAnalysisService: Failed to analyze file '{$filePath}'. Error: {$e->getMessage()}");
+            }
+        }
+
+        if (!$dryRun) {
+            try {
+                File::put($outputFile, json_encode($results, JSON_PRETTY_PRINT));
+                Log::info("CodeAnalysisService: Analysis results written to '{$outputFile}'.");
+            } catch (Throwable $e) {
+                Log::error("CodeAnalysisService: Failed to write analysis results to '{$outputFile}'. Error: {$e->getMessage()}");
+            }
+        } else {
+            Log::info("CodeAnalysisService: Dry run completed. No results were saved.");
+        }
+
+        Log::info("CodeAnalysisService: Analysis process completed.");
+    }
 }
