@@ -62,7 +62,7 @@ class ParserService
     public function parseFile(string $filePath, bool $useCache = false): array
     {
         $basePath = Config::get('filesystems.base_path');
-        $absolutePath = realpath($basePath . DIRECTORY_SEPARATOR . $filePath) ?: $filePath;
+        $absolutePath = realpath($basePath.DIRECTORY_SEPARATOR.$filePath) ?: $filePath;
         Log::debug("ParserService.parseFile => [{$absolutePath}], useCache={$useCache}");
 
         if ($useCache) {

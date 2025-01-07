@@ -4,22 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services\AI;
 
-use App\Enums\OperationIdentifier;
-use App\Enums\ParsedItemType;
-use App\Jobs\ProcessAnalysisPassJob;
-use App\Models\AIResult;
 use App\Models\CodeAnalysis;
-use App\Services\AI\AIPromptBuilder;
-use App\Services\AI\OpenAIService;
 use App\Services\Parsing\ParserService;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
-use PhpParser\NodeTraverser;
-use PhpParser\NodeVisitor\NameResolver;
-use Throwable;
 use Illuminate\Support\Str;
+use Throwable;
 
 /**
  * Manages AST parsing and prepares CodeAnalysis records for AI processing.
@@ -83,7 +74,7 @@ class CodeAnalysisService
     /**
      * Normalize the file path to ensure it is relative to the base path.
      *
-     * @param string $filePath The original file path (absolute or relative).
+     * @param  string  $filePath  The original file path (absolute or relative).
      * @return string The normalized relative file path.
      */
     protected function normalizeFilePath(string $filePath): string
@@ -95,31 +86,34 @@ class CodeAnalysisService
         $basePath = str_replace(['\\'], '/', $basePath);
 
         // Convert to absolute path if it's not already
-        if (!Str::startsWith($filePath, ['/', 'http'])) {
-            $filePath = realpath($basePath . '/' . ltrim($filePath, '/'));
+        if (! Str::startsWith($filePath, ['/', 'http'])) {
+            $filePath = realpath($basePath.'/'.ltrim($filePath, '/'));
         }
 
         // Ensure filePath is absolute
-        if (!$filePath || !is_string($filePath)) {
+        if (! $filePath || ! is_string($filePath)) {
             Log::error("CodeAnalysisService: Provided filePath '{$filePath}' could not be resolved to a real path.");
+
             return $filePath;
         }
 
         // Strip the base path from the file path to get the relative path
         if (Str::startsWith($filePath, $basePath)) {
-            $relativePath = Str::replaceFirst($basePath . '/', '', $filePath);
+            $relativePath = Str::replaceFirst($basePath.'/', '', $filePath);
             Log::debug("CodeAnalysisService: Normalized '{$filePath}' to '{$relativePath}'.");
+
             return $relativePath;
         }
 
         Log::warning("CodeAnalysisService: The file path '{$filePath}' does not start with base path '{$basePath}'. Storing as is.");
+
         return $filePath;
     }
 
     /**
      * Collect PHP files from the given directory.
      *
-     * @param string $directory The directory to scan for PHP files.
+     * @param  string  $directory  The directory to scan for PHP files.
      * @return Collection<string> The collection of PHP file paths.
      */
     public function collectPhpFiles(string $directory): Collection
@@ -128,17 +122,15 @@ class CodeAnalysisService
 
         try {
             $phpFiles = collect(File::allFiles($directory))
-                ->filter(function ($file) {
-                    return $file->getExtension() === 'php';
-                })
-                ->map(function ($file) use ($directory) {
-                    return $this->normalizeFilePath($file->getPathname());
-                });
+                ->filter(fn($file) => $file->getExtension() === 'php')
+                ->map(fn($file) => $this->normalizeFilePath($file->getPathname()));
 
-            Log::debug("CodeAnalysisService: Collected " . $phpFiles->count() . " PHP files from '{$directory}'.");
+            Log::debug('CodeAnalysisService: Collected '.$phpFiles->count()." PHP files from '{$directory}'.");
+
             return $phpFiles;
-        } catch (Throwable $e) {
-            Log::error("CodeAnalysisService: Failed to collect PHP files from directory '{$directory}'. Error: {$e->getMessage()}");
+        } catch (Throwable $throwable) {
+            Log::error("CodeAnalysisService: Failed to collect PHP files from directory '{$directory}'. Error: {$throwable->getMessage()}");
+
             return collect();
         }
     }
@@ -146,8 +138,8 @@ class CodeAnalysisService
     /**
      * Build a summary of the AST for analysis.
      *
-     * @param string $relativePath The relative file path.
-     * @param array $ast The abstract syntax tree.
+     * @param  string  $relativePath  The relative file path.
+     * @param  array  $ast  The abstract syntax tree.
      * @return array The summary of the AST.
      */
     protected function buildAstSummary(string $relativePath, array $ast): array

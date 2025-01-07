@@ -24,11 +24,6 @@ class AIResult extends Model
         'content_type' => AIResultContentType::class,
     ];
 
-    protected $casts = [
-        'metadata' => 'array',
-        'response_text' => 'array', // If you plan to store JSON responses as arrays
-    ];
-
     /**
      * Get the CodeAnalysis instance associated with this AIResult.
      *
@@ -37,5 +32,12 @@ class AIResult extends Model
     public function codeAnalysis()
     {
         return $this->belongsTo(CodeAnalysis::class);
+    }
+    protected function casts(): array
+    {
+        return [
+            'metadata' => 'array',
+            'response_text' => 'array', // If you plan to store JSON responses as arrays
+        ];
     }
 }
