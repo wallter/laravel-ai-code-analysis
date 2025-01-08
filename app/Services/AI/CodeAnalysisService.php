@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Throwable;
 
 /**
@@ -82,10 +83,17 @@ class CodeAnalysisService
      *
      * @param  string  $filePath  The original file path (absolute or relative).
      * @return string The normalized relative file path.
+     *
+     * @throws InvalidArgumentException If the file path cannot be resolved.
      */
     protected function normalizeFilePath(string $filePath): string
     {
         $basePath = realpath(base_path());
+
+        if ($basePath === false) {
+            Log::error("CodeAnalysisService: Unable to resolve base path.");
+            throw new InvalidArgumentException("Unable to resolve base path.");
+        }
 
         // Ensure both paths use forward slashes
         $filePath = str_replace(['\\'], '/', $filePath);
@@ -93,19 +101,19 @@ class CodeAnalysisService
 
         // Convert to absolute path if it's not already
         if (! Str::startsWith($filePath, ['/', 'http'])) {
-            $filePath = realpath($basePath.'/'.ltrim($filePath, '/'));
-        }
+            $resolvedPath = realpath($basePath . '/' . ltrim($filePath, '/'));
 
-        // Ensure filePath is absolute
-        if (! $filePath || ! is_string($filePath)) {
-            Log::error("CodeAnalysisService: Provided filePath '{$filePath}' could not be resolved to a real path.");
+            if ($resolvedPath === false) {
+                Log::error("CodeAnalysisService: Provided filePath '{$filePath}' could not be resolved to a real path.");
+                throw new InvalidArgumentException("Invalid file path: {$filePath}");
+            }
 
-            return $filePath;
+            $filePath = $resolvedPath;
         }
 
         // Strip the base path from the file path to get the relative path
         if (Str::startsWith($filePath, $basePath)) {
-            $relativePath = Str::replaceFirst($basePath.'/', '', $filePath);
+            $relativePath = Str::replaceFirst($basePath . '/', '', $filePath);
             Log::debug("CodeAnalysisService: Normalized '{$filePath}' to '{$relativePath}'.");
 
             return $relativePath;
@@ -131,7 +139,7 @@ class CodeAnalysisService
                 ->filter(fn ($file) => $file->getExtension() === 'php')
                 ->map(fn ($file) => $this->normalizeFilePath($file->getPathname()));
 
-            Log::debug('CodeAnalysisService: Collected '.$phpFiles->count()." PHP files from '{$directory}'.");
+            Log::debug('CodeAnalysisService: Collected ' . $phpFiles->count() . " PHP files from '{$directory}'.");
 
             return $phpFiles;
         } catch (Throwable $throwable) {
@@ -186,7 +194,7 @@ class CodeAnalysisService
                     $results[] = [
                         'file_path' => $analysis->file_path,
                         'ast_summary' => $analysis->analysis,
-                        'ai_output' => $analysis->ai_output,
+                        'ai_output' => $analysis->ai_output ?? null, // Ensure ai_output exists
                     ];
                 } catch (Throwable $e) {
                     Log::error("CodeAnalysisService: Failed to analyze file '{$filePath}'. Error: {$e->getMessage()}");
