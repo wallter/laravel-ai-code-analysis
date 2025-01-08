@@ -14,7 +14,6 @@ use Throwable;
 class AnalyzeFilesCommand extends FilesCommand
 {
     protected $signature = 'analyze:files
-        {directory=app : The directory to analyze .php files within}
         {--output-file= : Export analysis results to a .json file}
         {--limit-class= : (Unused in this example, but provided by FilesCommand)}
         {--limit-method= : (Unused in this example, but provided)}
@@ -39,9 +38,12 @@ class AnalyzeFilesCommand extends FilesCommand
     {
         $outputFile = $this->getOutputFile();
         $dryRun = (bool) $this->option('dry-run');
-        $directory = $this->argument('directory');
+        $folders = config('parsing.folders', []);
 
-        $phpFiles = $this->collectPhpFiles($directory);
+        $phpFiles = collect();
+        foreach ($folders as $folder) {
+            $phpFiles = $phpFiles->merge($this->analysisService->collectPhpFiles($folder));
+        }
         if ($phpFiles->isEmpty()) {
             $this->warn('No PHP files found. Aborting analysis.');
             Log::warning('AnalyzeFilesCommand: No .php files found, aborting analysis.');
@@ -91,14 +93,17 @@ class AnalyzeFilesCommand extends FilesCommand
     /**
      * Collect PHP files using the CodeAnalysisService.
      *
-     * @param  string  $directory  The directory to search within.
+     * @param  array<string>  $folders  The directories to search within.
      * @return Collection<string> The collection of PHP file paths.
      */
-    protected function collectPhpFiles(string $directory): Collection
+    protected function collectPhpFiles(array $folders): Collection
     {
-        $phpFiles = $this->analysisService->collectPhpFiles($directory);
-        $this->info("Found [{$phpFiles->count()}] .php files in [{$directory}].");
-        Log::info("AnalyzeFilesCommand: Found [{$phpFiles->count()}] .php files in [{$directory}].");
+        $phpFiles = collect();
+        foreach ($folders as $folder) {
+            $phpFiles = $phpFiles->merge($this->analysisService->collectPhpFiles($folder));
+            $this->info("Found [{$phpFiles->count()}] .php files in [{$folder}].");
+            Log::info("AnalyzeFilesCommand: Found [{$phpFiles->count()}] .php files in [{$folder}].");
+        }
 
         return $phpFiles;
     }
