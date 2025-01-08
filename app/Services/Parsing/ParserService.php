@@ -30,7 +30,7 @@ class ParserService
      *
      * @return Collection<string> A collection of PHP file paths.
      */
-    public function collectPhpFiles(string $directory = 'app'): Collection
+    public function collectPhpFiles(): Collection
     {
         Log::info('ParserService: Collecting .php files from configuration.');
 

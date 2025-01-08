@@ -38,12 +38,10 @@ class AnalyzeFilesCommand extends FilesCommand
     {
         $outputFile = $this->getOutputFile();
         $dryRun = (bool) $this->option('dry-run');
-        $folders = config('parsing.folders', []);
 
-        $phpFiles = collect();
-        foreach ($folders as $folder) {
-            $phpFiles = $phpFiles->merge($this->analysisService->collectPhpFiles($folder));
-        }
+        // Collect all PHP files (both from folders and files)
+        $phpFiles = $this->analysisService->collectPhpFiles();
+
         if ($phpFiles->isEmpty()) {
             $this->warn('No PHP files found. Aborting analysis.');
             Log::warning('AnalyzeFilesCommand: No .php files found, aborting analysis.');
@@ -88,24 +86,6 @@ class AnalyzeFilesCommand extends FilesCommand
         Log::info("AnalyzeFilesCommand: Completed. Processed [{$results->count()}] files.");
 
         return 0;
-    }
-
-    /**
-     * Collect PHP files using the CodeAnalysisService.
-     *
-     * @param  array<string>  $folders  The directories to search within.
-     * @return Collection<string> The collection of PHP file paths.
-     */
-    protected function collectPhpFiles(array $folders): Collection
-    {
-        $phpFiles = collect();
-        foreach ($folders as $folder) {
-            $phpFiles = $phpFiles->merge($this->analysisService->collectPhpFiles($folder));
-            $this->info("Found [{$phpFiles->count()}] .php files in [{$folder}].");
-            Log::info("AnalyzeFilesCommand: Found [{$phpFiles->count()}] .php files in [{$folder}].");
-        }
-
-        return $phpFiles;
     }
 
     /**
