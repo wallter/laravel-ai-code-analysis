@@ -2,6 +2,7 @@
 
 @section('content')
 @php
+    dump($analysis->toArray());
     // Sort AI results, prioritizing the consolidation pass
     $sortedAiResults = $analysis->aiResults->sortByDesc(function($result) {
         return $result->pass_name === App\Enums\OperationIdentifier::CONSOLIDATION_PASS->value;
