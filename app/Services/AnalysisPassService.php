@@ -43,12 +43,12 @@ class AnalysisPassService
                 $analysis = $this->retrieveAnalysis($codeAnalysisId);
                 if (! $analysis) {
                     Log::warning("AnalysisPassService: No analysis found for CodeAnalysis ID {$codeAnalysisId}. Exiting processAllPasses.");
-
                     return;
                 }
 
-                // Run static analysis
-                $staticAnalysis = $this->staticAnalysisService->runAnalysis($analysis);
+                // Run static analysis with the specified tool
+                $toolName = 'PHPStan'; // Specify the tool name here
+                $staticAnalysis = $this->staticAnalysisService->runAnalysis($analysis, $toolName);
                 if ($staticAnalysis) {
                     // Make static analysis data available to AI passes
                     // Example: Attach static analysis results to the CodeAnalysis model
