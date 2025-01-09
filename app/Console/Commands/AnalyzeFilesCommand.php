@@ -241,7 +241,7 @@ class AnalyzeFilesCommand extends FilesCommand
     }
 
     /**
-     * Extract class names from a PHP file.
+     * Extract fully qualified class names from a PHP file.
      *
      * @param string $filePath
      * @return array
@@ -249,8 +249,17 @@ class AnalyzeFilesCommand extends FilesCommand
     private function extractClassesFromFile(string $filePath): array
     {
         $content = file_get_contents($filePath);
-        // Updated regex to handle namespaces and class modifiers
-        preg_match_all('/(?:namespace\s+[\w\\\\]+;)?\s*(?:abstract\s+|final\s+)?class\s+(\w+)/', $content, $matches);
-        return $matches[1] ?? [];
+        // Updated regex to capture namespace and class name
+        preg_match_all('/(?:namespace\s+([A-Za-z_][A-Za-z0-9_\\\\]*)\s*;)?\s*(?:abstract\s+|final\s+)?class\s+([A-Za-z_][A-Za-z0-9_]*)/', $content, $matches, PREG_SET_ORDER);
+
+        $classes = [];
+        foreach ($matches as $match) {
+            $namespace = $match[1] ?? '';
+            $className = $match[2];
+            $fullyQualifiedName = $namespace ? "{$namespace}\\{$className}" : $className;
+            $classes[] = $fullyQualifiedName;
+        }
+
+        return $classes;
     }
 }
