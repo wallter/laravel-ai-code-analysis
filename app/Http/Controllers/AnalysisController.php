@@ -30,7 +30,11 @@ class AnalysisController extends Controller
     public function index()
     {
         // Eager-load AI results if you want quick access to them
-        $analyses = CodeAnalysis::with('aiResults')->orderBy('id', 'desc')->get();
+        $analyses = CodeAnalysis::with([
+            'aiResults',
+            'aiScores',
+            'static_analyses'
+        ])->orderBy('id', 'desc')->get();
 
         return view('analysis.index', compact('analyses'));
     }
