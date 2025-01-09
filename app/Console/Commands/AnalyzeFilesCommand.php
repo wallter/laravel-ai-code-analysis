@@ -36,13 +36,23 @@ class AnalyzeFilesCommand extends FilesCommand
      */
     public function handle(): int
     {
-        $outputFile = $this->getOutputFile();
+        $outputFile = $this->option('output-file');
         $dryRun = (bool) $this->option('dry-run');
         $limitClassesOption = $this->option('limit-class');
         $limitClasses = [];
 
         if ($limitClassesOption) {
             $limitClasses = array_map('trim', explode(',', $limitClassesOption));
+
+            // Validate that limitClasses are not empty and are valid class names
+            foreach ($limitClasses as $class) {
+                if (!preg_match('/^[A-Za-z_][A-Za-z0-9_\\\\]*$/', $class)) {
+                    $this->error("Invalid class name provided in --limit-class: '{$class}'");
+                    Log::error("AnalyzeFilesCommand: Invalid class name provided in --limit-class: '{$class}'");
+                    return 1;
+                }
+            }
+
             $this->info('Limiting analysis to classes: ' . implode(', ', $limitClasses));
             Log::info('AnalyzeFilesCommand: Limiting analysis to classes: ' . implode(', ', $limitClasses));
         }
@@ -102,10 +112,10 @@ class AnalyzeFilesCommand extends FilesCommand
                 $this->analysisService->runAnalysis($dryRun, $outputFile);
                 Log::info("AnalyzeFilesCommand: runAnalysis executed with dryRun={$dryRun}.");
             } catch (Throwable $e) {
-                Log::error('AnalyzeFilesCommand: runAnalysis failed. Error: '.$e->getMessage(), [
+                Log::error('AnalyzeFilesCommand: runAnalysis failed. Error: ' . $e->getMessage(), [
                     'exception' => $e,
                 ]);
-                $this->warn('runAnalysis failed: '.$e->getMessage());
+                $this->warn('runAnalysis failed: ' . $e->getMessage());
 
                 return 1;
             }
@@ -160,10 +170,10 @@ class AnalyzeFilesCommand extends FilesCommand
                     'completed_passes' => $analysisRecord->completed_passes,
                 ]);
             } catch (Throwable $e) {
-                Log::error("AnalyzeFilesCommand: Analysis failed [{$filePath}]: ".$e->getMessage(), [
+                Log::error("AnalyzeFilesCommand: Analysis failed [{$filePath}]: " . $e->getMessage(), [
                     'exception' => $e,
                 ]);
-                $this->warn("Could not analyze [{$filePath}]: ".$e->getMessage());
+                $this->warn("Could not analyze [{$filePath}]: " . $e->getMessage());
             }
 
             $bar->advance();
@@ -184,8 +194,8 @@ class AnalyzeFilesCommand extends FilesCommand
     protected function exportToJson(array $data, string $filePath): void
     {
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        if (! $json) {
-            $this->warn('Failed to encode JSON: '.json_last_error_msg());
+        if (!$json) {
+            $this->warn('Failed to encode JSON: ' . json_last_error_msg());
             Log::warning('AnalyzeFilesCommand: Failed to encode JSON output.', [
                 'error' => json_last_error_msg(),
             ]);
@@ -208,7 +218,8 @@ class AnalyzeFilesCommand extends FilesCommand
     private function extractClassesFromFile(string $filePath): array
     {
         $content = file_get_contents($filePath);
-        preg_match_all('/class\s+(\w+)/', $content, $matches);
+        // Updated regex to handle namespaces and class modifiers
+        preg_match_all('/(?:namespace\s+[\w\\\\]+;)?\s*(?:abstract\s+|final\s+)?class\s+(\w+)/', $content, $matches);
         return $matches[1] ?? [];
     }
 }
