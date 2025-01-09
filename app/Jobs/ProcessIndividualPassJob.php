@@ -11,26 +11,28 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
+/**
+ * ProcessIndividualPassJob
+ *
+ * Processes a single AI pass for a code analysis.
+ */
 class ProcessIndividualPassJob implements ShouldQueue
 {
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * The CodeAnalysis ID.
      *
-     * @var int
+     * @var int|null
      */
-    public int $codeAnalysisId;
+    public ?int $codeAnalysisId;
 
     /**
      * The name of the AI pass to execute.
      *
-     * @var string
+     * @var string|null
      */
-    public string $passName;
+    public ?string $passName;
 
     /**
      * Indicates if the job is a dry run.
@@ -42,13 +44,13 @@ class ProcessIndividualPassJob implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param int $codeAnalysisId
-     * @param string $passName
+     * @param int|null $codeAnalysisId
+     * @param string|null $passName
      * @param bool $dryRun
      */
     public function __construct(
-        int $codeAnalysisId,
-        string $passName,
+        ?int $codeAnalysisId = null,
+        ?string $passName = null,
         bool $dryRun = false
     ) {
         $this->codeAnalysisId = $codeAnalysisId;
@@ -64,6 +66,11 @@ class ProcessIndividualPassJob implements ShouldQueue
      */
     public function handle(AnalysisPassService $analysisPassService): void
     {
+        if ($this->codeAnalysisId === null || $this->passName === null) {
+            Log::error("ProcessIndividualPassJob: Missing required parameters for CodeAnalysis ID {$this->codeAnalysisId}.");
+            return;
+        }
+
         try {
             Log::info("ProcessIndividualPassJob: Starting pass '{$this->passName}' for CodeAnalysis ID {$this->codeAnalysisId}.");
 
