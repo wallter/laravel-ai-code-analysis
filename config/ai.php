@@ -310,6 +310,22 @@ return [
                 'response_format' => 'Return a JSON object with "migration_score" and "summary".',
             ],
         ],
+
+        /*
+        |--------------------------------------------------------------------------
+        | Static Analysis Pass
+        |--------------------------------------------------------------------------
+        | Runs static analysis tools like PHPStan, PHP_CodeSniffer, and Psalm.
+        */
+        'static_analysis' => [
+            'operation_identifier' => OperationIdentifier::STATIC_ANALYSIS->value,
+            'model' => null, // No AI model needed
+            'max_tokens' => null,
+            'temperature' => null,
+            'type' => PassType::RAW->value, // Assuming 'RAW' type is appropriate
+            'system_message' => null, // No system message since this is not an AI pass
+            'prompt_sections' => [],
+        ],
     ],
 
     /*
@@ -322,10 +338,11 @@ return [
     'operations' => [
         'multi_pass_analysis' => [
             'pass_order' => [
-                // Updated to use gpt-4o for doc_generation (and ignoring o1-mini)
+                // Updated to include static_analysis
                 'doc_generation',
                 'functional_analysis',
                 'style_convention',
+                'static_analysis',
                 'consolidation_pass',
                 'scoring_pass',
                 'laravel_migration',
