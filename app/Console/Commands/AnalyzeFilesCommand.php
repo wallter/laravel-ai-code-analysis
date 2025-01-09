@@ -15,7 +15,7 @@ class AnalyzeFilesCommand extends FilesCommand
 {
     protected $signature = 'analyze:files
         {--output-file= : Export analysis results to a .json file}
-        {--limit-class= : (Unused in this example, but provided by FilesCommand)}
+        {--limit-class= : Limit analysis to specific classes (comma-separated)}
         {--limit-method= : (Unused in this example, but provided)}
         {--dry-run : Skip saving AI results to DB.}';
 
@@ -38,6 +38,14 @@ class AnalyzeFilesCommand extends FilesCommand
     {
         $outputFile = $this->getOutputFile();
         $dryRun = (bool) $this->option('dry-run');
+        $limitClassesOption = $this->option('limit-class');
+        $limitClasses = [];
+
+        if ($limitClassesOption) {
+            $limitClasses = array_map('trim', explode(',', $limitClassesOption));
+            $this->info('Limiting analysis to classes: ' . implode(', ', $limitClasses));
+            Log::info('AnalyzeFilesCommand: Limiting analysis to classes: ' . implode(', ', $limitClasses));
+        }
 
         // Collect all PHP files (both from folders and files)
         $folders = config('parsing.folders', []);
@@ -65,11 +73,25 @@ class AnalyzeFilesCommand extends FilesCommand
             }
         }
 
-        if ($phpFiles->isEmpty()) {
-            $this->warn('No PHP files found. Aborting analysis.');
-            Log::warning('AnalyzeFilesCommand: No .php files found, aborting analysis.');
+        if ($limitClasses) {
+            $phpFiles = $phpFiles->filter(function ($filePath) use ($limitClasses) {
+                $classesInFile = $this->extractClassesFromFile($filePath);
+                return count(array_intersect($classesInFile, $limitClasses)) > 0;
+            });
 
-            return 0;
+            if ($phpFiles->isEmpty()) {
+                $this->warn('No PHP files found matching the specified classes. Aborting analysis.');
+                Log::warning('AnalyzeFilesCommand: No .php files found matching the specified classes, aborting analysis.');
+
+                return 0;
+            }
+        } else {
+            if ($phpFiles->isEmpty()) {
+                $this->warn('No PHP files found. Aborting analysis.');
+                Log::warning('AnalyzeFilesCommand: No .php files found, aborting analysis.');
+
+                return 0;
+            }
         }
 
         $results = $this->processFiles($phpFiles, $dryRun);
@@ -175,5 +197,18 @@ class AnalyzeFilesCommand extends FilesCommand
         file_put_contents($filePath, $json);
         $this->info("Wrote analysis to [{$filePath}].");
         Log::info("AnalyzeFilesCommand: Wrote analysis JSON to [{$filePath}].");
+    }
+
+    /**
+     * Extract class names from a PHP file.
+     *
+     * @param string $filePath
+     * @return array
+     */
+    private function extractClassesFromFile(string $filePath): array
+    {
+        $content = file_get_contents($filePath);
+        preg_match_all('/class\s+(\w+)/', $content, $matches);
+        return $matches[1] ?? [];
     }
 }
