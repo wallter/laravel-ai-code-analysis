@@ -31,7 +31,7 @@ return [
     | Fallbacks help avoid errors if environment variables are missing.
     */
     'default' => [
-        'model' => env('AI_DEFAULT_MODEL', 'gpt-4o-mini'),
+        'model' => env('AI_DEFAULT_MODEL', 'gpt-4o'), // Updated from 'gpt-4o-mini' to 'gpt-4o'
         'max_tokens' => env('AI_DEFAULT_MAX_TOKENS', 500),
         'temperature' => env('AI_DEFAULT_TEMPERATURE', 0.5),
         'system_message' => 'You are a helpful AI assistant.',
