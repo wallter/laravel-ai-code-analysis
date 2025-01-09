@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Enums\OperationIdentifier;
@@ -35,7 +37,7 @@ class AnalysisPassService
      */
     public function processAllPasses(int $codeAnalysisId, bool $dryRun = false): void
     {
-        Log::info("AnalysisPassService: Starting processAllPasses for CodeAnalysis ID {$codeAnalysisId}, dryRun: ".($dryRun ? 'true' : 'false'));
+        Log::info("AnalysisPassService: Starting processAllPasses for CodeAnalysis ID {$codeAnalysisId}, dryRun: " . ($dryRun ? 'true' : 'false'));
 
         try {
             // Start a database transaction to ensure atomicity
@@ -67,7 +69,7 @@ class AnalysisPassService
                 }
             });
         } catch (Exception $exception) {
-            Log::error('AnalysisPassService: Exception in processAllPasses => '.$exception->getMessage(), ['exception' => $exception]);
+            Log::error('AnalysisPassService: Exception in processAllPasses => ' . $exception->getMessage(), ['exception' => $exception]);
         }
 
         Log::info("AnalysisPassService: Finished processAllPasses for CodeAnalysis ID {$codeAnalysisId}.");
@@ -259,7 +261,7 @@ class AnalysisPassService
         }
 
         // Log the parameters being sent (excluding sensitive information)
-        Log::debug("AnalysisPassService: Performing AI operation for pass '{$passName}' with parameters: ".json_encode([
+        Log::debug("AnalysisPassService: Performing AI operation for pass '{$passName}' with parameters: " . json_encode([
             'model' => $aiParams['model'],
             $tokenLimitParam => $aiParams[$tokenLimitParam],
             'temperature' => $aiParams['temperature'],
@@ -272,7 +274,7 @@ class AnalysisPassService
             operationIdentifier: $operationIdentifier,
             params: $aiParams
         );
-        Log::debug("AnalysisPassService: AI operation response for pass '{$passName}': ".json_encode($responseData));
+        Log::debug("AnalysisPassService: AI operation response for pass '{$passName}': " . json_encode($responseData));
 
         return [
             'prompt' => $prompt,
@@ -347,7 +349,7 @@ class AnalysisPassService
         $metadata = [];
 
         if (! empty($usage)) {
-            Log::debug('AnalysisPassService: Usage metrics found: '.json_encode($usage));
+            Log::debug('AnalysisPassService: Usage metrics found: ' . json_encode($usage));
             $metadata['usage'] = $usage;
             // Compute cost
             $COST_PER_1K_TOKENS = env('OPENAI_COST_PER_1K_TOKENS', 0.002); // e.g., $0.002 per 1k tokens
