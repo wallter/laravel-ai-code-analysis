@@ -98,7 +98,7 @@ return [
         'PHPStan' => [
             'enabled' => true,
             'command' => 'vendor/bin/phpstan',
-            'options' => ['analyse', '--json'],
+            'options' => ['analyse', '--error-format=json'], // Updated option
             'output_format' => 'json',
         ],
         'PHP_CodeSniffer' => [
