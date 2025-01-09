@@ -98,7 +98,7 @@
                     @php
                         $passName = $result->pass_name;
                         $passCost = $result->metadata['cost_estimate_usd'] ?? 0;
-                        $aiOutput = $result->ai_output ?? 'No output available.';
+                        $aiOutput = $result->response_text ?? 'No output available.';
                         $metadataUsage = $result->metadata['usage'] ?? [];
 
                         // Determine badge color based on cost
