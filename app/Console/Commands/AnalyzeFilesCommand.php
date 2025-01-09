@@ -47,7 +47,7 @@ class AnalyzeFilesCommand extends FilesCommand
             // Validate that limitClasses are not empty and are valid class names
             foreach ($limitClasses as $class) {
                 if (!preg_match('/^[A-Za-z_][A-Za-z0-9_\\\\]*$/', $class)) {
-                    $this->error("Invalid class name provided in --limit-class: '{$class}'");
+                    $this->error("Invalid class name provided in --limit-class: '{$class}'. Class names must start with a letter or underscore and contain only letters, numbers, underscores, or backslashes.");
                     Log::error("AnalyzeFilesCommand: Invalid class name provided in --limit-class: '{$class}'");
                     return 1;
                 }
