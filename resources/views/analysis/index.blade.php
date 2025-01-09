@@ -17,26 +17,6 @@
             </ul>
         </x-alert>
     @endif
-    @if (session('status'))
-        <x-alert class="bg-green-100 border-green-400 text-green-700">
-            {{ session('status') }}
-        </x-alert>
-    @endif
-
-    @if ($errors->any())
-        <x-alert class="bg-red-100 border-red-400 text-red-700">
-            <ul class="list-disc list-inside">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </x-alert>
-    @endif
-    @if (session('status'))
-        <x-alert class="bg-green-100 border-green-400 text-green-700">
-            {{ session('status') }}
-        </x-alert>
-    @endif
 
     <div>
         <div class="flex justify-between items-center">
@@ -84,6 +64,7 @@
                 <th class="px-4 py-2 text-left font-semibold">File Path</th>
                 <th class="px-4 py-2 text-left font-semibold">Current Pass</th>
                 <th class="px-4 py-2 text-left font-semibold">Completed Passes</th>
+                <th class="px-4 py-2 text-left font-semibold">Static Analyses</th>
                 <th class="px-4 py-2 font-semibold text-center">Actions</th>
               </tr>
             </thead>
@@ -104,6 +85,20 @@
                       {{ implode(', ', (array)$analysis->completed_passes) }}
                     @else
                       <span class="text-gray-400 dark:text-gray-500">None</span>
+                    @endif
+                  </td>
+                  <td class="px-4 py-2 text-gray-800 dark:text-gray-100 w-1/4">
+                    @if($analysis->staticAnalyses->isEmpty())
+                        <span class="text-gray-400 dark:text-gray-500">No Static Analyses</span>
+                    @else
+                        <ul class="list-disc list-inside">
+                            @foreach($analysis->staticAnalyses as $staticAnalysis)
+                                <li>
+                                    <strong>{{ $staticAnalysis->tool }}</strong>: 
+                                    {{ count($staticAnalysis->results) }} issues found
+                                </li>
+                            @endforeach
+                        </ul>
                     @endif
                   </td>
                   <td class="px-4 py-2 text-center w-1/6">
