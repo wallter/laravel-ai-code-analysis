@@ -33,7 +33,7 @@ class AnalysisController extends Controller
         $analyses = CodeAnalysis::with([
             'aiResults',
             'aiScores',
-            'staticAnalyses'
+            'staticAnalyses',
         ])->orderBy('id', 'desc')->get();
 
         return view('analysis.index', compact('analyses'));
@@ -50,18 +50,14 @@ class AnalysisController extends Controller
         // Eager-load both AI results and static analyses
         $analysis = CodeAnalysis::with([
             'aiResults',
-            'staticAnalyses'
+            'staticAnalyses',
         ])->findOrFail($id);
 
         // Summation of all AI cost estimates
-        $totalAICost = $analysis->aiResults->sum(function ($result) {
-            return $result->metadata['cost_estimate_usd'] ?? 0;
-        });
+        $totalAICost = $analysis->aiResults->sum(fn($result) => $result->metadata['cost_estimate_usd'] ?? 0);
 
         // Summation of static analysis errors
-        $totalStaticErrors = $analysis->staticAnalyses->sum(function ($staticAnalysis) {
-            return count($staticAnalysis->results['errors'] ?? []);
-        });
+        $totalStaticErrors = $analysis->staticAnalyses->sum(fn($staticAnalysis) => count($staticAnalysis->results['errors'] ?? []));
 
         return view('analysis.show', compact('analysis', 'totalAICost', 'totalStaticErrors'));
     }

@@ -9,14 +9,13 @@ use App\Jobs\ProcessIndividualPassJob;
 use App\Models\AIResult;
 use App\Models\CodeAnalysis;
 use App\Services\AI\AIPromptBuilder;
-use App\Services\StaticAnalysis\StaticAnalysisToolInterface;
 use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
+use App\Services\StaticAnalysis\StaticAnalysisToolInterface;
 use Exception;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Throwable;
 
 /**
  * Service responsible for handling AI analysis passes for code.
@@ -37,7 +36,7 @@ class AnalysisPassService
      */
     public function processAllPasses(int $codeAnalysisId, bool $dryRun = false): void
     {
-        Log::info("AnalysisPassService: Starting processAllPasses for CodeAnalysis ID {$codeAnalysisId}, dryRun: " . ($dryRun ? 'true' : 'false'));
+        Log::info("AnalysisPassService: Starting processAllPasses for CodeAnalysis ID {$codeAnalysisId}, dryRun: ".($dryRun ? 'true' : 'false'));
 
         try {
             // Start a database transaction to ensure atomicity
@@ -45,6 +44,7 @@ class AnalysisPassService
                 $analysis = $this->retrieveAnalysis($codeAnalysisId);
                 if (! $analysis) {
                     Log::warning("AnalysisPassService: No analysis found for CodeAnalysis ID {$codeAnalysisId}. Exiting processAllPasses.");
+
                     return;
                 }
 
@@ -60,16 +60,16 @@ class AnalysisPassService
                 $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
 
                 // Dispatch the first pass job
-                if (!empty($passOrder)) {
+                if (! empty($passOrder)) {
                     $firstPass = $passOrder[0];
                     ProcessIndividualPassJob::dispatch($codeAnalysisId, $firstPass, $dryRun);
                     Log::info("AnalysisPassService: Dispatched ProcessIndividualPassJob for pass '{$firstPass}' and CodeAnalysis ID {$codeAnalysisId}.");
                 } else {
-                    Log::warning("AnalysisPassService: Pass order is empty. No jobs dispatched.");
+                    Log::warning('AnalysisPassService: Pass order is empty. No jobs dispatched.');
                 }
             });
         } catch (Exception $exception) {
-            Log::error('AnalysisPassService: Exception in processAllPasses => ' . $exception->getMessage(), ['exception' => $exception]);
+            Log::error('AnalysisPassService: Exception in processAllPasses => '.$exception->getMessage(), ['exception' => $exception]);
         }
 
         Log::info("AnalysisPassService: Finished processAllPasses for CodeAnalysis ID {$codeAnalysisId}.");
@@ -114,10 +114,6 @@ class AnalysisPassService
     /**
      * Process a single AI analysis pass with caching.
      *
-     * @param string $passName
-     * @param int $codeAnalysisId
-     * @param bool $dryRun
-     * @return void
      * @throws \Exception
      */
     public function processPass(string $passName, int $codeAnalysisId, bool $dryRun = false): void
@@ -128,17 +124,20 @@ class AnalysisPassService
             $analysis = $this->retrieveAnalysis($codeAnalysisId);
             if (! $analysis) {
                 Log::warning("AnalysisPassService: No analysis found for CodeAnalysis ID {$codeAnalysisId}. Skipping pass '{$passName}'.");
+
                 return;
             }
 
             $passConfig = $this->getPassConfig($passName);
             if (! $passConfig) {
                 Log::warning("AnalysisPassService: No configuration found for pass '{$passName}'. Skipping.");
+
                 return;
             }
 
             if ($dryRun) {
                 Log::info("[DRY-RUN] => would run pass [{$passName}] for [{$analysis->file_path}].");
+
                 return;
             }
 
@@ -163,11 +162,11 @@ class AnalysisPassService
             $analysis->save();
 
             Log::info("AnalysisPassService: Pass '{$passName}' marked as completed for CodeAnalysis ID {$codeAnalysisId}.");
-        } catch (\Exception $e) {
-            Log::error("AnalysisPassService: Failed to process pass '{$passName}' for CodeAnalysis ID {$codeAnalysisId}. Error: " . $e->getMessage(), [
-                'exception' => $e,
+        } catch (\Exception $exception) {
+            Log::error("AnalysisPassService: Failed to process pass '{$passName}' for CodeAnalysis ID {$codeAnalysisId}. Error: ".$exception->getMessage(), [
+                'exception' => $exception,
             ]);
-            throw $e;
+            throw $exception;
         }
 
         Log::info("AnalysisPassService: Completed pass '{$passName}' for CodeAnalysis ID {$codeAnalysisId}.");
@@ -176,10 +175,6 @@ class AnalysisPassService
     /**
      * Execute AI operation with caching.
      *
-     * @param CodeAnalysis $analysis
-     * @param string $passName
-     * @param array $passConfig
-     * @return array
      * @throws \Exception
      */
     private function executeAiOperationWithCaching(CodeAnalysis $analysis, string $passName, array $passConfig): array
@@ -191,6 +186,7 @@ class AnalysisPassService
         if (Cache::has($cacheKey)) {
             Log::info("AnalysisPassService: Retrieved cached response for pass '{$passName}'.");
             $responseData = Cache::get($cacheKey);
+
             return [
                 'prompt' => '', // No need to rebuild prompt if cached
                 'response_data' => $responseData,
@@ -213,10 +209,6 @@ class AnalysisPassService
     /**
      * Execute AI operation asynchronously.
      *
-     * @param CodeAnalysis $analysis
-     * @param string $passName
-     * @param array $passConfig
-     * @return array
      * @throws \Exception
      */
     private function executeAiOperationAsync(CodeAnalysis $analysis, string $passName, array $passConfig): array
@@ -261,7 +253,7 @@ class AnalysisPassService
         }
 
         // Log the parameters being sent (excluding sensitive information)
-        Log::debug("AnalysisPassService: Performing AI operation for pass '{$passName}' with parameters: " . json_encode([
+        Log::debug("AnalysisPassService: Performing AI operation for pass '{$passName}' with parameters: ".json_encode([
             'model' => $aiParams['model'],
             $tokenLimitParam => $aiParams[$tokenLimitParam],
             'temperature' => $aiParams['temperature'],
@@ -274,7 +266,7 @@ class AnalysisPassService
             operationIdentifier: $operationIdentifier,
             params: $aiParams
         );
-        Log::debug("AnalysisPassService: AI operation response for pass '{$passName}': " . json_encode($responseData));
+        Log::debug("AnalysisPassService: AI operation response for pass '{$passName}': ".json_encode($responseData));
 
         return [
             'prompt' => $prompt,
@@ -318,10 +310,12 @@ class AnalysisPassService
     {
         if (file_exists($filePath)) {
             Log::debug("AnalysisPassService: Retrieving raw code from '{$filePath}'.");
+
             return file_get_contents($filePath);
         }
 
         Log::warning("AnalysisPassService: Raw code file '{$filePath}' does not exist.");
+
         return '';
     }
 
@@ -349,7 +343,7 @@ class AnalysisPassService
         $metadata = [];
 
         if (! empty($usage)) {
-            Log::debug('AnalysisPassService: Usage metrics found: ' . json_encode($usage));
+            Log::debug('AnalysisPassService: Usage metrics found: '.json_encode($usage));
             $metadata['usage'] = $usage;
             // Compute cost
             $COST_PER_1K_TOKENS = env('OPENAI_COST_PER_1K_TOKENS', 0.002); // e.g., $0.002 per 1k tokens

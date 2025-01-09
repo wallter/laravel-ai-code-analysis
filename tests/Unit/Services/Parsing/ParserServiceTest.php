@@ -2,10 +2,8 @@
 
 namespace Tests\Unit\Services\Parsing;
 
-use App\Models\CodeAnalysis;
-use App\Services\AI\CodeAnalysisService;
-use App\Services\Parsing\ParserService;
 use App\Services\ParsedItemService;
+use App\Services\Parsing\ParserService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
@@ -33,7 +31,7 @@ class ParserServiceTest extends TestCase
         $this->parserService = new ParserService($this->parsedItemServiceMock);
     }
 
-    public function testCollectPhpFilesIncludesParsingFiles()
+    public function test_collect_php_files_includes_parsing_files()
     {
         // Arrange
         Config::shouldReceive('get')
@@ -73,7 +71,7 @@ class ParserServiceTest extends TestCase
         $this->assertTrue($phpFiles->contains(base_path('app/Services/SomeOtherService.php')));
     }
 
-    public function testParseFileThrowsExceptionForInvalidPath()
+    public function test_parse_file_throws_exception_for_invalid_path()
     {
         // Arrange
         $invalidPath = 'app/NonExistent.php';
@@ -88,9 +86,7 @@ class ParserServiceTest extends TestCase
 
         Log::shouldReceive('error')
             ->once()
-            ->withArgs(function ($message) use ($invalidPath) {
-                return strpos($message, "Failed to read") !== false;
-            });
+            ->withArgs(fn($message) => str_contains((string) $message, 'Failed to read'));
 
         // Act
         $ast = $this->parserService->parseFile($invalidPath);
@@ -99,7 +95,7 @@ class ParserServiceTest extends TestCase
         $this->assertEmpty($ast);
     }
 
-    public function testParseFileReturnsAstForValidFile()
+    public function test_parse_file_returns_ast_for_valid_file()
     {
         // Arrange
         $validPath = 'app/Services/AI/CodeAnalysisService.php';
@@ -119,20 +115,16 @@ class ParserServiceTest extends TestCase
             ->with($code)
             ->andReturn(['ast_node']);
 
-        $this->app->instance(\PhpParser\ParserFactory::class, function () use ($parserMock) {
-            return new class($parserMock) extends \PhpParser\ParserFactory {
-                private $parser;
+        $this->app->instance(\PhpParser\ParserFactory::class, fn() => new class($parserMock) extends \PhpParser\ParserFactory
+        {
+            public function __construct(private $parser)
+            {
+            }
 
-                public function __construct($parser)
-                {
-                    $this->parser = $parser;
-                }
-
-                public function createForNewestSupportedVersion()
-                {
-                    return $this->parser;
-                }
-            };
+            public function createForNewestSupportedVersion()
+            {
+                return $this->parser;
+            }
         });
 
         $this->parsedItemServiceMock->shouldReceive('createParsedItem')->times(1)->andReturnNull();
@@ -145,7 +137,7 @@ class ParserServiceTest extends TestCase
         $this->assertEquals(['ast_node'], $ast);
     }
 
-    public function testCollectPhpFilesThrowsExceptionForInvalidFiles()
+    public function test_collect_php_files_throws_exception_for_invalid_files()
     {
         // Arrange
         Config::shouldReceive('get')

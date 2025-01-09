@@ -12,10 +12,6 @@ interface StaticAnalysisToolInterface
 {
     /**
      * Run static analysis on the given CodeAnalysis entry using the specified tool and store results.
-     *
-     * @param CodeAnalysis $codeAnalysis
-     * @param string $toolName
-     * @return StaticAnalysis|null
      */
     public function runAnalysis(CodeAnalysis $codeAnalysis, string $toolName): ?StaticAnalysis;
 }

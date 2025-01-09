@@ -16,15 +16,13 @@ return [
     */
     'folders' => [
         // Directories to parse recursively
-        // base_path('app/Models'),
-        base_path('app/Services'),
-        base_path('app/Helpers.php'),
+        base_path('resources/access-app'),
     ],
 
     'files' => [
         // Individual files to parse
         // base_path('app/Models/CodeAnalysis.php'),
-        base_path('app/Services/AI/CodeAnalysisService.php'),
+        // base_path('app/Services/AI/CodeAnalysisService.php'),
     ],
 
     /*

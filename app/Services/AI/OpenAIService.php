@@ -23,8 +23,6 @@ class OpenAIService
     /**
      * Perform an AI operation using the OpenAI API.
      *
-     * @param OperationIdentifier $operationIdentifier
-     * @param array $params
      * @return string AI-generated content.
      *
      * @throws Exception If the API request fails.
@@ -33,7 +31,7 @@ class OpenAIService
     {
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Authorization' => 'Bearer '.$this->apiKey,
                 'Content-Type' => 'application/json',
             ])->post($this->apiBaseUrl, $params);
 
@@ -59,8 +57,6 @@ class OpenAIService
 
     /**
      * Get the last usage metrics.
-     *
-     * @return array
      */
     public function getLastUsage(): array
     {

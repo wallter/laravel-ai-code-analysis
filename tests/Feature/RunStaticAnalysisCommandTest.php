@@ -7,11 +7,16 @@ use App\Models\StaticAnalysis;
 use App\Services\StaticAnalysisService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
-use Tests\TestCase;
 use Mockery;
+use Tests\TestCase;
 
 class RunStaticAnalysisCommandTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->mockConsoleOutput = false;
+    }
     use RefreshDatabase;
 
     public function test_command_runs_static_analysis_successfully()

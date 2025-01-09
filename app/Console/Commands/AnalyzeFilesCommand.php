@@ -52,27 +52,31 @@ class AnalyzeFilesCommand extends FilesCommand
                 if (ctype_digit($class)) {
                     $this->error("Invalid class name provided in --limit-class: '{$class}'. If you intended to limit the number of classes, use the --limit-number option instead.");
                     Log::error("AnalyzeFilesCommand: Invalid class name provided in --limit-class: '{$class}'. Consider using --limit-number instead.");
+
                     return 1;
                 }
 
-                if (!preg_match('/^[A-Za-z_][A-Za-z0-9_\\\\]*$/', $class)) {
+                if (! preg_match('/^[A-Za-z_][A-Za-z0-9_\\\\]*$/', $class)) {
                     $this->error("Invalid class name provided in --limit-class: '{$class}'. Class names must start with a letter or underscore and contain only letters, numbers, underscores, or backslashes.");
                     Log::error("AnalyzeFilesCommand: Invalid class name provided in --limit-class: '{$class}'");
+
                     return 1;
                 }
             }
 
-            $this->info('Limiting analysis to classes: ' . implode(', ', $limitClasses));
-            Log::info('AnalyzeFilesCommand: Limiting analysis to classes: ' . implode(', ', $limitClasses));
+            $this->info('Limiting analysis to classes: '.implode(', ', $limitClasses));
+            Log::info('AnalyzeFilesCommand: Limiting analysis to classes: '.implode(', ', $limitClasses));
         }
 
         if ($limitNumberOption !== null) {
-            if (!ctype_digit($limitNumberOption) || (int)$limitNumberOption < 1) {
+            if (! ctype_digit($limitNumberOption) || (int) $limitNumberOption < 1) {
                 $this->error("Invalid number provided in --limit-number: '{$limitNumberOption}'. It must be a positive integer.");
                 Log::error("AnalyzeFilesCommand: Invalid number provided in --limit-number: '{$limitNumberOption}'");
+
                 return 1;
             }
-            $limitNumber = (int)$limitNumberOption;
+
+            $limitNumber = (int) $limitNumberOption;
             $this->info("Limiting analysis to {$limitNumber} class(es).");
             Log::info("AnalyzeFilesCommand: Limiting analysis to {$limitNumber} class(es).");
         }
@@ -95,7 +99,7 @@ class AnalyzeFilesCommand extends FilesCommand
         }
 
         foreach ($files as $filePath) {
-            if (file_exists($filePath) && pathinfo($filePath, PATHINFO_EXTENSION) === 'php') {
+            if (file_exists($filePath) && pathinfo((string) $filePath, PATHINFO_EXTENSION) === 'php') {
                 $phpFiles->push($filePath);
             } else {
                 $this->warn("File does not exist or is not a PHP file: {$filePath}");
@@ -106,6 +110,7 @@ class AnalyzeFilesCommand extends FilesCommand
         if ($limitClasses) {
             $phpFiles = $phpFiles->filter(function ($filePath) use ($limitClasses) {
                 $classesInFile = $this->extractClassesFromFile($filePath);
+
                 return count(array_intersect($classesInFile, $limitClasses)) > 0;
             });
 
@@ -143,10 +148,10 @@ class AnalyzeFilesCommand extends FilesCommand
                 $this->analysisService->runAnalysis($dryRun, $outputFile);
                 Log::info("AnalyzeFilesCommand: runAnalysis executed with dryRun={$dryRun}.");
             } catch (Throwable $e) {
-                Log::error('AnalyzeFilesCommand: runAnalysis failed. Error: ' . $e->getMessage(), [
+                Log::error('AnalyzeFilesCommand: runAnalysis failed. Error: '.$e->getMessage(), [
                     'exception' => $e,
                 ]);
-                $this->warn('runAnalysis failed: ' . $e->getMessage());
+                $this->warn('runAnalysis failed: '.$e->getMessage());
 
                 return 1;
             }
@@ -201,10 +206,10 @@ class AnalyzeFilesCommand extends FilesCommand
                     'completed_passes' => $analysisRecord->completed_passes,
                 ]);
             } catch (Throwable $e) {
-                Log::error("AnalyzeFilesCommand: Analysis failed [{$filePath}]: " . $e->getMessage(), [
+                Log::error("AnalyzeFilesCommand: Analysis failed [{$filePath}]: ".$e->getMessage(), [
                     'exception' => $e,
                 ]);
-                $this->warn("Could not analyze [{$filePath}]: " . $e->getMessage());
+                $this->warn("Could not analyze [{$filePath}]: ".$e->getMessage());
             }
 
             $bar->advance();
@@ -225,8 +230,8 @@ class AnalyzeFilesCommand extends FilesCommand
     protected function exportToJson(array $data, string $filePath): void
     {
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        if (!$json) {
-            $this->warn('Failed to encode JSON: ' . json_last_error_msg());
+        if (! $json) {
+            $this->warn('Failed to encode JSON: '.json_last_error_msg());
             Log::warning('AnalyzeFilesCommand: Failed to encode JSON output.', [
                 'error' => json_last_error_msg(),
             ]);
@@ -242,9 +247,6 @@ class AnalyzeFilesCommand extends FilesCommand
 
     /**
      * Extract fully qualified class names from a PHP file.
-     *
-     * @param string $filePath
-     * @return array
      */
     private function extractClassesFromFile(string $filePath): array
     {

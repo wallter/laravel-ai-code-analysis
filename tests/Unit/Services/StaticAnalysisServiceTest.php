@@ -6,10 +6,9 @@ use App\Models\CodeAnalysis;
 use App\Models\StaticAnalysis;
 use App\Services\StaticAnalysisService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Log;
-use Tests\TestCase;
 use Mockery;
 use Symfony\Component\Process\Process;
+use Tests\TestCase;
 
 class StaticAnalysisServiceTest extends TestCase
 {
@@ -31,7 +30,7 @@ class StaticAnalysisServiceTest extends TestCase
         // Mock the Process creation
         $this->instance(Process::class, $processMock);
 
-        $service = new StaticAnalysisService();
+        $service = new StaticAnalysisService;
 
         // Act
         $staticAnalysis = $service->runAnalysis($codeAnalysis);
@@ -60,7 +59,7 @@ class StaticAnalysisServiceTest extends TestCase
         // Mock the Process creation
         $this->instance(Process::class, $processMock);
 
-        $service = new StaticAnalysisService();
+        $service = new StaticAnalysisService;
 
         // Act
         $staticAnalysis = $service->runAnalysis($codeAnalysis);

@@ -5,8 +5,6 @@ namespace App\Providers;
 use App\Console\Commands\AiderUpgradeCommand;
 use App\Console\Commands\Queue\QueueListCommand;
 use App\Services\AI\AiderService;
-use App\Services\StaticAnalysis\StaticAnalysisToolInterface;
-use App\Services\StaticAnalysisService;
 use App\Services\AI\AiderServiceInterface;
 use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
@@ -14,6 +12,8 @@ use App\Services\Export\JsonExportService;
 use App\Services\ParsedItemService;
 use App\Services\Parsing\FileProcessorService;
 use App\Services\Parsing\ParserService;
+use App\Services\StaticAnalysis\StaticAnalysisToolInterface;
+use App\Services\StaticAnalysisService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 
@@ -56,8 +56,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(AiderServiceInterface::class, fn ($app) => new AiderService);
 
         // Bind the StaticAnalysisToolInterface to the StaticAnalysisService implementation
-        $this->app->singleton(StaticAnalysisService::class, fn($app) => new StaticAnalysisService());
-        $this->app->singleton(StaticAnalysisToolInterface::class, fn($app) => $app->make(StaticAnalysisService::class));
+        $this->app->singleton(StaticAnalysisService::class, fn ($app) => new StaticAnalysisService);
+        $this->app->singleton(StaticAnalysisToolInterface::class, fn ($app) => $app->make(StaticAnalysisService::class));
     }
 
     /**

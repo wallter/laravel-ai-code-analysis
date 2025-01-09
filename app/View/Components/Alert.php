@@ -17,9 +17,7 @@ class Alert extends Component
          * The CSS classes for the alert.
          */
         public $class = ''
-    )
-    {
-    }
+    ) {}
 
     /**
      * Get the view / contents that represent the component.

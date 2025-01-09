@@ -14,11 +14,8 @@ use Throwable;
 class ProcessIndividualPassJob implements ShouldQueue
 {
     use Dispatchable;
-
     use InteractsWithQueue;
-
     use Queueable;
-
     use SerializesModels;
 
     /**
@@ -37,9 +34,7 @@ class ProcessIndividualPassJob implements ShouldQueue
          * Indicates if the job is a dry run.
          */
         protected bool $dryRun = false
-    )
-    {
-    }
+    ) {}
 
     /**
      * Execute the job.

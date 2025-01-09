@@ -11,12 +11,6 @@ class AIPromptBuilder
 {
     /**
      * Constructor to initialize the prompt builder.
-     *
-     * @param OperationIdentifier $operationIdentifier
-     * @param array $config
-     * @param array $astData
-     * @param string $rawCode
-     * @param string $previousResults
      */
     public function __construct(
         protected OperationIdentifier $operationIdentifier,
@@ -45,11 +39,11 @@ class AIPromptBuilder
         // Construct the user prompt with clear sections for code and AST data
         $userContent = $this->buildUserPrompt();
         $userContent .= "\n\n## Code:\n```php\n{$this->rawCode}\n```";
-        $userContent .= "\n\n## AST Data:\n```json\n" . json_encode($this->astData, JSON_PRETTY_PRINT) . "\n```";
+        $userContent .= "\n\n## AST Data:\n```json\n".json_encode($this->astData, JSON_PRETTY_PRINT)."\n```";
 
         // Include previous AI pass results if any
-        if (!empty($this->previousResults)) {
-            $userContent .= "\n\n## Previous AI Passes:\n" . $this->previousResults;
+        if (! empty($this->previousResults)) {
+            $userContent .= "\n\n## Previous AI Passes:\n".$this->previousResults;
         }
 
         $messages[] = [
@@ -62,8 +56,6 @@ class AIPromptBuilder
 
     /**
      * Build the user prompt based on pass configuration.
-     *
-     * @return string
      */
     private function buildUserPrompt(): string
     {
@@ -71,13 +63,13 @@ class AIPromptBuilder
 
         $prompt = $promptSections['base_prompt'] ?? '';
         foreach ($promptSections['guidelines'] ?? [] as $guideline) {
-            $prompt .= "\n" . $guideline;
+            $prompt .= "\n".$guideline;
         }
 
         if (isset($promptSections['example'])) {
-            $prompt .= "\n\n" . implode("\n", $promptSections['example']);
+            $prompt .= "\n\n".implode("\n", $promptSections['example']);
         }
 
-        return $prompt . ("\n\n" . ($promptSections['response_format'] ?? ''));
+        return $prompt.("\n\n".($promptSections['response_format'] ?? ''));
     }
 }

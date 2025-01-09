@@ -17,7 +17,7 @@ class AnalyzeFilesCommandTest extends TestCase
      *
      * @return void
      */
-    public function testAnalyzeFilesRespectsConfigParsingFolders()
+    public function test_analyze_files_respects_config_parsing_folders()
     {
         // Arrange: Set up test directories and files
         Config::set('parsing.folders', [
@@ -55,7 +55,7 @@ class AnalyzeFilesCommandTest extends TestCase
      *
      * @return void
      */
-    public function testAnalyzeFilesDoesNotProcessUnconfiguredFolders()
+    public function test_analyze_files_does_not_process_unconfigured_folders()
     {
         // Arrange: Set up test directories and files
         Config::set('parsing.folders', [
