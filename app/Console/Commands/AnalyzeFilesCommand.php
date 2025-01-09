@@ -40,7 +40,30 @@ class AnalyzeFilesCommand extends FilesCommand
         $dryRun = (bool) $this->option('dry-run');
 
         // Collect all PHP files (both from folders and files)
-        $phpFiles = $this->analysisService->collectPhpFiles();
+        $folders = config('parsing.folders', []);
+        $files = config('parsing.files', []);
+
+        $phpFiles = collect();
+
+        foreach ($folders as $folder) {
+            // Ensure the folder exists before attempting to collect files
+            if (is_dir($folder)) {
+                $collected = $this->analysisService->collectPhpFiles($folder);
+                $phpFiles = $phpFiles->merge($collected);
+            } else {
+                $this->warn("Directory does not exist: {$folder}");
+                Log::warning("AnalyzeFilesCommand: Directory does not exist: {$folder}");
+            }
+        }
+
+        foreach ($files as $filePath) {
+            if (file_exists($filePath) && pathinfo($filePath, PATHINFO_EXTENSION) === 'php') {
+                $phpFiles->push($filePath);
+            } else {
+                $this->warn("File does not exist or is not a PHP file: {$filePath}");
+                Log::warning("AnalyzeFilesCommand: File does not exist or is not a PHP file: {$filePath}");
+            }
+        }
 
         if ($phpFiles->isEmpty()) {
             $this->warn('No PHP files found. Aborting analysis.');
