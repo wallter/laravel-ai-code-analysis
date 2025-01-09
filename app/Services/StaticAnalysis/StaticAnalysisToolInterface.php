@@ -11,7 +11,7 @@ use App\Models\StaticAnalysis;
 interface StaticAnalysisToolInterface
 {
     /**
-     * Run static analysis on the given CodeAnalysis entry.
+     * Run static analysis on the given CodeAnalysis entry using the specified tool and store results.
      *
      * @param CodeAnalysis $codeAnalysis
      * @param string $toolName

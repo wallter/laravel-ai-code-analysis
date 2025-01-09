@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\CodeAnalysis;
 use App\Models\StaticAnalysis;
 use App\Services\StaticAnalysis\StaticAnalysisToolInterface;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
@@ -12,12 +13,6 @@ use Exception;
 
 class StaticAnalysisService implements StaticAnalysisToolInterface
 {
-    /**
-     * Run static analysis on the given file and store results.
-     *
-     * @param CodeAnalysis $codeAnalysis
-     * @return StaticAnalysis|null
-     */
     /**
      * Run static analysis on the given file using the specified tool and store results.
      *
@@ -30,20 +25,26 @@ class StaticAnalysisService implements StaticAnalysisToolInterface
         $filePath = $codeAnalysis->file_path;
         Log::info("StaticAnalysisService: Running {$toolName} on '{$filePath}'.");
 
-        switch ($toolName) {
-            case 'PHPStan':
-                $command = ['vendor/bin/phpstan', 'analyse', $filePath, '--json'];
-                break;
-            case 'PHP_CodeSniffer':
-                $command = ['vendor/bin/phpcs', '--report=json', $filePath];
-                break;
-            case 'Psalm':
-                $command = ['vendor/bin/psalm', '--output-format=json', $filePath];
-                break;
-            default:
-                Log::error("StaticAnalysisService: Unsupported static analysis tool '{$toolName}'.");
-                return null;
+        $toolsConfig = Config::get('ai.static_analysis_tools');
+
+        if (!isset($toolsConfig[$toolName])) {
+            Log::error("StaticAnalysisService: Static analysis tool '{$toolName}' is not configured.");
+            return null;
         }
+
+        $toolConfig = $toolsConfig[$toolName];
+
+        if (!($toolConfig['enabled'] ?? false)) {
+            Log::warning("StaticAnalysisService: Static analysis tool '{$toolName}' is disabled.");
+            return null;
+        }
+
+        $command = array_merge(
+            [$toolConfig['command']],
+            $toolConfig['options'] ?? []
+        );
+
+        Log::debug("StaticAnalysisService: Executing command - " . implode(' ', $command));
 
         $process = new Process($command);
         $process->run();
@@ -58,9 +59,11 @@ class StaticAnalysisService implements StaticAnalysisToolInterface
         $results = json_decode($output, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            Log::error("StaticAnalysisService: Failed to decode JSON output from {$toolName} for '{$filePath}'.");
+            Log::error("StaticAnalysisService: Failed to decode JSON output from {$toolName} for '{$filePath}'. Error: " . json_last_error_msg());
             return null;
         }
+
+        Log::debug("StaticAnalysisService: {$toolName} results for '{$filePath}': " . json_encode($results));
 
         $staticAnalysis = StaticAnalysis::create([
             'code_analysis_id' => $codeAnalysis->id,

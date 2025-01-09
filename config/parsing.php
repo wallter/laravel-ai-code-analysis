@@ -17,6 +17,8 @@ return [
     'folders' => [
         // Directories to parse recursively
         // base_path('app/Models'),
+        base_path('app/Services'),
+        base_path('app/Helpers.php'),
     ],
 
     'files' => [
@@ -39,6 +41,8 @@ return [
         '.git',
         'vendor',
         'node_modules',
+        'storage',
+        'bootstrap/cache',
         // etc.
     ],
 ];

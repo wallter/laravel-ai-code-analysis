@@ -32,31 +32,37 @@ class AppServiceProvider extends ServiceProvider
         // Register JsonExportService
         $this->app->singleton(JsonExportService::class, fn ($app) => new JsonExportService);
 
+        // Register OpenAIService
         $this->app->singleton(OpenAIService::class, fn (Application $app): OpenAIService => new OpenAIService);
 
+        // Register CodeAnalysisService
         $this->app->singleton(CodeAnalysisService::class, fn (Application $app): CodeAnalysisService => new CodeAnalysisService(
             $app->make(OpenAIService::class),
             $app->make(ParserService::class)
         ));
 
-        // Updated AnalysisPassService registration to match constructor parameters
+        // Register AnalysisPassService with updated constructor parameters
         $this->app->singleton(\App\Services\AnalysisPassService::class, fn ($app) => new \App\Services\AnalysisPassService(
             $app->make(\App\Services\AI\OpenAIService::class),
-            $app->make(\App\Services\AI\CodeAnalysisService::class)
-            // Removed AiderServiceInterface as it's not used yet
+            $app->make(\App\Services\AI\CodeAnalysisService::class),
+            $app->make(StaticAnalysisToolInterface::class)
         ));
 
         // Register AiderUpgradeCommand
         $this->app->singleton(AiderUpgradeCommand::class, fn ($app) => new AiderUpgradeCommand);
 
+        // Register AiderService and bind the interface
         $this->app->singleton(AiderService::class, fn ($app) => new AiderService);
-
-        // Bind the interface to the implementation
         $this->app->singleton(AiderServiceInterface::class, fn ($app) => new AiderService);
+
+        // Bind the StaticAnalysisToolInterface to the StaticAnalysisService implementation
         $this->app->singleton(StaticAnalysisService::class, fn($app) => new StaticAnalysisService());
-        $this->app->singleton(StaticAnalysisToolInterface::class, StaticAnalysisService::class);
+        $this->app->singleton(StaticAnalysisToolInterface::class, fn($app) => $app->make(StaticAnalysisService::class));
     }
 
+    /**
+     * Bootstrap any application services.
+     */
     public function boot(): void
     {
         // ... boot logic...

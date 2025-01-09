@@ -89,6 +89,34 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Static Analysis Tools Configuration
+    |--------------------------------------------------------------------------
+    | Defines the static analysis tools to be integrated into the system.
+    | Each tool has its specific command and configurations.
+    */
+    'static_analysis_tools' => [
+        'PHPStan' => [
+            'enabled' => true,
+            'command' => 'vendor/bin/phpstan',
+            'options' => ['analyse', '--json'],
+            'output_format' => 'json',
+        ],
+        'PHP_CodeSniffer' => [
+            'enabled' => true,
+            'command' => 'vendor/bin/phpcs',
+            'options' => ['--report=json'],
+            'output_format' => 'json',
+        ],
+        'Psalm' => [
+            'enabled' => true,
+            'command' => 'vendor/bin/psalm',
+            'options' => ['--output-format=json'],
+            'output_format' => 'json',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | AI Passes Configuration
     |--------------------------------------------------------------------------
     | Each key focuses on a specific analysis task or pass.

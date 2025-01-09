@@ -176,11 +176,13 @@ class CodeAnalysisService
     {
         Log::info("CodeAnalysisService: Starting analysis with dryRun={$dryRun}.");
 
-        // Retrieve the folders from the parsing configuration
+        // Retrieve the folders and files from the parsing configuration
         $folders = config('parsing.folders', []);
+        $files = config('parsing.files', []);
 
         $results = [];
 
+        // Analyze files from folders
         foreach ($folders as $directory) {
             Log::info("CodeAnalysisService: Analyzing directory '{$directory}'.");
             $phpFiles = $this->collectPhpFiles($directory);
@@ -199,6 +201,22 @@ class CodeAnalysisService
                 } catch (Throwable $e) {
                     Log::error("CodeAnalysisService: Failed to analyze file '{$filePath}'. Error: {$e->getMessage()}");
                 }
+            }
+        }
+
+        // Analyze individual files
+        foreach ($files as $filePath) {
+            try {
+                Log::debug("CodeAnalysisService: Analyzing individual file '{$filePath}'.");
+                $analysis = $this->analyzeFile($filePath, $dryRun);
+
+                $results[] = [
+                    'file_path' => $analysis->file_path,
+                    'ast_summary' => $analysis->analysis,
+                    'ai_output' => $analysis->ai_output ?? null,
+                ];
+            } catch (Throwable $e) {
+                Log::error("CodeAnalysisService: Failed to analyze file '{$filePath}'. Error: {$e->getMessage()}");
             }
         }
 
