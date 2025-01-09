@@ -41,7 +41,8 @@ class StaticAnalysisService implements StaticAnalysisToolInterface
 
         $command = array_merge(
             [$toolConfig['command']],
-            $toolConfig['options'] ?? []
+            $toolConfig['options'] ?? [],
+            [$filePath] // Added the file path to the command
         );
 
         Log::debug("StaticAnalysisService: Executing command - " . implode(' ', $command));
