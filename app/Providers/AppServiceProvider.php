@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Console\Commands\AiderUpgradeCommand;
 use App\Console\Commands\Queue\QueueListCommand;
 use App\Services\AI\AiderService;
+use App\Services\StaticAnalysis\StaticAnalysisToolInterface;
+use App\Services\StaticAnalysisService;
 use App\Services\AI\AiderServiceInterface;
 use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
@@ -51,6 +53,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Bind the interface to the implementation
         $this->app->singleton(AiderServiceInterface::class, fn ($app) => new AiderService);
+        $this->app->singleton(StaticAnalysisService::class, fn($app) => new StaticAnalysisService());
+        $this->app->singleton(StaticAnalysisToolInterface::class, StaticAnalysisService::class);
     }
 
     public function boot(): void

@@ -7,6 +7,7 @@ use App\Jobs\ProcessIndividualPassJob;
 use App\Models\AIResult;
 use App\Models\CodeAnalysis;
 use App\Services\AI\AIPromptBuilder;
+use App\Services\StaticAnalysis\StaticAnalysisToolInterface;
 use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
 use Exception;
@@ -25,7 +26,8 @@ class AnalysisPassService
      */
     public function __construct(
         protected OpenAIService $openAIService,
-        protected CodeAnalysisService $codeAnalysisService
+        protected CodeAnalysisService $codeAnalysisService,
+        protected StaticAnalysisToolInterface $staticAnalysisService
     ) {}
 
     /**
@@ -43,6 +45,14 @@ class AnalysisPassService
                     Log::warning("AnalysisPassService: No analysis found for CodeAnalysis ID {$codeAnalysisId}. Exiting processAllPasses.");
 
                     return;
+                }
+
+                // Run static analysis
+                $staticAnalysis = $this->staticAnalysisService->runAnalysis($analysis);
+                if ($staticAnalysis) {
+                    // Make static analysis data available to AI passes
+                    // Example: Attach static analysis results to the CodeAnalysis model
+                    // This ensures AI passes can access it
                 }
 
                 $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);

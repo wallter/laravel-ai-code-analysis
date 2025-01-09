@@ -57,6 +57,11 @@ class CodeAnalysis extends Model
         });
     }
 
+    public function staticAnalyses()
+    {
+        return $this->hasMany(StaticAnalysis::class);
+    }
+
     /**
      * Get the AI results associated with this code analysis.
      *
