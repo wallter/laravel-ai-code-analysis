@@ -29,30 +29,41 @@ class AnalysisController extends Controller
      */
     public function index()
     {
-        // Eager-load AI results if you want quick access to them
+        // Eager-load AI results and static analyses for efficient querying
         $analyses = CodeAnalysis::with([
             'aiResults',
             'aiScores',
-            'static_analyses'
+            'staticAnalyses'
         ])->orderBy('id', 'desc')->get();
 
         return view('analysis.index', compact('analyses'));
     }
 
     /**
-     * Show details (including AI results) for a single CodeAnalysis record.
+     * Show details (including AI results and static analyses) for a single CodeAnalysis record.
      *
      * @param  int  $id  The ID of the CodeAnalysis record.
      * @return \Illuminate\View\View The view displaying the analysis details.
      */
     public function show(int $id)
     {
-        $analysis = CodeAnalysis::with('aiResults')->findOrFail($id);
+        // Eager-load both AI results and static analyses
+        $analysis = CodeAnalysis::with([
+            'aiResults',
+            'staticAnalyses'
+        ])->findOrFail($id);
 
-        // Summation of all cost_estimate_usd
-        $totalCost = $analysis->aiResults->sum(fn ($result) => $result->metadata['cost_estimate_usd'] ?? 0);
+        // Summation of all AI cost estimates
+        $totalAICost = $analysis->aiResults->sum(function ($result) {
+            return $result->metadata['cost_estimate_usd'] ?? 0;
+        });
 
-        return view('analysis.show', compact('analysis', 'totalCost'));
+        // Summation of static analysis errors
+        $totalStaticErrors = $analysis->staticAnalyses->sum(function ($staticAnalysis) {
+            return count($staticAnalysis->results['errors'] ?? []);
+        });
+
+        return view('analysis.show', compact('analysis', 'totalAICost', 'totalStaticErrors'));
     }
 
     /**
