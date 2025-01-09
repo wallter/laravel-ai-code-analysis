@@ -15,6 +15,10 @@ class StaticAnalysis extends Model
         'results',
     ];
 
+    protected $casts = [
+        'results' => 'array',
+    ];
+
     public function codeAnalysis()
     {
         return $this->belongsTo(CodeAnalysis::class);
