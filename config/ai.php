@@ -98,7 +98,7 @@ return [
         'PHPStan' => [
             'enabled' => true,
             'command' => 'vendor/bin/phpstan',
-            'options' => ['analyse', '--error-format=json'], // Updated option
+            'options' => ['analyse', '--no-progress', '--error-format=json'], // Added '--no-progress' to suppress progress output
             'output_format' => 'json',
         ],
         'PHP_CodeSniffer' => [
