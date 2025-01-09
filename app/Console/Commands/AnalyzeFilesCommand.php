@@ -16,6 +16,7 @@ class AnalyzeFilesCommand extends FilesCommand
     protected $signature = 'analyze:files
         {--output-file= : Export analysis results to a .json file}
         {--limit-class= : Limit analysis to specific classes (comma-separated)}
+        {--limit-number= : Limit the number of classes to analyze}
         {--limit-method= : (Unused in this example, but provided)}
         {--dry-run : Skip saving AI results to DB.}';
 
@@ -39,7 +40,9 @@ class AnalyzeFilesCommand extends FilesCommand
         $outputFile = $this->option('output-file');
         $dryRun = (bool) $this->option('dry-run');
         $limitClassesOption = $this->option('limit-class');
+        $limitNumberOption = $this->option('limit-number');
         $limitClasses = [];
+        $limitNumber = null;
 
         if ($limitClassesOption) {
             $limitClasses = array_map('trim', explode(',', $limitClassesOption));
@@ -55,6 +58,17 @@ class AnalyzeFilesCommand extends FilesCommand
 
             $this->info('Limiting analysis to classes: ' . implode(', ', $limitClasses));
             Log::info('AnalyzeFilesCommand: Limiting analysis to classes: ' . implode(', ', $limitClasses));
+        }
+
+        if ($limitNumberOption !== null) {
+            if (!ctype_digit($limitNumberOption) || (int)$limitNumberOption < 1) {
+                $this->error("Invalid number provided in --limit-number: '{$limitNumberOption}'. It must be a positive integer.");
+                Log::error("AnalyzeFilesCommand: Invalid number provided in --limit-number: '{$limitNumberOption}'");
+                return 1;
+            }
+            $limitNumber = (int)$limitNumberOption;
+            $this->info("Limiting analysis to {$limitNumber} class(es).");
+            Log::info("AnalyzeFilesCommand: Limiting analysis to {$limitNumber} class(es).");
         }
 
         // Collect all PHP files (both from folders and files)
@@ -92,6 +106,17 @@ class AnalyzeFilesCommand extends FilesCommand
             if ($phpFiles->isEmpty()) {
                 $this->warn('No PHP files found matching the specified classes. Aborting analysis.');
                 Log::warning('AnalyzeFilesCommand: No .php files found matching the specified classes, aborting analysis.');
+
+                return 0;
+            }
+        }
+
+        if ($limitNumber !== null) {
+            $phpFiles = $phpFiles->take($limitNumber);
+
+            if ($phpFiles->isEmpty()) {
+                $this->warn("No PHP files found to limit to {$limitNumber} class(es). Aborting analysis.");
+                Log::warning("AnalyzeFilesCommand: No PHP files found to limit to {$limitNumber} class(es), aborting analysis.");
 
                 return 0;
             }
