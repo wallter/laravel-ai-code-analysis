@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -54,10 +55,12 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
          * The CodeAnalysis ID.
          */
         protected int $codeAnalysisId,
+
         /**
          * Indicates if the job is a dry run.
          */
         protected bool $dryRun = false
+
     ) {}
 
     /**
@@ -71,10 +74,29 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(AnalysisPassService $analysisPassService): void
+    public function handle(): void
     {
         try {
-            $analysisPassService->processAllPasses($this->codeAnalysisId, $this->dryRun);
+            $passOrder = Config::get('ai.operations.multi_pass_analysis.pass_order', []);
+
+            if (empty($passOrder)) {
+                Log::warning("ProcessAnalysisPassJob: No pass_order defined in config for CodeAnalysis ID {$this->codeAnalysisId}.");
+                return;
+            }
+
+            $jobs = [];
+
+            foreach ($passOrder as $passName) {
+                $jobs[] = new ProcessIndividualPassJob($this->codeAnalysisId, $passName, $this->dryRun);
+            }
+
+            // Dispatch the first job and chain the rest
+            $firstJob = array_shift($jobs);
+            if ($firstJob) {
+                $firstJob->withChain($jobs)->dispatch();
+                Log::info("ProcessAnalysisPassJob: Dispatched chain of AI passes for CodeAnalysis ID {$this->codeAnalysisId}.");
+            }
+
         } catch (Throwable $throwable) {
             // Log the exception and optionally retry or mark the job as failed
             Log::error("ProcessAnalysisPassJob: Failed for CodeAnalysis ID {$this->codeAnalysisId}. Error: {$throwable->getMessage()}", [
