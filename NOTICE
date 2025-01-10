@@ -1,0 +1,51 @@
+Apache License
+Version 2.0, January 2004
+http://www.apache.org/licenses/
+
+This NOTICE file contains additional attribution notices for the Laravel AI Code Analysis Project.
+
+### Project Overview
+
+**Laravel AI Code Analysis Project**
+- **Description:** Integrates OpenAI’s language models with PHP Abstract Syntax Tree (AST) analysis to perform comprehensive multi-pass code analysis.
+- **Repository:** [https://github.com/your-username/laravel-ai-code-analysis](https://github.com/your-username/laravel-ai-code-analysis)
+
+### Attributions
+
+This project includes software developed by the following third parties:
+
+1. **Laravel Framework**
+   - **Description:** A web application framework with expressive, elegant syntax.
+   - **Website:** [https://laravel.com/](https://laravel.com/)
+   - **License:** MIT License
+   - **License File:** [LICENSE-MIT](https://github.com/laravel/laravel/blob/master/LICENSE.md)
+
+2. **PHP-Parser by Nikic**
+   - **Description:** A PHP parser written in PHP.
+   - **Repository:** [https://github.com/nikic/PHP-Parser](https://github.com/nikic/PHP-Parser)
+   - **License:** BSD-3-Clause License
+   - **License File:** [LICENSE](https://github.com/nikic/PHP-Parser/blob/master/LICENSE)
+
+3. **OpenAI API**
+   - **Description:** Provides access to OpenAI’s powerful language models for AI-driven features.
+   - **Website:** [https://openai.com/](https://openai.com/)
+   - **License:** [Specify License if applicable](https://openai.com/policies/terms-of-use)
+
+4. **Other Dependencies**
+   - **Description:** List any other significant third-party libraries or tools used in your project.
+   - **Repository/Website:** Provide URLs.
+   - **License:** Specify respective licenses.
+   - **License File:** Link to respective license files if available.
+
+### Additional Notices
+
+Any additional notices or attributions required by third-party licenses are included within their respective files in the project repository.
+
+### Contact Information
+
+For any queries or contributions, please contact:
+
+- **Author:** Tyler R. Wall
+- **GitHub:** [https://github.com/wallter](https://github.com/wallter)
+- **LinkedIn:** [https://www.linkedin.com/in/tylerrwall/](https://www.linkedin.com/in/tylerrwall/)
+- **Email:** [your.email@example.com](mailto:your.email@example.com)
