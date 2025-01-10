@@ -16,4 +16,5 @@ enum OperationIdentifier: string
     case SCORING_PASS = 'scoring_pass';
     case LARAVEL_MIGRATION = 'laravel_migration';
     case LARAVEL_MIGRATION_SCORING = 'laravel_migration_scoring';
+    case STATIC_ANALYSIS = 'static_analysis';
 }
