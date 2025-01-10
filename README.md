@@ -6,7 +6,7 @@
 
 ## Overview
 
-This Laravel-based project seamlessly integrates **OpenAI’s language models** with **PHP Abstract Syntax Tree (AST) analysis** (powered by [nikic/php-parser](https://github.com/nikic/PHP-Parser)) to deliver a **comprehensive multi-pass code analysis**. By iteratively scanning PHP codebases, the system generates:
+This Laravel-based project seamlessly integrates **OpenAI’s language models** with **PHP Abstract Syntax Tree (AST) analysis** (powered by [nikic/php-parser](https://github.com/nikic/PHP-Parser)) along with other essential tooling such as [PHPStan](https://phpstan.org/), [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer), and [Psalm](https://psalm.dev/) to deliver a **comprehensive multi-pass code analysis**. By iteratively scanning PHP codebases, the system generates:
 
 - **Automated Documentation**: Creates concise and clear documentation derived from raw code and AST data, enhancing code comprehension and maintainability.
 - **Refactoring Suggestions**: Provides actionable recommendations to improve code clarity, adhere to best practices, and optimize overall structure.
@@ -98,6 +98,16 @@ The server will start at [http://localhost:8000](http://localhost:8000) by defau
 
 ## Features
 
+### Tooling
+
+This project leverages a suite of powerful tools to enhance code analysis and maintainability:
+
+- **[PHPStan](https://phpstan.org/):** A static analysis tool for PHP that focuses on finding bugs in your code without running it.
+- **[PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer):** Detects violations of a defined coding standard in your PHP code.
+- **[Psalm](https://psalm.dev/):** A static analysis tool for finding errors in PHP applications.
+- **[Laravel Tinker](https://github.com/laravel/tinker):** An interactive REPL for the Laravel framework, aiding in debugging and testing.
+- **[OpenAI-PHP/Laravel](https://github.com/openai-php/laravel):** Facilitates integration with OpenAI’s API for AI-driven features.
+
 ### Code Parsing and Analysis
 - **Comprehensive Parsing:** Analyzes PHP files to extract detailed information about classes, methods, functions, traits, and annotations, providing a holistic view of the codebase.
 - **Abstract Syntax Tree (AST) Insights:** Captures detailed AST data, including node types, attributes, and structural relationships, enabling advanced analysis of code structure and behavior.
@@ -136,7 +146,6 @@ The server will start at [http://localhost:8000](http://localhost:8000) by defau
   - **`code:analyze`:** Analyzes PHP files, gathers AST data, and applies AI-driven multi-pass analysis.
       
     
-    - (experimental) **`generate:tests`:** Generates PHPUnit test skeletons for discovered classes and methods.
     - Database utilities:
       - **`db:backup`:** Backs up the SQLite database.
       - **`db:backup:restore`:** Restores the SQLite database from a backup file.
@@ -369,14 +378,7 @@ In `config/parsing.php`, define:
      - Creates or updates a CodeAnalysis record for each file.
      - Queues AI passes if using the new asynchronous approach.
 
-4. **Generate Tests (experimental)**
-
-   ```bash
-   php artisan generate:tests
-   ```
-   - **Description:** Creates or updates test files for discovered classes & methods (in progress).
-
-5. **DB Backup / Restore**
+4. **DB Backup / Restore**
 
    ```bash
    php artisan db:backup
