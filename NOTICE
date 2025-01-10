@@ -8,7 +8,7 @@ This NOTICE file contains additional attribution notices for the Laravel AI Code
 
 **Laravel AI Code Analysis Project**
 - **Description:** Integrates OpenAI’s language models with PHP Abstract Syntax Tree (AST) analysis to perform comprehensive multi-pass code analysis.
-- **Repository:** [https://github.com/your-username/laravel-ai-code-analysis](https://github.com/your-username/laravel-ai-code-analysis)
+- **Repository:** [https://github.com/wallter/laravel-ai-code-analysis](https://github.com/wallter/laravel-ai-code-analysis)
 
 ### Attributions
 
@@ -29,13 +29,19 @@ This project includes software developed by the following third parties:
 3. **OpenAI API**
    - **Description:** Provides access to OpenAI’s powerful language models for AI-driven features.
    - **Website:** [https://openai.com/](https://openai.com/)
-   - **License:** [Specify License if applicable](https://openai.com/policies/terms-of-use)
+   - **License:** [OpenAI API Terms of Use](https://openai.com/policies/terms-of-use)
 
 4. **Other Dependencies**
    - **Description:** List any other significant third-party libraries or tools used in your project.
-   - **Repository/Website:** Provide URLs.
-   - **License:** Specify respective licenses.
-   - **License File:** Link to respective license files if available.
+   - **Repository/Website:**
+     - **OpenAI-PHP/Laravel:** [https://github.com/openai-php/laravel](https://github.com/openai-php/laravel)
+     - **Laravel Tinker:** [https://github.com/laravel/tinker](https://github.com/laravel/tinker)
+   - **License:** 
+     - **OpenAI-PHP/Laravel:** MIT License
+     - **Laravel Tinker:** MIT License
+   - **License File:**
+     - **OpenAI-PHP/Laravel:** [LICENSE](https://github.com/openai-php/laravel/blob/master/LICENSE)
+     - **Laravel Tinker:** [LICENSE](https://github.com/laravel/tinker/blob/master/LICENSE.md)
 
 ### Additional Notices
 
@@ -48,4 +54,4 @@ For any queries or contributions, please contact:
 - **Author:** Tyler R. Wall
 - **GitHub:** [https://github.com/wallter](https://github.com/wallter)
 - **LinkedIn:** [https://www.linkedin.com/in/tylerrwall/](https://www.linkedin.com/in/tylerrwall/)
-- **Email:** [your.email@example.com](mailto:your.email@example.com)
+- **Email:** [tyler.r.wall@gmail.com](mailto:tyler.r.wall@gmail.com)
