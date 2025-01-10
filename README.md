@@ -22,22 +22,20 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
   - [Overview](#overview)
   - [Table of Contents](#table-of-contents)
   - [Usage TLDR;](#usage-tldr)
-    - [Running the UI & Server](#running-the-ui--server)
+    - [Running the UI \& Server](#running-the-ui--server)
   - [Features](#features)
     - [Code Parsing and Analysis](#code-parsing-and-analysis)
     - [Multi-Pass AI Analysis](#multi-pass-ai-analysis)
     - [Artisan Commands](#artisan-commands)
   - [Requirements](#requirements)
-  - [Static Analysis](#static-analysis)
   - [Installation](#installation)
   - [UI Setup](#ui-setup)
   - [Configuration](#configuration)
     - [AI Service Configuration](#ai-service-configuration)
-      - [Parsing Configuration](#parsing-configuration)
-    - [Parsing Configuration](#parsing-configuration-1)
+    - [Parsing Configuration](#parsing-configuration)
   - [Usage](#usage)
     - [Artisan Commands](#artisan-commands-1)
-    - [Token & Cost Tracking](#token--cost-tracking)
+    - [Token \& Cost Tracking](#token--cost-tracking)
     - [Queued Analysis](#queued-analysis)
     - [Testing](#testing)
   - [Testing](#testing-1)
@@ -545,6 +543,7 @@ Contributions are welcome! Please follow these steps to contribute:
    Ensure all tests pass before submitting.
 
    ```bash
+       # Optimize the code
        composer rector
 
        # Run Laravel Pint to format your code
