@@ -144,11 +144,6 @@ This project leverages a suite of powerful tools to enhance code analysis and ma
     php artisan static-analysis:run 1 --tools=PHPStan,Psalm
     ```
   - **`code:analyze`:** Analyzes PHP files, gathers AST data, and applies AI-driven multi-pass analysis.
-      
-    
-    - Database utilities:
-      - **`db:backup`:** Backs up the SQLite database.
-      - **`db:backup:restore`:** Restores the SQLite database from a backup file.
   
 - **Database Management**
   - Utilizes SQLite for simplicity and ease of use.
