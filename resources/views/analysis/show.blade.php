@@ -2,7 +2,7 @@
 
 @section('content')
 @php
-    dump($analysis->toJson());
+    // dump($analysis->toJson());
     // dump($analysis->toArray());
     // Sort AI results, prioritizing the consolidation pass
     $sortedAiResults = $analysis->aiResults->sortByDesc(function($result) {
