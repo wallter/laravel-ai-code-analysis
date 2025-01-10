@@ -2,13 +2,7 @@ Apache License
 Version 2.0, January 2004
 http://www.apache.org/licenses/
 
-This NOTICE file contains additional attribution notices for the Laravel AI Code Analysis Project.
-
-### Project Overview
-
-**Laravel AI Code Analysis Project**
-- **Description:** Integrates OpenAI’s language models with PHP Abstract Syntax Tree (AST) analysis to perform comprehensive multi-pass code analysis.
-- **Repository:** [https://github.com/wallter/laravel-ai-code-analysis](https://github.com/wallter/laravel-ai-code-analysis)
+This NOTICE file contains attribution notices required by the Apache License 2.0 for the Laravel AI Code Analysis Project.
 
 ### Attributions
 
@@ -47,11 +41,9 @@ This project includes software developed by the following third parties:
 
 Any additional notices or attributions required by third-party licenses are included within their respective files in the project repository.
 
-### Contact Information
+### Compliance with Apache License 2.0
 
-For any queries or contributions, please contact:
+When distributing this project or any derivative works, ensure that:
 
-- **Author:** Tyler R. Wall
-- **GitHub:** [https://github.com/wallter](https://github.com/wallter)
-- **LinkedIn:** [https://www.linkedin.com/in/tylerrwall/](https://www.linkedin.com/in/tylerrwall/)
-- **Email:** [tyler.r.wall@gmail.com](mailto:tyler.r.wall@gmail.com)
+- This NOTICE file is included in all copies or substantial portions of the software.
+- Any modifications to the software are accompanied by prominent notices stating that changes have been made.
