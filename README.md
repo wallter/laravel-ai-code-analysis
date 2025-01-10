@@ -6,13 +6,15 @@
 
 ## Overview
 
-This Laravel-based project uses **OpenAI’s language models** in tandem with **PHP Abstract Syntax Tree (AST) analysis** (via [nikic/php-parser](https://github.com/nikic/PHP-Parser)) to deliver a **comprehensive multi-pass code analysis**. It iteratively inspects PHP codebases, generating:
+This Laravel-based project seamlessly integrates **OpenAI’s language models** with **PHP Abstract Syntax Tree (AST) analysis** (powered by [nikic/php-parser](https://github.com/nikic/PHP-Parser)) to deliver a **comprehensive multi-pass code analysis**. By iteratively scanning PHP codebases, the system generates:
 
-- **Automated Documentation** from raw code + AST data + previous AI Analysis "Passes"
-- **Refactoring Suggestions** for clarity and adherence to best practices
-- **Functionality Assessments** focusing on performance and maintainability
+- **Automated Documentation**: Creates concise and clear documentation derived from raw code and AST data, enhancing code comprehension and maintainability.
+- **Refactoring Suggestions**: Provides actionable recommendations to improve code clarity, adhere to best practices, and optimize overall structure.
+- **Functionality Assessments**: Evaluates performance and maintainability aspects of the code, identifying potential bottlenecks and areas for improvement.
 
-By leveraging **queued** AI operations, **token usage** tracking, and other advanced features, developers can **enhance maintainability**, **optimize performance**, and **ensure** cleaner, more efficient code (see `config/ai.php`).
+![Documentation Generation](resources/images/github/documentation-generation.png)
+
+By leveraging **queued** AI operations, **token usage** tracking, and other advanced features, developers can **enhance maintainability**, **optimize performance**, and **ensure** cleaner, more efficient codebases (see `config/ai.php`).
 
 ## Table of Contents
 
@@ -99,17 +101,7 @@ The server will start at [http://localhost:8000](http://localhost:8000) by defau
 ## Features
 
 ### Code Parsing and Analysis
-- **Comprehensive Parsing:** Analyzes PHP files to extract detailed information about classes, methods, functions, traits, and annotations, providing a holistic view of the codebase  - **Comprehensive Parsing:** Analyzes PHP files to extract detailed information about classes, methods, functions, traits, and annotations, providing a holistic view of the codebase.
-
-- **Comprehensive Parsing:** Analyzes PHP files to extract detailed information about classes, methods, functions, traits, and annotations, providing a holistic view of the codebase### Static Analysis
-
-- **Comprehensive Parsing:** Analyzes PHP files to extract detailed information about classes, methods, functions, traits, and annotations, providing a holistic view of the codebaseThe project integrates multiple static analysis tools to ensure code quality and adherence to best practices. The following tools are configured:
-
-- **Comprehensive Parsing:** Analyzes PHP files to extract detailed information about classes, methods, functions, traits, and annotations, providing a holistic view of the codebase- **PHPStan**: Detects errors in PHP code without running it.
-- **Comprehensive Parsing:** Analyzes PHP files to extract detailed information about classes, methods, functions, traits, and annotations, providing a holistic view of the codebase- **PHP_CodeSniffer**: Checks for coding standard violations.
-- **Comprehensive Parsing:** Analyzes PHP files to extract detailed information about classes, methods, functions, traits, and annotations, providing a holistic view of the codebase- **Psalm**: Focuses on type safety and finding potential bugs.
-
-- **Comprehensive Parsing:** Analyzes PHP files to extract detailed information about classes, methods, functions, traits, and annotations, providing a holistic view of the codebaseThese tools can be run individually or as part of the analysis pipeline using Artisan commands.
+- **Comprehensive Parsing:** Analyzes PHP files to extract detailed information about classes, methods, functions, traits, and annotations, providing a holistic view of the codebase.
 - **Abstract Syntax Tree (AST) Insights:** Captures detailed AST data, including node types, attributes, and structural relationships, enabling advanced analysis of code structure and behavior.
 - **Granular Metadata:** Extracts metadata such as namespaces, file paths, line numbers, and method parameters to facilitate in-depth understanding and precise debugging.
 - **Persistent Tracking:** Stores parsed data in a database, allowing for historical tracking, cross-referencing, and analysis over time.
@@ -127,27 +119,24 @@ The server will start at [http://localhost:8000](http://localhost:8000) by defau
 ### Artisan Commands
   - **`parse:files`:** Parses configured files/directories to list discovered classes and functions.
   - **`static-analysis:run`**
-
+  
     ```bash
     php artisan static-analysis:run {code_analysis_id} --tools=PHPStan,PHP_CodeSniffer,Psalm
     ```
-
+  
     - **Description**: Runs the specified static analysis tools on a particular `CodeAnalysis` entry.
     - **Parameters**:
       - `{code_analysis_id}`: The ID of the `CodeAnalysis` record you wish to analyze.
     - **Options**:
       - `--tools`: Comma-separated list of static analysis tools to run (e.g., `PHPStan,PHP_CodeSniffer,Psalm`).
-
+  
     **Example:**
-
+  
     ```bash
     php artisan static-analysis:run 1 --tools=PHPStan,Psalm
     ```
-  - **`static-analysis:run {code_analysis_id} --tools=PHPStan,PHP_CodeSniffer,Psalm`:** Runs specified static analysis tools on a particular CodeAnalysis entry.
-    - **Options:**
-      - `--tools`: Comma-separated list of static analysis tools to run (e.g., PHPStan, PHP_CodeSniffer, Psalm).
   - **`code:analyze`:** Analyzes PHP files, gathers AST data, and applies AI-driven multi-pass analysis.
-  
+      
     
     - (experimental) **`generate:tests`:** Generates PHPUnit test skeletons for discovered classes and methods.
     - Database utilities:
@@ -234,57 +223,7 @@ The server will start at [http://localhost:8000](http://localhost:8000) by defau
 
 ## Configuration
 
-### Static Analysis Tools Configuration
-
-Configure the static analysis tools in your `.env` file and `config/ai.php`. These configurations allow you to enable or disable tools, specify command paths, and define tool-specific options.
-
-#### `.env.example`
-
-Ensure the following static analysis configurations are set in your `.env` file:
-
-```env
-# Static Analysis Tools Configuration
-STATIC_ANALYSIS_PHPSTAN_ENABLED=true
-STATIC_ANALYSIS_PHPSTAN_COMMAND=vendor/bin/phpstan
-STATIC_ANALYSIS_PHPSTAN_OPTIONS="analyse --no-progress --error-format=json"
-
-STATIC_ANALYSIS_PHP_CODESNIFFER_ENABLED=true
-STATIC_ANALYSIS_PHP_CODESNIFFER_COMMAND=vendor/bin/phpcs
-STATIC_ANALYSIS_PHP_CODESNIFFER_OPTIONS="--report=json"
-
-STATIC_ANALYSIS_PSLAM_ENABLED=true
-STATIC_ANALYSIS_PSLAM_COMMAND=vendor/bin/psalm
-STATIC_ANALYSIS_PSLAM_OPTIONS="--output-format=json"
-```
-
-#### `config/ai.php`
-
-Review and adjust the `static_analysis_tools` array to match your preferences:
-
-```php
-'static_analysis_tools' => [
-    'PHPStan' => [
-        'enabled' => env('STATIC_ANALYSIS_PHPSTAN_ENABLED', true),
-        'command' => env('STATIC_ANALYSIS_PHPSTAN_COMMAND', 'vendor/bin/phpstan'),
-        'options' => explode(' ', env('STATIC_ANALYSIS_PHPSTAN_OPTIONS', '--no-progress --error-format=json')),
-        'output_format' => 'json',
-    ],
-    'PHP_CodeSniffer' => [
-        'enabled' => env('STATIC_ANALYSIS_PHP_CODESNIFFER_ENABLED', true),
-        'command' => env('STATIC_ANALYSIS_PHP_CODESNIFFER_COMMAND', 'vendor/bin/phpcs'),
-        'options' => explode(' ', env('STATIC_ANALYSIS_PHP_CODESNIFFER_OPTIONS', '--report=json')),
-        'output_format' => 'json',
-    ],
-    'Psalm' => [
-        'enabled' => env('STATIC_ANALYSIS_PSLAM_ENABLED', true),
-        'command' => env('STATIC_ANALYSIS_PSLAM_COMMAND', 'vendor/bin/psalm'),
-        'options' => explode(' ', env('STATIC_ANALYSIS_PSLAM_OPTIONS', '--output-format=json')),
-        'output_format' => 'json',
-    ],
-],
-```
-
-Ensure that the commands and options match your project's requirements and that the tools are properly installed via Composer.
+### AI Service Configuration
 
 The AI capabilities are configured in `config/ai.php`. This file defines the AI operations, multi-pass analysis settings, static analysis tools, and default model configurations. Configure via `.env`.
 
@@ -376,10 +315,13 @@ The AI capabilities are configured in `config/ai.php`. This file defines the AI 
               'doc_generation',
               'functional_analysis',
               'style_convention',
+              'static_analysis',
               'consolidation_pass',
               'scoring_pass',
               'laravel_migration',
               'laravel_migration_scoring',
+              'security_analysis',
+              'performance_analysis',
           ],
       ],
   ],
@@ -444,27 +386,15 @@ In `config/parsing.php`, define:
    ```
    - **Description:** Backup or restore the SQLite DB as needed.
 
-### Running Static Analysis
+- **Database Management**
+  - Utilizes SQLite for simplicity and ease of use.
+  - Provides migration files to set up necessary database tables.
+  
+- **Logging with Contextual Information**
+  - Implements detailed logging using Laravel's Context facade for enhanced traceability and debugging.
 
-To execute static analysis tools on your codebase, use the following Artisan command:
+### Token & Cost Tracking
 
-```bash
-php artisan static-analysis:run {code_analysis_id} --tools=PHPStan,PHP_CodeSniffer,Psalm
-```
-
-**Steps:**
-
-1. **Ensure Configuration**: Verify that the static analysis tools are enabled and properly configured in your `.env` and `config/ai.php` files.
-
-2. **Run Static Analysis**: Execute the command with the appropriate `code_analysis_id` and desired tools.
-
-3. **Review Results**: Upon completion, results will be stored in the `static_analyses` table and can be reviewed through the application's dashboard or relevant interfaces.
-
-**Example:**
-
-```bash
-php artisan static-analysis:run 1 --tools=PHPStan,Psalm
-```
 - **OpenAIService** captures usage stats (`prompt_tokens`, `completion_tokens`, `total_tokens`) per request.
 - **AIResult** stores the usage in `metadata->usage`.
 - If desired, you can compute a cost estimate in USD by applying your own rate (e.g., $0.002 per 1K tokens).
