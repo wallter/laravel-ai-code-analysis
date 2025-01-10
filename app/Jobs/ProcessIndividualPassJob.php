@@ -18,56 +18,42 @@ use Throwable;
  */
 class ProcessIndividualPassJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
 
-    /**
-     * The CodeAnalysis ID.
-     *
-     * @var int|null
-     */
-    public ?int $codeAnalysisId;
+    use InteractsWithQueue;
 
-    /**
-     * The name of the AI pass to execute.
-     *
-     * @var string|null
-     */
-    public ?string $passName;
+    use Queueable;
 
-    /**
-     * Indicates if the job is a dry run.
-     *
-     * @var bool
-     */
-    public bool $dryRun;
+    use SerializesModels;
 
     /**
      * Create a new job instance.
-     *
-     * @param int|null $codeAnalysisId
-     * @param string|null $passName
-     * @param bool $dryRun
      */
     public function __construct(
-        ?int $codeAnalysisId = null,
-        ?string $passName = null,
-        bool $dryRun = false
-    ) {
-        $this->codeAnalysisId = $codeAnalysisId;
-        $this->passName = $passName;
-        $this->dryRun = $dryRun;
+        /**
+         * The CodeAnalysis ID.
+         */
+        public ?int $codeAnalysisId = null,
+        /**
+         * The name of the AI pass to execute.
+         */
+        public ?string $passName = null,
+        /**
+         * Indicates if the job is a dry run.
+         */
+        public bool $dryRun = false
+    )
+    {
     }
 
     /**
      * Execute the job.
-     *
-     * @param AnalysisPassService $analysisPassService
-     * @return void
      */
     public function handle(AnalysisPassService $analysisPassService): void
     {
         if ($this->codeAnalysisId === null || $this->passName === null) {
             Log::error("ProcessIndividualPassJob: Missing required parameters for CodeAnalysis ID {$this->codeAnalysisId}.");
+
             return;
         }
 

@@ -86,7 +86,7 @@ class ParserServiceTest extends TestCase
 
         Log::shouldReceive('error')
             ->once()
-            ->withArgs(fn($message) => str_contains((string) $message, 'Failed to read'));
+            ->withArgs(fn ($message) => str_contains((string) $message, 'Failed to read'));
 
         // Act
         $ast = $this->parserService->parseFile($invalidPath);
@@ -115,11 +115,9 @@ class ParserServiceTest extends TestCase
             ->with($code)
             ->andReturn(['ast_node']);
 
-        $this->app->instance(\PhpParser\ParserFactory::class, fn() => new class($parserMock) extends \PhpParser\ParserFactory
+        $this->app->instance(\PhpParser\ParserFactory::class, fn () => new class($parserMock) extends \PhpParser\ParserFactory
         {
-            public function __construct(private $parser)
-            {
-            }
+            public function __construct(private $parser) {}
 
             public function createForNewestSupportedVersion()
             {

@@ -54,10 +54,10 @@ class AnalysisController extends Controller
         ])->findOrFail($id);
 
         // Summation of all AI cost estimates
-        $totalAICost = $analysis->aiResults->sum(fn($result) => $result->metadata['cost_estimate_usd'] ?? 0);
+        $totalAICost = $analysis->aiResults->sum(fn ($result) => $result->metadata['cost_estimate_usd'] ?? 0);
 
         // Summation of static analysis errors
-        $totalStaticErrors = $analysis->staticAnalyses->sum(fn($staticAnalysis) => count($staticAnalysis->results['errors'] ?? []));
+        $totalStaticErrors = $analysis->staticAnalyses->sum(fn ($staticAnalysis) => count($staticAnalysis->results['errors'] ?? []));
 
         return view('analysis.show', compact('analysis', 'totalAICost', 'totalStaticErrors'));
     }

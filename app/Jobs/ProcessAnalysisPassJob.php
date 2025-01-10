@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Services\AnalysisPassService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -81,6 +80,7 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
 
             if (empty($passOrder)) {
                 Log::warning("ProcessAnalysisPassJob: No pass_order defined in config for CodeAnalysis ID {$this->codeAnalysisId}.");
+
                 return;
             }
 

@@ -17,6 +17,7 @@ class RunStaticAnalysisCommandTest extends TestCase
         parent::setUp();
         $this->mockConsoleOutput = false;
     }
+
     use RefreshDatabase;
 
     public function test_command_runs_static_analysis_successfully()
