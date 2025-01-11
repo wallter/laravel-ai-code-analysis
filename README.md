@@ -7,19 +7,19 @@
 ## Overview
 
 ```mermaid
-graph TD
-    PHP_Codebase[PHP Codebase] --> ParserService
-    ParserService --> AST[Abstract Syntax Tree (AST) Data]
-    AST --> StaticAnalysis[Static Analysis Tools]
-    AST --> AI_Analysis[AI Analysis]
-    StaticAnalysis --> Tools[PHPStan, PHP_CodeSniffer, Psalm]
-    AI_Analysis --> MultiPass[Multi-Pass AI Operations]
-    MultiPass --> Documentation[Documentation Generation]
-    MultiPass --> Refactoring[Refactoring Suggestions]
-    MultiPass --> Functionality[Functionality Assessments]
-    Documentation --> Database[Database Storage]
-    Refactoring --> Database
-    Functionality --> Database
+graph TD;
+    PHP_Codebase[PHP Codebase] --> ParserService;
+    ParserService --> AST[Abstract Syntax Tree (AST) Data];
+    AST --> StaticAnalysis[Static Analysis Tools];
+    AST --> AI_Analysis[AI Analysis];
+    StaticAnalysis --> Tools[PHPStan, PHP_CodeSniffer, Psalm];
+    AI_Analysis --> MultiPass[Multi-Pass AI Operations];
+    MultiPass --> Documentation[Documentation Generation];
+    MultiPass --> Refactoring[Refactoring Suggestions];
+    MultiPass --> Functionality[Functionality Assessments];
+    Documentation --> Database[Database Storage];
+    Refactoring --> Database;
+    Functionality --> Database;
 ```
 
 This Laravel-based project seamlessly integrates **OpenAI’s language models** with **PHP Abstract Syntax Tree (AST) analysis** (powered by [nikic/php-parser](https://github.com/nikic/PHP-Parser)) along with other essential tooling such as [PHPStan](https://phpstan.org/), [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer), and [Psalm](https://psalm.dev/) to deliver a **comprehensive multi-pass code analysis**. By iteratively scanning PHP codebases, the system generates:
@@ -115,43 +115,43 @@ The server will start at [http://localhost:8000](http://localhost:8000) by defau
 ## Features
 
 ```mermaid
-graph LR
+graph LR;
     subgraph Tooling
-        PHPStan[PHPStan]
-        PHPCS[PHP_CodeSniffer]
-        Psalm[Psalm]
-        Tinker[Laravel Tinker]
-        OpenAI[OpenAI-PHP/Laravel]
-    end
+        PHPStan[PHPStan];
+        PHPCS[PHP_CodeSniffer];
+        Psalm[Psalm];
+        Tinker[Laravel Tinker];
+        OpenAI[OpenAI-PHP/Laravel];
+    end;
 
     subgraph Code Parsing and Analysis
-        Parsing[Comprehensive Parsing]
-        AST[AST Insights]
-        Metadata[Granular Metadata]
-        Tracking[Persistent Tracking]
-        Advanced[Supports Advanced Use Cases]
-    end
+        Parsing[Comprehensive Parsing];
+        AST[AST Insights];
+        Metadata[Granular Metadata];
+        Tracking[Persistent Tracking];
+        Advanced[Supports Advanced Use Cases];
+    end;
 
     subgraph Multi-Pass AI Analysis
-        DocGen[Documentation Generation]
-        Refactor[Refactoring Suggestions]
-        Functionality[Functionality Analysis]
-        Style[Style & Convention Review]
-        Performance[Performance Analysis]
-        Dependency[Dependency Review]
-    end
+        DocGen[Documentation Generation];
+        Refactor[Refactoring Suggestions];
+        Functionality[Functionality Analysis];
+        Style[Style & Convention Review];
+        Performance[Performance Analysis];
+        Dependency[Dependency Review];
+    end;
 
     subgraph Artisan Commands
-        Parse[parse:files]
-        StaticRun[static-analysis:run]
-        Analyze[analyze:files]
-        Backup[db:backup]
-        Restore[db:backup:restore]
-    end
+        Parse[parse:files];
+        StaticRun[static-analysis:run];
+        Analyze[analyze:files];
+        Backup[db:backup];
+        Restore[db:backup:restore];
+    end;
 
-    Tooling --> CodeParsing[Code Parsing and Analysis]
-    CodeParsing --> AIAnalysis[Multi-Pass AI Analysis]
-    AIAnalysis --> Commands[Artisan Commands]
+    Tooling --> CodeParsing[Code Parsing and Analysis];
+    CodeParsing --> AIAnalysis[Multi-Pass AI Analysis];
+    AIAnalysis --> Commands[Artisan Commands];
 ```
 
 ### Tooling
@@ -184,12 +184,12 @@ This project leverages a suite of powerful tools to enhance code analysis and ma
 ### Artisan Commands
 
 ```mermaid
-flowchart TD
-    Start[Start] --> ParseFiles[parse:files]
-    ParseFiles --> RunStaticAnalysis[static-analysis:run]
-    RunStaticAnalysis --> AnalyzeFiles[analyze:files]
-    AnalyzeFiles --> QueueProgress[queue:progress]
-    QueueProgress --> End[End]
+flowchart TD;
+    Start[Start] --> ParseFiles[parse:files];
+    ParseFiles --> RunStaticAnalysis[static-analysis:run];
+    RunStaticAnalysis --> AnalyzeFiles[analyze:files];
+    AnalyzeFiles --> QueueProgress[queue:progress];
+    QueueProgress --> End[End];
 ```
 - **`parse:files`:** Parses configured files/directories to list discovered classes and functions.
 - **`static-analysis:run`**
@@ -476,22 +476,22 @@ In `config/parsing.php`, define:
 ### Testing
 
 ```mermaid
-sequenceDiagram
-    participant User
-    participant Artisan
-    participant ParserService
-    participant StaticAnalysis
-    participant AIService
-    participant Database
+sequenceDiagram;
+    participant User;
+    participant Artisan;
+    participant ParserService;
+    participant StaticAnalysis;
+    participant AIService;
+    participant Database;
 
-    User->>Artisan: Run analyze:files
-    Artisan->>ParserService: Parse PHP files
-    ParserService->>Database: Store AST data
-    Artisan->>StaticAnalysis: Execute static tools
-    StaticAnalysis->>Database: Save analysis results
-    Artisan->>AIService: Initiate AI passes
-    AIService->>Database: Update with AI results
-    Database-->>User: Retrieve comprehensive analysis
+    User->>Artisan: Run analyze:files;
+    Artisan->>ParserService: Parse PHP files;
+    ParserService->>Database: Store AST data;
+    Artisan->>StaticAnalysis: Execute static tools;
+    StaticAnalysis->>Database: Save analysis results;
+    Artisan->>AIService: Initiate AI passes;
+    AIService->>Database: Update with AI results;
+    Database-->>User: Retrieve comprehensive analysis;
 ```
 - **Run Tests:**
 
