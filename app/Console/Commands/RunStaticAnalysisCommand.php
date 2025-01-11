@@ -32,7 +32,6 @@ class RunStaticAnalysisCommand extends Command
         if ($codeAnalyses->isEmpty()) {
             $this->info('No CodeAnalysis entries found without static analyses.');
             return 0;
-            }
         }
 
         $this->info("Found [{$codeAnalyses->count()}] CodeAnalysis entries without static analyses.");
@@ -51,7 +50,6 @@ class RunStaticAnalysisCommand extends Command
                     $this->info("Dispatching pass '{$passName}' for '{$codeAnalysis->file_path}'.");
                     ProcessIndividualPassJob::dispatch($codeAnalysis->id, $passName, $dryRun = false);
                 }
-            }
             $this->info('Multi-pass analysis jobs have been dispatched.');
             return 0;
         }
