@@ -11,7 +11,7 @@ class ScriptRunnerService
     public function runScript(string $command, array $arguments = [], ?int $timeout = null): ?string
     {
         $commandParts = array_merge([$command], $arguments);
-        Log::debug('ScriptRunnerService: Executing command - ' . implode(' ', $commandParts));
+        Log::debug('ScriptRunnerService: Executing command - '.implode(' ', $commandParts));
 
         $process = new Process($commandParts);
         $process->setTimeout($timeout ?? 300);
@@ -20,11 +20,12 @@ class ScriptRunnerService
             $process->mustRun();
         } catch (ProcessFailedException $exception) {
             Log::error("ScriptRunnerService: Command '{$command}' failed. Error: {$exception->getMessage()}");
+
             return null;
         }
 
         $output = $process->getOutput();
-        Log::debug("ScriptRunnerService: Command '{$command}' output: " . $output);
+        Log::debug("ScriptRunnerService: Command '{$command}' output: ".$output);
 
         return $output;
     }

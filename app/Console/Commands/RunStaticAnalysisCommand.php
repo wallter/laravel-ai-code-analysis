@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\ProcessIndividualPassJob;
 use App\Models\CodeAnalysis;
 use App\Services\StaticAnalysisService;
-use App\Jobs\ProcessIndividualPassJob;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
 
@@ -19,7 +19,7 @@ class RunStaticAnalysisCommand extends Command
     public function __construct(protected StaticAnalysisService $staticAnalysisService)
     {
         parent::__construct();
-        
+
         // Initialize the list of enabled static analysis tools
         $this->enabledTools = $this->getEnabledStaticAnalysisTools();
     }
@@ -31,6 +31,7 @@ class RunStaticAnalysisCommand extends Command
 
         if ($codeAnalyses->isEmpty()) {
             $this->info('No CodeAnalysis entries found without static analyses.');
+
             return 0;
         }
 
@@ -51,6 +52,7 @@ class RunStaticAnalysisCommand extends Command
                     ProcessIndividualPassJob::dispatch($codeAnalysis->id, $passName, $dryRun = false);
                 }
                 $this->info('Multi-pass analysis jobs have been dispatched.');
+
                 continue;
             }
 
@@ -75,8 +77,9 @@ class RunStaticAnalysisCommand extends Command
                 $this->info("Determined language '{$language}' for '{$codeAnalysis->file_path}' and updated the CodeAnalysis entry.");
             }
 
-            if (!isset($toolsByLanguage[$language])) {
+            if (! isset($toolsByLanguage[$language])) {
                 $this->warn("No static analysis tools configured for language '{$language}' detected in '{$codeAnalysis->file_path}'. Skipping.");
+
                 continue;
             }
 
@@ -100,8 +103,6 @@ class RunStaticAnalysisCommand extends Command
 
     /**
      * Get the list of enabled static analysis tools from configuration.
-     *
-     * @return array
      */
     protected function getEnabledStaticAnalysisTools(): array
     {

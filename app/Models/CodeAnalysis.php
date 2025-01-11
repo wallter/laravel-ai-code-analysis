@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
 /**
  * CodeAnalysis model represents the analysis of a single PHP file.
@@ -38,7 +38,7 @@ class CodeAnalysis extends Model
         return Attribute::make(
             get: function ($value) {
                 $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
-                $absolutePath = realpath($basePath . DIRECTORY_SEPARATOR . $value);
+                $absolutePath = realpath($basePath.DIRECTORY_SEPARATOR.$value);
 
                 return $absolutePath ?: $value;
             },
@@ -48,7 +48,7 @@ class CodeAnalysis extends Model
                 $value = str_replace(['\\'], '/', $value);
                 $basePath = str_replace(['\\'], '/', $basePath);
                 if (Str::startsWith($value, $basePath)) {
-                    $relativePath = Str::replaceFirst($basePath . '/', '', $value);
+                    $relativePath = Str::replaceFirst($basePath.'/', '', $value);
                     $this->attributes['file_path'] = $relativePath;
                     Log::debug("CodeAnalysis Model: Set 'file_path' to relative path '{$relativePath}'.");
                 } else {
@@ -91,8 +91,6 @@ class CodeAnalysis extends Model
 
     /**
      * Determine the language based on the file extension.
-     *
-     * @return string
      */
     protected function determineLanguage(): string
     {
@@ -106,6 +104,7 @@ class CodeAnalysis extends Model
             'ex' => 'elixir',
             'exs' => 'elixir',
         ];
+
         return $languageMap[$extension] ?? 'unknown';
     }
 
