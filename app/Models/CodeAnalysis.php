@@ -38,7 +38,7 @@ class CodeAnalysis extends Model
         return Attribute::make(
             get: function ($value) {
                 $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
-                $absolutePath = realpath($basePath.DIRECTORY_SEPARATOR.$value);
+                $absolutePath = realpath($basePath . DIRECTORY_SEPARATOR . $value);
 
                 return $absolutePath ?: $value;
             },
@@ -48,7 +48,7 @@ class CodeAnalysis extends Model
                 $value = str_replace(['\\'], '/', $value);
                 $basePath = str_replace(['\\'], '/', $basePath);
                 if (Str::startsWith($value, $basePath)) {
-                    $relativePath = Str::replaceFirst($basePath.'/', '', $value);
+                    $relativePath = Str::replaceFirst($basePath . '/', '', $value);
                     $this->attributes['file_path'] = $relativePath;
                     Log::debug("CodeAnalysis Model: Set 'file_path' to relative path '{$relativePath}'.");
                 } else {
@@ -73,6 +73,40 @@ class CodeAnalysis extends Model
                 Log::debug("CodeAnalysis Model: Set 'language' to '{$language}'.");
             }
         );
+    }
+
+    /**
+     * Boot the model and attach event listeners.
+     */
+    protected static function booted()
+    {
+        static::creating(function ($codeAnalysis) {
+            $codeAnalysis->language = $codeAnalysis->determineLanguage();
+        });
+
+        static::updating(function ($codeAnalysis) {
+            $codeAnalysis->language = $codeAnalysis->determineLanguage();
+        });
+    }
+
+    /**
+     * Determine the language based on the file extension.
+     *
+     * @return string
+     */
+    protected function determineLanguage(): string
+    {
+        $extension = strtolower(pathinfo($this->file_path, PATHINFO_EXTENSION));
+        $languageMap = [
+            'php' => 'php',
+            'js' => 'javascript',
+            'ts' => 'typescript',
+            'py' => 'python',
+            'go' => 'go',
+            'ex' => 'elixir',
+            'exs' => 'elixir',
+        ];
+        return $languageMap[$extension] ?? 'unknown';
     }
 
     public function staticAnalyses()
