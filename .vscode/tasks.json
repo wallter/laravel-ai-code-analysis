@@ -1,0 +1,56 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "PHP Artisan Serve",
+            "type": "shell",
+            "command": "php artisan serve",
+            "isBackground": true,
+            "presentation": {
+                "panel": "dedicated",
+                "echo": true,
+                "reveal": "always",
+                "focus": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "NPM Run Dev",
+            "type": "shell",
+            "command": "npm run dev",
+            "isBackground": true,
+            "presentation": {
+                "panel": "dedicated",
+                "echo": true,
+                "reveal": "always",
+                "focus": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Aider",
+            "type": "shell",
+            "command": "aider",
+            "isBackground": true,
+            "presentation": {
+                "panel": "dedicated",
+                "echo": true,
+                "reveal": "always",
+                "focus": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run All Startup Tasks",
+            "dependsOn": [
+                "PHP Artisan Serve",
+                "NPM Run Dev",
+                "Aider"
+            ],
+            "dependsOrder": "parallel",
+            "runOptions": {
+                "runOn": "folderOpen"
+            }
+        }
+    ]
+}
