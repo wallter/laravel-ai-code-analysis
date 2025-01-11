@@ -66,4 +66,19 @@ return [
             'language' => 'elixir',
         ],
     ],
+
+    'multi_pass_analysis' => [
+        'enabled' => env('MULTI_PASS_ANALYSIS_ENABLED', false),
+        'passes' => [
+            'initial' => [
+                'description' => 'Initial static analysis pass',
+                'tools' => ['PHPStan', 'Psalm'],
+            ],
+            'refinement' => [
+                'description' => 'Refinement pass after initial analysis',
+                'tools' => ['Rector'],
+            ],
+            // Add more passes as needed
+        ],
+    ],
 ];

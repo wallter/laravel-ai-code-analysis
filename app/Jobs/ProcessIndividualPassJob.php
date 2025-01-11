@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\Models\CodeAnalysis;
 use App\Services\AnalysisPassService;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -78,7 +80,31 @@ class ProcessIndividualPassJob implements ShouldQueue
             return;
         }
 
+        // Retrieve tools for the current pass from configuration
+        $tools = Config::get("static_analysis.multi_pass_analysis.passes.{$this->passName}.tools", []);
+
+        if (empty($tools)) {
+            Log::warning("ProcessIndividualPassJob: No tools configured for pass '{$this->passName}' for CodeAnalysis ID {$this->codeAnalysisId}.");
+            return;
+        }
+
         try {
+            // Retrieve the CodeAnalysis instance
+            $codeAnalysis = CodeAnalysis::find($this->codeAnalysisId);
+            if (!$codeAnalysis) {
+                Log::error("ProcessIndividualPassJob: CodeAnalysis ID {$this->codeAnalysisId} not found.");
+                return;
+            }
+
+            foreach ($tools as $toolName) {
+                Log::info("ProcessIndividualPassJob: Running tool '{$toolName}' for pass '{$this->passName}' on '{$codeAnalysis->file_path}'.");
+                $staticAnalysis = $analysisPassService->runAnalysis($codeAnalysis, $toolName);
+                if ($staticAnalysis) {
+                    Log::info("ProcessIndividualPassJob: Tool '{$toolName}' completed for pass '{$this->passName}' on '{$codeAnalysis->file_path}'.");
+                } else {
+                    Log::error("ProcessIndividualPassJob: Tool '{$toolName}' failed for pass '{$this->passName}' on '{$codeAnalysis->file_path}'.");
+                }
+            }
             Log::info("ProcessIndividualPassJob: Starting pass '{$this->passName}' for CodeAnalysis ID {$this->codeAnalysisId}.");
 
             $analysisPassService->processPass($this->passName, $this->codeAnalysisId, $this->dryRun);
