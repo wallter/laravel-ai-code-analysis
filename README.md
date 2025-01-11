@@ -6,6 +6,18 @@
 
 ## Overview
 
+This Laravel-based project seamlessly integrates **OpenAI’s language models** with **PHP Abstract Syntax Tree (AST) analysis** (powered by [nikic/php-parser](https://github.com/nikic/PHP-Parser)) along with other essential tooling such as [PHPStan](https://phpstan.org/), [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer), and [Psalm](https://psalm.dev/) to deliver a **comprehensive multi-pass code analysis**. By iteratively scanning PHP codebases, the system generates:
+
+- **Automated Documentation**: Creates concise and clear documentation derived from raw code and AST data, enhancing code comprehension and maintainability.
+- **Refactoring Suggestions**: Provides actionable recommendations to improve code clarity, adhere to best practices, and optimize overall structure.
+- **Functionality Assessments**: Evaluates performance and maintainability aspects of the code, identifying potential bottlenecks and areas for improvement.
+
+![Documentation Generation](resources/images/github/documentation-generation.png)
+
+By leveraging **queued** AI operations, **token usage** tracking, and other advanced features, developers can **enhance maintainability**, **optimize performance**, and **ensure** cleaner, more efficient codebases (see `config/ai.php`).
+
+### Functional Diagram
+
 ```mermaid
 graph TD;
     PHP_Codebase[PHP Codebase] --> ParserService;
@@ -22,20 +34,11 @@ graph TD;
     Functionality --> Database;
 ```
 
-This Laravel-based project seamlessly integrates **OpenAI’s language models** with **PHP Abstract Syntax Tree (AST) analysis** (powered by [nikic/php-parser](https://github.com/nikic/PHP-Parser)) along with other essential tooling such as [PHPStan](https://phpstan.org/), [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer), and [Psalm](https://psalm.dev/) to deliver a **comprehensive multi-pass code analysis**. By iteratively scanning PHP codebases, the system generates:
-
-- **Automated Documentation**: Creates concise and clear documentation derived from raw code and AST data, enhancing code comprehension and maintainability.
-- **Refactoring Suggestions**: Provides actionable recommendations to improve code clarity, adhere to best practices, and optimize overall structure.
-- **Functionality Assessments**: Evaluates performance and maintainability aspects of the code, identifying potential bottlenecks and areas for improvement.
-
-![Documentation Generation](resources/images/github/documentation-generation.png)
-
-By leveraging **queued** AI operations, **token usage** tracking, and other advanced features, developers can **enhance maintainability**, **optimize performance**, and **ensure** cleaner, more efficient codebases (see `config/ai.php`).
-
 ## Table of Contents
 
 - [Laravel AI Code Analysis Project](#laravel-ai-code-analysis-project)
   - [Overview](#overview)
+    - [Functional Diagram](#functional-diagram)
   - [Table of Contents](#table-of-contents)
   - [Usage TLDR;](#usage-tldr)
     - [Running the UI \& Server](#running-the-ui--server)
@@ -49,6 +52,7 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
   - [UI Setup](#ui-setup)
   - [Configuration](#configuration)
     - [AI Service Configuration](#ai-service-configuration)
+    - [Features Diagram](#features-diagram)
     - [Parsing Configuration](#parsing-configuration)
   - [Usage](#usage)
     - [Artisan Commands](#artisan-commands-1)
@@ -114,46 +118,6 @@ The server will start at [http://localhost:8000](http://localhost:8000) by defau
 - Monitor Laravel logs `storage/logs/laravel.log` for detailed output
 
 ## Features
-
-```mermaid
-graph LR;
-    subgraph Tooling
-        PHPStan[PHPStan];
-        PHPCS[PHP_CodeSniffer];
-        Psalm[Psalm];
-        Tinker[Laravel Tinker];
-        OpenAI[OpenAI-PHP/Laravel];
-    end;
-
-    subgraph Code Parsing and Analysis
-        Parsing[Comprehensive Parsing];
-        AST[AST Insights];
-        Metadata[Granular Metadata];
-        Tracking[Persistent Tracking];
-        Advanced[Supports Advanced Use Cases];
-    end;
-
-    subgraph Multi-Pass AI Analysis
-        DocGen[Documentation Generation];
-        Refactor[Refactoring Suggestions];
-        Functionality[Functionality Analysis];
-        Style[Style & Convention Review];
-        Performance[Performance Analysis];
-        Dependency[Dependency Review];
-    end;
-
-    subgraph Artisan Commands
-        Parse[parse:files];
-        StaticRun[static-analysis:run];
-        Analyze[analyze:files];
-        Backup[db:backup];
-        Restore[db:backup:restore];
-    end;
-
-    Tooling --> CodeParsing[Code Parsing and Analysis];
-    CodeParsing --> AIAnalysis[Multi-Pass AI Analysis];
-    AIAnalysis --> Commands[Artisan Commands];
-```
 
 ### Tooling
 
@@ -372,6 +336,47 @@ The AI capabilities are configured in `config/ai.php`. This file defines the AI 
       ],
   ],
   ```
+
+### Features Diagram
+```mermaid
+graph LR;
+    subgraph Tooling
+        PHPStan[PHPStan];
+        PHPCS[PHP_CodeSniffer];
+        Psalm[Psalm];
+        Tinker[Laravel Tinker];
+        OpenAI[OpenAI-PHP/Laravel];
+    end;
+
+    subgraph Code Parsing and Analysis
+        Parsing[Comprehensive Parsing];
+        AST[AST Insights];
+        Metadata[Granular Metadata];
+        Tracking[Persistent Tracking];
+        Advanced[Supports Advanced Use Cases];
+    end;
+
+    subgraph Multi-Pass AI Analysis
+        DocGen[Documentation Generation];
+        Refactor[Refactoring Suggestions];
+        Functionality[Functionality Analysis];
+        Style[Style & Convention Review];
+        Performance[Performance Analysis];
+        Dependency[Dependency Review];
+    end;
+
+    subgraph Artisan Commands
+        Parse[parse:files];
+        StaticRun[static-analysis:run];
+        Analyze[analyze:files];
+        Backup[db:backup];
+        Restore[db:backup:restore];
+    end;
+
+    Tooling --> CodeParsing[Code Parsing and Analysis];
+    CodeParsing --> AIAnalysis[Multi-Pass AI Analysis];
+    AIAnalysis --> Commands[Artisan Commands];
+```
 
 - **Multi-Pass Analysis**
 
