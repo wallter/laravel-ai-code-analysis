@@ -8,9 +8,9 @@ use Illuminate\Console\Command;
 
 class RunStaticAnalysisCommand extends Command
 {
-    protected $signature = 'static-analysis:run {code_analysis_id}';
+    protected $signature = 'static-analysis:run';
 
-    protected $description = 'Run static analysis on a specific CodeAnalysis entry';
+    protected $description = 'Run static analysis on all CodeAnalysis entries without existing static analyses';
 
     public function __construct(protected StaticAnalysisService $staticAnalysisService)
     {
@@ -19,24 +19,29 @@ class RunStaticAnalysisCommand extends Command
 
     public function handle()
     {
-        $codeAnalysisId = $this->argument('code_analysis_id');
-        $codeAnalysis = CodeAnalysis::find($codeAnalysisId);
+        // Retrieve all CodeAnalysis entries that do not have any associated static analyses
+        $codeAnalyses = CodeAnalysis::whereDoesntHave('staticAnalyses')->get();
 
-        if (! $codeAnalysis) {
-            $this->error("CodeAnalysis with ID {$codeAnalysisId} not found.");
-
-            return 1;
+        if ($codeAnalyses->isEmpty()) {
+            $this->info('No CodeAnalysis entries found without static analyses.');
+            return 0;
         }
 
-        $this->info("Running static analysis on '{$codeAnalysis->file_path}'.");
+        $this->info("Found [{$codeAnalyses->count()}] CodeAnalysis entries without static analyses.");
 
-        $staticAnalysis = $this->staticAnalysisService->runAnalysis($codeAnalysis);
+        foreach ($codeAnalyses as $codeAnalysis) {
+            $this->info("Running static analysis on '{$codeAnalysis->file_path}'.");
 
-        if ($staticAnalysis) {
-            $this->info('Static analysis completed and results stored.');
-        } else {
-            $this->error('Static analysis failed.');
+            $staticAnalysis = $this->staticAnalysisService->runAnalysis($codeAnalysis);
+
+            if ($staticAnalysis) {
+                $this->info("Static analysis completed and results stored for '{$codeAnalysis->file_path}'.");
+            } else {
+                $this->error("Static analysis failed for '{$codeAnalysis->file_path}'.");
+            }
         }
+
+        $this->info('All pending static analyses have been processed.');
 
         return 0;
     }
