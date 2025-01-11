@@ -44,6 +44,27 @@ class RunStaticAnalysisCommand extends Command
 
         foreach ($codeAnalyses as $codeAnalysis) {
             $language = $codeAnalysis->language;
+
+            if (empty($language)) {
+                // Determine language from file extension
+                $extension = strtolower(pathinfo($codeAnalysis->file_path, PATHINFO_EXTENSION));
+                $languageMap = [
+                    'php' => 'php',
+                    'js' => 'javascript',
+                    'ts' => 'typescript',
+                    'py' => 'python',
+                    'go' => 'go',
+                    'ex' => 'elixir',
+                    'exs' => 'elixir',
+                    // Add other mappings as necessary
+                ];
+                $language = $languageMap[$extension] ?? 'unknown';
+                $codeAnalysis->language = $language;
+                $codeAnalysis->save();
+
+                $this->info("Determined language '{$language}' for '{$codeAnalysis->file_path}' and updated the CodeAnalysis entry.");
+            }
+
             if (!isset($toolsByLanguage[$language])) {
                 $this->warn("No static analysis tools configured for language '{$language}' detected in '{$codeAnalysis->file_path}'. Skipping.");
                 continue;
