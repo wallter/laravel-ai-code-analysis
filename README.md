@@ -104,10 +104,7 @@ php artisan analyze:files
 
 # 7) Run the custom command (with a progressbar) to process the async jobs
 php artisan queue:progress
-
-# Or just run a queue worker
-
-# php artisan queue:work --stop-when-empty
+# Or run: php artisan queue:work --stop-when-empty
 ```
 - Check console output
 
