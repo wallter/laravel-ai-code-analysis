@@ -32,6 +32,7 @@ class RunStaticAnalysisCommand extends Command
         if ($codeAnalyses->isEmpty()) {
             $this->info('No CodeAnalysis entries found without static analyses.');
             return 0;
+            }
         }
 
         $this->info("Found [{$codeAnalyses->count()}] CodeAnalysis entries without static analyses.");
