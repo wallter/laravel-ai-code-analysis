@@ -59,7 +59,7 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
 
 ```mermaid
 graph TD;
-    PHP_Codebase[PHP Codebase] --> ParserService;
+    PHP_Codebase[Your PHP Codebase] --> ParserService;
     ParserService --> AST[Abstract Syntax Tree AST Data];
     AST --> StaticAnalysis[Static Analysis Tools];
     AST --> AI_Analysis[AI Analysis];
