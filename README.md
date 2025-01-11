@@ -21,9 +21,9 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
 - [Laravel AI Code Analysis Project](#laravel-ai-code-analysis-project)
   - [Overview](#overview)
   - [Table of Contents](#table-of-contents)
+    - [How it works](#how-it-works)
   - [Usage TLDR;](#usage-tldr)
     - [Running the UI \& Server](#running-the-ui--server)
-    - [How it works](#how-it-works)
   - [Features](#features)
     - [Tooling](#tooling)
     - [Code Parsing and Analysis](#code-parsing-and-analysis)
@@ -54,6 +54,24 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
     - [Overall Rating and Recommendations](#overall-rating-and-recommendations)
   - [Contributing](#contributing)
   - [License](#license)
+
+### How it works
+
+```mermaid
+graph TD;
+    PHP_Codebase[PHP Codebase] --> ParserService;
+    ParserService --> AST[Abstract Syntax Tree AST Data];
+    AST --> StaticAnalysis[Static Analysis Tools];
+    AST --> AI_Analysis[AI Analysis];
+    StaticAnalysis --> Tools[PHPStan, PHP_CodeSniffer, Psalm];
+    AI_Analysis --> MultiPass[Multi-Pass AI Operations];
+    MultiPass --> Documentation[Documentation Generation];
+    MultiPass --> Refactoring[Refactoring Suggestions];
+    MultiPass --> Functionality[Functionality Assessments];
+    Documentation --> Database[Database Storage];
+    Refactoring --> Database;
+    Functionality --> Database;
+```
 
 ## Usage TLDR;
 ```bash
@@ -102,24 +120,6 @@ php artisan serve
 
 The server will start at [http://localhost:8000](http://localhost:8000) by default. You can access the application by navigating to this URL in your web browser.
 - Monitor Laravel logs `storage/logs/laravel.log` for detailed output
-
-### How it works
-
-```mermaid
-graph TD;
-    PHP_Codebase[PHP Codebase] --> ParserService;
-    ParserService --> AST[Abstract Syntax Tree AST Data];
-    AST --> StaticAnalysis[Static Analysis Tools];
-    AST --> AI_Analysis[AI Analysis];
-    StaticAnalysis --> Tools[PHPStan, PHP_CodeSniffer, Psalm];
-    AI_Analysis --> MultiPass[Multi-Pass AI Operations];
-    MultiPass --> Documentation[Documentation Generation];
-    MultiPass --> Refactoring[Refactoring Suggestions];
-    MultiPass --> Functionality[Functionality Assessments];
-    Documentation --> Database[Database Storage];
-    Refactoring --> Database;
-    Functionality --> Database;
-```
 
 ## Features
 
