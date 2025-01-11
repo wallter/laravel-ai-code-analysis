@@ -19,50 +19,59 @@ class StaticAnalysisService implements StaticAnalysisToolInterface
         $filePath = $codeAnalysis->file_path;
         Log::info("StaticAnalysisService: Running {$toolName} on '{$filePath}'.");
 
-        $toolsConfig = Config::get('ai.static_analysis_tools');
+        $toolsConfig = Config::get('static_analysis.tools', []);
 
-        if (! isset($toolsConfig[$toolName])) {
+        if (!isset($toolsConfig[$toolName])) {
             Log::error("StaticAnalysisService: Static analysis tool '{$toolName}' is not configured.");
-
             return null;
         }
 
         $toolConfig = $toolsConfig[$toolName];
 
-        if (! ($toolConfig['enabled'] ?? false)) {
+        if (!($toolConfig['enabled'] ?? false)) {
             Log::warning("StaticAnalysisService: Static analysis tool '{$toolName}' is disabled.");
-
             return null;
         }
 
-        $command = array_merge(
-            [$toolConfig['command']],
-            $toolConfig['options'] ?? [],
-            [$filePath] // Added the file path to the command
-        );
+        $command = $toolConfig['command'];
+        $options = $toolConfig['options'] ?? [];
 
-        Log::debug('StaticAnalysisService: Executing command - '.implode(' ', $command));
+        if (in_array($toolConfig['language'], ['php', 'javascript', 'typescript', 'python', 'go', 'elixir'])) {
+            if (!empty($options)) {
+                $commandParts = array_merge([$command], $options, [$filePath]);
+            } else {
+                $commandParts = [$command, $filePath];
+            }
+        } else {
+            $commandParts = array_merge([$command], $options);
+        }
 
-        $process = new Process($command);
-        $process->run();
+        Log::debug('StaticAnalysisService: Executing command - ' . implode(' ', $commandParts));
 
-        if (! $process->isSuccessful()) {
-            $errorOutput = $process->getErrorOutput() ?: $process->getOutput();
-            Log::error("StaticAnalysisService: {$toolName} failed for '{$filePath}'. Error: {$errorOutput}");
+        $process = new Process($commandParts);
+        $process->setTimeout(300);
 
+        try {
+            $process->mustRun();
+        } catch (ProcessFailedException $exception) {
+            Log::error("StaticAnalysisService: {$toolName} failed for '{$filePath}'. Error: {$exception->getMessage()}");
             return null;
         }
 
         $output = $process->getOutput();
-        $results = json_decode($output, true);
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            Log::error("StaticAnalysisService: Failed to decode JSON output from {$toolName} for '{$filePath}'. Error: ".json_last_error_msg());
+        if ($toolConfig['output_format'] === 'json') {
+            $results = json_decode($output, true);
 
-            return null;
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                Log::error("StaticAnalysisService: Failed to decode JSON output from {$toolName} for '{$filePath}'. Error: " . json_last_error_msg());
+                return null;
+            }
+        } else {
+            $results = $output;
         }
 
-        Log::debug("StaticAnalysisService: {$toolName} results for '{$filePath}': ".json_encode($results));
+        Log::debug("StaticAnalysisService: {$toolName} results for '{$filePath}': " . ($toolConfig['output_format'] === 'json' ? json_encode($results) : $results));
 
         $staticAnalysis = StaticAnalysis::create([
             'code_analysis_id' => $codeAnalysis->id,

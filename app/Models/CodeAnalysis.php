@@ -25,6 +25,7 @@ class CodeAnalysis extends Model
         'ai_output',
         'current_pass',
         'completed_passes',
+        'language',
     ];
 
     /**
@@ -55,6 +56,33 @@ class CodeAnalysis extends Model
 
             return ['file_path' => $value];
         });
+    }
+
+    protected function setFilePathAttribute($value)
+    {
+        $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
+        $absolutePath = realpath($basePath . DIRECTORY_SEPARATOR . $value) ?: $value;
+        $relativePath = Str::startsWith($absolutePath, $basePath)
+            ? Str::replaceFirst($basePath . DIRECTORY_SEPARATOR, '', $absolutePath)
+            : $absolutePath;
+
+        $extension = strtolower(pathinfo($relativePath, PATHINFO_EXTENSION));
+        $languageMap = [
+            'php' => 'php',
+            'js' => 'javascript',
+            'ts' => 'typescript',
+            'py' => 'python',
+            'go' => 'go',
+            'ex' => 'elixir',
+            'exs' => 'elixir',
+            'language' => 'string',
+        ];
+        $language = $languageMap[$extension] ?? 'unknown';
+
+        $this->attributes['file_path'] = $relativePath;
+        $this->attributes['language'] = $language;
+
+        Log::debug("CodeAnalysis Model: Set 'file_path' to '{$relativePath}' and 'language' to '{$language}'.");
     }
 
     public function staticAnalyses()

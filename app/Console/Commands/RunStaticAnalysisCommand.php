@@ -35,8 +35,21 @@ class RunStaticAnalysisCommand extends Command
 
         $this->info("Found [{$codeAnalyses->count()}] CodeAnalysis entries without static analyses.");
 
+        $toolsByLanguage = [];
+
+        foreach ($this->enabledTools as $toolName => $toolConfig) {
+            $language = $toolConfig['language'] ?? 'unknown';
+            $toolsByLanguage[$language][$toolName] = $toolConfig;
+        }
+
         foreach ($codeAnalyses as $codeAnalysis) {
-            foreach ($this->enabledTools as $toolName) {
+            $language = $codeAnalysis->language;
+            if (!isset($toolsByLanguage[$language])) {
+                $this->warn("No static analysis tools configured for language '{$language}' detected in '{$codeAnalysis->file_path}'. Skipping.");
+                continue;
+            }
+
+            foreach ($toolsByLanguage[$language] as $toolName => $toolConfig) {
                 $this->info("Running static analysis '{$toolName}' on '{$codeAnalysis->file_path}'.");
 
                 $staticAnalysis = $this->staticAnalysisService->runAnalysis($codeAnalysis, $toolName);
