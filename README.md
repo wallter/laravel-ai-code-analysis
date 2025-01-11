@@ -21,7 +21,7 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
 - [Laravel AI Code Analysis Project](#laravel-ai-code-analysis-project)
   - [Overview](#overview)
   - [Table of Contents](#table-of-contents)
-    - [How it works](#how-it-works)
+  - [How it works](#how-it-works)
   - [Usage TLDR;](#usage-tldr)
     - [Running the UI \& Server](#running-the-ui--server)
   - [Features](#features)
@@ -55,7 +55,7 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
   - [Contributing](#contributing)
   - [License](#license)
 
-### How it works
+## How it works
 
 ```mermaid
 graph TD;
