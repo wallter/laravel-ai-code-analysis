@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 /**
  * CodeAnalysis model represents the analysis of a single PHP file.
@@ -29,60 +30,49 @@ class CodeAnalysis extends Model
     ];
 
     /**
-     * Accessor to get the absolute file path.
-     *
-     * @param  string  $value
+     * Accessor and Mutator for the file_path attribute.
+     * Ensures that both file_path and language are set correctly.
      */
-    protected function filePath(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function filePath(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function ($value) {
-            $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
-            $absolutePath = realpath($basePath.DIRECTORY_SEPARATOR.$value);
+        return Attribute::make(
+            get: function ($value) {
+                $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
+                $absolutePath = realpath($basePath.DIRECTORY_SEPARATOR.$value);
 
-            return $absolutePath ?: $value;
-        }, set: function (string $value) {
-            $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
-            // Ensure both paths use forward slashes
-            $value = str_replace(['\\'], '/', $value);
-            $basePath = str_replace(['\\'], '/', $basePath);
-            if (Str::startsWith($value, $basePath)) {
-                $relativePath = Str::replaceFirst($basePath.'/', '', $value);
-                $this->attributes['file_path'] = $relativePath;
-                Log::debug("CodeAnalysis Model: Set 'file_path' to relative path '{$relativePath}'.");
-            } else {
-                $this->attributes['file_path'] = $value;
-                Log::warning("CodeAnalysis Model: The file path '{$value}' does not start with base path '{$basePath}'. Stored as is.");
+                return $absolutePath ?: $value;
+            },
+            set: function ($value) {
+                $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
+                // Ensure both paths use forward slashes
+                $value = str_replace(['\\'], '/', $value);
+                $basePath = str_replace(['\\'], '/', $basePath);
+                if (Str::startsWith($value, $basePath)) {
+                    $relativePath = Str::replaceFirst($basePath.'/', '', $value);
+                    $this->attributes['file_path'] = $relativePath;
+                    Log::debug("CodeAnalysis Model: Set 'file_path' to relative path '{$relativePath}'.");
+                } else {
+                    $this->attributes['file_path'] = $value;
+                    Log::warning("CodeAnalysis Model: The file path '{$value}' does not start with base path '{$basePath}'. Stored as is.");
+                }
+
+                // Set language based on file extension
+                $extension = strtolower(pathinfo($value, PATHINFO_EXTENSION));
+                $languageMap = [
+                    'php' => 'php',
+                    'js' => 'javascript',
+                    'ts' => 'typescript',
+                    'py' => 'python',
+                    'go' => 'go',
+                    'ex' => 'elixir',
+                    'exs' => 'elixir',
+                ];
+                $language = $languageMap[$extension] ?? 'unknown';
+                $this->attributes['language'] = $language;
+
+                Log::debug("CodeAnalysis Model: Set 'language' to '{$language}'.");
             }
-
-            return ['file_path' => $value];
-        });
-    }
-
-    protected function setFilePathAttribute($value)
-    {
-        $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
-        $absolutePath = realpath($basePath . DIRECTORY_SEPARATOR . $value) ?: $value;
-        $relativePath = Str::startsWith($absolutePath, $basePath)
-            ? Str::replaceFirst($basePath . DIRECTORY_SEPARATOR, '', $absolutePath)
-            : $absolutePath;
-
-        $extension = strtolower(pathinfo($relativePath, PATHINFO_EXTENSION));
-        $languageMap = [
-            'php' => 'php',
-            'js' => 'javascript',
-            'ts' => 'typescript',
-            'py' => 'python',
-            'go' => 'go',
-            'ex' => 'elixir',
-            'exs' => 'elixir',
-            'language' => 'string',
-        ];
-        $language = $languageMap[$extension] ?? 'unknown';
-
-        $this->attributes['file_path'] = $relativePath;
-        $this->attributes['language'] = $language;
-
-        Log::debug("CodeAnalysis Model: Set 'file_path' to '{$relativePath}' and 'language' to '{$language}'.");
+        );
     }
 
     public function staticAnalyses()
