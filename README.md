@@ -71,6 +71,7 @@ graph TD;
     Documentation --> Database[Database Storage];
     Refactoring --> Database;
     Functionality --> Database;
+    Tools[PHPStan, PHP_CodeSniffer, Psalm] --> Database;
 ```
 
 ## Usage TLDR;
