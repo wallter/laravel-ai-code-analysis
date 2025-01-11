@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\CodeAnalysis;
 use App\Services\StaticAnalysisService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Config;
 
 class RunStaticAnalysisCommand extends Command
 {
@@ -12,9 +13,14 @@ class RunStaticAnalysisCommand extends Command
 
     protected $description = 'Run static analysis on all CodeAnalysis entries without existing static analyses';
 
+    protected array $enabledTools;
+
     public function __construct(protected StaticAnalysisService $staticAnalysisService)
     {
         parent::__construct();
+        
+        // Initialize the list of enabled static analysis tools
+        $this->enabledTools = $this->getEnabledStaticAnalysisTools();
     }
 
     public function handle()
@@ -30,19 +36,45 @@ class RunStaticAnalysisCommand extends Command
         $this->info("Found [{$codeAnalyses->count()}] CodeAnalysis entries without static analyses.");
 
         foreach ($codeAnalyses as $codeAnalysis) {
-            $this->info("Running static analysis on '{$codeAnalysis->file_path}'.");
+            foreach ($this->enabledTools as $toolName) {
+                $this->info("Running static analysis '{$toolName}' on '{$codeAnalysis->file_path}'.");
 
-            $staticAnalysis = $this->staticAnalysisService->runAnalysis($codeAnalysis);
+                $staticAnalysis = $this->staticAnalysisService->runAnalysis($codeAnalysis, $toolName);
 
-            if ($staticAnalysis) {
-                $this->info("Static analysis completed and results stored for '{$codeAnalysis->file_path}'.");
-            } else {
-                $this->error("Static analysis failed for '{$codeAnalysis->file_path}'.");
+                if ($staticAnalysis) {
+                    $this->info("Static analysis '{$toolName}' completed and results stored for '{$codeAnalysis->file_path}'.");
+                } else {
+                    $this->error("Static analysis '{$toolName}' failed for '{$codeAnalysis->file_path}'.");
+                }
             }
         }
 
         $this->info('All pending static analyses have been processed.');
 
         return 0;
+    }
+
+    /**
+     * Get the list of enabled static analysis tools from configuration.
+     *
+     * @return array
+     */
+    protected function getEnabledStaticAnalysisTools(): array
+    {
+        $tools = [];
+
+        if (Config::get('static_analysis.phpstan_enabled')) {
+            $tools[] = 'PHPStan';
+        }
+
+        if (Config::get('static_analysis.php_codesniffer_enabled')) {
+            $tools[] = 'PHP_CodeSniffer';
+        }
+
+        if (Config::get('static_analysis.pslam_enabled')) {
+            $tools[] = 'Psalm';
+        }
+
+        return $tools;
     }
 }
