@@ -1,0 +1,1 @@
+PHP Fatal error:  'continue' not in the 'loop' or 'switch' context in /path/app/Console/Commands/RunStaticAnalysisCommand.php on line 80

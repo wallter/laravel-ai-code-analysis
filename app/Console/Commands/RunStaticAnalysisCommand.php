@@ -43,16 +43,17 @@ class RunStaticAnalysisCommand extends Command
             $toolsByLanguage[$language][$toolName] = $toolConfig;
         }
 
-        // Handle multi-pass analysis if enabled
-        if (Config::get('static_analysis.multi_pass_analysis.enabled')) {
-            foreach ($codeAnalyses as $codeAnalysis) {
+        foreach ($codeAnalyses as $codeAnalysis) {
+            // Handle multi-pass analysis if enabled
+            if (Config::get('static_analysis.multi_pass_analysis.enabled')) {
                 foreach (Config::get('static_analysis.multi_pass_analysis.passes', []) as $passName => $passConfig) {
                     $this->info("Dispatching pass '{$passName}' for '{$codeAnalysis->file_path}'.");
                     ProcessIndividualPassJob::dispatch($codeAnalysis->id, $passName, $dryRun = false);
                 }
-            $this->info('Multi-pass analysis jobs have been dispatched.');
-            return 0;
-        }
+                $this->info('Multi-pass analysis jobs have been dispatched.');
+                continue;
+            }
+
             $language = $codeAnalysis->language;
 
             if (empty($language)) {
@@ -66,7 +67,6 @@ class RunStaticAnalysisCommand extends Command
                     'go' => 'go',
                     'ex' => 'elixir',
                     'exs' => 'elixir',
-                    // Add other mappings as necessary
                 ];
                 $language = $languageMap[$extension] ?? 'unknown';
                 $codeAnalysis->language = $language;
