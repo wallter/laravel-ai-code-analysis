@@ -6,6 +6,22 @@
 
 ## Overview
 
+```mermaid
+graph TD
+    A[PHP Codebase] --> B[ParserService]
+    B --> C[Abstract Syntax Tree (AST) Data]
+    C --> D[Static Analysis Tools]
+    C --> E[AI Analysis]
+    D --> F[PHPStan, PHP_CodeSniffer, Psalm]
+    E --> G[Multi-Pass AI Operations]
+    G --> H[Documentation Generation]
+    G --> I[Refactoring Suggestions]
+    G --> J[Functionality Assessments]
+    H --> K[Database Storage]
+    I --> K
+    J --> K
+```
+
 This Laravel-based project seamlessly integrates **OpenAI’s language models** with **PHP Abstract Syntax Tree (AST) analysis** (powered by [nikic/php-parser](https://github.com/nikic/PHP-Parser)) along with other essential tooling such as [PHPStan](https://phpstan.org/), [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer), and [Psalm](https://psalm.dev/) to deliver a **comprehensive multi-pass code analysis**. By iteratively scanning PHP codebases, the system generates:
 
 - **Automated Documentation**: Creates concise and clear documentation derived from raw code and AST data, enhancing code comprehension and maintainability.
@@ -125,6 +141,15 @@ This project leverages a suite of powerful tools to enhance code analysis and ma
   - **AST Insights:** Provides insights into the code structure and relationships using Abstract Syntax Tree (AST) data, helping to understand and navigate the codebase effectively.
 
 ### Artisan Commands
+
+```mermaid
+graph LR
+    Start --> ParseFiles[parse:files]
+    ParseFiles --> RunStaticAnalysis[static-analysis:run]
+    RunStaticAnalysis --> AnalyzeFiles[analyze:files]
+    AnalyzeFiles --> QueueProgress[queue:progress]
+    QueueProgress --> End
+```
   - **`parse:files`:** Parses configured files/directories to list discovered classes and functions.
   - **`static-analysis:run`**
   
@@ -408,6 +433,25 @@ In `config/parsing.php`, define:
 - **Once completed, results are in `ai_results` table.**
 
 ### Testing
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Artisan
+    participant ParserService
+    participant StaticAnalysis
+    participant AIService
+    participant Database
+
+    User->>Artisan: Run analyze:files
+    Artisan->>ParserService: Parse PHP files
+    ParserService->>Database: Store AST data
+    Artisan->>StaticAnalysis: Execute static tools
+    StaticAnalysis->>Database: Save analysis results
+    Artisan->>AIService: Initiate AI passes
+    AIService->>Database: Update with AI results
+    Database-->>User: Retrieve comprehensive analysis
+```
 - **Run Tests:**
 
   ```bash
