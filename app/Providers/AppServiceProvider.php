@@ -2,10 +2,6 @@
 
 namespace App\Providers;
 
-use App\Console\Commands\AiderUpgradeCommand;
-use App\Console\Commands\Queue\QueueListCommand;
-use App\Services\AI\AiderService;
-use App\Services\AI\AiderServiceInterface;
 use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
 use App\Services\Export\JsonExportService;
@@ -48,13 +44,6 @@ class AppServiceProvider extends ServiceProvider
             $app->make(StaticAnalysisToolInterface::class)
         ));
 
-        // Register AiderUpgradeCommand
-        $this->app->singleton(AiderUpgradeCommand::class, fn ($app) => new AiderUpgradeCommand);
-
-        // Register AiderService and bind the interface
-        $this->app->singleton(AiderService::class, fn ($app) => new AiderService);
-        $this->app->singleton(AiderServiceInterface::class, fn ($app) => new AiderService);
-
         // Bind the StaticAnalysisToolInterface to the StaticAnalysisService implementation
         $this->app->singleton(StaticAnalysisService::class, fn ($app) => new StaticAnalysisService);
         $this->app->singleton(StaticAnalysisToolInterface::class, fn ($app) => $app->make(StaticAnalysisService::class));
@@ -66,13 +55,5 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // ... boot logic...
-
-        // Register the commands with Artisan
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                AiderUpgradeCommand::class,
-                QueueListCommand::class,
-            ]);
-        }
     }
 }

@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\AiderController;
 use App\Http\Controllers\AnalysisController;
 use Illuminate\Support\Facades\Route;
 
@@ -8,7 +7,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', fn () => redirect()->route('analysis.index'));
 
 Route::get('/analysis', [AnalysisController::class, 'index'])->name('analysis.index');
-Route::post('/aider/interact', [AiderController::class, 'interact'])->name('aider.interact');
 Route::get('/analysis/{id}', [AnalysisController::class, 'show'])->name('analysis.show');
 
 // CRUD Routes for Analysis

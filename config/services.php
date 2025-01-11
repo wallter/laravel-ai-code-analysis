@@ -40,11 +40,6 @@ return [
         'max_tokens' => env('OPENAI_MAX_TOKENS', 1024),
     ],
 
-    'aider' => [
-        'api_key' => env('AIDER_API_KEY', 'AIDER_INTEGRATION_NOT_COMPLETE_YET'),
-        'endpoint' => env('AIDER_ENDPOINT', 'https://api.aider.com'),
-    ],
-
     'parsing' => [
         'files' => [],
     ],
