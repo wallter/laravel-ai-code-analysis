@@ -16,32 +16,14 @@ This Laravel-based project seamlessly integrates **OpenAI’s language models** 
 
 By leveraging **queued** AI operations, **token usage** tracking, and other advanced features, developers can **enhance maintainability**, **optimize performance**, and **ensure** cleaner, more efficient codebases (see `config/ai.php`).
 
-### Functional Diagram
-
-```mermaid
-graph TD;
-    PHP_Codebase[PHP Codebase] --> ParserService;
-    ParserService --> AST[Abstract Syntax Tree AST Data];
-    AST --> StaticAnalysis[Static Analysis Tools];
-    AST --> AI_Analysis[AI Analysis];
-    StaticAnalysis --> Tools[PHPStan, PHP_CodeSniffer, Psalm];
-    AI_Analysis --> MultiPass[Multi-Pass AI Operations];
-    MultiPass --> Documentation[Documentation Generation];
-    MultiPass --> Refactoring[Refactoring Suggestions];
-    MultiPass --> Functionality[Functionality Assessments];
-    Documentation --> Database[Database Storage];
-    Refactoring --> Database;
-    Functionality --> Database;
-```
-
 ## Table of Contents
 
 - [Laravel AI Code Analysis Project](#laravel-ai-code-analysis-project)
   - [Overview](#overview)
-    - [Functional Diagram](#functional-diagram)
   - [Table of Contents](#table-of-contents)
   - [Usage TLDR;](#usage-tldr)
-    - [Running the UI & Server](#running-the-ui--server)
+    - [Running the UI \& Server](#running-the-ui--server)
+    - [How it works](#how-it-works)
   - [Features](#features)
     - [Tooling](#tooling)
     - [Code Parsing and Analysis](#code-parsing-and-analysis)
@@ -55,7 +37,7 @@ graph TD;
     - [Parsing Configuration](#parsing-configuration)
   - [Usage](#usage)
     - [Artisan Commands](#artisan-commands-1)
-    - [Token & Cost Tracking](#token--cost-tracking)
+    - [Token \& Cost Tracking](#token--cost-tracking)
     - [Queued Analysis](#queued-analysis)
     - [Testing](#testing)
   - [Testing](#testing-1)
@@ -87,6 +69,11 @@ php artisan migrate:fresh
 
 # 3) Set your file/folder scanning in config/parsing.php
 
+# run everything and you're done 
+composer run app
+
+# or run the commands manually...
+
 # 4) Parse code, store results:
 php artisan parse:files
 
@@ -101,7 +88,7 @@ php artisan queue:progress
 
 # Or just run a queue worker
 
-# php artisan queue:work
+# php artisan queue:work --stop-when-empty
 ```
 - Check console output
 
@@ -115,6 +102,24 @@ php artisan serve
 
 The server will start at [http://localhost:8000](http://localhost:8000) by default. You can access the application by navigating to this URL in your web browser.
 - Monitor Laravel logs `storage/logs/laravel.log` for detailed output
+
+### How it works
+
+```mermaid
+graph TD;
+    PHP_Codebase[PHP Codebase] --> ParserService;
+    ParserService --> AST[Abstract Syntax Tree AST Data];
+    AST --> StaticAnalysis[Static Analysis Tools];
+    AST --> AI_Analysis[AI Analysis];
+    StaticAnalysis --> Tools[PHPStan, PHP_CodeSniffer, Psalm];
+    AI_Analysis --> MultiPass[Multi-Pass AI Operations];
+    MultiPass --> Documentation[Documentation Generation];
+    MultiPass --> Refactoring[Refactoring Suggestions];
+    MultiPass --> Functionality[Functionality Assessments];
+    Documentation --> Database[Database Storage];
+    Refactoring --> Database;
+    Functionality --> Database;
+```
 
 ## Features
 
