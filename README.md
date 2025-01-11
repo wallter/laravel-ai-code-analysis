@@ -9,7 +9,7 @@
 ```mermaid
 graph TD;
     PHP_Codebase[PHP Codebase] --> ParserService;
-    ParserService --> AST[Abstract Syntax Tree (AST) Data];
+    ParserService --> AST[Abstract Syntax Tree AST Data];
     AST --> StaticAnalysis[Static Analysis Tools];
     AST --> AI_Analysis[AI Analysis];
     StaticAnalysis --> Tools[PHPStan, PHP_CodeSniffer, Psalm];
@@ -38,8 +38,9 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
   - [Overview](#overview)
   - [Table of Contents](#table-of-contents)
   - [Usage TLDR;](#usage-tldr)
-    - [Running the UI & Server](#running-the-ui--server)
+    - [Running the UI \& Server](#running-the-ui--server)
   - [Features](#features)
+    - [Tooling](#tooling)
     - [Code Parsing and Analysis](#code-parsing-and-analysis)
     - [Multi-Pass AI Analysis](#multi-pass-ai-analysis)
     - [Artisan Commands](#artisan-commands)
@@ -51,7 +52,7 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
     - [Parsing Configuration](#parsing-configuration)
   - [Usage](#usage)
     - [Artisan Commands](#artisan-commands-1)
-    - [Token & Cost Tracking](#token--cost-tracking)
+    - [Token \& Cost Tracking](#token--cost-tracking)
     - [Queued Analysis](#queued-analysis)
     - [Testing](#testing)
   - [Testing](#testing-1)
