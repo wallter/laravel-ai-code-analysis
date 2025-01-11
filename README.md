@@ -41,7 +41,7 @@ graph TD;
     - [Functional Diagram](#functional-diagram)
   - [Table of Contents](#table-of-contents)
   - [Usage TLDR;](#usage-tldr)
-    - [Running the UI \& Server](#running-the-ui--server)
+    - [Running the UI & Server](#running-the-ui--server)
   - [Features](#features)
     - [Tooling](#tooling)
     - [Code Parsing and Analysis](#code-parsing-and-analysis)
@@ -52,11 +52,10 @@ graph TD;
   - [UI Setup](#ui-setup)
   - [Configuration](#configuration)
     - [AI Service Configuration](#ai-service-configuration)
-    - [Features Diagram](#features-diagram)
     - [Parsing Configuration](#parsing-configuration)
   - [Usage](#usage)
     - [Artisan Commands](#artisan-commands-1)
-    - [Token \& Cost Tracking](#token--cost-tracking)
+    - [Token & Cost Tracking](#token--cost-tracking)
     - [Queued Analysis](#queued-analysis)
     - [Testing](#testing)
   - [Testing](#testing-1)
@@ -119,6 +118,46 @@ The server will start at [http://localhost:8000](http://localhost:8000) by defau
 
 ## Features
 
+```mermaid
+graph LR;
+    subgraph Tooling
+        PHPStan[PHPStan];
+        PHPCS[PHP_CodeSniffer];
+        Psalm[Psalm];
+        Tinker[Laravel Tinker];
+        OpenAI[OpenAI-PHP/Laravel];
+    end;
+
+    subgraph Code Parsing and Analysis
+        Parsing[Comprehensive Parsing];
+        AST[AST Insights];
+        Metadata[Granular Metadata];
+        Tracking[Persistent Tracking];
+        Advanced[Supports Advanced Use Cases];
+    end;
+
+    subgraph Multi-Pass AI Analysis
+        DocGen[Documentation Generation];
+        Refactor[Refactoring Suggestions];
+        Functionality[Functionality Analysis];
+        Style[Style & Convention Review];
+        Performance[Performance Analysis];
+        Dependency[Dependency Review];
+    end;
+
+    subgraph Artisan Commands
+        Parse[parse:files];
+        StaticRun[static-analysis:run];
+        Analyze[analyze:files];
+        Backup[db:backup];
+        Restore[db:backup:restore];
+    end;
+
+    Tooling --> CodeParsing[Code Parsing and Analysis];
+    CodeParsing --> AIAnalysis[Multi-Pass AI Analysis];
+    AIAnalysis --> Commands[Artisan Commands];
+```
+
 ### Tooling
 
 This project leverages a suite of powerful tools to enhance code analysis and maintainability:
@@ -149,7 +188,7 @@ This project leverages a suite of powerful tools to enhance code analysis and ma
 ### Artisan Commands
 
 ```mermaid
-flowchart TD;
+flowchart LR;
     Start[Start] --> ParseFiles[parse:files];
     ParseFiles --> RunStaticAnalysis[static-analysis:run];
     RunStaticAnalysis --> AnalyzeFiles[analyze:files];
@@ -337,47 +376,6 @@ The AI capabilities are configured in `config/ai.php`. This file defines the AI 
   ],
   ```
 
-### Features Diagram
-```mermaid
-graph LR;
-    subgraph Tooling
-        PHPStan[PHPStan];
-        PHPCS[PHP_CodeSniffer];
-        Psalm[Psalm];
-        Tinker[Laravel Tinker];
-        OpenAI[OpenAI-PHP/Laravel];
-    end;
-
-    subgraph Code Parsing and Analysis
-        Parsing[Comprehensive Parsing];
-        AST[AST Insights];
-        Metadata[Granular Metadata];
-        Tracking[Persistent Tracking];
-        Advanced[Supports Advanced Use Cases];
-    end;
-
-    subgraph Multi-Pass AI Analysis
-        DocGen[Documentation Generation];
-        Refactor[Refactoring Suggestions];
-        Functionality[Functionality Analysis];
-        Style[Style & Convention Review];
-        Performance[Performance Analysis];
-        Dependency[Dependency Review];
-    end;
-
-    subgraph Artisan Commands
-        Parse[parse:files];
-        StaticRun[static-analysis:run];
-        Analyze[analyze:files];
-        Backup[db:backup];
-        Restore[db:backup:restore];
-    end;
-
-    Tooling --> CodeParsing[Code Parsing and Analysis];
-    CodeParsing --> AIAnalysis[Multi-Pass AI Analysis];
-    AIAnalysis --> Commands[Artisan Commands];
-```
-
 - **Multi-Pass Analysis**
 
   Configure the order and specifics of each analysis pass.
@@ -410,7 +408,7 @@ In `config/parsing.php`, define:
 
 - **Analysis Limits**
 
-  Set global limits to control the scope of analysis inside the `config/ai.php` configuration. Each of the `parse:files` and `code:analyze` commands offers options (`--limit-class=1 --limit-method=1`) to allow for fine-grained testing and calibration of AI prompts. 
+  Set global limits to control the scope of analysis inside the `config/ai.php` configuration. Each of the `parse:files` and `code:analyze` commands offers options (`--limit-class=1 --limit-method=1`) to allow for fine-grained testing and calibration of AI prompts.
 
   ```php
   'analysis_limits' => [
