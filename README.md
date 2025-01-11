@@ -8,18 +8,18 @@
 
 ```mermaid
 graph TD
-    A[PHP Codebase] --> B[ParserService]
-    B --> C[Abstract Syntax Tree (AST) Data]
-    C --> D[Static Analysis Tools]
-    C --> E[AI Analysis]
-    D --> F[PHPStan, PHP_CodeSniffer, Psalm]
-    E --> G[Multi-Pass AI Operations]
-    G --> H[Documentation Generation]
-    G --> I[Refactoring Suggestions]
-    G --> J[Functionality Assessments]
-    H --> K[Database Storage]
-    I --> K
-    J --> K
+    PHP_Codebase[PHP Codebase] --> ParserService
+    ParserService --> AST[Abstract Syntax Tree (AST) Data]
+    AST --> StaticAnalysis[Static Analysis Tools]
+    AST --> AI_Analysis[AI Analysis]
+    StaticAnalysis --> Tools[PHPStan, PHP_CodeSniffer, Psalm]
+    AI_Analysis --> MultiPass[Multi-Pass AI Operations]
+    MultiPass --> Documentation[Documentation Generation]
+    MultiPass --> Refactoring[Refactoring Suggestions]
+    MultiPass --> Functionality[Functionality Assessments]
+    Documentation --> Database[Database Storage]
+    Refactoring --> Database
+    Functionality --> Database
 ```
 
 This Laravel-based project seamlessly integrates **OpenAI’s language models** with **PHP Abstract Syntax Tree (AST) analysis** (powered by [nikic/php-parser](https://github.com/nikic/PHP-Parser)) along with other essential tooling such as [PHPStan](https://phpstan.org/), [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer), and [Psalm](https://psalm.dev/) to deliver a **comprehensive multi-pass code analysis**. By iteratively scanning PHP codebases, the system generates:
@@ -38,7 +38,7 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
   - [Overview](#overview)
   - [Table of Contents](#table-of-contents)
   - [Usage TLDR;](#usage-tldr)
-    - [Running the UI \& Server](#running-the-ui--server)
+    - [Running the UI & Server](#running-the-ui--server)
   - [Features](#features)
     - [Code Parsing and Analysis](#code-parsing-and-analysis)
     - [Multi-Pass AI Analysis](#multi-pass-ai-analysis)
@@ -51,7 +51,7 @@ By leveraging **queued** AI operations, **token usage** tracking, and other adva
     - [Parsing Configuration](#parsing-configuration)
   - [Usage](#usage)
     - [Artisan Commands](#artisan-commands-1)
-    - [Token \& Cost Tracking](#token--cost-tracking)
+    - [Token & Cost Tracking](#token--cost-tracking)
     - [Queued Analysis](#queued-analysis)
     - [Testing](#testing)
   - [Testing](#testing-1)
@@ -115,44 +115,43 @@ The server will start at [http://localhost:8000](http://localhost:8000) by defau
 ## Features
 
 ```mermaid
-graph TB
+graph LR
     subgraph Tooling
-        A[PHPStan]
-        B[PHP_CodeSniffer]
-        C[Psalm]
-        D[Laravel Tinker]
-        E[OpenAI-PHP/Laravel]
+        PHPStan[PHPStan]
+        PHPCS[PHP_CodeSniffer]
+        Psalm[Psalm]
+        Tinker[Laravel Tinker]
+        OpenAI[OpenAI-PHP/Laravel]
     end
 
     subgraph Code Parsing and Analysis
-        F[Comprehensive Parsing]
-        G[AST Insights]
-        H[Granular Metadata]
-        I[Persistent Tracking]
-        J[Supports Advanced Use Cases]
+        Parsing[Comprehensive Parsing]
+        AST[AST Insights]
+        Metadata[Granular Metadata]
+        Tracking[Persistent Tracking]
+        Advanced[Supports Advanced Use Cases]
     end
 
     subgraph Multi-Pass AI Analysis
-        K[Documentation Generation]
-        L[Refactoring Suggestions]
-        M[Functionality Analysis]
-        N[Style & Convention Review]
-        O[Performance Analysis]
-        P[Dependency Review]
-        Q[AST Insights]
+        DocGen[Documentation Generation]
+        Refactor[Refactoring Suggestions]
+        Functionality[Functionality Analysis]
+        Style[Style & Convention Review]
+        Performance[Performance Analysis]
+        Dependency[Dependency Review]
     end
 
     subgraph Artisan Commands
-        R[parse:files]
-        S[static-analysis:run]
-        T[analyze:files]
-        U[db:backup]
-        V[db:backup:restore]
+        Parse[parse:files]
+        StaticRun[static-analysis:run]
+        Analyze[analyze:files]
+        Backup[db:backup]
+        Restore[db:backup:restore]
     end
 
-    Tooling --> Code Parsing and Analysis
-    Code Parsing and Analysis --> Multi-Pass AI Analysis
-    Multi-Pass AI Analysis --> Artisan Commands
+    Tooling --> CodeParsing[Code Parsing and Analysis]
+    CodeParsing --> AIAnalysis[Multi-Pass AI Analysis]
+    AIAnalysis --> Commands[Artisan Commands]
 ```
 
 ### Tooling
@@ -166,55 +165,56 @@ This project leverages a suite of powerful tools to enhance code analysis and ma
 - **[OpenAI-PHP/Laravel](https://github.com/openai-php/laravel):** Facilitates integration with OpenAI’s API for AI-driven features.
 
 ### Code Parsing and Analysis
+
 - **Comprehensive Parsing:** Analyzes PHP files to extract detailed information about classes, methods, functions, traits, and annotations, providing a holistic view of the codebase.
-- **Abstract Syntax Tree (AST) Insights:** Captures detailed AST data, including node types, attributes, and structural relationships, enabling advanced analysis of code structure and behavior.
+- **AST Insights:** Captures detailed AST data, including node types, attributes, and structural relationships, enabling advanced analysis of code structure and behavior.
 - **Granular Metadata:** Extracts metadata such as namespaces, file paths, line numbers, and method parameters to facilitate in-depth understanding and precise debugging.
 - **Persistent Tracking:** Stores parsed data in a database, allowing for historical tracking, cross-referencing, and analysis over time.
 - **Supports Advanced Use Cases:** Enables scenarios like dependency mapping, identifying code smells, and generating tailored documentation or refactoring suggestions based on rich structural insights.
 
 ### Multi-Pass AI Analysis
-  - **Documentation Generation:** Automatically creates concise, structured documentation from both AST data and raw code. Summarizes class purposes, key methods, parameters, and usage context with clarity.
-  - **Refactoring Suggestions:** Offers actionable recommendations to improve code structure, maintainability, and adherence to SOLID principles, with a focus on reducing duplication and enhancing clarity.
-  - **Functionality Analysis:** Evaluates the code for functional correctness, identifies edge cases, and highlights performance bottlenecks. Provides suggestions for enhancing scalability, reliability, and testability.
-  - **Style & Convention Review:** Ensures adherence to PSR standards and highlights inconsistencies in formatting, naming conventions, and documentation. Recommends improvements for readability and consistency.
-  - **Performance Analysis:** Identifies inefficiencies like redundant operations or excessive memory usage. Suggests optimizations such as caching, algorithmic improvements, or asynchronous processing.
-  - **Dependency Review:** Analyses external dependencies for compatibility, security risks, and outdated packages. Recommends updates and alternatives for deprecated or inefficient libraries.
-  - **AST Insights:** Provides insights into the code structure and relationships using Abstract Syntax Tree (AST) data, helping to understand and navigate the codebase effectively.
+
+- **Documentation Generation:** Automatically creates concise, structured documentation from both AST data and raw code. Summarizes class purposes, key methods, parameters, and usage context with clarity.
+- **Refactoring Suggestions:** Offers actionable recommendations to improve code structure, maintainability, and adherence to SOLID principles, with a focus on reducing duplication and enhancing clarity.
+- **Functionality Analysis:** Evaluates the code for functional correctness, identifies edge cases, and highlights performance bottlenecks. Provides suggestions for enhancing scalability, reliability, and testability.
+- **Style & Convention Review:** Ensures adherence to PSR standards and highlights inconsistencies in formatting, naming conventions, and documentation. Recommends improvements for readability and consistency.
+- **Performance Analysis:** Identifies inefficiencies like redundant operations or excessive memory usage. Suggests optimizations such as caching, algorithmic improvements, or asynchronous processing.
+- **Dependency Review:** Analyzes external dependencies for compatibility, security risks, and outdated packages. Recommends updates and alternatives for deprecated or inefficient libraries.
 
 ### Artisan Commands
 
 ```mermaid
-graph LR
-    Start --> ParseFiles[parse:files]
+flowchart TD
+    Start[Start] --> ParseFiles[parse:files]
     ParseFiles --> RunStaticAnalysis[static-analysis:run]
     RunStaticAnalysis --> AnalyzeFiles[analyze:files]
     AnalyzeFiles --> QueueProgress[queue:progress]
-    QueueProgress --> End
+    QueueProgress --> End[End]
 ```
-  - **`parse:files`:** Parses configured files/directories to list discovered classes and functions.
-  - **`static-analysis:run`**
-  
-    ```bash
-    php artisan static-analysis:run {code_analysis_id} --tools=PHPStan,PHP_CodeSniffer,Psalm
-    ```
-  
-    - **Description**: Runs the specified static analysis tools on a particular `CodeAnalysis` entry.
-    - **Parameters**:
-      - `{code_analysis_id}`: The ID of the `CodeAnalysis` record you wish to analyze.
-    - **Options**:
-      - `--tools`: Comma-separated list of static analysis tools to run (e.g., `PHPStan,PHP_CodeSniffer,Psalm`).
-  
-    **Example:**
-  
-    ```bash
-    php artisan static-analysis:run 1 --tools=PHPStan,Psalm
-    ```
-  - **`code:analyze`:** Analyzes PHP files, gathers AST data, and applies AI-driven multi-pass analysis.
-  
+- **`parse:files`:** Parses configured files/directories to list discovered classes and functions.
+- **`static-analysis:run`**
+
+  ```bash
+  php artisan static-analysis:run {code_analysis_id} --tools=PHPStan,PHP_CodeSniffer,Psalm
+  ```
+
+  - **Description**: Runs the specified static analysis tools on a particular `CodeAnalysis` entry.
+  - **Parameters**:
+    - `{code_analysis_id}`: The ID of the `CodeAnalysis` record you wish to analyze.
+  - **Options**:
+    - `--tools`: Comma-separated list of static analysis tools to run (e.g., `PHPStan,PHP_CodeSniffer,Psalm`).
+
+  **Example:**
+
+  ```bash
+  php artisan static-analysis:run 1 --tools=PHPStan,Psalm
+  ```
+- **`analyze:files`:** Analyzes PHP files, gathers AST data, and applies AI-driven multi-pass analysis.
+
 - **Database Management**
   - Utilizes SQLite for simplicity and ease of use.
   - Provides migration files to set up necessary database tables.
-  
+
 - **Logging with Contextual Information**
   - Implements detailed logging using Laravel's Context facade for enhanced traceability and debugging.
 
@@ -354,7 +354,7 @@ The AI capabilities are configured in `config/ai.php`. This file defines the AI 
       'PHPStan' => [
           'enabled' => true,
           'command' => 'vendor/bin/phpstan',
-          'options' => ['analyse', '--json'],
+          'options' => ['analyse', '--no-progress', '--error-format=json'],
           'output_format' => 'json',
       ],
       'PHP_CodeSniffer' => [
@@ -450,7 +450,7 @@ In `config/parsing.php`, define:
 - **Database Management**
   - Utilizes SQLite for simplicity and ease of use.
   - Provides migration files to set up necessary database tables.
-  
+
 - **Logging with Contextual Information**
   - Implements detailed logging using Laravel's Context facade for enhanced traceability and debugging.
 
