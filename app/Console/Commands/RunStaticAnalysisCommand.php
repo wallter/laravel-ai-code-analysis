@@ -74,20 +74,15 @@ class RunStaticAnalysisCommand extends Command
      */
     protected function getEnabledStaticAnalysisTools(): array
     {
-        $tools = [];
+        $toolsConfig = Config::get('static_analysis.tools', []);
+        $enabledTools = [];
 
-        if (Config::get('static_analysis.phpstan_enabled')) {
-            $tools[] = 'PHPStan';
+        foreach ($toolsConfig as $toolName => $toolSettings) {
+            if ($toolSettings['enabled'] ?? false) {
+                $enabledTools[$toolName] = $toolSettings;
+            }
         }
 
-        if (Config::get('static_analysis.php_codesniffer_enabled')) {
-            $tools[] = 'PHP_CodeSniffer';
-        }
-
-        if (Config::get('static_analysis.pslam_enabled')) {
-            $tools[] = 'Psalm';
-        }
-
-        return $tools;
+        return $enabledTools;
     }
 }
