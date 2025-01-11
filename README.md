@@ -114,6 +114,47 @@ The server will start at [http://localhost:8000](http://localhost:8000) by defau
 
 ## Features
 
+```mermaid
+graph TB
+    subgraph Tooling
+        A[PHPStan]
+        B[PHP_CodeSniffer]
+        C[Psalm]
+        D[Laravel Tinker]
+        E[OpenAI-PHP/Laravel]
+    end
+
+    subgraph Code Parsing and Analysis
+        F[Comprehensive Parsing]
+        G[AST Insights]
+        H[Granular Metadata]
+        I[Persistent Tracking]
+        J[Supports Advanced Use Cases]
+    end
+
+    subgraph Multi-Pass AI Analysis
+        K[Documentation Generation]
+        L[Refactoring Suggestions]
+        M[Functionality Analysis]
+        N[Style & Convention Review]
+        O[Performance Analysis]
+        P[Dependency Review]
+        Q[AST Insights]
+    end
+
+    subgraph Artisan Commands
+        R[parse:files]
+        S[static-analysis:run]
+        T[analyze:files]
+        U[db:backup]
+        V[db:backup:restore]
+    end
+
+    Tooling --> Code Parsing and Analysis
+    Code Parsing and Analysis --> Multi-Pass AI Analysis
+    Multi-Pass AI Analysis --> Artisan Commands
+```
+
 ### Tooling
 
 This project leverages a suite of powerful tools to enhance code analysis and maintainability:
