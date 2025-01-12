@@ -15,9 +15,9 @@ class OpenAIService
 
     protected array $lastUsage = [];
 
-    public function __construct()
+    public function __construct(protected string $apiKey)
     {
-        $this->apiKey = config('ai.openai_api_key');
+        // API Key is injected via the constructor
     }
 
     /**
