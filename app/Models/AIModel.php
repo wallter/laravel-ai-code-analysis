@@ -2,26 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
-use OwenIt\Auditing\Auditable as AuditableTrait;
 
-class AIModel extends Model implements Auditable
+class AIModel extends Model
 {
-    use AuditableTrait;
+    use HasFactory;
 
-    /**
-     * The table associated with the model.
-     *
-     * @var string|null
-     */
-    protected $table = 'ai_models';
-
-    /**
-     * Get the AIConfiguration that owns the AIModel.
-     */
-    public function aiConfiguration()
-    {
-        return $this->belongsTo(AIConfiguration::class);
-    }
+    protected $fillable = [
+        'name',
+        'description',
+        // Add other fillable fields as necessary
+    ];
 }

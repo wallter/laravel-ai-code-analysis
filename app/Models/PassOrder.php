@@ -2,17 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PassOrder extends Model
 {
-    public function aiConfiguration()
-    {
-        return $this->belongsTo(AIConfiguration::class);
-    }
+    use HasFactory;
 
-    public function aiPass()
-    {
-        return $this->belongsTo(AIPass::class);
-    }
+    protected $fillable = [
+        'pass_name',
+        'order',
+        // Add other fillable fields as necessary
+    ];
 }

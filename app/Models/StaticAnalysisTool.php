@@ -2,21 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class StaticAnalysisTool extends Model
 {
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'options' => 'array',
-    ];
+    use HasFactory;
 
-    public function aiConfiguration()
-    {
-        return $this->belongsTo(AIConfiguration::class);
-    }
+    protected $fillable = [
+        'name',
+        'command',
+        'options',
+        'enabled',
+        // Add other fillable fields as necessary
+    ];
 }

@@ -2,53 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class AIPass extends Model
 {
-    /**
-     * The table associated with the model.
-     *
-     * @var string|null
-     */
-    protected $table = 'ai_passes';
+    use HasFactory;
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'prompt_sections' => 'array',
+    protected $fillable = [
+        'name',
+        'description',
+        // Add other fillable fields as necessary
     ];
-
-    /**
-     * Get the AIConfiguration that owns the AIPass.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function aiConfiguration()
-    {
-        return $this->belongsTo(AIConfiguration::class);
-    }
-
-    /**
-     * Get the AIModel associated with the AIPass.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function model()
-    {
-        return $this->belongsTo(AIModel::class, 'model_id');
-    }
-
-    /**
-     * Get the PassOrders for the AIPass.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function passOrders()
-    {
-        return $this->hasMany(PassOrder::class);
-    }
 }

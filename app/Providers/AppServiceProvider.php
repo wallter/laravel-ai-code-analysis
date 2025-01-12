@@ -6,6 +6,14 @@ use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
 use App\Interfaces\Admin\AiModelServiceInterface;
 use App\Services\Admin\AiModelService;
+use App\Interfaces\Admin\AiConfigurationServiceInterface;
+use App\Services\Admin\AiConfigurationService;
+use App\Interfaces\Admin\AIPassServiceInterface;
+use App\Services\Admin\AIPassService;
+use App\Interfaces\Admin\PassOrderServiceInterface;
+use App\Services\Admin\PassOrderService;
+use App\Interfaces\Admin\StaticAnalysisToolServiceInterface;
+use App\Services\Admin\StaticAnalysisToolService;
 use App\Services\Export\JsonExportService;
 use App\Services\ParsedItemService;
 use App\Services\Parsing\FileProcessorService;
@@ -22,36 +30,49 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(ParserService::class, fn (Application $app): ParserService => new ParserService($app->make(ParsedItemService::class)));
+        // Singleton bindings for services
+        $this->app->singleton(ParserService::class, function (Application $app): ParserService {
+            return new ParserService($app->make(ParsedItemService::class));
+        });
 
-        // Register FileProcessorService
-        $this->app->singleton(FileProcessorService::class, fn ($app) => new FileProcessorService($app->make(ParserService::class)));
+        $this->app->singleton(FileProcessorService::class, function ($app) {
+            return new FileProcessorService($app->make(ParserService::class));
+        });
 
-        // Register JsonExportService
-        $this->app->singleton(JsonExportService::class, fn ($app) => new JsonExportService);
+        $this->app->singleton(JsonExportService::class, function ($app) {
+            return new JsonExportService;
+        });
 
-        // Register OpenAIService
-        $this->app->singleton(OpenAIService::class, fn (Application $app): OpenAIService => new OpenAIService);
+        $this->app->singleton(OpenAIService::class, function (Application $app): OpenAIService {
+            return new OpenAIService;
+        });
 
-        // Register CodeAnalysisService
-        $this->app->singleton(CodeAnalysisService::class, fn (Application $app): CodeAnalysisService => new CodeAnalysisService(
-            $app->make(OpenAIService::class),
-            $app->make(ParserService::class)
-        ));
+        $this->app->singleton(CodeAnalysisService::class, function (Application $app): CodeAnalysisService {
+            return new CodeAnalysisService(
+                $app->make(OpenAIService::class),
+                $app->make(ParserService::class)
+            );
+        });
 
         // Bind AiModelServiceInterface to AiModelService
         $this->app->singleton(AiModelServiceInterface::class, AiModelService::class);
 
-        // Register AnalysisPassService with updated constructor parameters
-        $this->app->singleton(\App\Services\AnalysisPassService::class, fn ($app) => new \App\Services\AnalysisPassService(
-            $app->make(\App\Services\AI\OpenAIService::class),
-            $app->make(\App\Services\AI\CodeAnalysisService::class),
-            $app->make(StaticAnalysisToolInterface::class)
-        ));
+        // Bind AiConfigurationServiceInterface to AiConfigurationService
+        $this->app->singleton(AiConfigurationServiceInterface::class, AiConfigurationService::class);
 
-        // Bind the StaticAnalysisToolInterface to the StaticAnalysisService implementation
-        $this->app->singleton(StaticAnalysisService::class, fn ($app) => new StaticAnalysisService);
-        $this->app->singleton(StaticAnalysisToolInterface::class, fn ($app) => $app->make(StaticAnalysisService::class));
+        // Bind AIPassServiceInterface to AIPassService
+        $this->app->singleton(AIPassServiceInterface::class, AIPassService::class);
+
+        // Bind PassOrderServiceInterface to PassOrderService
+        $this->app->singleton(PassOrderServiceInterface::class, PassOrderService::class);
+
+        // Bind StaticAnalysisToolServiceInterface to StaticAnalysisToolService
+        $this->app->singleton(StaticAnalysisToolServiceInterface::class, StaticAnalysisToolService::class);
+
+        // Bind StaticAnalysisToolInterface to StaticAnalysisService
+        $this->app->singleton(StaticAnalysisToolInterface::class, function ($app) {
+            return $app->make(StaticAnalysisService::class);
+        });
     }
 
     /**
