@@ -3,9 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
+use OwenIt\Auditing\Auditable as AuditableTrait;
 
-class AIConfiguration extends Model
+class AIConfiguration extends Model implements Auditable
 {
+    use AuditableTrait;
+
     /**
      * The table associated with the model.
      *
