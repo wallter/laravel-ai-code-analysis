@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
 /**
  * CodeAnalysis model represents the analysis of a single PHP file.
@@ -30,15 +30,13 @@ class CodeAnalysis extends Model
 
     /**
      * Accessor to get the absolute file path.
-     *
-     * @return Attribute
      */
     protected function filePath(): Attribute
     {
         return Attribute::make(
             get: function ($value) {
                 $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
-                $absolutePath = realpath($basePath . DIRECTORY_SEPARATOR . $value);
+                $absolutePath = realpath($basePath.DIRECTORY_SEPARATOR.$value);
 
                 return $absolutePath ?: $value;
             },
@@ -48,7 +46,7 @@ class CodeAnalysis extends Model
                 $value = str_replace(['\\'], '/', $value);
                 $basePath = str_replace(['\\'], '/', $basePath);
                 if (Str::startsWith($value, $basePath)) {
-                    $relativePath = Str::replaceFirst($basePath . '/', '', $value);
+                    $relativePath = Str::replaceFirst($basePath.'/', '', $value);
                     $this->attributes['file_path'] = $relativePath;
                     Log::debug("CodeAnalysis Model: Set 'file_path' to relative path '{$relativePath}'.");
                 } else {
@@ -86,12 +84,15 @@ class CodeAnalysis extends Model
         return $this->hasMany(AIScore::class);
     }
 
-    protected $casts = [
-        'file_path' => 'string',
-        'relative_file_path' => 'string',
-        'ast' => 'array',
-        'analysis' => 'array',
-        'ai_output' => 'array',
-        'completed_passes' => 'array',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'file_path' => 'string',
+            'relative_file_path' => 'string',
+            'ast' => 'array',
+            'analysis' => 'array',
+            'ai_output' => 'array',
+            'completed_passes' => 'array',
+        ];
+    }
 }

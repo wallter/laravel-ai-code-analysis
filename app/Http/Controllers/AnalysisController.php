@@ -137,7 +137,6 @@ class AnalysisController extends Controller
     /**
      * Show the form for editing the specified CodeAnalysis.
      *
-     * @param  \App\Models\CodeAnalysis  $analysis
      * @return \Illuminate\View\View
      */
     public function edit(CodeAnalysis $analysis)
@@ -148,8 +147,6 @@ class AnalysisController extends Controller
     /**
      * Update the specified CodeAnalysis in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\CodeAnalysis  $analysis
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, CodeAnalysis $analysis)
@@ -180,7 +177,6 @@ class AnalysisController extends Controller
     /**
      * Remove the specified CodeAnalysis from storage.
      *
-     * @param  \App\Models\CodeAnalysis  $analysis
      * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(CodeAnalysis $analysis)

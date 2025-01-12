@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 class OpenAIService
 {
-    protected string $apiKey;
+    // protected string $apiKey;
 
     protected string $apiBaseUrl = 'https://api.openai.com/v1/chat/completions';
 

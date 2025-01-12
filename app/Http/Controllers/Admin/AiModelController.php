@@ -8,11 +8,8 @@ use Illuminate\Http\Request;
 
 class AiModelController extends Controller
 {
-    protected AiModelServiceInterface $aiModelService;
-
-    public function __construct(AiModelServiceInterface $aiModelService)
+    public function __construct(protected AiModelServiceInterface $aiModelService)
     {
-        $this->aiModelService = $aiModelService;
     }
 
     /**
@@ -21,6 +18,7 @@ class AiModelController extends Controller
     public function index()
     {
         $aiModels = $this->aiModelService->getAllModels();
+
         return view('admin.ai_models.index', compact('aiModels'));
     }
 
@@ -46,7 +44,7 @@ class AiModelController extends Controller
         $this->aiModelService->createModel($validated);
 
         return redirect()->route('admin.ai-models.index')
-                         ->with('success', 'AI Model created successfully.');
+            ->with('success', 'AI Model created successfully.');
     }
 
     /**
@@ -55,6 +53,7 @@ class AiModelController extends Controller
     public function show(string $id)
     {
         $aiModel = $this->aiModelService->getModelById($id);
+
         return view('admin.ai_models.show', compact('aiModel'));
     }
 
@@ -64,6 +63,7 @@ class AiModelController extends Controller
     public function edit(string $id)
     {
         $aiModel = $this->aiModelService->getModelById($id);
+
         return view('admin.ai_models.edit', compact('aiModel'));
     }
 
@@ -81,7 +81,7 @@ class AiModelController extends Controller
         $this->aiModelService->updateModel($id, $validated);
 
         return redirect()->route('admin.ai-models.index')
-                         ->with('success', 'AI Model updated successfully.');
+            ->with('success', 'AI Model updated successfully.');
     }
 
     /**
@@ -90,7 +90,8 @@ class AiModelController extends Controller
     public function destroy(string $id)
     {
         $this->aiModelService->deleteModel($id);
+
         return redirect()->route('admin.ai-models.index')
-                         ->with('success', 'AI Model deleted successfully.');
+            ->with('success', 'AI Model deleted successfully.');
     }
 }

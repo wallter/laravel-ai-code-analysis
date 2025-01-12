@@ -32,10 +32,13 @@ class AIResult extends Model
         return $this->belongsTo(CodeAnalysis::class);
     }
 
-    protected $casts = [
-        'metadata' => 'array',
-        'response_text' => 'string',
-        'cost_estimate_usd' => 'decimal:6',
-        'content_type' => AIResultContentType::class,
-    ];
+    protected function casts(): array
+    {
+        return [
+            'metadata' => 'array',
+            'response_text' => 'string',
+            'cost_estimate_usd' => 'decimal:6',
+            'content_type' => AIResultContentType::class,
+        ];
+    }
 }

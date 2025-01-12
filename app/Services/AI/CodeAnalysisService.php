@@ -89,9 +89,6 @@ class CodeAnalysisService
      */
     protected function normalizeFilePath(string $filePath): string
     {
-        // Use the injected basePath
-        $absolutePath = realpath($this->basePath.DIRECTORY_SEPARATOR.$filePath) ?: $filePath;
-
         if ($basePath === false) {
             Log::error('CodeAnalysisService: Unable to resolve base path.');
             throw new InvalidArgumentException('Unable to resolve base path.');

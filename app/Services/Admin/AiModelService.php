@@ -8,17 +8,12 @@ use Illuminate\Support\Collection;
 
 class AiModelService implements AiModelServiceInterface
 {
-    protected AIModel $aiModel;
-
-    public function __construct(AIModel $aiModel)
+    public function __construct(protected AIModel $aiModel)
     {
-        $this->aiModel = $aiModel;
     }
 
     /**
      * Retrieve all AI models.
-     *
-     * @return Collection
      */
     public function getAllModels(): Collection
     {
@@ -28,7 +23,6 @@ class AiModelService implements AiModelServiceInterface
     /**
      * Create a new AI model.
      *
-     * @param array $data
      * @return AIModel
      */
     public function createModel(array $data)
@@ -39,7 +33,6 @@ class AiModelService implements AiModelServiceInterface
     /**
      * Retrieve a specific AI model by ID.
      *
-     * @param int $id
      * @return AIModel
      */
     public function getModelById(int $id)
@@ -50,22 +43,18 @@ class AiModelService implements AiModelServiceInterface
     /**
      * Update a specific AI model.
      *
-     * @param int $id
-     * @param array $data
      * @return AIModel
      */
     public function updateModel(int $id, array $data)
     {
         $model = $this->getModelById($id);
         $model->update($data);
+
         return $model;
     }
 
     /**
      * Delete a specific AI model.
-     *
-     * @param int $id
-     * @return void
      */
     public function deleteModel(int $id): void
     {

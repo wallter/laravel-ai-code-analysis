@@ -20,7 +20,10 @@ class StaticAnalysis extends Model
         return $this->belongsTo(CodeAnalysis::class);
     }
 
-    protected $casts = [
-        'results' => 'array',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'results' => 'array',
+        ];
+    }
 }

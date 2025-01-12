@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Jobs;
@@ -20,8 +21,6 @@ use Throwable;
  *
  * This job retrieves the specified CodeAnalysis record, performs all designated AI passes,
  * stores the results, and marks the passes as completed.
- *
- * @package App\Jobs
  */
 class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
 {
@@ -32,67 +31,40 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
 
     /**
      * The number of times the job may be attempted.
-     *
-     * @var int
      */
     public int $tries = 3;
 
     /**
      * The number of seconds before the job should be retried.
-     *
-     * @var int
      */
     public int $backoff = 60;
 
     /**
      * The number of seconds after which the unique lock will be released.
-     *
-     * @var int
      */
     public int $uniqueFor = 300;
 
     /**
-     * The CodeAnalysis ID.
-     *
-     * @var int
-     */
-    protected int $codeAnalysisId;
-
-    /**
-     * Indicates if the job is a dry run.
-     *
-     * @var bool
-     */
-    protected bool $dryRun;
-
-    /**
      * Create a new job instance.
      *
-     * @param int  $codeAnalysisId The CodeAnalysis ID.
-     * @param bool $dryRun         Indicates if the job is a dry run.
+     * @param  int  $codeAnalysisId  The CodeAnalysis ID.
+     * @param  bool  $dryRun  Indicates if the job is a dry run.
      */
-    public function __construct(
-        int $codeAnalysisId,
-        bool $dryRun = false
-    ) {
-        $this->codeAnalysisId = $codeAnalysisId;
-        $this->dryRun = $dryRun;
+    public function __construct(protected int $codeAnalysisId, protected bool $dryRun = false)
+    {
     }
 
     /**
      * Get the unique identifier for the job.
-     *
-     * @return string
      */
     public function uniqueId(): string
     {
-        return "{$this->codeAnalysisId}-" . ($this->dryRun ? '1' : '0');
+        return "{$this->codeAnalysisId}-".($this->dryRun ? '1' : '0');
     }
 
     /**
      * Execute the job.
      *
-     * @return void
      *
      * @throws Throwable
      */
@@ -107,9 +79,7 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
                 return;
             }
 
-            $jobs = collect($passOrder)->map(function (string $passName) {
-                return new ProcessIndividualPassJob($this->codeAnalysisId, $passName, $this->dryRun);
-            })->all();
+            $jobs = collect($passOrder)->map(fn(string $passName) => new ProcessIndividualPassJob($this->codeAnalysisId, $passName, $this->dryRun))->all();
 
             // Dispatch the first job and chain the rest
             $firstJob = array_shift($jobs);

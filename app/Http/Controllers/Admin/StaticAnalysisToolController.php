@@ -8,11 +8,8 @@ use Illuminate\Http\Request;
 
 class StaticAnalysisToolController extends Controller
 {
-    protected StaticAnalysisToolServiceInterface $staticAnalysisToolService;
-
-    public function __construct(StaticAnalysisToolServiceInterface $staticAnalysisToolService)
+    public function __construct(protected StaticAnalysisToolServiceInterface $staticAnalysisToolService)
     {
-        $this->staticAnalysisToolService = $staticAnalysisToolService;
     }
 
     /**
@@ -21,6 +18,7 @@ class StaticAnalysisToolController extends Controller
     public function index()
     {
         $tools = $this->staticAnalysisToolService->getAllTools();
+
         return view('admin.static_analysis_tools.index', compact('tools'));
     }
 
@@ -48,7 +46,7 @@ class StaticAnalysisToolController extends Controller
         $this->staticAnalysisToolService->createTool($validated);
 
         return redirect()->route('admin.static-analysis-tools.index')
-                         ->with('success', 'Static Analysis Tool created successfully.');
+            ->with('success', 'Static Analysis Tool created successfully.');
     }
 
     /**
@@ -57,6 +55,7 @@ class StaticAnalysisToolController extends Controller
     public function show(string $id)
     {
         $tool = $this->staticAnalysisToolService->getToolById($id);
+
         return view('admin.static_analysis_tools.show', compact('tool'));
     }
 
@@ -66,6 +65,7 @@ class StaticAnalysisToolController extends Controller
     public function edit(string $id)
     {
         $tool = $this->staticAnalysisToolService->getToolById($id);
+
         return view('admin.static_analysis_tools.edit', compact('tool'));
     }
 
@@ -85,7 +85,7 @@ class StaticAnalysisToolController extends Controller
         $this->staticAnalysisToolService->updateTool($id, $validated);
 
         return redirect()->route('admin.static-analysis-tools.index')
-                         ->with('success', 'Static Analysis Tool updated successfully.');
+            ->with('success', 'Static Analysis Tool updated successfully.');
     }
 
     /**
@@ -94,7 +94,8 @@ class StaticAnalysisToolController extends Controller
     public function destroy(string $id)
     {
         $this->staticAnalysisToolService->deleteTool($id);
+
         return redirect()->route('admin.static-analysis-tools.index')
-                         ->with('success', 'Static Analysis Tool deleted successfully.');
+            ->with('success', 'Static Analysis Tool deleted successfully.');
     }
 }

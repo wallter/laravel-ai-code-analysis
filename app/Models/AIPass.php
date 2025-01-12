@@ -21,6 +21,7 @@ class AIPass extends Model
         'system_message',
         'prompt_sections',
     ];
+
     public function aiConfiguration()
     {
         return $this->belongsTo(AIConfiguration::class);

@@ -8,11 +8,8 @@ use Illuminate\Http\Request;
 
 class PassOrderController extends Controller
 {
-    protected PassOrderServiceInterface $passOrderService;
-
-    public function __construct(PassOrderServiceInterface $passOrderService)
+    public function __construct(protected PassOrderServiceInterface $passOrderService)
     {
-        $this->passOrderService = $passOrderService;
     }
 
     /**
@@ -21,6 +18,7 @@ class PassOrderController extends Controller
     public function index()
     {
         $passOrders = $this->passOrderService->getAllPassOrders();
+
         return view('admin.pass_orders.index', compact('passOrders'));
     }
 
@@ -46,7 +44,7 @@ class PassOrderController extends Controller
         $this->passOrderService->createPassOrder($validated);
 
         return redirect()->route('admin.pass-orders.index')
-                         ->with('success', 'Pass Order created successfully.');
+            ->with('success', 'Pass Order created successfully.');
     }
 
     /**
@@ -55,6 +53,7 @@ class PassOrderController extends Controller
     public function show(string $id)
     {
         $passOrder = $this->passOrderService->getPassOrderById($id);
+
         return view('admin.pass_orders.show', compact('passOrder'));
     }
 
@@ -64,6 +63,7 @@ class PassOrderController extends Controller
     public function edit(string $id)
     {
         $passOrder = $this->passOrderService->getPassOrderById($id);
+
         return view('admin.pass_orders.edit', compact('passOrder'));
     }
 
@@ -81,7 +81,7 @@ class PassOrderController extends Controller
         $this->passOrderService->updatePassOrder($id, $validated);
 
         return redirect()->route('admin.pass-orders.index')
-                         ->with('success', 'Pass Order updated successfully.');
+            ->with('success', 'Pass Order updated successfully.');
     }
 
     /**
@@ -90,7 +90,8 @@ class PassOrderController extends Controller
     public function destroy(string $id)
     {
         $this->passOrderService->deletePassOrder($id);
+
         return redirect()->route('admin.pass-orders.index')
-                         ->with('success', 'Pass Order deleted successfully.');
+            ->with('success', 'Pass Order deleted successfully.');
     }
 }

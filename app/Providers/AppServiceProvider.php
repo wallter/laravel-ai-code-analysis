@@ -2,18 +2,16 @@
 
 namespace App\Providers;
 
+use App\Interfaces\Admin\AiConfigurationServiceInterface;
+use App\Interfaces\Admin\AIPassServiceInterface;
+use App\Interfaces\Admin\PassOrderServiceInterface;
+use App\Interfaces\Admin\StaticAnalysisToolServiceInterface;
+use App\Services\Admin\AiConfigurationService;
+use App\Services\Admin\AIPassService;
+use App\Services\Admin\PassOrderService;
+use App\Services\Admin\StaticAnalysisToolService;
 use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
-use App\Interfaces\Admin\AiModelServiceInterface;
-use App\Services\Admin\AiModelService;
-use App\Interfaces\Admin\AiConfigurationServiceInterface;
-use App\Services\Admin\AiConfigurationService;
-use App\Interfaces\Admin\AIPassServiceInterface;
-use App\Services\Admin\AIPassService;
-use App\Interfaces\Admin\PassOrderServiceInterface;
-use App\Services\Admin\PassOrderService;
-use App\Interfaces\Admin\StaticAnalysisToolServiceInterface;
-use App\Services\Admin\StaticAnalysisToolService;
 use App\Services\Export\JsonExportService;
 use App\Services\ParsedItemService;
 use App\Services\Parsing\FileProcessorService;
@@ -35,20 +33,18 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ParserService::class, function (Application $app) {
             $parsedItemService = $app->make(ParsedItemService::class);
             $basePath = config('filesystems.base_path');
+
             return new ParserService($parsedItemService, $basePath);
         });
 
-        $this->app->singleton(FileProcessorService::class, function ($app) {
-            return new FileProcessorService($app->make(ParserService::class));
-        });
+        $this->app->singleton(FileProcessorService::class, fn($app) => new FileProcessorService($app->make(ParserService::class)));
 
-        $this->app->singleton(JsonExportService::class, function ($app) {
-            return new JsonExportService;
-        });
+        $this->app->singleton(JsonExportService::class, fn($app) => new JsonExportService);
 
         // Bind OpenAIService with the injected API key
         $this->app->singleton(OpenAIService::class, function (Application $app) {
             $apiKey = config('ai.openai_api_key');
+
             return new OpenAIService($apiKey);
         });
 
@@ -57,6 +53,7 @@ class AppServiceProvider extends ServiceProvider
             $openAIService = $app->make(OpenAIService::class);
             $parserService = $app->make(ParserService::class);
             $basePath = base_path(); // or config('filesystems.base_path');
+
             return new CodeAnalysisService($openAIService, $parserService, $basePath);
         });
 
@@ -67,6 +64,7 @@ class AppServiceProvider extends ServiceProvider
             $staticAnalysisService = $app->make(StaticAnalysisToolInterface::class);
             $multiPassConfig = config('ai.operations.multi_pass_analysis', []);
             $passesConfig = config('ai.passes', []);
+
             return new AnalysisPassService(
                 $openAIService,
                 $codeAnalysisService,
@@ -89,9 +87,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(StaticAnalysisToolServiceInterface::class, StaticAnalysisToolService::class);
 
         // Bind StaticAnalysisToolInterface to StaticAnalysisService
-        $this->app->singleton(StaticAnalysisToolInterface::class, function ($app) {
-            return $app->make(StaticAnalysisService::class);
-        });
+        $this->app->singleton(StaticAnalysisToolInterface::class, fn($app) => $app->make(StaticAnalysisService::class));
     }
 
     /**

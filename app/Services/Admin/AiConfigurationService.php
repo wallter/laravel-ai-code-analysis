@@ -8,17 +8,12 @@ use Illuminate\Support\Collection;
 
 class AiConfigurationService implements AiConfigurationServiceInterface
 {
-    protected AIConfiguration $aiConfiguration;
-
-    public function __construct(AIConfiguration $aiConfiguration)
+    public function __construct(protected AIConfiguration $aiConfiguration)
     {
-        $this->aiConfiguration = $aiConfiguration;
     }
 
     /**
      * Retrieve all AI configurations.
-     *
-     * @return Collection
      */
     public function getAllConfigurations(): Collection
     {
@@ -28,7 +23,6 @@ class AiConfigurationService implements AiConfigurationServiceInterface
     /**
      * Create a new AI configuration.
      *
-     * @param array $data
      * @return AIConfiguration
      */
     public function createConfiguration(array $data)
@@ -39,7 +33,6 @@ class AiConfigurationService implements AiConfigurationServiceInterface
     /**
      * Retrieve a specific AI configuration by ID.
      *
-     * @param int $id
      * @return AIConfiguration
      */
     public function getConfigurationById(int $id)
@@ -50,22 +43,18 @@ class AiConfigurationService implements AiConfigurationServiceInterface
     /**
      * Update a specific AI configuration.
      *
-     * @param int $id
-     * @param array $data
      * @return AIConfiguration
      */
     public function updateConfiguration(int $id, array $data)
     {
         $configuration = $this->getConfigurationById($id);
         $configuration->update($data);
+
         return $configuration;
     }
 
     /**
      * Delete a specific AI configuration.
-     *
-     * @param int $id
-     * @return void
      */
     public function deleteConfiguration(int $id): void
     {

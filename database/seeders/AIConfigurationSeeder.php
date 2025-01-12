@@ -2,14 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\AIConfiguration;
 use App\Models\AIModel;
-use App\Models\StaticAnalysisTool;
 use App\Models\AIPass;
 use App\Models\PassOrder;
-use App\Enums\OperationIdentifier;
-use App\Enums\PassType;
+use App\Models\StaticAnalysisTool;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Config;
 
 class AIConfigurationSeeder extends Seeder
@@ -26,7 +24,7 @@ class AIConfigurationSeeder extends Seeder
         $aiConfig = AIConfiguration::create();
 
         // Seed AI Models
-        foreach ($config['models'] as $modelKey => $modelData) {
+        foreach ($config['models'] as $modelData) {
             AIModel::create([
                 'ai_configuration_id' => $aiConfig->id,
                 'model_name' => $modelData['model_name'],
@@ -51,8 +49,8 @@ class AIConfigurationSeeder extends Seeder
 
         // Seed AI Passes
         foreach ($config['passes'] as $passKey => $passData) {
-            $modelId = $passData['model'] 
-                ? AIModel::where('model_name', $passData['model'])->value('id') 
+            $modelId = $passData['model']
+                ? AIModel::where('model_name', $passData['model'])->value('id')
                 : null;
 
             AIPass::create([

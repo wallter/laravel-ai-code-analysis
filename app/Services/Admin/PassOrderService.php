@@ -8,17 +8,12 @@ use Illuminate\Support\Collection;
 
 class PassOrderService implements PassOrderServiceInterface
 {
-    protected PassOrder $passOrder;
-
-    public function __construct(PassOrder $passOrder)
+    public function __construct(protected PassOrder $passOrder)
     {
-        $this->passOrder = $passOrder;
     }
 
     /**
      * Retrieve all pass orders.
-     *
-     * @return Collection
      */
     public function getAllPassOrders(): Collection
     {
@@ -28,7 +23,6 @@ class PassOrderService implements PassOrderServiceInterface
     /**
      * Create a new pass order.
      *
-     * @param array $data
      * @return PassOrder
      */
     public function createPassOrder(array $data)
@@ -39,7 +33,6 @@ class PassOrderService implements PassOrderServiceInterface
     /**
      * Retrieve a specific pass order by ID.
      *
-     * @param int $id
      * @return PassOrder
      */
     public function getPassOrderById(int $id)
@@ -50,22 +43,18 @@ class PassOrderService implements PassOrderServiceInterface
     /**
      * Update a specific pass order.
      *
-     * @param int $id
-     * @param array $data
      * @return PassOrder
      */
     public function updatePassOrder(int $id, array $data)
     {
         $passOrder = $this->getPassOrderById($id);
         $passOrder->update($data);
+
         return $passOrder;
     }
 
     /**
      * Delete a specific pass order.
-     *
-     * @param int $id
-     * @return void
      */
     public function deletePassOrder(int $id): void
     {

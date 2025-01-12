@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Jobs;
@@ -16,8 +17,6 @@ use Throwable;
  * Class ProcessIndividualPassJob
  *
  * Processes a single AI pass for a code analysis.
- *
- * @package App\Jobs
  */
 class ProcessIndividualPassJob implements ShouldQueue
 {
@@ -27,48 +26,18 @@ class ProcessIndividualPassJob implements ShouldQueue
     use SerializesModels;
 
     /**
-     * The CodeAnalysis ID.
-     *
-     * @var int|null
-     */
-    public ?int $codeAnalysisId;
-
-    /**
-     * The name of the AI pass to execute.
-     *
-     * @var string|null
-     */
-    public ?string $passName;
-
-    /**
-     * Indicates if the job is a dry run.
-     *
-     * @var bool
-     */
-    public bool $dryRun;
-
-    /**
      * Create a new job instance.
      *
-     * @param int|null    $codeAnalysisId The CodeAnalysis ID.
-     * @param string|null $passName       The name of the AI pass to execute.
-     * @param bool        $dryRun         Indicates if the job is a dry run.
+     * @param  int|null  $codeAnalysisId  The CodeAnalysis ID.
+     * @param  string|null  $passName  The name of the AI pass to execute.
+     * @param  bool  $dryRun  Indicates if the job is a dry run.
      */
-    public function __construct(
-        ?int $codeAnalysisId = null,
-        ?string $passName = null,
-        bool $dryRun = false
-    ) {
-        $this->codeAnalysisId = $codeAnalysisId;
-        $this->passName = $passName;
-        $this->dryRun = $dryRun;
+    public function __construct(public ?int $codeAnalysisId = null, public ?string $passName = null, public bool $dryRun = false)
+    {
     }
 
     /**
      * Execute the job.
-     *
-     * @param AnalysisPassService $analysisPassService
-     * @return void
      */
     public function handle(AnalysisPassService $analysisPassService): void
     {

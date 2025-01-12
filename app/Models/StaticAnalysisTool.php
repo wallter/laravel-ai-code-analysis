@@ -18,12 +18,14 @@ class StaticAnalysisTool extends Model
         // Add other necessary fields
     ];
 
-    protected $casts = [
-        'options' => 'array',
-    ];
-
     public function aiConfiguration()
     {
         return $this->belongsTo(AIConfiguration::class);
+    }
+    protected function casts(): array
+    {
+        return [
+            'options' => 'array',
+        ];
     }
 }

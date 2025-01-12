@@ -8,11 +8,8 @@ use Illuminate\Http\Request;
 
 class AIPassController extends Controller
 {
-    protected AIPassServiceInterface $aiPassService;
-
-    public function __construct(AIPassServiceInterface $aiPassService)
+    public function __construct(protected AIPassServiceInterface $aiPassService)
     {
-        $this->aiPassService = $aiPassService;
     }
 
     /**
@@ -21,6 +18,7 @@ class AIPassController extends Controller
     public function index()
     {
         $aiPasses = $this->aiPassService->getAllPasses();
+
         return view('admin.ai_passes.index', compact('aiPasses'));
     }
 
@@ -46,7 +44,7 @@ class AIPassController extends Controller
         $this->aiPassService->createPass($validated);
 
         return redirect()->route('admin.ai-passes.index')
-                         ->with('success', 'AI Pass created successfully.');
+            ->with('success', 'AI Pass created successfully.');
     }
 
     /**
@@ -55,6 +53,7 @@ class AIPassController extends Controller
     public function show(string $id)
     {
         $aiPass = $this->aiPassService->getPassById($id);
+
         return view('admin.ai_passes.show', compact('aiPass'));
     }
 
@@ -64,6 +63,7 @@ class AIPassController extends Controller
     public function edit(string $id)
     {
         $aiPass = $this->aiPassService->getPassById($id);
+
         return view('admin.ai_passes.edit', compact('aiPass'));
     }
 
@@ -81,7 +81,7 @@ class AIPassController extends Controller
         $this->aiPassService->updatePass($id, $validated);
 
         return redirect()->route('admin.ai-passes.index')
-                         ->with('success', 'AI Pass updated successfully.');
+            ->with('success', 'AI Pass updated successfully.');
     }
 
     /**
@@ -90,7 +90,8 @@ class AIPassController extends Controller
     public function destroy(string $id)
     {
         $this->aiPassService->deletePass($id);
+
         return redirect()->route('admin.ai-passes.index')
-                         ->with('success', 'AI Pass deleted successfully.');
+            ->with('success', 'AI Pass deleted successfully.');
     }
 }

@@ -8,11 +8,8 @@ use Illuminate\Http\Request;
 
 class AiConfigurationController extends Controller
 {
-    protected AiConfigurationServiceInterface $aiConfigurationService;
-
-    public function __construct(AiConfigurationServiceInterface $aiConfigurationService)
+    public function __construct(protected AiConfigurationServiceInterface $aiConfigurationService)
     {
-        $this->aiConfigurationService = $aiConfigurationService;
     }
 
     /**
@@ -21,6 +18,7 @@ class AiConfigurationController extends Controller
     public function index()
     {
         $aiConfigurations = $this->aiConfigurationService->getAllConfigurations();
+
         return view('admin.ai_configurations.index', compact('aiConfigurations'));
     }
 
@@ -46,7 +44,7 @@ class AiConfigurationController extends Controller
         $this->aiConfigurationService->createConfiguration($validated);
 
         return redirect()->route('admin.ai-configurations.index')
-                         ->with('success', 'AI Configuration created successfully.');
+            ->with('success', 'AI Configuration created successfully.');
     }
 
     /**
@@ -55,6 +53,7 @@ class AiConfigurationController extends Controller
     public function show(string $id)
     {
         $aiConfiguration = $this->aiConfigurationService->getConfigurationById($id);
+
         return view('admin.ai_configurations.show', compact('aiConfiguration'));
     }
 
@@ -64,6 +63,7 @@ class AiConfigurationController extends Controller
     public function edit(string $id)
     {
         $aiConfiguration = $this->aiConfigurationService->getConfigurationById($id);
+
         return view('admin.ai_configurations.edit', compact('aiConfiguration'));
     }
 
@@ -81,7 +81,7 @@ class AiConfigurationController extends Controller
         $this->aiConfigurationService->updateConfiguration($id, $validated);
 
         return redirect()->route('admin.ai-configurations.index')
-                         ->with('success', 'AI Configuration updated successfully.');
+            ->with('success', 'AI Configuration updated successfully.');
     }
 
     /**
@@ -90,7 +90,8 @@ class AiConfigurationController extends Controller
     public function destroy(string $id)
     {
         $this->aiConfigurationService->deleteConfiguration($id);
+
         return redirect()->route('admin.ai-configurations.index')
-                         ->with('success', 'AI Configuration deleted successfully.');
+            ->with('success', 'AI Configuration deleted successfully.');
     }
 }

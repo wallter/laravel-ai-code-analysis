@@ -1,11 +1,11 @@
 <?php
 
-use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\Admin\AiConfigurationController;
 use App\Http\Controllers\Admin\AiModelController;
 use App\Http\Controllers\Admin\AIPassController;
 use App\Http\Controllers\Admin\PassOrderController;
 use App\Http\Controllers\Admin\StaticAnalysisToolController;
+use App\Http\Controllers\AnalysisController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect to the analysis index page by default

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('ai_configurations', function (Blueprint $table) {
             $table->id();
+            $table->string('openai_api_key')->default('');
             $table->timestamps();
         });
     }

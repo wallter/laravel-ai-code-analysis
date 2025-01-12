@@ -8,17 +8,12 @@ use Illuminate\Support\Collection;
 
 class AIPassService implements AIPassServiceInterface
 {
-    protected AIPass $aiPass;
-
-    public function __construct(AIPass $aiPass)
+    public function __construct(protected AIPass $aiPass)
     {
-        $this->aiPass = $aiPass;
     }
 
     /**
      * Retrieve all AI passes.
-     *
-     * @return Collection
      */
     public function getAllPasses(): Collection
     {
@@ -28,7 +23,6 @@ class AIPassService implements AIPassServiceInterface
     /**
      * Create a new AI pass.
      *
-     * @param array $data
      * @return AIPass
      */
     public function createPass(array $data)
@@ -39,7 +33,6 @@ class AIPassService implements AIPassServiceInterface
     /**
      * Retrieve a specific AI pass by ID.
      *
-     * @param int $id
      * @return AIPass
      */
     public function getPassById(int $id)
@@ -50,22 +43,18 @@ class AIPassService implements AIPassServiceInterface
     /**
      * Update a specific AI pass.
      *
-     * @param int $id
-     * @param array $data
      * @return AIPass
      */
     public function updatePass(int $id, array $data)
     {
         $pass = $this->getPassById($id);
         $pass->update($data);
+
         return $pass;
     }
 
     /**
      * Delete a specific AI pass.
-     *
-     * @param int $id
-     * @return void
      */
     public function deletePass(int $id): void
     {

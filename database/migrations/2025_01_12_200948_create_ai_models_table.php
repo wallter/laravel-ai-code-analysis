@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('ai_models', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('ai_configuration_id')->constrained()->onDelete('cascade');
+            $table->string('model_name');
+            $table->integer('max_tokens')->nullable();
+            $table->float('temperature')->nullable();
+            $table->boolean('supports_system_message')->default(false);
+            $table->string('token_limit_parameter')->nullable();
             $table->timestamps();
         });
     }

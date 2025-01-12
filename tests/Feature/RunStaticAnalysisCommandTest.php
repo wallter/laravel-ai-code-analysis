@@ -30,19 +30,19 @@ class RunStaticAnalysisCommandTest extends TestCase
         // Mock the StaticAnalysisToolService
         $serviceMock = Mockery::mock(StaticAnalysisToolServiceInterface::class);
         $serviceMock->shouldReceive('getAllTools')
-                    ->once()
-                    ->andReturn(collect([
-                        ['name' => 'PHPStan', 'command' => 'vendor/bin/phpstan', 'options' => [], 'enabled' => true],
-                    ]));
+            ->once()
+            ->andReturn(collect([
+                ['name' => 'PHPStan', 'command' => 'vendor/bin/phpstan', 'options' => [], 'enabled' => true],
+            ]));
 
         $serviceMock->shouldReceive('runAnalysis')
-                    ->with($codeAnalysis, 'PHPStan')
-                    ->once()
-                    ->andReturn(StaticAnalysis::factory()->make([
-                        'code_analysis_id' => $codeAnalysis->id,
-                        'tool' => 'PHPStan',
-                        'results' => ['files' => []],
-                    ]));
+            ->with($codeAnalysis, 'PHPStan')
+            ->once()
+            ->andReturn(StaticAnalysis::factory()->make([
+                'code_analysis_id' => $codeAnalysis->id,
+                'tool' => 'PHPStan',
+                'results' => ['files' => []],
+            ]));
 
         $this->app->instance(StaticAnalysisToolServiceInterface::class, $serviceMock);
 
