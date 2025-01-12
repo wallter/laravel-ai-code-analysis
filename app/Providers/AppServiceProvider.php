@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
+use App\Interfaces\Admin\AiModelServiceInterface;
+use App\Services\Admin\AiModelService;
 use App\Services\Export\JsonExportService;
 use App\Services\ParsedItemService;
 use App\Services\Parsing\FileProcessorService;
@@ -36,6 +38,9 @@ class AppServiceProvider extends ServiceProvider
             $app->make(OpenAIService::class),
             $app->make(ParserService::class)
         ));
+
+        // Bind AiModelServiceInterface to AiModelService
+        $this->app->singleton(AiModelServiceInterface::class, AiModelService::class);
 
         // Register AnalysisPassService with updated constructor parameters
         $this->app->singleton(\App\Services\AnalysisPassService::class, fn ($app) => new \App\Services\AnalysisPassService(

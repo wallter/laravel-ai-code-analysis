@@ -3,16 +3,22 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Interfaces\Admin\AiModelServiceInterface;
 use Illuminate\Http\Request;
 
 class AiModelController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected AiModelServiceInterface $aiModelService;
+
+    public function __construct(AiModelServiceInterface $aiModelService)
+    {
+        $this->aiModelService = $aiModelService;
+    }
+
     public function index()
     {
-        //
+        $aiModels = $this->aiModelService->getAllModels();
+        return view('admin.ai_models.index', compact('aiModels'));
     }
 
     /**
@@ -23,20 +29,22 @@ class AiModelController extends Controller
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        $this->aiModelService->createModel($validated);
+
+        return redirect()->route('admin.ai-models.index')->with('success', 'AI Model created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-        //
+        $aiModel = $this->aiModelService->getModelById($id);
+        return view('admin.ai_models.show', compact('aiModel'));
     }
 
     /**
@@ -47,19 +55,21 @@ class AiModelController extends Controller
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        $this->aiModelService->updateModel($id, $validated);
+
+        return redirect()->route('admin.ai-models.index')->with('success', 'AI Model updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        //
+        $this->aiModelService->deleteModel($id);
+        return redirect()->route('admin.ai-models.index')->with('success', 'AI Model deleted successfully.');
     }
 }
