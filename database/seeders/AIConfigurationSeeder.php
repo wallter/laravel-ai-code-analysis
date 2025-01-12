@@ -22,10 +22,8 @@ class AIConfigurationSeeder extends Seeder
         // Retrieve the AI configuration from config/ai.php
         $config = Config::get('ai');
 
-        // Create AIConfiguration
-        $aiConfig = AIConfiguration::create([
-            'openai_api_key' => $config['openai_api_key'],
-        ]);
+        // Create AIConfiguration without 'openai_api_key'
+        $aiConfig = AIConfiguration::create();
 
         // Seed AI Models
         foreach ($config['models'] as $modelKey => $modelData) {
