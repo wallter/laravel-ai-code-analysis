@@ -16,4 +16,12 @@ class AIModel extends Model implements Auditable
      * @var string|null
      */
     protected $table = 'ai_models';
+
+    /**
+     * Get the AIConfiguration that owns the AIModel.
+     */
+    public function aiConfiguration()
+    {
+        return $this->belongsTo(AIConfiguration::class);
+    }
 }
