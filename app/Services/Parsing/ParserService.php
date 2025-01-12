@@ -23,7 +23,10 @@ class ParserService
      *
      * @param  ParsedItemService  $parsedItemService  The service handling ParsedItem creation.
      */
-    public function __construct(protected ParsedItemService $parsedItemService) {}
+    public function __construct(protected ParsedItemService $parsedItemService, protected string $basePath)
+    {
+        // basePath is injected via the constructor
+    }
 
     /**
      * Collect .php files from config('parsing.files') and config('parsing.folders').
@@ -61,7 +64,7 @@ class ParserService
      */
     public function parseFile(string $filePath, bool $useCache = false): array
     {
-        $basePath = Config::get('filesystems.base_path');
+        // $basePath is now injected
         $absolutePath = realpath($basePath.DIRECTORY_SEPARATOR.$filePath) ?: $filePath;
         Log::debug("ParserService.parseFile => [{$absolutePath}], useCache={$useCache}");
 

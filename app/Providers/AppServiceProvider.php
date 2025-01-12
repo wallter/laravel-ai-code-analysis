@@ -31,8 +31,11 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Singleton bindings for services
-        $this->app->singleton(ParserService::class, function (Application $app): ParserService {
-            return new ParserService($app->make(ParsedItemService::class));
+        // Bind ParserService with the injected base path
+        $this->app->singleton(ParserService::class, function (Application $app) {
+            $parsedItemService = $app->make(ParsedItemService::class);
+            $basePath = config('filesystems.base_path');
+            return new ParserService($parsedItemService, $basePath);
         });
 
         $this->app->singleton(FileProcessorService::class, function ($app) {
@@ -43,15 +46,18 @@ class AppServiceProvider extends ServiceProvider
             return new JsonExportService;
         });
 
-        $this->app->singleton(OpenAIService::class, function (Application $app): OpenAIService {
-            return new OpenAIService;
+        // Bind OpenAIService with the injected API key
+        $this->app->singleton(OpenAIService::class, function (Application $app) {
+            $apiKey = config('ai.openai_api_key');
+            return new OpenAIService($apiKey);
         });
 
-        $this->app->singleton(CodeAnalysisService::class, function (Application $app): CodeAnalysisService {
-            return new CodeAnalysisService(
-                $app->make(OpenAIService::class),
-                $app->make(ParserService::class)
-            );
+        // Bind CodeAnalysisService with the injected base path
+        $this->app->singleton(CodeAnalysisService::class, function (Application $app) {
+            $openAIService = $app->make(OpenAIService::class);
+            $parserService = $app->make(ParserService::class);
+            $basePath = base_path(); // or config('filesystems.base_path');
+            return new CodeAnalysisService($openAIService, $parserService, $basePath);
         });
 
         // Bind AiModelServiceInterface to AiModelService

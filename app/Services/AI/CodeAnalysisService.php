@@ -27,7 +27,8 @@ class CodeAnalysisService
      */
     public function __construct(
         protected OpenAIService $openAIService,
-        protected ParserService $parserService
+        protected ParserService $parserService,
+        protected string $basePath
     ) {}
 
     /**
@@ -88,7 +89,8 @@ class CodeAnalysisService
      */
     protected function normalizeFilePath(string $filePath): string
     {
-        $basePath = realpath(base_path());
+        // Use the injected basePath
+        $absolutePath = realpath($this->basePath.DIRECTORY_SEPARATOR.$filePath) ?: $filePath;
 
         if ($basePath === false) {
             Log::error('CodeAnalysisService: Unable to resolve base path.');

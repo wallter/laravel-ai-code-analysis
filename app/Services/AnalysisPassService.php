@@ -28,7 +28,9 @@ class AnalysisPassService
     public function __construct(
         protected OpenAIService $openAIService,
         protected CodeAnalysisService $codeAnalysisService,
-        protected StaticAnalysisToolInterface $staticAnalysisService
+        protected StaticAnalysisToolInterface $staticAnalysisService,
+        protected array $multiPassConfig,
+        protected array $passesConfig
     ) {}
 
     /**
