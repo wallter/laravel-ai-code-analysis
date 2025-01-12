@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 /**
  * CodeAnalysis model represents the analysis of a single PHP file.
@@ -30,31 +31,34 @@ class CodeAnalysis extends Model
     /**
      * Accessor to get the absolute file path.
      *
-     * @param  string  $value
+     * @return Attribute
      */
-    protected function filePath(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function filePath(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function ($value) {
-            $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
-            $absolutePath = realpath($basePath.DIRECTORY_SEPARATOR.$value);
+        return Attribute::make(
+            get: function ($value) {
+                $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
+                $absolutePath = realpath($basePath . DIRECTORY_SEPARATOR . $value);
 
-            return $absolutePath ?: $value;
-        }, set: function (string $value) {
-            $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
-            // Ensure both paths use forward slashes
-            $value = str_replace(['\\'], '/', $value);
-            $basePath = str_replace(['\\'], '/', $basePath);
-            if (Str::startsWith($value, $basePath)) {
-                $relativePath = Str::replaceFirst($basePath.'/', '', $value);
-                $this->attributes['file_path'] = $relativePath;
-                Log::debug("CodeAnalysis Model: Set 'file_path' to relative path '{$relativePath}'.");
-            } else {
-                $this->attributes['file_path'] = $value;
-                Log::warning("CodeAnalysis Model: The file path '{$value}' does not start with base path '{$basePath}'. Stored as is.");
+                return $absolutePath ?: $value;
+            },
+            set: function (string $value) {
+                $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
+                // Ensure both paths use forward slashes
+                $value = str_replace(['\\'], '/', $value);
+                $basePath = str_replace(['\\'], '/', $basePath);
+                if (Str::startsWith($value, $basePath)) {
+                    $relativePath = Str::replaceFirst($basePath . '/', '', $value);
+                    $this->attributes['file_path'] = $relativePath;
+                    Log::debug("CodeAnalysis Model: Set 'file_path' to relative path '{$relativePath}'.");
+                } else {
+                    $this->attributes['file_path'] = $value;
+                    Log::warning("CodeAnalysis Model: The file path '{$value}' does not start with base path '{$basePath}'. Stored as is.");
+                }
+
+                return $value;
             }
-
-            return ['file_path' => $value];
-        });
+        );
     }
 
     public function staticAnalyses()
@@ -82,15 +86,12 @@ class CodeAnalysis extends Model
         return $this->hasMany(AIScore::class);
     }
 
-    protected function casts(): array
-    {
-        return [
-            'file_path' => 'string',
-            'relative_file_path' => 'string',
-            'ast' => 'array',
-            'analysis' => 'array',
-            'ai_output' => 'array',
-            'completed_passes' => 'array',
-        ];
-    }
+    protected $casts = [
+        'file_path' => 'string',
+        'relative_file_path' => 'string',
+        'ast' => 'array',
+        'analysis' => 'array',
+        'ai_output' => 'array',
+        'completed_passes' => 'array',
+    ];
 }

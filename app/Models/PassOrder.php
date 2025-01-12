@@ -10,8 +10,19 @@ class PassOrder extends Model
     use HasFactory;
 
     protected $fillable = [
-        'pass_name',
+        'ai_configuration_id',
+        'ai_pass_id',
         'order',
-        // Add other fillable fields as necessary
+        // Add other necessary fields as necessary
     ];
+
+    public function aiConfiguration()
+    {
+        return $this->belongsTo(AIConfiguration::class);
+    }
+
+    public function aiPass()
+    {
+        return $this->belongsTo(AIPass::class);
+    }
 }
