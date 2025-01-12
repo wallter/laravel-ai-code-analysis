@@ -60,8 +60,21 @@ class AppServiceProvider extends ServiceProvider
             return new CodeAnalysisService($openAIService, $parserService, $basePath);
         });
 
-        // Bind AiModelServiceInterface to AiModelService
-        $this->app->singleton(AiModelServiceInterface::class, AiModelService::class);
+        // Bind AnalysisPassService with injected configuration
+        $this->app->singleton(AnalysisPassService::class, function (Application $app) {
+            $openAIService = $app->make(OpenAIService::class);
+            $codeAnalysisService = $app->make(CodeAnalysisService::class);
+            $staticAnalysisService = $app->make(StaticAnalysisToolInterface::class);
+            $multiPassConfig = config('ai.operations.multi_pass_analysis', []);
+            $passesConfig = config('ai.passes', []);
+            return new AnalysisPassService(
+                $openAIService,
+                $codeAnalysisService,
+                $staticAnalysisService,
+                $multiPassConfig,
+                $passesConfig
+            );
+        });
 
         // Bind AiConfigurationServiceInterface to AiConfigurationService
         $this->app->singleton(AiConfigurationServiceInterface::class, AiConfigurationService::class);
