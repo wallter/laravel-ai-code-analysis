@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('static_analysis_tools', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('ai_configuration_id')->constrained()->onDelete('cascade');
+            $table->string('name');
+            $table->boolean('enabled')->default(true);
+            $table->string('command');
+            $table->json('options');
+            $table->string('output_format');
             $table->timestamps();
         });
     }

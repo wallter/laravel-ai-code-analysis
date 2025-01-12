@@ -12,4 +12,18 @@ class AIPass extends Model
      * @var string|null
      */
     protected $table = 'ai_passes';
+    public function aiConfiguration()
+    {
+        return $this->belongsTo(AIConfiguration::class);
+    }
+
+    public function model()
+    {
+        return $this->belongsTo(AIModel::class, 'model_id');
+    }
+
+    public function passOrders()
+    {
+        return $this->hasMany(PassOrder::class);
+    }
 }

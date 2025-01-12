@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('pass_orders', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('ai_configuration_id')->constrained()->onDelete('cascade');
+            $table->foreignId('ai_pass_id')->constrained('ai_passes')->onDelete('cascade');
+            $table->integer('order');
             $table->timestamps();
         });
     }
