@@ -65,26 +65,23 @@ class ParsedItem extends Model
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'type' => 'string',
-            'name' => 'string',
-            'file_path' => 'string',
-            'line_number' => 'integer',
-            'annotations' => 'array',
-            'attributes' => 'array',
-            'details' => 'array',
-            'class_name' => 'string',
-            'namespace' => 'string',
-            'visibility' => 'string',
-            'is_static' => 'boolean',
-            'fully_qualified_name' => 'string',
-            'operation_summary' => 'string',
-            'called_methods' => 'array',
-            'ast' => 'array',
-        ];
-    }
+    protected $casts = [
+        'type' => 'string',
+        'name' => 'string',
+        'file_path' => 'string',
+        'line_number' => 'integer',
+        'annotations' => 'array',
+        'attributes' => 'array',
+        'details' => 'array',
+        'class_name' => 'string',
+        'namespace' => 'string',
+        'visibility' => 'string',
+        'is_static' => 'boolean',
+        'fully_qualified_name' => 'string',
+        'operation_summary' => 'string',
+        'called_methods' => 'array',
+        'ast' => 'array',
+    ];
 
     /**
      * Accessor to get the absolute file path.
@@ -122,5 +119,9 @@ class ParsedItem extends Model
                 ? Str::substr($this->file_path, strlen($basePath) + 1)
                 : $this->file_path;
         });
+    }
+    public function codeAnalysis()
+    {
+        return $this->belongsTo(CodeAnalysis::class);
     }
 }

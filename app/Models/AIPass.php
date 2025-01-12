@@ -10,8 +10,29 @@ class AIPass extends Model
     use HasFactory;
 
     protected $fillable = [
+        'ai_configuration_id',
         'name',
         'description',
-        // Add other fillable fields as necessary
+        'operation_identifier',
+        'model_id',
+        'max_tokens',
+        'temperature',
+        'type',
+        'system_message',
+        'prompt_sections',
     ];
+    public function aiConfiguration()
+    {
+        return $this->belongsTo(AIConfiguration::class);
+    }
+
+    public function model()
+    {
+        return $this->belongsTo(AIModel::class, 'model_id');
+    }
+
+    public function passOrders()
+    {
+        return $this->hasMany(PassOrder::class);
+    }
 }
