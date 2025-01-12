@@ -40,14 +40,10 @@ This document outlines a streamlined process to migrate the existing `config/ai.
 
 ### Progress
 
-- **Reviewed `config/ai.php`:**
-  - **Sections Identified:**
-    - **OpenAI API Key:** Configuration for authenticating with OpenAI.
-    - **Default Model Configuration:** Default settings applied when a pass doesn't specify a model.
-    - **OpenAI Models Configuration:** Detailed configurations for various OpenAI models.
-    - **Static Analysis Tools Configuration:** Settings for integrating external static analysis tools like PHPStan, PHP_CodeSniffer, and Psalm.
-    - **AI Passes Configuration:** Definitions of multiple AI analysis passes, including new additions.
-    - **Multi-Pass Analysis Order:** Sequence in which the defined passes are executed.
+- **Completed Migration of Configuration to Database:**
+  - Migrated `config/ai.php` settings to database models and migrations.
+  - Created models: `AIConfiguration`, `AIModel`, `StaticAnalysisTool`, `AIPass`, and `PassOrder`.
+  - Developed and executed migration scripts to establish necessary database tables.
 
 - **Completed Comprehensive Review of `config/ai.php`:**
   - Analyzed all sections including OpenAI API configurations, model settings, static analysis tools, AI passes, and the multi-pass analysis order.
@@ -63,18 +59,17 @@ This document outlines a streamlined process to migrate the existing `config/ai.
 
 ### Discoveries
 
-- **New AI Passes Added:**
-  - **Security Analysis Pass (`security_analysis`):** Focuses on identifying security vulnerabilities and best practices.
-  - **Performance Analysis Pass (`performance_analysis`):** Targets performance optimizations and efficiency improvements.
-  
-- **Integration of Static Analysis Tools:**
-  - The `static_analysis` pass leverages external tools (PHPStan, PHP_CodeSniffer, Psalm) configured to output results in JSON format for consistency and ease of parsing.
-  
-- **Modular Configuration Structure:**
-  - The configuration is highly modular, allowing easy addition or modification of AI passes and models without significant codebase changes.
-  
-- **Environment Variable Usage:**
-  - Extensive use of environment variables for flexibility, enabling dynamic configuration of models and their parameters without altering the code.
+- **New Models and Relationships:**
+  - Introduced models to represent AI configurations, models, static analysis tools, AI passes, and pass orders.
+  - Established Eloquent relationships to reflect configuration dependencies and hierarchies.
+
+- **Operation Identifier Consistency:**
+  - Identified inconsistencies in using `OperationIdentifier` enums versus string literals (`'SECURITY_ANALYSIS'`, `'PERFORMANCE_ANALYSIS'`).
+  - Planned to standardize all `operation_identifier` values to utilize the `OperationIdentifier` enum for type safety and consistency.
+
+- **Prompt Sections Variability:**
+  - Noted that some AI passes include detailed `prompt_sections` with guidelines and response formats, while others have minimal or none.
+  - Determined the need to standardize the structure of `prompt_sections` across all AI passes to ensure maintainability and clarity.
 
 - **Operation Identifier Consistency:**
   - Noticed that while most AI passes utilize `OperationIdentifier` enum values, the `security_analysis` and `performance_analysis` passes are using string literals (`'SECURITY_ANALYSIS'`, `'PERFORMANCE_ANALYSIS'`). This inconsistency may lead to type handling issues and should be standardized to use enums across all passes.
@@ -87,20 +82,17 @@ This document outlines a streamlined process to migrate the existing `config/ai.
 
 ### Deviations
 
-- **Consistency in Pass Definitions:**
-  - Noticed that some passes have `type` set to `BOTH`, while others are `RAW` or `PREVIOUS`. Ensuring consistent usage of these types across all passes will aid in maintainability.
-  
-- **Optional Fields Handling:**
-  - Certain AI passes have nullable fields like `model_id`, `max_tokens`, and `temperature`. It's essential to handle these gracefully in the application logic to prevent potential null reference issues.
-
 - **Inconsistent Use of Enums and Strings:**
-  - The mix of enum-based and string-based `operation_identifier` values across AI passes introduces inconsistency. It's recommended to refactor the `config/ai.php` to use `OperationIdentifier` enums uniformly to maintain consistency and leverage type safety.
+  - The mix of enum-based and string-based `operation_identifier` values across AI passes introduces inconsistency.
+  - Recommended refactoring `config/ai.php` and related models to uniformly use `OperationIdentifier` enums for all passes.
 
-- **Handling of Static Analysis Pass:**
-  - The `static_analysis` pass is categorized as `RAW` and does not specify a model or related parameters. This departure from other AI passes requires distinct handling in the application logic to differentiate between AI-driven and tool-driven analyses.
+- **Handling of Nullable Fields in AI Passes:**
+  - Several AI passes have nullable fields such as `model_id`, `max_tokens`, and `temperature`.
+  - Identified the necessity to ensure that the application logic gracefully handles these nullable fields to prevent potential runtime errors.
 
-- **Environment Variable Defaults:**
-  - Default values for environment variables are extensively used, which is good for flexibility. However, some defaults may lead to suboptimal configurations if not properly overridden, necessitating careful management of `.env` settings.
+- **Static Analysis Pass Handling:**
+  - The `static_analysis` pass is categorized as `RAW` and does not specify a model or related parameters.
+  - Recognized the need for distinct handling in the application logic to differentiate between AI-driven and tool-driven analyses.
 
 ### Next Steps
 
@@ -108,14 +100,9 @@ With Step 1 completed, the next actions involve designing the database schema to
 
 ### Actions
 
-1. **Review `config/ai.php`:**
-   - **Sections Identified:**
-     - OpenAI API Configuration
-     - Default Model Configuration
-     - OpenAI Models Configuration
-     - Static Analysis Tools Configuration
-     - AI Passes Configuration
-     - Multi-Pass Analysis Order
+- **Refactor Services and Controllers:**
+  - Plan to update all relevant services and controllers to retrieve AI configurations from the database models instead of the static `config/ai.php` file.
+  - Ensure that dependency injection is utilized for the new configuration services to maintain code modularity and testability.
 
 2. **Document Relationships:**
    - Determine how different sections interrelate, such as which models are used by which passes.
