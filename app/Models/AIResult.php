@@ -22,7 +22,7 @@ class AIResult extends Model
         'response_text',
         'metadata',
         'cost_estimate_usd' => 'decimal:6',
-        'content_type' => AIResultContentType::class,
+        'content_type' => App\Models\AIResultContentType::class,
     ];
 
     /**
