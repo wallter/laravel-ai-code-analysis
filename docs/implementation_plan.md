@@ -2,23 +2,23 @@
 
 ## Overview
 
-This document outlines the step-by-step process to migrate the existing `config/ai.php` configuration file to a database-driven approach using Laravel models. This migration enhances flexibility, scalability, and maintainability by allowing dynamic management of AI configurations through the application's interface.
+This document outlines a streamlined process to migrate the existing `config/ai.php` configuration file to a database-driven approach using Laravel models. This migration enhances flexibility, scalability, and maintainability by enabling dynamic management of AI configurations through the application's interface.
 
 ## Table of Contents
 
 1. [Prerequisites](#prerequisites)
 2. [Step 1: Analyze Current Configuration](#step-1-analyze-current-configuration)
 3. [Step 2: Design the Database Schema](#step-2-design-the-database-schema)
-4. [Step 3: Create Laravel Models and Migrations](#step-3-create-laravel-models-and-migrations)
+4. [Step 3: Create Models and Migrations](#step-3-create-models-and-migrations)
 5. [Step 4: Define Model Relationships](#step-4-define-model-relationships)
-6. [Step 5: Populate the Database with Existing Configuration](#step-5-populate-the-database-with-existing-configuration)
-7. [Step 6: Refactor Services and Controllers](#step-6-refactor-services-and-controllers)
-8. [Step 7: Update Configuration Access Points](#step-7-update-configuration-access-points)
-9. [Step 8: Implement Caching (Optional)](#step-8-implement-caching-optional)
-10. [Step 9: Testing the Migration](#step-9-testing-the-migration)
+6. [Step 5: Seed the Database](#step-5-seed-the-database)
+7. [Step 6: Refactor Application Logic](#step-6-refactor-application-logic)
+8. [Step 7: Implement Configuration Service](#step-7-implement-configuration-service)
+9. [Step 8: Optimize with Caching](#step-8-optimize-with-caching)
+10. [Step 9: Testing](#step-9-testing)
 11. [Step 10: Update Documentation and Admin Interface](#step-10-update-documentation-and-admin-interface)
-12. [Step 11: Rollback Plan](#step-11-rollback-plan)
-13. [Step 12: Next Steps and Enhancements](#step-12-next-steps-and-enhancements)
+12. [Step 11: Rollback Strategy](#step-11-rollback-strategy)
+13. [Step 12: Future Enhancements](#step-12-future-enhancements)
 
 ---
 
@@ -453,30 +453,23 @@ This document outlines the step-by-step process to migrate the existing `config/
 
 ---
 
-## Step 5: Populate the Database with Existing Configuration
+## Step 5: Seed the Database
 
-### Objectives
+**Objective:** Populate the database with existing configurations from `config/ai.php`.
 
-- **Transfer** existing configurations from `config/ai.php` to the newly created database tables.
-- **Ensure** data integrity and consistency during the migration.
+**Actions:**
 
-### Actions
-
-1. **Create a Seeder:**
-
-   Generate a new seeder to handle the migration of configuration data.
+1. **Create Seeder:**
 
    ```bash
    php artisan make:seeder AIConfigurationSeeder
    ```
 
-2. **Define the Seeder:**
+2. **Define Seeder Logic:**
 
-   **`database/seeders/AIConfigurationSeeder.php`:**
+   **`database/seeders/AIConfigurationSeeder.php`**
 
    ```php
-   <?php
-
    namespace Database\Seeders;
 
    use Illuminate\Database\Seeder;
@@ -490,7 +483,6 @@ This document outlines the step-by-step process to migrate the existing `config/
    {
        public function run()
        {
-           // Fetch configuration
            $config = config('ai');
 
            // Create AI Configuration
@@ -498,7 +490,7 @@ This document outlines the step-by-step process to migrate the existing `config/
                'openai_api_key' => $config['openai_api_key'],
            ]);
 
-           // Create AI Models
+           // Seed AI Models
            foreach ($config['models'] as $modelKey => $modelData) {
                AIModel::create([
                    'ai_configuration_id' => $aiConfig->id,
@@ -510,7 +502,7 @@ This document outlines the step-by-step process to migrate the existing `config/
                ]);
            }
 
-           // Create Static Analysis Tools
+           // Seed Static Analysis Tools
            foreach ($config['static_analysis_tools'] as $toolName => $toolData) {
                StaticAnalysisTool::create([
                    'ai_configuration_id' => $aiConfig->id,
@@ -522,10 +514,9 @@ This document outlines the step-by-step process to migrate the existing `config/
                ]);
            }
 
-           // Create AI Passes
+           // Seed AI Passes
            foreach ($config['passes'] as $passKey => $passData) {
-               // Find the associated model if exists
-               $modelId = isset($passData['model']) 
+               $modelId = $passData['model'] 
                    ? AIModel::where('model_name', $passData['model'])->value('id') 
                    : null;
 
@@ -542,15 +533,14 @@ This document outlines the step-by-step process to migrate the existing `config/
                ]);
            }
 
-           // Create Pass Orders
-           $passOrderConfig = $config['operations']['multi_pass_analysis']['pass_order'];
-           foreach ($passOrderConfig as $index => $passName) {
+           // Seed Pass Orders
+           foreach ($config['operations']['multi_pass_analysis']['pass_order'] as $index => $passName) {
                $aiPass = AIPass::where('name', $passName)->first();
                if ($aiPass) {
                    PassOrder::create([
                        'ai_configuration_id' => $aiConfig->id,
                        'ai_pass_id' => $aiPass->id,
-                       'order' => $index + 1, // Order starts at 1
+                       'order' => $index + 1,
                    ]);
                }
            }
@@ -558,44 +548,34 @@ This document outlines the step-by-step process to migrate the existing `config/
    }
    ```
 
-3. **Register the Seeder:**
+3. **Register Seeder:**
 
-   Update `DatabaseSeeder.php` to include the new seeder.
-
-   **`database/seeders/DatabaseSeeder.php`:**
+   **`database/seeders/DatabaseSeeder.php`**
 
    ```php
-   <?php
-
    namespace Database\Seeders;
 
    use Illuminate\Database\Seeder;
 
    class DatabaseSeeder extends Seeder
    {
-       /**
-        * Seed the application's database.
-        */
-       public function run(): void
+       public function run()
        {
            $this->call([
                AIConfigurationSeeder::class,
-               // Add other seeders if necessary
            ]);
        }
    }
    ```
 
-4. **Run the Seeder:**
-
-   Ensure all migrations are up-to-date and execute the seeder.
+4. **Execute Seeder:**
 
    ```bash
    php artisan migrate --fresh
    php artisan db:seed --class=AIConfigurationSeeder
    ```
 
-   > **Note:** Using `--fresh` drops all tables before migrating. Use with caution in non-development environments.
+   > **Note:** The `--fresh` flag drops all tables before migrating. Use cautiously outside development environments.
 
 ---
 
