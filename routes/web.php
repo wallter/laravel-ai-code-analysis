@@ -1,6 +1,11 @@
 <?php
 
 use App\Http\Controllers\AnalysisController;
+use App\Http\Controllers\Admin\AiConfigurationController;
+use App\Http\Controllers\Admin\AiModelController;
+use App\Http\Controllers\Admin\AIPassController;
+use App\Http\Controllers\Admin\PassOrderController;
+use App\Http\Controllers\Admin\StaticAnalysisToolController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect to the analysis index page by default
@@ -17,3 +22,12 @@ Route::put('/analysis/{analysis}', [AnalysisController::class, 'update'])->name(
 Route::delete('/analysis/{analysis}', [AnalysisController::class, 'destroy'])->name('analysis.destroy');
 Route::post('/analysis/parse', [AnalysisController::class, 'parse'])->name('analysis.parse');
 Route::post('/analysis/analyze', [AnalysisController::class, 'analyze'])->name('analysis.analyze');
+
+// Admin Routes
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('ai-models', AiModelController::class);
+    Route::resource('ai-configurations', AiConfigurationController::class);
+    Route::resource('static-analysis-tools', StaticAnalysisToolController::class);
+    Route::resource('pass-orders', PassOrderController::class);
+    Route::resource('ai-passes', AIPassController::class);
+});
