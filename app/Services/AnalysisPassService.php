@@ -43,8 +43,9 @@ class AnalysisPassService
         try {
             // Start a database transaction to ensure atomicity
             DB::transaction(function () use ($codeAnalysisId, $dryRun) {
+                $passOrder = $this->multiPassConfig['pass_order'] ?? [];
                 $analysis = $this->retrieveAnalysis($codeAnalysisId);
-                if (! $analysis) {
+                if (!$analysis) {
                     Log::warning("AnalysisPassService: No analysis found for CodeAnalysis ID {$codeAnalysisId}. Exiting processAllPasses.");
 
                     return;
