@@ -34,10 +34,21 @@ class AIPassController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'ai_configuration_id' => 'required|integer|exists:ai_configurations,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            // Add other necessary fields if applicable
+            'operation_identifier' => 'required|string|max:255',
+            'model_id' => 'nullable|integer|exists:ai_models,id',
+            'max_tokens' => 'nullable|integer|min:1',
+            'temperature' => 'nullable|numeric|between:0,1',
+            'type' => 'required|in:single,both',
+            'supports_system_message' => 'nullable|boolean',
+            'system_message' => 'nullable|string',
+            'prompt_sections' => 'nullable|json',
         ]);
+
+        // Handle the checkbox for supports_system_message, since unchecked checkboxes are not sent.
+        $validated['supports_system_message'] = $request->has('supports_system_message');
 
         $this->aiPassService->createPass($validated);
 
