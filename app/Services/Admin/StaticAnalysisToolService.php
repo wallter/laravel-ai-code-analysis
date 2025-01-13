@@ -8,9 +8,7 @@ use Illuminate\Support\Collection;
 
 class StaticAnalysisToolService implements StaticAnalysisToolServiceInterface
 {
-    public function __construct(protected StaticAnalysisTool $staticAnalysisTool)
-    {
-    }
+    public function __construct(protected StaticAnalysisTool $staticAnalysisTool) {}
 
     /**
      * Retrieve all Static Analysis Tools.

@@ -9,6 +9,8 @@ class AIConfiguration extends Model
 {
     use HasFactory;
 
+    protected $table = 'ai_configurations';
+
     protected $fillable = [
         'openai_api_key',
         // Add other necessary fields as per the implementation plan

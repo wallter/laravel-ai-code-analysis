@@ -50,9 +50,7 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
      * @param  int  $codeAnalysisId  The CodeAnalysis ID.
      * @param  bool  $dryRun  Indicates if the job is a dry run.
      */
-    public function __construct(protected int $codeAnalysisId, protected bool $dryRun = false)
-    {
-    }
+    public function __construct(protected int $codeAnalysisId, protected bool $dryRun = false) {}
 
     /**
      * Get the unique identifier for the job.
@@ -79,7 +77,7 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
                 return;
             }
 
-            $jobs = collect($passOrder)->map(fn(string $passName) => new ProcessIndividualPassJob($this->codeAnalysisId, $passName, $this->dryRun))->all();
+            $jobs = collect($passOrder)->map(fn (string $passName) => new ProcessIndividualPassJob($this->codeAnalysisId, $passName, $this->dryRun))->all();
 
             // Dispatch the first job and chain the rest
             $firstJob = array_shift($jobs);

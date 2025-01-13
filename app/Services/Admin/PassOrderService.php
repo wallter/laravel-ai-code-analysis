@@ -8,9 +8,7 @@ use Illuminate\Support\Collection;
 
 class PassOrderService implements PassOrderServiceInterface
 {
-    public function __construct(protected PassOrder $passOrder)
-    {
-    }
+    public function __construct(protected PassOrder $passOrder) {}
 
     /**
      * Retrieve all pass orders.

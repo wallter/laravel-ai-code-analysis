@@ -102,6 +102,7 @@ class ParsedItem extends Model
     {
         return $this->belongsTo(CodeAnalysis::class);
     }
+
     /**
      * The attributes that should be cast to native types.
      *

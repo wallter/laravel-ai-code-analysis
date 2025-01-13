@@ -8,9 +8,7 @@ use Illuminate\Http\Request;
 
 class StaticAnalysisToolController extends Controller
 {
-    public function __construct(protected StaticAnalysisToolServiceInterface $staticAnalysisToolService)
-    {
-    }
+    public function __construct(protected StaticAnalysisToolServiceInterface $staticAnalysisToolService) {}
 
     /**
      * Display a listing of the Static Analysis Tools.

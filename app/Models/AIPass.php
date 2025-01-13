@@ -24,10 +24,6 @@ class AIPass extends Model
         'prompt_sections',
     ];
 
-    protected $casts = [
-        'prompt_sections' => 'array',
-    ];
-
     public function aiConfiguration()
     {
         return $this->belongsTo(AIConfiguration::class);
@@ -41,5 +37,11 @@ class AIPass extends Model
     public function passOrders()
     {
         return $this->hasMany(PassOrder::class);
+    }
+    protected function casts(): array
+    {
+        return [
+            'prompt_sections' => 'array',
+        ];
     }
 }

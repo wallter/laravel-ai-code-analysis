@@ -8,9 +8,7 @@ use Illuminate\Http\Request;
 
 class AiConfigurationController extends Controller
 {
-    public function __construct(protected AiConfigurationServiceInterface $aiConfigurationService)
-    {
-    }
+    public function __construct(protected AiConfigurationServiceInterface $aiConfigurationService) {}
 
     /**
      * Display a listing of the AI configurations.

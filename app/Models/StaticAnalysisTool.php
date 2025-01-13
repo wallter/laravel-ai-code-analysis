@@ -22,6 +22,7 @@ class StaticAnalysisTool extends Model
     {
         return $this->belongsTo(AIConfiguration::class);
     }
+
     protected function casts(): array
     {
         return [

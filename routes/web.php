@@ -26,7 +26,7 @@ Route::post('/analysis/analyze', [AnalysisController::class, 'analyze'])->name('
 // Admin Routes
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', fn () => redirect()->route('admin.ai-models.index'));
-    
+
     Route::resource('ai-models', AiModelController::class);
 
     // Additional route for delete confirmation

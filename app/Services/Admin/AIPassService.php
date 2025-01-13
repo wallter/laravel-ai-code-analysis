@@ -8,9 +8,7 @@ use Illuminate\Support\Collection;
 
 class AIPassService implements AIPassServiceInterface
 {
-    public function __construct(protected AIPass $aiPass)
-    {
-    }
+    public function __construct(protected AIPass $aiPass) {}
 
     /**
      * Retrieve all AI passes.

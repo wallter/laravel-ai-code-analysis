@@ -8,9 +8,7 @@ use Illuminate\Http\Request;
 
 class AIPassController extends Controller
 {
-    public function __construct(protected AIPassServiceInterface $aiPassService)
-    {
-    }
+    public function __construct(protected AIPassServiceInterface $aiPassService) {}
 
     /**
      * Display a listing of the AI passes.

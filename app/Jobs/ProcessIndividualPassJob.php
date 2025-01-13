@@ -32,9 +32,7 @@ class ProcessIndividualPassJob implements ShouldQueue
      * @param  string|null  $passName  The name of the AI pass to execute.
      * @param  bool  $dryRun  Indicates if the job is a dry run.
      */
-    public function __construct(public ?int $codeAnalysisId = null, public ?string $passName = null, public bool $dryRun = false)
-    {
-    }
+    public function __construct(public ?int $codeAnalysisId = null, public ?string $passName = null, public bool $dryRun = false) {}
 
     /**
      * Execute the job.

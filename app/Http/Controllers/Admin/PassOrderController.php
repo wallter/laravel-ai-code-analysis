@@ -8,9 +8,7 @@ use Illuminate\Http\Request;
 
 class PassOrderController extends Controller
 {
-    public function __construct(protected PassOrderServiceInterface $passOrderService)
-    {
-    }
+    public function __construct(protected PassOrderServiceInterface $passOrderService) {}
 
     /**
      * Display a listing of the Pass Orders.

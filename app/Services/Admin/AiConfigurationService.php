@@ -8,9 +8,7 @@ use Illuminate\Support\Collection;
 
 class AiConfigurationService implements AiConfigurationServiceInterface
 {
-    public function __construct(protected AIConfiguration $aiConfiguration)
-    {
-    }
+    public function __construct(protected AIConfiguration $aiConfiguration) {}
 
     /**
      * Retrieve all AI configurations.
