@@ -38,9 +38,14 @@ class AiModelController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'max_tokens' => 'nullable|integer|min:1',
+            'temperature' => 'nullable|numeric|between:0,1',
+            'supports_system_message' => 'required|boolean',
+            'token_limit_parameter' => 'nullable|string|max:255',
             // Add other necessary fields if applicable
         ]);
 
+        // Create the AI model using the service
         $this->aiModelService->createModel($validated);
 
         return redirect()->route('admin.ai-models.index')
@@ -75,9 +80,14 @@ class AiModelController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'max_tokens' => 'nullable|integer|min:1',
+            'temperature' => 'nullable|numeric|between:0,1',
+            'supports_system_message' => 'required|boolean',
+            'token_limit_parameter' => 'nullable|string|max:255',
             // Add other necessary fields if applicable
         ]);
 
+        // Update the AI model using the service
         $this->aiModelService->updateModel($id, $validated);
 
         return redirect()->route('admin.ai-models.index')
