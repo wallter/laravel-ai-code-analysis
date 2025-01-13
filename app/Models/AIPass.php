@@ -9,6 +9,8 @@ class AIPass extends Model
 {
     use HasFactory;
 
+    protected $table = 'ai_passes';
+
     protected $fillable = [
         'ai_configuration_id',
         'name',
