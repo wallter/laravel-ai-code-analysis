@@ -44,7 +44,7 @@
                     name="name"
                     value="{{ old('name', $aiPass->name) }}"
                     placeholder="Enter pass name"
-                    class="mt-1 block w-full border border-gray-300 dark:border-gray-700 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100 transition-colors"
+                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-gray-100 transition-colors"
                     required
                 />
             </div>
@@ -57,7 +57,7 @@
                     name="description"
                     rows="4"
                     placeholder="Enter pass description (optional)"
-                    class="mt-1 block w-full border border-gray-300 dark:border-gray-700 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100 transition-colors"
+                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-gray-100 transition-colors"
                 >{{ old('description', $aiPass->description) }}</textarea>
             </div>
 
@@ -70,7 +70,7 @@
                     name="operation_identifier"
                     value="{{ old('operation_identifier', $aiPass->operation_identifier) }}"
                     placeholder="Enter operation identifier"
-                    class="mt-1 block w-full border border-gray-300 dark:border-gray-700 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100 transition-colors"
+                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-gray-100 transition-colors"
                     required
                 />
             </div>
@@ -81,7 +81,7 @@
                 <select
                     id="model_id"
                     name="model_id"
-                    class="mt-1 block w-full border border-gray-300 dark:border-gray-700 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100 transition-colors"
+                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-gray-100 transition-colors"
                 >
                     <option value="">-- Select AI Model (Optional) --</option>
                     @foreach($aiModels as $model)
@@ -101,7 +101,7 @@
                     name="max_tokens"
                     value="{{ old('max_tokens', $aiPass->max_tokens) }}"
                     placeholder="Enter maximum tokens (optional)"
-                    class="mt-1 block w-full border border-gray-300 dark:border-gray-700 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100 transition-colors"
+                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-gray-100 transition-colors"
                     min="1"
                 />
             </div>
@@ -116,7 +116,7 @@
                     name="temperature"
                     value="{{ old('temperature', $aiPass->temperature) }}"
                     placeholder="Enter temperature (0-1) (optional)"
-                    class="mt-1 block w-full border border-gray-300 dark:border-gray-700 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100 transition-colors"
+                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-gray-100 transition-colors"
                     min="0" max="1"
                 />
             </div>
@@ -127,7 +127,7 @@
                 <select
                     id="type"
                     name="type"
-                    class="mt-1 block w-full border border-gray-300 dark:border-gray-700 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100 transition-colors"
+                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-gray-100 transition-colors"
                     required
                 >
                     <option value="">-- Select Type --</option>
@@ -159,7 +159,7 @@
                     name="system_message"
                     rows="3"
                     placeholder="Enter system message (optional)"
-                    class="mt-1 block w-full border border-gray-300 dark:border-gray-700 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100 transition-colors"
+                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-gray-100 transition-colors"
                 >{{ old('system_message', $aiPass->system_message) }}</textarea>
             </div>
 
@@ -171,7 +171,7 @@
                     name="prompt_sections"
                     rows="4"
                     placeholder="Enter prompt sections as JSON (optional)"
-                    class="mt-1 block w-full border border-gray-300 dark:border-gray-700 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-800 dark:text-gray-100 transition-colors"
+                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 px-3 py-2 rounded focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-gray-100 transition-colors"
                 >{{ old('prompt_sections', json_encode($aiPass->prompt_sections, JSON_PRETTY_PRINT)) }}</textarea>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Example:
 <pre class="bg-gray-100 dark:bg-gray-700 p-2 rounded text-xs">
