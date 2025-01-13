@@ -25,6 +25,8 @@ Route::post('/analysis/analyze', [AnalysisController::class, 'analyze'])->name('
 
 // Admin Routes
 Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', fn () => redirect()->route('admin.ai-models.index'));
+    
     Route::resource('ai-models', AiModelController::class);
     Route::resource('ai-configurations', AiConfigurationController::class);
     Route::resource('static-analysis-tools', StaticAnalysisToolController::class);
