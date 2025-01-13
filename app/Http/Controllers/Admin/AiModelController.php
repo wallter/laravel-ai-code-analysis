@@ -13,6 +13,16 @@ class AiModelController extends Controller
     }
 
     /**
+     * Show the confirmation page for deleting the specified AI model.
+     */
+    public function confirmDelete(string $id)
+    {
+        $aiModel = $this->aiModelService->getModelById($id);
+
+        return view('admin.ai_models.confirm_delete', compact('aiModel'));
+    }
+
+    /**
      * Display a listing of the AI models.
      */
     public function index()

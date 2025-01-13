@@ -28,6 +28,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', fn () => redirect()->route('admin.ai-models.index'));
     
     Route::resource('ai-models', AiModelController::class);
+
+    // Additional route for delete confirmation
+    Route::get('/admin/ai-models/{id}/confirm-delete', [AiModelController::class, 'confirmDelete'])->name('ai-models.confirm-delete')->middleware(['auth', 'can:manage-ai-models']);
     Route::resource('ai-configurations', AiConfigurationController::class);
     Route::resource('static-analysis-tools', StaticAnalysisToolController::class);
     Route::resource('pass-orders', PassOrderController::class);
