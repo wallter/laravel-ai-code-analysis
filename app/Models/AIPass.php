@@ -38,6 +38,7 @@ class AIPass extends Model
     {
         return $this->hasMany(PassOrder::class);
     }
+
     protected function casts(): array
     {
         return [
