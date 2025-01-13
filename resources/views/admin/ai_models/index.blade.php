@@ -73,13 +73,30 @@
                                 <x-button href="{{ route('admin.ai-models.edit', $model->id) }}" class="bg-yellow-600 text-white hover:bg-yellow-700 focus:ring-yellow-500">
                                     Edit
                                 </x-button>
-                                <form action="{{ route('admin.ai-models.destroy', $model->id) }}" method="POST" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <x-button type="submit" class="bg-red-600 text-white hover:bg-red-700 focus:ring-red-500" onclick="return confirm('Are you sure you want to delete this AI model?');">
-                                        Delete
-                                    </x-button>
-                                </form>
+                                <button 
+                                    @click.prevent="$dispatch('trigger-modal', { id: 'delete-modal-{{ $model->id }}' })" 
+                                    class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 focus:ring-red-500"
+                                >
+                                    Delete
+                                </button>
+
+                                <!-- Delete Confirmation Modal -->
+                                <x-modal id="delete-modal-{{ $model->id }}" title="Confirm Deletion">
+                                    <p class="text-gray-700 dark:text-gray-300">
+                                        Are you sure you want to delete the AI Model <strong>{{ $model->model_name }}</strong>? This action cannot be undone.
+                                    </p>
+                                    
+                                    <!-- Delete Form Passed as Slot -->
+                                    <x-slot name="deleteForm">
+                                        <form action="{{ route('admin.ai-models.destroy', $model->id) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <x-button type="submit" class="bg-red-600 text-white hover:bg-red-700 focus:ring-red-500">
+                                                Delete AI Model
+                                            </x-button>
+                                        </form>
+                                    </x-slot>
+                                </x-modal>
                             </td>
                         </tr>
                     @endforeach
