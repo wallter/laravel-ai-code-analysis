@@ -44,8 +44,8 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors" :class="{ 'dark': isDark }>
-
+<body class="min-h-screen bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors" :class="{ 'dark': isDark }">
+    
 <!-- Container for entire app layout -->
 <div class="flex min-h-screen">
 
