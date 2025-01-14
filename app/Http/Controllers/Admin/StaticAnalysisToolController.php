@@ -21,6 +21,25 @@ class StaticAnalysisToolController extends Controller
     }
 
     /**
+     * Update the specified Static Analysis Tool in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'command' => 'required|string',
+            'options' => 'nullable|array',
+            'enabled' => 'required|boolean',
+            // Add other necessary fields if applicable
+        ]);
+
+        $this->staticAnalysisToolService->updateTool($id, $validated);
+
+        return redirect()->route('admin.static-analysis-tools.index')
+            ->with('success', 'Static Analysis Tool updated successfully.');
+    }
+
+    /**
      * Show the form for creating a new Static Analysis Tool.
      */
     public function create()
@@ -43,8 +62,8 @@ class StaticAnalysisToolController extends Controller
 
         $tool = $this->staticAnalysisToolService->createTool($validated);
 
-        return view('admin.static_analysis_tools.store')
-            ->with('tool_name', $tool->name);
+        return redirect()->route('admin.static-analysis-tools.index')
+            ->with('success', 'Static Analysis Tool created successfully.');
     }
 
     /**
