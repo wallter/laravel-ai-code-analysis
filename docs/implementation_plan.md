@@ -626,7 +626,7 @@ This document outlines a streamlined process to migrate the existing `config/ai.
    **Before:**
 
    ```php
-   $passes = config('ai.operations.multi_pass_analysis.pass_order');
+   $passes = config('ai.ai.passes.pass_order.pass_order');
 
    foreach ($passes as $passName) {
        // Perform pass operations

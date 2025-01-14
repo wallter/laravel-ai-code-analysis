@@ -64,7 +64,7 @@ class AppServiceProvider extends ServiceProvider
             $openAIService = $app->make(OpenAIService::class);
             $codeAnalysisService = $app->make(CodeAnalysisService::class);
             $staticAnalysisService = $app->make(StaticAnalysisToolInterface::class);
-            $multiPassConfig = config('ai.operations.multi_pass_analysis', []);
+            $multiPassConfig = config('ai.ai.passes.pass_order', []);
             $passesConfig = config('ai.passes', []);
 
             return new AnalysisPassService(

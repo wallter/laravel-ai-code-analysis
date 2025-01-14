@@ -60,7 +60,7 @@ class AnalysisPassService
                     // This ensures AI passes can access it
                 }
 
-                $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
+                $passOrder = config('ai.ai.passes.pass_order.pass_order', []);
 
                 // Dispatch the first pass job
                 if (! empty($passOrder)) {

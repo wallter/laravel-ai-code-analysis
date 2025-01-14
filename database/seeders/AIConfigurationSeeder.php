@@ -49,6 +49,10 @@ class AIConfigurationSeeder extends Seeder
 
         // Seed AI Passes
         foreach ($config['passes'] as $passKey => $passData) {
+            if ($passKey === 'pass_order') {
+                continue;
+            }
+
             $modelId = $passData['model']
                 ? AIModel::where('model_name', $passData['model'])->value('id')
                 : null;
@@ -67,7 +71,7 @@ class AIConfigurationSeeder extends Seeder
         }
 
         // Seed Pass Orders
-        foreach ($config['operations']['multi_pass_analysis']['pass_order'] as $index => $passName) {
+        foreach ($config['pass_order'] as $index => $passName) {
             $aiPass = AIPass::where('name', $passName)->first();
             if ($aiPass) {
                 PassOrder::create([
