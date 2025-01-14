@@ -41,7 +41,7 @@ class StaticAnalysisToolController extends Controller
             // Add other necessary fields if applicable
         ]);
 
-        $tool = $this->staticAnalysisToolService->createTool($validated);
+        $this->staticAnalysisToolService->createTool($validated);
 
         return redirect()->route('admin.static-analysis-tools.index')
             ->with('success', 'Static Analysis Tool created successfully.');

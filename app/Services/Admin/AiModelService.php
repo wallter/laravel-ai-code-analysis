@@ -8,9 +8,7 @@ use Illuminate\Support\Collection;
 
 class AiModelService implements AiModelServiceInterface
 {
-    public function __construct(protected AIModel $aiModel)
-    {
-    }
+    public function __construct(protected AIModel $aiModel) {}
 
     /**
      * Retrieve all AI models.
