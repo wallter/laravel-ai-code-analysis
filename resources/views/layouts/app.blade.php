@@ -6,11 +6,11 @@
         sidebarOpen: false,
         initTheme() {
             const stored = localStorage.getItem('theme');
-            if (!stored) {
+            if (stored === 'light') {
+                this.isDark = false;
+            } else {
                 this.isDark = true;
                 localStorage.setItem('theme', 'dark');
-            } else {
-                this.isDark = (stored === 'dark');
             }
         },
         toggleTheme() {
@@ -27,25 +27,34 @@
 >
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('app.name') }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://unpkg.com/alpinejs@3.10.2/dist/cdn.min.js" defer></script>
 
-    <!-- Some custom classes for green theme -->
+    <!-- Dark mode first custom styles -->
     <style>
         .bg-forest-900 { background-color: #234d36; }
         .bg-forest-800 { background-color: #1c4030; }
         .text-forest-lt { color: #e0f2e9; }
-        .border-forest  { border-color: #234d36; }
-        /* If you want transitions for the sidebar */
-        .sidebar-transition {
-            transition: width 0.3s, margin 0.3s;
+        .border-forest { border-color: #234d36; }
+        .sidebar-transition { transition: width 0.3s, margin 0.3s; }
+
+        /* Default theme colors */
+        body {
+            background-color: #1a202c; /* Dark mode background */
+            color: #f7fafc; /* Dark mode text */
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.light {
+            background-color: #f7fafc; /* Light mode background */
+            color: #2d3748; /* Light mode text */
         }
     </style>
 </head>
-<body class="min-h-screen bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors" :class="{ 'dark': isDark }">
-    
+<body :class="{ 'light': !isDark }" class="min-h-screen transition-colors">
+
 <!-- Container for entire app layout -->
 <div class="flex min-h-screen">
 
@@ -58,19 +67,16 @@
         {{ config('app.name') }}
       </div>
       <button 
-        @click="sidebarOpen = !sidebarOpen"
+        @click="toggleSidebar()"
         class="p-1 focus:outline-none hover:bg-forest-800 rounded"
       >
-        <!-- Bars / X toggles similarly -->
         <svg x-show="!sidebarOpen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
              viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 6h16M4 12h16M4 18h16"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
         </svg>
         <svg x-show="sidebarOpen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
              viewBox="0 0 24 24" stroke="currentColor">
-           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                 d="M6 18L18 6M6 6l12 12"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       </button>
     </div>

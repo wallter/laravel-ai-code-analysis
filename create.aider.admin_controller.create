@@ -1,0 +1,11 @@
+/drop
+/add       app/Http/Controllers/Admin/StaticAnalysisToolController.php
+/add       docs/aider/GUIDELINES
+/add       docs/implementation_plan.md
+/add       resources/views/admin/static_analysis_tools/store.blade.php
+
+create view(s) for `app/Http/Controllers/Admin/StaticAnalysisToolController.php` `store` functions. Ensure the views are reusable and/or reuse
+d components used in for other (Admin) views. Ensure that the view functions as expected and has an intuitive interface. Impliment one at a time
+ and ensure it will work end to end. The views should be like `resources/views/admin/ai_models` but have their own folder/etc.
+
+ Ask the user what controller/endpoint they would like to create a view for. 
