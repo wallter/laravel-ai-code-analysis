@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('content')
     <div class="container mx-auto px-4 sm:px-8">
@@ -68,10 +68,10 @@
                     </table>
                     <div class="px-5 py-5 bg-white border-t flex items-center justify-between">
                         <div class="flex-1 text-sm text-gray-700">
-                            Showing {{ $passOrders->first() }} to {{ $passOrders->last() }} of {{ $passOrders->count() }} entries
+                            Showing {{ count($passOrders) > 0 ? 1 : 0 }} to {{ count($passOrders) }} of {{ count($passOrders) }} entries
                         </div>
                         <div>
-                            {{ false && $passOrders->links() }}
+                            {{-- Pagination links are disabled as passOrders is an array --}}
                         </div>
                     </div>
                 </div>
