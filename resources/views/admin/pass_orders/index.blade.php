@@ -19,59 +19,70 @@
 
             <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
                 <div class="inline-block min-w-full shadow rounded-lg overflow-hidden">
-                    <table class="min-w-full leading-normal">
-                        <thead>
+                    <table class="min-w-full table-auto bg-white dark:bg-gray-800 transition-colors text-sm">
+                        <thead class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                             <tr>
-                                <th class="px-5 py-3 bg-white border-b border-gray-200 text-gray-800 text-left text-sm uppercase font-normal">
-                                    Pass Name
-                                </th>
-                                <th class="px-5 py-3 bg-white border-b border-gray-200 text-gray-800 text-left text-sm uppercase font-normal">
-                                    Order
-                                </th>
-                                <th class="px-5 py-3 bg-white border-b border-gray-200 text-gray-800 text-right text-sm uppercase font-normal">
-                                    Actions
-                                </th>
+                                <th class="px-4 py-2 text-left font-semibold">Pass Name</th>
+                                <th class="px-4 py-2 text-left font-semibold">Order</th>
+                                <th class="px-4 py-2 font-semibold text-center">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             @forelse($passOrders as $passOrder)
-                                <tr>
-                                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                <tr 
+                                    class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                                >
+                                    <td class="px-4 py-2 text-gray-800 dark:text-gray-100">
                                         {{ $passOrder->aiPass?->name ?? 'N/A' }}
                                     </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                    <td class="px-4 py-2 text-gray-800 dark:text-gray-100">
                                         {{ $passOrder->order }}
                                     </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-right">
-                                        <div class="flex items-center space-x-4">
-                                            <a href="{{ route('admin.pass-orders.edit', $passOrder->id) }}" class="text-indigo-600 hover:text-indigo-900">
-                                                Edit
-                                            </a>
-                                            <form action="{{ route('admin.pass-orders.destroy', $passOrder->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this pass order?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900">
-                                                    Delete
-                                                </button>
-                                            </form>
-                                        </div>
+                                    <td class="px-4 py-2 text-center">
+                                        <x-button href="{{ route('admin.pass-orders.edit', $passOrder->id) }}" class="bg-yellow-600 text-white hover:bg-yellow-700 focus:ring-yellow-500">
+                                            Edit
+                                        </x-button>
+                                        <button 
+                                            @click.prevent="$dispatch('trigger-modal', { id: 'delete-modal-{{ $passOrder->id }}' })" 
+                                            class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 focus:ring-red-500"
+                                        >
+                                            Delete
+                                        </button>
+
+                                        <!-- Delete Confirmation Modal -->
+                                        <x-modal id="delete-modal-{{ $passOrder->id }}" title="Confirm Deletion">
+                                            <p class="text-gray-700 dark:text-gray-300">
+                                                Are you sure you want to delete the Pass Order <strong>{{ $passOrder->aiPass?->name ?? 'N/A' }}</strong>? This action cannot be undone.
+                                            </p>
+                                            
+                                            <!-- Delete Form Passed as Slot -->
+                                            <x-slot name="deleteForm">
+                                                <form action="{{ route('admin.pass-orders.destroy', $passOrder->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <x-button type="submit" class="bg-red-600 text-white hover:bg-red-700 focus:ring-red-500">
+                                                        Delete Pass Order
+                                                    </x-button>
+                                                </form>
+                                            </x-slot>
+                                        </x-modal>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="px-5 py-5 bg-white text-sm text-center text-gray-500">
+                                    <td colspan="3" class="px-4 py-2 bg-white dark:bg-gray-800 text-sm text-center text-gray-500">
                                         No pass orders found.
                                     </td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
-                    <div class="px-5 py-5 bg-white border-t flex items-center justify-between">
-                        <div class="flex-1 text-sm text-gray-700">
-                            Showing {{ count($passOrders) > 0 ? 1 : 0 }} to {{ count($passOrders) }} of {{ count($passOrders) }} entries
+                    <div class="px-5 py-5 bg-white dark:bg-gray-800 border-t flex items-center justify-between">
+                        <div class="flex-1 text-sm text-gray-700 dark:text-gray-300">
+                            Total {{ count($passOrders) }} pass order{{ count($passOrders) !== 1 ? 's' : '' }} found.
                         </div>
                         <div>
-                            {{-- Pagination links are disabled as passOrders is an array --}}
+                            {{-- Pagination links can be added here if needed --}}
                         </div>
                     </div>
                 </div>
