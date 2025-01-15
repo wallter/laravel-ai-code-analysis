@@ -28,7 +28,9 @@
                                 <th class="px-5 py-3 bg-white border-b border-gray-200 text-gray-800 text-left text-sm uppercase font-normal">
                                     Order
                                 </th>
-                                <th class="px-5 py-3 bg-white border-b border-gray-200"></th>
+                                <th class="px-5 py-3 bg-white border-b border-gray-200 text-gray-800 text-right text-sm uppercase font-normal">
+                                    Actions
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -64,12 +66,12 @@
                             @endforelse
                         </tbody>
                     </table>
-                    <div class="px-5 py-5 bg-white border-t flex flex-col xs:flex-row items-center xs:justify-between">
-                        <span class="text-xs xs:text-sm text-gray-900">
-
-                        </span>
-                        <div class="inline-flex mt-2 xs:mt-0">
-
+                    <div class="px-5 py-5 bg-white border-t flex items-center justify-between">
+                        <div class="flex-1 text-sm text-gray-700">
+                            Showing {{ $passOrders->firstItem() }} to {{ $passOrders->lastItem() }} of {{ $passOrders->total() }} entries
+                        </div>
+                        <div>
+                            {{ $passOrders->links() }}
                         </div>
                     </div>
                 </div>
