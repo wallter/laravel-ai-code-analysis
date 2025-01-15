@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 
 @section('content')
     <div class="container mx-auto px-4 sm:px-8">
@@ -68,10 +68,10 @@
                     </table>
                     <div class="px-5 py-5 bg-white border-t flex items-center justify-between">
                         <div class="flex-1 text-sm text-gray-700">
-                            Showing {{ $passOrders->firstItem() }} to {{ $passOrders->lastItem() }} of {{ $passOrders->total() }} entries
+                            Showing {{ $passOrders->first() }} to {{ $passOrders->last() }} of {{ $passOrders->count() }} entries
                         </div>
                         <div>
-                            {{ $passOrders->links() }}
+                            {{ false && $passOrders->links() }}
                         </div>
                     </div>
                 </div>
