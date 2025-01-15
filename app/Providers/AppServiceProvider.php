@@ -14,6 +14,7 @@ use App\Services\Admin\PassOrderService;
 use App\Services\Admin\StaticAnalysisToolService;
 use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
+use App\Services\AnalysisPassService;
 use App\Services\Export\JsonExportService;
 use App\Services\ParsedItemService;
 use App\Services\Parsing\FileProcessorService;

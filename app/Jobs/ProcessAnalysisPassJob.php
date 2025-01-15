@@ -69,7 +69,7 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
     public function handle(): void
     {
         try {
-            $passOrder = Config::get('ai.ai.passes.pass_order.pass_order', []);
+            $passOrder = Config::get('ai.pass_order', []);
 
             if (empty($passOrder)) {
                 Log::warning("ProcessAnalysisPassJob: No pass_order defined in config for CodeAnalysis ID {$this->codeAnalysisId}.");

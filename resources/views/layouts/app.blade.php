@@ -3,7 +3,7 @@
     lang="en"
     x-data="{
         isDark: true,
-        sidebarOpen: false,
+        sidebarOpen: true,
         initTheme() {
             const stored = localStorage.getItem('theme');
             if (stored === 'light') {
