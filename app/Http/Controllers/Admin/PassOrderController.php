@@ -48,7 +48,7 @@ class PassOrderController extends Controller
     /**
      * Display the specified Pass Order.
      */
-    public function show(string $id)
+    public function show(int $id)
     {
         $passOrder = $this->passOrderService->getPassOrderById($id);
 
@@ -58,7 +58,7 @@ class PassOrderController extends Controller
     /**
      * Show the form for editing the specified Pass Order.
      */
-    public function edit(string $id)
+    public function edit(int $id)
     {
         $passOrder = $this->passOrderService->getPassOrderById($id);
 
@@ -68,7 +68,7 @@ class PassOrderController extends Controller
     /**
      * Update the specified Pass Order in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, int $id)
     {
         $validated = $request->validate([
             'pass_name' => 'required|string|max:255',
@@ -85,7 +85,7 @@ class PassOrderController extends Controller
     /**
      * Remove the specified Pass Order from storage.
      */
-    public function destroy(string $id)
+    public function destroy(int $id)
     {
         $this->passOrderService->deletePassOrder($id);
 
