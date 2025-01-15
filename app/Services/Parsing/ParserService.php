@@ -65,7 +65,7 @@ class ParserService
     public function parseFile(string $filePath, bool $useCache = false): array
     {
         // $basePath is now injected
-        $absolutePath = realpath($basePath.DIRECTORY_SEPARATOR.$filePath) ?: $filePath;
+        $absolutePath = realpath($this->basePath . DIRECTORY_SEPARATOR . $filePath) ?: $filePath;
         Log::debug("ParserService.parseFile => [{$absolutePath}], useCache={$useCache}");
 
         if ($useCache) {
@@ -157,7 +157,7 @@ class ParserService
             }
         }
 
-        Log::info("ParserService.getPhpFiles => [{$realDir}] => found [".count($phpFiles).'] .php files.');
+        Log::info("ParserService.getPhpFiles => [{$realDir}] => found [" . count($phpFiles) . '] .php files.');
 
         return collect($phpFiles);
     }
@@ -185,6 +185,6 @@ class ParserService
             ]);
         }
 
-        Log::info('ParserService: Stored '.count($parsedItems)." parsed items for [{$filePath}].");
+        Log::info('ParserService: Stored ' . count($parsedItems) . " parsed items for [{$filePath}].");
     }
 }
