@@ -37,7 +37,7 @@
                             @forelse($passOrders as $passOrder)
                                 <tr>
                                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                        {{ $passOrder->aiPass->name }}
+                                        {{ $passOrder->aiPass?->name ?? 'N/A' }}
                                     </td>
                                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                         {{ $passOrder->order }}
