@@ -74,6 +74,7 @@ class ProcessIndividualPassJob implements ShouldQueue
                     Log::error("ProcessIndividualPassJob: Tool '{$toolName}' failed for pass '{$this->passName}' on '{$codeAnalysis->file_path}'.");
                 }
             }
+
             Log::info("ProcessIndividualPassJob: Starting pass '{$this->passName}' for CodeAnalysis ID {$this->codeAnalysisId}.");
 
             $analysisPassService->processPass($this->passName, $this->codeAnalysisId, $this->dryRun);

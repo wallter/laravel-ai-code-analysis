@@ -51,6 +51,7 @@ class RunStaticAnalysisCommand extends Command
                     $this->info("Dispatching pass '{$passName}' for '{$codeAnalysis->file_path}'.");
                     ProcessIndividualPassJob::dispatch($codeAnalysis->id, $passName, $dryRun = false);
                 }
+
                 $this->info('Multi-pass analysis jobs have been dispatched.');
 
                 continue;

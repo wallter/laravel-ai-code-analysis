@@ -1,6 +1,6 @@
-<?php 
+<?php
 
-return [    
+return [
     'o1-mini' => [
         'model_name' => env('OPENAI_MODEL_O1_MINI', 'o1-mini'),
         'max_tokens' => env('OPENAI_MODEL_O1_MINI_MAX_TOKENS', 1500),

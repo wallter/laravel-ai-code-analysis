@@ -1,8 +1,5 @@
 <?php
 
-use App\Enums\OperationIdentifier;
-use App\Enums\PassType;
-
 /**
  * AI Analysis Configuration
  *

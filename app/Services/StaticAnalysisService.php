@@ -55,8 +55,8 @@ class StaticAnalysisService implements StaticAnalysisToolInterface
 
         try {
             $process->mustRun();
-        } catch (ProcessFailedException $exception) {
-            Log::error("StaticAnalysisService: {$toolName} failed for '{$filePath}'. Error: {$exception->getMessage()}");
+        } catch (ProcessFailedException $processFailedException) {
+            Log::error("StaticAnalysisService: {$toolName} failed for '{$filePath}'. Error: {$processFailedException->getMessage()}");
 
             return null;
         }

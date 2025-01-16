@@ -18,8 +18,8 @@ class ScriptRunnerService
 
         try {
             $process->mustRun();
-        } catch (ProcessFailedException $exception) {
-            Log::error("ScriptRunnerService: Command '{$command}' failed. Error: {$exception->getMessage()}");
+        } catch (ProcessFailedException $processFailedException) {
+            Log::error("ScriptRunnerService: Command '{$command}' failed. Error: {$processFailedException->getMessage()}");
 
             return null;
         }

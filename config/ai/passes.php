@@ -203,5 +203,5 @@ return [
             ],
             'response_format' => 'Return bullet points detailing performance issues and recommended optimizations.',
         ],
-    ]
+    ],
 ];

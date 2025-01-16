@@ -22,9 +22,9 @@ class CodeAnalysisService
     /**
      * Constructor to inject necessary services.
      *
-     * @param  OpenAIService      $openAIService      Handles interactions with OpenAI API.
-     * @param  ParserService      $parserService      Handles PHP file parsing.
-     * @param  string             $basePath           The base path of the application.
+     * @param  OpenAIService  $openAIService  Handles interactions with OpenAI API.
+     * @param  ParserService  $parserService  Handles PHP file parsing.
+     * @param  string  $basePath  The base path of the application.
      */
     public function __construct(
         protected OpenAIService $openAIService,
@@ -35,8 +35,8 @@ class CodeAnalysisService
     /**
      * Analyze a PHP file by parsing it and creating/updating the CodeAnalysis record.
      *
-     * @param  string       $filePath  The relative or absolute path to the PHP file.
-     * @param  bool         $reparse   Whether to force re-parsing the file.
+     * @param  string  $filePath  The relative or absolute path to the PHP file.
+     * @param  bool  $reparse  Whether to force re-parsing the file.
      * @return CodeAnalysis The CodeAnalysis model instance.
      */
     public function analyzeFile(string $filePath, bool $reparse = false): CodeAnalysis
@@ -101,7 +101,7 @@ class CodeAnalysisService
 
         // Convert to absolute path if it's not already
         if (! Str::startsWith($filePath, ['/', 'http'])) {
-            $resolvedPath = realpath($basePath . '/' . ltrim($filePath, '/'));
+            $resolvedPath = realpath($basePath.'/'.ltrim($filePath, '/'));
 
             if ($resolvedPath === false) {
                 Log::error("CodeAnalysisService: Provided filePath '{$filePath}' could not be resolved to a real path.");
@@ -113,7 +113,7 @@ class CodeAnalysisService
 
         // Strip the base path from the file path to get the relative path
         if (Str::startsWith($filePath, $basePath)) {
-            $relativePath = Str::replaceFirst($basePath . '/', '', $filePath);
+            $relativePath = Str::replaceFirst($basePath.'/', '', $filePath);
             Log::debug("CodeAnalysisService: Normalized '{$filePath}' to '{$relativePath}'.");
 
             return $relativePath;
@@ -127,8 +127,8 @@ class CodeAnalysisService
     /**
      * Collect PHP files from the given directory.
      *
-     * @param  string              $directory  The directory to scan for PHP files.
-     * @return Collection<string>  The collection of PHP file paths.
+     * @param  string  $directory  The directory to scan for PHP files.
+     * @return Collection<string> The collection of PHP file paths.
      */
     public function collectPhpFiles(string $directory): Collection
     {
@@ -139,7 +139,7 @@ class CodeAnalysisService
                 ->filter(fn ($file) => $file->getExtension() === 'php')
                 ->map(fn ($file) => $this->normalizeFilePath($file->getPathname()));
 
-            Log::debug('CodeAnalysisService: Collected ' . $phpFiles->count() . " PHP files from '{$directory}'.");
+            Log::debug('CodeAnalysisService: Collected '.$phpFiles->count()." PHP files from '{$directory}'.");
 
             return $phpFiles;
         } catch (Throwable $throwable) {
@@ -152,8 +152,8 @@ class CodeAnalysisService
     /**
      * Build a summary of the AST for analysis.
      *
-     * @param  string $relativePath The relative file path.
-     * @param  array  $ast          The abstract syntax tree.
+     * @param  string  $relativePath  The relative file path.
+     * @param  array  $ast  The abstract syntax tree.
      * @return array The summary of the AST.
      */
     protected function buildAstSummary(string $relativePath, array $ast): array
@@ -169,8 +169,8 @@ class CodeAnalysisService
     /**
      * Run the complete analysis process.
      *
-     * @param  bool   $dryRun     Whether to perform a dry run without saving results.
-     * @param  string $outputFile The path to the output JSON file.
+     * @param  bool  $dryRun  Whether to perform a dry run without saving results.
+     * @param  string  $outputFile  The path to the output JSON file.
      */
     public function runAnalysis(bool $dryRun = false, string $outputFile = 'all.json'): void
     {
@@ -194,9 +194,9 @@ class CodeAnalysisService
 
                     // Assuming you want to collect some data from each analysis
                     $results[] = [
-                        'file_path'      => $analysis->file_path,
-                        'ast_summary'    => $analysis->analysis,
-                        'ai_output'      => $analysis->ai_output ?? null, // Ensure ai_output exists
+                        'file_path' => $analysis->file_path,
+                        'ast_summary' => $analysis->analysis,
+                        'ai_output' => $analysis->ai_output ?? null, // Ensure ai_output exists
                     ];
                 } catch (Throwable $e) {
                     Log::error("CodeAnalysisService: Failed to analyze file '{$filePath}'. Error: {$e->getMessage()}");
@@ -211,9 +211,9 @@ class CodeAnalysisService
                 $analysis = $this->analyzeFile($filePath, $dryRun);
 
                 $results[] = [
-                    'file_path'   => $analysis->file_path,
+                    'file_path' => $analysis->file_path,
                     'ast_summary' => $analysis->analysis,
-                    'ai_output'   => $analysis->ai_output ?? null,
+                    'ai_output' => $analysis->ai_output ?? null,
                 ];
             } catch (Throwable $e) {
                 Log::error("CodeAnalysisService: Failed to analyze file '{$filePath}'. Error: {$e->getMessage()}");
