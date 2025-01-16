@@ -49,6 +49,7 @@ class CodeAnalysisService
         $analysis = CodeAnalysis::firstOrCreate(
             ['file_path' => $relativePath],
             [
+                'file_path' => $relativePath, // Ensure file_path is set in attributes
                 'ast' => [],
                 'analysis' => [],
                 'current_pass' => 0,
