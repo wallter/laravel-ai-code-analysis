@@ -28,36 +28,13 @@ class ProcessIndividualPassJob implements ShouldQueue
     use SerializesModels;
 
     /**
-     * The CodeAnalysis ID.
-     */
-    public ?int $codeAnalysisId;
-
-    /**
-     * The name of the AI pass to execute.
-     */
-    public ?string $passName;
-
-    /**
-     * Indicates if the job is a dry run.
-     */
-    public bool $dryRun;
-
-    /**
      * Create a new job instance.
      *
      * @param  int|null  $codeAnalysisId  The CodeAnalysis ID.
      * @param  string|null  $passName  The name of the AI pass to execute.
      * @param  bool  $dryRun  Indicates if the job is a dry run.
      */
-    public function __construct(
-        ?int $codeAnalysisId = null,
-        ?string $passName = null,
-        bool $dryRun = false
-    ) {
-        $this->codeAnalysisId = $codeAnalysisId;
-        $this->passName = $passName;
-        $this->dryRun = $dryRun;
-    }
+    public function __construct(public ?int $codeAnalysisId = null, public ?string $passName = null, public bool $dryRun = false) {}
 
     /**
      * Execute the job.

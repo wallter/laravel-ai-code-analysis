@@ -28,7 +28,9 @@ class AnalysisPassService
     public function __construct(
         protected OpenAIService $openAIService,
         protected CodeAnalysisService $codeAnalysisService,
-        protected StaticAnalysisToolInterface $staticAnalysisService
+        protected StaticAnalysisToolInterface $staticAnalysisService,
+        protected array $multiPassConfig,
+        protected array $passesConfig
     ) {}
 
     /**
@@ -41,6 +43,7 @@ class AnalysisPassService
         try {
             // Start a database transaction to ensure atomicity
             DB::transaction(function () use ($codeAnalysisId, $dryRun) {
+                $passOrder = $this->multiPassConfig['pass_order'] ?? [];
                 $analysis = $this->retrieveAnalysis($codeAnalysisId);
                 if (! $analysis) {
                     Log::warning("AnalysisPassService: No analysis found for CodeAnalysis ID {$codeAnalysisId}. Exiting processAllPasses.");
@@ -57,7 +60,7 @@ class AnalysisPassService
                     // This ensures AI passes can access it
                 }
 
-                $passOrder = config('ai.operations.multi_pass_analysis.pass_order', []);
+                $passOrder = config('ai.ai.passes.pass_order.pass_order', []);
 
                 // Dispatch the first pass job
                 if (! empty($passOrder)) {

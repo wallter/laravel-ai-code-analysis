@@ -6,9 +6,6 @@ use App\Enums\AIResultContentType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * AIResult model represents the results from AI analysis passes.
- */
 class AIResult extends Model
 {
     use HasFactory;
@@ -21,8 +18,8 @@ class AIResult extends Model
         'prompt_text',
         'response_text',
         'metadata',
-        'cost_estimate_usd' => 'decimal:6',
-        'content_type' => AIResultContentType::class,
+        'cost_estimate_usd',
+        'content_type',
     ];
 
     /**
@@ -39,7 +36,9 @@ class AIResult extends Model
     {
         return [
             'metadata' => 'array',
-            'response_text' => 'array', // If you plan to store JSON responses as arrays
+            'response_text' => 'string',
+            'cost_estimate_usd' => 'decimal:6',
+            'content_type' => AIResultContentType::class,
         ];
     }
 }

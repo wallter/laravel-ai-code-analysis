@@ -1,3 +1,78 @@
+@php
+$navItems = [
+    // Group 1
+    [
+        'label' => 'Analyses',
+        'short_label' => 'A',
+        'route' => route('analysis.index'),
+        'disabled' => false, // If we want opacity-50
+    ],
+    // Separator
+    [ 'separator' => true ],
+    // Group 2
+    [
+        'label' => 'Admin',
+        'short_label' => 'A',
+        'route' => route('admin.ai-models.index'),
+        'disabled' => true,
+    ],
+    [
+        'label' => 'AI Models',
+        'short_label' => 'A',
+        'route' => route('admin.ai-models.index'),
+        'disabled' => false,
+    ],
+    [
+        'label' => 'AI Configurations',
+        'short_label' => 'A',
+        'route' => route('admin.ai-configurations.index'),
+        'disabled' => false,
+    ],
+    [
+        'label' => 'Static Analysis',
+        'short_label' => 'A',
+        'route' => route('admin.static-analysis-tools.index'),
+        'disabled' => false,
+    ],
+    [
+        'label' => 'AI Pass Orders',
+        'short_label' => 'A',
+        'route' => route('admin.pass-orders.index'),
+        'disabled' => false,
+    ],
+    [
+        'label' => 'AI Passes',
+        'short_label' => 'A',
+        'route' => route('admin.ai-passes.index'),
+        'disabled' => false,
+    ],
+    // Separator
+    [ 'separator' => true ],
+    // Group 3 (External Links)
+    [
+        'label' => 'Tyler Wall',
+        'short_label' => 'T',
+        'route' => 'https://www.linkedin.com/in/tylerrwall/',
+        'external' => true,
+        'disabled' => true,
+    ],
+    [
+        'label' => 'LinkedIn',
+        'short_label' => 'L',
+        'route' => 'https://www.linkedin.com/in/tylerrwall/',
+        'external' => true,
+        'disabled' => false,
+    ],
+    [
+        'label' => 'Github',
+        'short_label' => 'G',
+        'route' => 'https://github.com/wallter',
+        'external' => true,
+        'disabled' => false,
+    ],
+];
+@endphp
+
 <aside 
     class="sidebar-transition bg-forest-900 text-forest-lt flex flex-col justify-between h-full sticky top-0 hidden sm:flex min-h-screen w-16"
     :class="sidebarOpen ? 'w-64' : 'w-16'"
@@ -34,29 +109,22 @@
 
         <!-- Menu items -->
         <nav class="px-2 py-4">
-            <a href="{{ route('analysis.index') }}"
-               class="block py-2 px-2 hover:bg-forest-800 rounded mb-1 transition-colors"
-               :class="sidebarOpen ? 'text-sm' : 'text-xs text-center'"
-            >
-              <span x-show="sidebarOpen" x-transition>Analyses</span>
-              <span x-show="!sidebarOpen" class="block" x-transition>A</span>
-            </a>
-            <hr class="bg-gray-200 h-px border-0 opacity-50 my-2">
-            <a href="https://www.linkedin.com/in/tylerrwall/" target="_blank"
-               class="block py-2 px-2 hover:bg-forest-800 rounded mb-1 transition-colors"
-               :class="sidebarOpen ? 'text-sm' : 'text-xs text-center'"
-            >
-              <span x-show="sidebarOpen" x-transition>Tyler Wall | LinkedIn</span>
-              <span x-show="!sidebarOpen" class="block" x-transition>L</span>
-            </a>
-            <a href="https://github.com/wallter" target="_blank"
-               class="block py-2 px-2 hover:bg-forest-800 rounded transition-colors"
-               :class="sidebarOpen ? 'text-sm' : 'text-xs text-center'"
-            >
-              <span x-show="sidebarOpen" x-transition>Tyler Wall | Github</span>
-              <span x-show="!sidebarOpen" class="block" x-transition>G</span>
-            </a>
-        </nav>
+          @foreach($navItems as $item)
+              @if(isset($item['separator']) && $item['separator'] === true)
+                  <hr class="bg-gray-200 h-px border-0 opacity-50 my-2">
+              @else
+                  <a 
+                      href="{{ $item['route'] }}"
+                      class="block py-2 px-2 hover:bg-forest-800 rounded mb-1 transition-colors {{ $item['disabled'] ? 'opacity-50' : '' }}"
+                      :class="sidebarOpen ? 'text-sm' : 'text-xs text-center'"
+                      @if(!empty($item['external'])) target="_blank" @endif
+                  >
+                      <span x-show="sidebarOpen" x-transition>{{ $item['label'] }}</span>
+                      <span x-show="!sidebarOpen" class="block" x-transition>{{ $item['short_label'] }}</span>
+                  </a>
+              @endif
+          @endforeach
+      </nav>
     </div>
 
     <!-- Bottom portion: theme toggle, etc. -->

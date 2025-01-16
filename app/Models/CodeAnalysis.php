@@ -42,7 +42,7 @@ class CodeAnalysis extends Model
 
                 return $absolutePath ?: $value;
             },
-            set: function ($value) {
+            set: function (string $value) {
                 $basePath = realpath(Config::get('filesystems.base_path')) ?: base_path();
                 // Ensure both paths use forward slashes
                 $value = str_replace(['\\'], '/', $value);
@@ -51,26 +51,26 @@ class CodeAnalysis extends Model
                     $relativePath = Str::replaceFirst($basePath.'/', '', $value);
                     $this->attributes['file_path'] = $relativePath;
                     Log::debug("CodeAnalysis Model: Set 'file_path' to relative path '{$relativePath}'.");
+
+                    // Set language based on file extension
+                    $extension = strtolower(pathinfo($value, PATHINFO_EXTENSION));
+                    $languageMap = [
+                        'php' => 'php',
+                        'js' => 'javascript',
+                        'ts' => 'typescript',
+                        'py' => 'python',
+                        'go' => 'go',
+                        'ex' => 'elixir',
+                        'exs' => 'elixir',
+                    ];
+                    $language = $languageMap[$extension] ?? 'unknown';
+                    $this->attributes['language'] = $language;
+
+                    Log::debug("CodeAnalysis Model: Set 'language' to '{$language}'.");
                 } else {
                     $this->attributes['file_path'] = $value;
                     Log::warning("CodeAnalysis Model: The file path '{$value}' does not start with base path '{$basePath}'. Stored as is.");
                 }
-
-                // Set language based on file extension
-                $extension = strtolower(pathinfo($value, PATHINFO_EXTENSION));
-                $languageMap = [
-                    'php' => 'php',
-                    'js' => 'javascript',
-                    'ts' => 'typescript',
-                    'py' => 'python',
-                    'go' => 'go',
-                    'ex' => 'elixir',
-                    'exs' => 'elixir',
-                ];
-                $language = $languageMap[$extension] ?? 'unknown';
-                $this->attributes['language'] = $language;
-
-                Log::debug("CodeAnalysis Model: Set 'language' to '{$language}'.");
             }
         );
     }

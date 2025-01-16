@@ -7,9 +7,6 @@ use App\Services\AI\CodeAnalysisService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-/**
- * Controller handling analysis-related actions.
- */
 class AnalysisController extends Controller
 {
     /**

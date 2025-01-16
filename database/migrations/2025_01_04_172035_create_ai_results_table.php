@@ -18,6 +18,8 @@ return new class extends Migration
             $table->longText('prompt_text');
             $table->longText('response_text')->nullable();
             $table->json('metadata')->nullable();
+            $table->decimal('cost_estimate_usd', 10, 6)->nullable();
+            $table->string('content_type')->nullable();
             $table->timestamps();
 
             // Add unique constraint to prevent duplicate pass entries per analysis

@@ -45,28 +45,12 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
     public int $uniqueFor = 300;
 
     /**
-     * The CodeAnalysis ID.
-     */
-    protected int $codeAnalysisId;
-
-    /**
-     * Indicates if the job is a dry run.
-     */
-    protected bool $dryRun;
-
-    /**
      * Create a new job instance.
      *
      * @param  int  $codeAnalysisId  The CodeAnalysis ID.
      * @param  bool  $dryRun  Indicates if the job is a dry run.
      */
-    public function __construct(
-        int $codeAnalysisId,
-        bool $dryRun = false
-    ) {
-        $this->codeAnalysisId = $codeAnalysisId;
-        $this->dryRun = $dryRun;
-    }
+    public function __construct(protected int $codeAnalysisId, protected bool $dryRun = false) {}
 
     /**
      * Get the unique identifier for the job.
@@ -85,7 +69,7 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
     public function handle(): void
     {
         try {
-            $passOrder = Config::get('ai.operations.multi_pass_analysis.pass_order', []);
+            $passOrder = Config::get('ai.pass_order', []);
 
             if (empty($passOrder)) {
                 Log::warning("ProcessAnalysisPassJob: No pass_order defined in config for CodeAnalysis ID {$this->codeAnalysisId}.");
@@ -93,9 +77,7 @@ class ProcessAnalysisPassJob implements ShouldBeUnique, ShouldQueue
                 return;
             }
 
-            $jobs = collect($passOrder)->map(function (string $passName) {
-                return new ProcessIndividualPassJob($this->codeAnalysisId, $passName, $this->dryRun);
-            })->all();
+            $jobs = collect($passOrder)->map(fn (string $passName) => new ProcessIndividualPassJob($this->codeAnalysisId, $passName, $this->dryRun))->all();
 
             // Dispatch the first job and chain the rest
             $firstJob = array_shift($jobs);

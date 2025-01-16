@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\CodeAnalysis;
 use App\Models\StaticAnalysis;
-use App\Services\StaticAnalysisService;
+use App\Services\Admin\StaticAnalysisToolServiceInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Mockery;
@@ -12,13 +12,13 @@ use Tests\TestCase;
 
 class RunStaticAnalysisCommandTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->mockConsoleOutput = false;
     }
-
-    use RefreshDatabase;
 
     public function test_command_runs_static_analysis_successfully()
     {
@@ -27,17 +27,24 @@ class RunStaticAnalysisCommandTest extends TestCase
             'file_path' => 'app/Http/Controllers/TestController.php',
         ]);
 
-        // Mock the StaticAnalysisService
-        $serviceMock = Mockery::mock(StaticAnalysisService::class);
+        // Mock the StaticAnalysisToolService
+        $serviceMock = Mockery::mock(StaticAnalysisToolServiceInterface::class);
+        $serviceMock->shouldReceive('getAllTools')
+            ->once()
+            ->andReturn(collect([
+                ['name' => 'PHPStan', 'command' => 'vendor/bin/phpstan', 'options' => [], 'enabled' => true],
+            ]));
+
         $serviceMock->shouldReceive('runAnalysis')
-            ->with($codeAnalysis)
+            ->with($codeAnalysis, 'PHPStan')
+            ->once()
             ->andReturn(StaticAnalysis::factory()->make([
                 'code_analysis_id' => $codeAnalysis->id,
                 'tool' => 'PHPStan',
                 'results' => ['files' => []],
             ]));
 
-        $this->app->instance(StaticAnalysisService::class, $serviceMock);
+        $this->app->instance(StaticAnalysisToolServiceInterface::class, $serviceMock);
 
         // Act
         Artisan::call('static-analysis:run', ['code_analysis_id' => $codeAnalysis->id]);
@@ -58,5 +65,11 @@ class RunStaticAnalysisCommandTest extends TestCase
 
         // Assert
         $this->assertStringContainsString('CodeAnalysis with ID 999 not found.', Artisan::output());
+    }
+
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
     }
 }

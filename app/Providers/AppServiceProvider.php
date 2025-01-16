@@ -2,8 +2,19 @@
 
 namespace App\Providers;
 
+use App\Interfaces\Admin\AiConfigurationServiceInterface;
+use App\Interfaces\Admin\AiModelServiceInterface;
+use App\Interfaces\Admin\AIPassServiceInterface;
+use App\Interfaces\Admin\PassOrderServiceInterface;
+use App\Interfaces\Admin\StaticAnalysisToolServiceInterface;
+use App\Services\Admin\AiConfigurationService;
+use App\Services\Admin\AiModelService;
+use App\Services\Admin\AIPassService;
+use App\Services\Admin\PassOrderService;
+use App\Services\Admin\StaticAnalysisToolService;
 use App\Services\AI\CodeAnalysisService;
 use App\Services\AI\OpenAIService;
+use App\Services\AnalysisPassService;
 use App\Services\Export\JsonExportService;
 use App\Services\ParsedItemService;
 use App\Services\Parsing\FileProcessorService;
@@ -20,33 +31,68 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(ParserService::class, fn (Application $app): ParserService => new ParserService($app->make(ParsedItemService::class)));
+        // Singleton bindings for services
+        // Bind ParserService with the injected base path
+        $this->app->singleton(ParserService::class, function (Application $app) {
+            $parsedItemService = $app->make(ParsedItemService::class);
+            $basePath = config('filesystems.base_path');
 
-        // Register FileProcessorService
+            return new ParserService($parsedItemService, $basePath);
+        });
+
         $this->app->singleton(FileProcessorService::class, fn ($app) => new FileProcessorService($app->make(ParserService::class)));
 
-        // Register JsonExportService
         $this->app->singleton(JsonExportService::class, fn ($app) => new JsonExportService);
 
-        // Register OpenAIService
-        $this->app->singleton(OpenAIService::class, fn (Application $app): OpenAIService => new OpenAIService);
+        // Bind OpenAIService with the injected API key
+        $this->app->singleton(OpenAIService::class, function (Application $app) {
+            $apiKey = config('ai.openai_api_key');
 
-        // Register CodeAnalysisService
-        $this->app->singleton(CodeAnalysisService::class, fn (Application $app): CodeAnalysisService => new CodeAnalysisService(
-            $app->make(OpenAIService::class),
-            $app->make(ParserService::class)
-        ));
+            return new OpenAIService($apiKey);
+        });
 
-        // Register AnalysisPassService with updated constructor parameters
-        $this->app->singleton(\App\Services\AnalysisPassService::class, fn ($app) => new \App\Services\AnalysisPassService(
-            $app->make(\App\Services\AI\OpenAIService::class),
-            $app->make(\App\Services\AI\CodeAnalysisService::class),
-            $app->make(StaticAnalysisToolInterface::class)
-        ));
+        // Bind CodeAnalysisService with the injected base path
+        $this->app->singleton(CodeAnalysisService::class, function (Application $app) {
+            $openAIService = $app->make(OpenAIService::class);
+            $parserService = $app->make(ParserService::class);
+            $basePath = base_path(); // or config('filesystems.base_path');
 
-        // Bind the StaticAnalysisToolInterface to the StaticAnalysisService implementation
-        $this->app->singleton(StaticAnalysisService::class, fn ($app) => new StaticAnalysisService);
+            return new CodeAnalysisService($openAIService, $parserService, $basePath);
+        });
+
+        // Bind AnalysisPassService with injected configuration
+        $this->app->singleton(AnalysisPassService::class, function (Application $app) {
+            $openAIService = $app->make(OpenAIService::class);
+            $codeAnalysisService = $app->make(CodeAnalysisService::class);
+            $staticAnalysisService = $app->make(StaticAnalysisToolInterface::class);
+            $multiPassConfig = config('ai.ai.passes.pass_order', []);
+            $passesConfig = config('ai.passes', []);
+
+            return new AnalysisPassService(
+                $openAIService,
+                $codeAnalysisService,
+                $staticAnalysisService,
+                $multiPassConfig,
+                $passesConfig
+            );
+        });
+
+        // Bind AiConfigurationServiceInterface to AiConfigurationService
+        $this->app->singleton(AiConfigurationServiceInterface::class, AiConfigurationService::class);
+
+        // Bind AIPassServiceInterface to AIPassService
+        $this->app->singleton(AIPassServiceInterface::class, AIPassService::class);
+
+        // Bind PassOrderServiceInterface to PassOrderService
+        $this->app->singleton(PassOrderServiceInterface::class, PassOrderService::class);
+
+        // Bind StaticAnalysisToolServiceInterface to StaticAnalysisToolService
+        $this->app->singleton(StaticAnalysisToolServiceInterface::class, StaticAnalysisToolService::class);
+
+        // Bind StaticAnalysisToolInterface to StaticAnalysisService
         $this->app->singleton(StaticAnalysisToolInterface::class, fn ($app) => $app->make(StaticAnalysisService::class));
+
+        $this->app->singleton(AiModelServiceInterface::class, fn ($app) => $app->make(AiModelService::class));
     }
 
     /**

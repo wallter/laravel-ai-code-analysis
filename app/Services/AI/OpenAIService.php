@@ -9,15 +9,15 @@ use Illuminate\Support\Facades\Log;
 
 class OpenAIService
 {
-    protected string $apiKey;
+    // protected string $apiKey;
 
     protected string $apiBaseUrl = 'https://api.openai.com/v1/chat/completions';
 
     protected array $lastUsage = [];
 
-    public function __construct()
+    public function __construct(protected string $apiKey)
     {
-        $this->apiKey = config('ai.openai_api_key');
+        // API Key is injected via the constructor
     }
 
     /**
