@@ -16,7 +16,8 @@ return [
     */
     'folders' => [
         // Directories to parse recursively
-        base_path('resources/access-app'),
+        // base_path('resources/access-app'),
+        base_path('app/'),
     ],
 
     'files' => [
