@@ -8,7 +8,7 @@
     "devDependencies": {
         "@tailwindcss/typography": "^0.5.15",
         "autoprefixer": "^10.4.20",
-        "axios": "^1.7.4",
+        "axios": "^1.8.2",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^1.0",
         "postcss": "^8.4.47",
