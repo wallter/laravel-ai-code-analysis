@@ -6,7 +6,7 @@
 
 ## Overview
 
-This Laravel-based project seamlessly integrates **OpenAI’s language models** with **PHP Abstract Syntax Tree (AST) analysis** (powered by [nikic/php-parser](https://github.com/nikic/PHP-Parser)) along with other essential tooling such as [PHPStan](https://phpstan.org/), [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer), [Psalm](https://psalm.dev/), [Rector](https://github.com/rectorphp/rector), [ESLint](https://eslint.org/), [Prettier](https://prettier.io/), [Pylint](https://www.pylint.org/), [golint](https://github.com/golang/lint), and Elixir’s formatter to deliver a **comprehensive multi-pass code analysis**. By iteratively scanning codebases across multiple languages, the system generates:
+This Laravel-based project seamlessly integrates **OpenAI’s language models** with **PHP Abstract Syntax Tree (AST) analysis** (powered by [nikic/php-parser](https://github.com/nikic/PHP-Parser)) along with other essential tooling such as [PHPStan](https://phpstan.org/), [PHP_CodeSniffer](https://github.com/PHPCSStandards/PHP_CodeSniffer), [Psalm](https://psalm.dev/), [Rector](https://github.com/rectorphp/rector), [ESLint](https://eslint.org/), [Prettier](https://prettier.io/), [Pylint](https://www.pylint.org/), [golint](https://github.com/golang/lint), and Elixir’s formatter to deliver a **comprehensive multi-pass code analysis**. By iteratively scanning codebases across multiple languages, the system generates:
 
 - **Automated Documentation**: Creates concise and clear documentation derived from raw code and AST data, enhancing code comprehension and maintainability.
 - **Refactoring Suggestions**: Provides actionable recommendations to improve code clarity, adhere to best practices, and optimize overall structure.
@@ -173,7 +173,7 @@ graph LR;
 This project leverages a suite of powerful tools to enhance code analysis and maintainability:
 
 - **[PHPStan](https://phpstan.org/):** A static analysis tool for PHP that focuses on finding bugs in your code without running it.
-- **[PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer):** Detects violations of a defined coding standard in your PHP code.
+- **[PHP_CodeSniffer](https://github.com/PHPCSStandards/PHP_CodeSniffer):** Detects violations of a defined coding standard in your PHP code.
 - **[Psalm](https://psalm.dev/):** A static analysis tool for finding errors in PHP applications.
 - **[Rector](https://github.com/rectorphp/rector):** An automated refactoring tool that upgrades and refactors your PHP code.
 - **[ESLint](https://eslint.org/):** A static analysis tool for identifying problematic patterns found in JavaScript and TypeScript code.
